@@ -1,0 +1,364 @@
+// expr.h — M6c: EXPRESSION RECONSTRUCTION.
+//
+// Turns the annotated IR (ir.h) into expression trees and statements, per basic block.
+//
+// Model: abstract interpretation over registers. Each instruction either
+//   DEFINES  a register  -> reg[A] = <expression tree>
+//   EMITS    a statement -> assignment / call-for-effect / return
+//   is CONTROL FLOW      -> recorded for M6d to structure (not reconstructed here)
+//   is SKIPPED           -> optimisation hints and prologue markers that carry no source meaning
+//
+// The acceptance metric is deliberately harsh: EVERY instruction must fall into one of those four
+// buckets, and anything else is COUNTED as unhandled rather than silently ignored. Silence is how a
+// decompiler ends up emitting plausible, wrong source.
+//
+// Scope of M6c: straight-line reconstruction WITHIN a basic block. Values that cross block
+// boundaries stay as named locals; turning those into structured control flow is M6d.
+#pragma once
+#include <string>
+#include <vector>
+#include <memory>
+#include <map>
+#include <set>
+#include "ir.h"
+
+namespace ex {
+
+enum class EK {
+    Const,      // literal, already rendered by ir::KVal
+    Reg,        // a register we have no better name for (crosses a block boundary)
+    Upval,
+    Global,     // _ENV.name  or an import path
+    Field,      // obj.name
+    Index,      // obj[key]
+    Bin, Un, Concat,
+    Call, Method,
+    Table,
+    Vararg,
+    Closure,
+    Unknown
+};
+
+struct Expr;
+using EP = std::shared_ptr<Expr>;
+
+struct Expr {
+    EK k = EK::Unknown;
+    std::string text;              // Const/Global/Field name/Bin op/Un op
+    int reg = -1, idx = -1;        // Reg index / Upval index / Closure proto
+    EP a, b;                       // operands / object
+    std::vector<EP> list;          // call args, concat parts, table items
+    int nres = 1;                  // Call: number of results (-1 = multret)
+    bool multret = false;
+};
+
+inline EP mk(EK k) { auto e = std::make_shared<Expr>(); e->k = k; return e; }
+inline EP mkconst(const std::string& t) { auto e = mk(EK::Const); e->text = t; return e; }
+inline EP mkreg(int r) { auto e = mk(EK::Reg); e->reg = r; return e; }
+
+// ---- precedence, so rendering parenthesises only where Lua requires it ----
+inline int prec(const Expr& e) {
+    if (e.k == EK::Bin) {
+        const std::string& o = e.text;
+        if (o == "or") return 1;
+        if (o == "and") return 2;
+        if (o == "<" || o == ">" || o == "<=" || o == ">=" || o == "~=" || o == "==") return 3;
+        if (o == "..") return 4;
+        if (o == "+" || o == "-") return 5;
+        if (o == "*" || o == "/" || o == "//" || o == "%") return 6;
+        if (o == "^") return 8;
+    }
+    if (e.k == EK::Un) return 7;
+    return 99;                                   // atoms
+}
+
+inline std::string render(const EP& e);
+
+inline std::string wrap(const EP& child, int parent_prec) {
+    std::string s = render(child);
+    if (child && prec(*child) < parent_prec) return "(" + s + ")";
+    return s;
+}
+
+inline bool is_ident(const std::string& s) {
+    if (s.empty() || (!isalpha((unsigned char)s[0]) && s[0] != '_')) return false;
+    for (char c : s) if (!isalnum((unsigned char)c) && c != '_') return false;
+    static const std::set<std::string> kw = {"and","break","do","else","elseif","end","false","for",
+        "function","if","in","local","nil","not","or","repeat","return","then","true","until","while",
+        "continue","export","type"};
+    return !kw.count(s);
+}
+
+inline std::string render(const EP& e) {
+    if (!e) return "nil";
+    char b[32];
+    switch (e->k) {
+        case EK::Const:  return e->text;
+        case EK::Reg:    std::snprintf(b, sizeof b, "v%d", e->reg); return b;
+        case EK::Upval:  std::snprintf(b, sizeof b, "u%d", e->idx); return b;
+        case EK::Global: return e->text;
+        case EK::Field:
+            if (is_ident(e->text)) return wrap(e->a, 99) + "." + e->text;
+            return wrap(e->a, 99) + "[" + ir::quote_lua(e->text) + "]";
+        case EK::Index:  return wrap(e->a, 99) + "[" + render(e->b) + "]";
+        case EK::Bin: {
+            int p = prec(*e);
+            // ^ and .. are right-associative in Lua; the rest left.
+            bool rightassoc = (e->text == "^" || e->text == "..");
+            std::string L = wrap(e->a, rightassoc ? p + 1 : p);
+            std::string R = wrap(e->b, rightassoc ? p : p + 1);
+            return L + " " + e->text + " " + R;
+        }
+        case EK::Un: {
+            std::string s = wrap(e->a, prec(*e));
+            return (e->text == "not") ? ("not " + s) : (e->text + s);
+        }
+        case EK::Concat: {
+            std::string s;
+            for (size_t i = 0; i < e->list.size(); ++i) { if (i) s += " .. "; s += wrap(e->list[i], 5); }
+            return s;
+        }
+        case EK::Call: {
+            std::string s = wrap(e->a, 99) + "(";
+            for (size_t i = 0; i < e->list.size(); ++i) { if (i) s += ", "; s += render(e->list[i]); }
+            return s + ")";
+        }
+        case EK::Method: {
+            std::string s = wrap(e->a, 99) + ":" + e->text + "(";
+            for (size_t i = 0; i < e->list.size(); ++i) { if (i) s += ", "; s += render(e->list[i]); }
+            return s + ")";
+        }
+        case EK::Table: {
+            if (e->list.empty() && e->text.empty()) return "{}";
+            if (!e->text.empty()) return e->text;                  // template rendered by ir.h
+            std::string s = "{";
+            for (size_t i = 0; i < e->list.size(); ++i) { if (i) s += ", "; s += render(e->list[i]); }
+            return s + "}";
+        }
+        case EK::Vararg:  return "...";
+        case EK::Closure: std::snprintf(b, sizeof b, "function<%d>", e->idx); return b;
+        default:          return "--[[?]]nil";
+    }
+}
+
+// ---------------------------------------------------------------- statements
+enum class SK { Assign, Local, ExprStmt, Return, Branch, LoopCtl, Comment };
+
+struct Stmt {
+    SK k = SK::Comment;
+    EP lhs, rhs;                       // Assign
+    std::vector<EP> list;              // Return values
+    std::string text;                  // Branch condition / comment
+    int target = -1;                   // Branch target block
+    int insn = -1;                     // source instruction index
+};
+
+// Per-instruction disposition — this IS the acceptance metric.
+enum class Disp { Expr, Stmt, Ctrl, Skip, UNHANDLED };
+
+struct BlockOut {
+    int first = 0, last = 0;
+    std::vector<Stmt> stmts;
+};
+
+struct ProtoOut {
+    std::vector<BlockOut> blocks;
+    long long n_expr = 0, n_stmt = 0, n_ctrl = 0, n_skip = 0, n_unhandled = 0;
+    std::map<std::string, long long> unhandled;
+};
+
+// ---------------------------------------------------------------------------------------------
+// Reconstruct one basic block. Registers are an abstract environment: reg[r] holds the expression
+// that produced the value currently in r. A register we have not seen defined in THIS block is a
+// value that crossed a block boundary, so it renders as a named local (v<N>) — resolving those into
+// real control flow and scoping is M6d's job, not a fudge here.
+// ---------------------------------------------------------------------------------------------
+struct RegEnv {
+    std::map<int, EP> r;
+    // `top` = highest register written so far. Luau encodes "all values up to the top of the stack"
+    // as B==0 / C==0 (multret): `f(g(x))`, `return f(x)`, `{...}` with a trailing call. Treating that
+    // as ZERO values silently drops arguments and return values — `math.floor(math.abs(a))` came out
+    // as `math.floor()`. Tracking the high-water mark resolves those ranges concretely.
+    int top = -1;
+    EP get(int i) { auto it = r.find(i); return it != r.end() ? it->second : mkreg(i); }
+    void set(int i, EP e) { r[i] = e; if (i > top) top = i; }
+    void kill(int i) { r.erase(i); }
+};
+
+inline const char* binop_for(uint8_t op) {
+    switch (op) {
+        case 0x49: case 0x38: return "+";
+        case 0x07: case 0x3e: case 0x06: return "-";
+        case 0x22: case 0x09: return "*";
+        case 0x1a: case 0x32: case 0x3b: return "/";
+        case 0x55: case 0x3c: return "%";
+        case 0x45: case 0x08: return "^";
+        case 0x00: case 0x24: return "//";
+        case 0x2f: case 0x31: return "and";
+        case 0x2b: case 0x51: return "or";
+        default: return nullptr;
+    }
+}
+
+inline void reconstruct_block(const ir::IProto& ip, int first, int last,
+                              ProtoOut& out, BlockOut& bo) {
+    RegEnv env;
+    auto K = [&](int i) -> EP {
+        if (i < 0 || i >= (int)ip.consts.size()) return mkconst("nil");
+        return mkconst(ir::value_text(ip.consts[i]));
+    };
+    for (int i = first; i <= last && i < (int)ip.code.size(); ++i) {
+        const ir::IInsn& in = ip.code[i];
+        uint8_t op = in.op;
+        Disp d = Disp::UNHANDLED;
+
+        // ---- pure value definitions -------------------------------------------------
+        if      (op == 0x12) { env.set(in.A, mkconst(std::to_string((int)(int16_t)in.Bx))); d = Disp::Expr; }
+        else if (op == 0x4e) { env.set(in.A, K(in.Bx)); d = Disp::Expr; }
+        else if (op == 0x0d) { env.set(in.A, mkconst("nil")); d = Disp::Expr; }
+        else if (op == 0x04) { env.set(in.A, mkconst(in.B ? "true" : "false")); d = Disp::Expr; }
+        else if (op == 0x14) { env.set(in.A, env.get(in.B)); d = Disp::Expr; }
+        else if (op == 0x13) { auto e = mk(EK::Upval); e->idx = in.B; env.set(in.A, e); d = Disp::Expr; }
+        else if (op == 0x17 || op == 0x46) {                       // GETGLOBAL / GETIMPORT
+            auto e = mk(EK::Global); e->text = in.note.empty() ? "nil" : in.note;
+            env.set(in.A, e); d = Disp::Expr;
+        }
+        else if (op == 0x3d) {                                     // GETFIELD
+            auto e = mk(EK::Field); e->a = env.get(in.B); e->text = in.note;
+            env.set(in.A, e); d = Disp::Expr;
+        }
+        else if (op == 0x01) {                                     // GETTABLE (register key)
+            auto e = mk(EK::Index); e->a = env.get(in.B); e->b = env.get(in.C);
+            env.set(in.A, e); d = Disp::Expr;
+        }
+        else if (op == 0x44) {                                     // GETTABLEN (small int key)
+            auto e = mk(EK::Index); e->a = env.get(in.B); e->b = mkconst(std::to_string(in.C + 1));
+            env.set(in.A, e); d = Disp::Expr;
+        }
+        else if (op == 0x2c) { env.set(in.A, mk(EK::Table)); d = Disp::Expr; }   // NEWTABLE
+        else if (op == 0x4f) {                                                   // DUPTABLE
+            auto e = mk(EK::Table);
+            if (in.Bx < (int)ip.consts.size()) e->text = ip.consts[in.Bx].text;
+            env.set(in.A, e); d = Disp::Expr;
+        }
+        else if (op == 0x16 || op == 0x42) {                                     // NEW/DUPCLOSURE
+            auto e = mk(EK::Closure); e->idx = in.Bx; env.set(in.A, e); d = Disp::Expr;
+        }
+        else if (op == 0x4c) { env.set(in.A, mk(EK::Vararg)); d = Disp::Expr; }  // GETVARARGS
+        else if (op == 0x0e || op == 0x50 || op == 0x4d) {                        // MINUS / NOT / LENGTH
+            auto e = mk(EK::Un); e->text = (op==0x0e) ? "-" : (op==0x50 ? "not" : "#");
+            e->a = env.get(in.B); env.set(in.A, e); d = Disp::Expr;
+        }
+        else if (op == 0x28) {                                                   // CONCAT B..C
+            auto e = mk(EK::Concat);
+            for (int r = in.B; r <= in.C; ++r) e->list.push_back(env.get(r));
+            env.set(in.A, e); d = Disp::Expr;
+        }
+        else if (const char* bo_op = binop_for(op)) {
+            auto e = mk(EK::Bin); e->text = bo_op;
+            // three operand shapes: reg-reg, reg-const (C), const-reg (B)
+            bool kc = (op==0x38||op==0x3e||op==0x09||op==0x32||op==0x3c||op==0x08||op==0x24||
+                       op==0x31||op==0x51);
+            bool kb = (op==0x06||op==0x3b);
+            if (kb) { e->a = K(in.B); e->b = env.get(in.C); }
+            else if (kc) { e->a = env.get(in.B); e->b = K(in.C); }
+            else { e->a = env.get(in.B); e->b = env.get(in.C); }
+            env.set(in.A, e); d = Disp::Expr;
+        }
+        // ---- calls -------------------------------------------------------------------
+        else if (op == 0x2d) {                                                   // NAMECALL
+            auto e = mk(EK::Method); e->a = env.get(in.B); e->text = in.note;
+            env.set(in.A, e);                       // completed by the CALL that follows
+            d = Disp::Expr;
+        }
+        else if (op == 0x54) {                                                   // CALL
+            EP fn = env.get(in.A);
+            int nargs = (int)in.B - 1, nres = (int)in.C - 1;
+            EP call;
+            if (fn && fn->k == EK::Method) { call = fn; }                        // NAMECALL set it up
+            else { call = mk(EK::Call); call->a = fn; }
+            // A method call's `self` occupies A+1, so its explicit arguments start at A+2 and the
+            // count includes self.
+            bool ismeth = (fn && fn->k == EK::Method);
+            int argbase = ismeth ? in.A + 2 : in.A + 1;
+            int argend;                                        // one past the last argument register
+            if (nargs < 0) { call->multret = true; argend = env.top + 1; }   // B==0: up to stack top
+            else argend = argbase + nargs - (ismeth ? 1 : 0);
+            for (int r = argbase; r < argend; ++r) call->list.push_back(env.get(r));
+            call->nres = nres;
+            // A call COLLAPSES the stack back to its own base: the argument registers are consumed.
+            // `top` must therefore be reset here, not left as a high-water mark, or the next multret
+            // instruction picks up dead argument registers as if they were values.
+            if (nres == 0) {
+                Stmt s; s.k = SK::ExprStmt; s.rhs = call; s.insn = i; bo.stmts.push_back(s);
+                for (int r = in.A; r <= env.top; ++r) env.kill(r);
+                env.top = in.A - 1;
+            } else {
+                for (int r = in.A; r <= env.top; ++r) env.kill(r);
+                env.r[in.A] = call;
+                env.top = (nres < 0) ? in.A                       // multret: results start at A
+                                     : in.A + nres - 1;
+            }
+            d = Disp::Stmt;
+        }
+        // ---- stores ------------------------------------------------------------------
+        else if (op == 0x02 || op == 0x53 || op == 0x15 || op == 0x2a || op == 0x2e) {
+            Stmt s; s.k = SK::Assign; s.insn = i; s.rhs = env.get(in.A);
+            if (op == 0x02) { auto g = mk(EK::Global); g->text = in.note; s.lhs = g; }
+            else if (op == 0x53) { auto u = mk(EK::Upval); u->idx = in.B; s.lhs = u; }
+            else if (op == 0x15) { auto f = mk(EK::Field); f->a = env.get(in.B); f->text = in.note; s.lhs = f; }
+            else if (op == 0x2a) { auto x = mk(EK::Index); x->a = env.get(in.B); x->b = env.get(in.C); s.lhs = x; }
+            else { auto x = mk(EK::Index); x->a = env.get(in.B); x->b = mkconst(std::to_string(in.C + 1)); s.lhs = x; }
+            bo.stmts.push_back(s); d = Disp::Stmt;
+        }
+        else if (op == 0x3f) {
+            // SETLIST A B C aux: append C-1 values starting at register B into the table in A,
+            // beginning at array index aux. C==0 means "everything up to the top of the stack".
+            // Without this a table constructor decompiles to `{}` and every element is LOST.
+            EP tbl = env.get(in.A);
+            if (!tbl || tbl->k != EK::Table) { tbl = mk(EK::Table); }
+            int cnt = (int)in.C - 1;
+            int vend = (cnt < 0) ? env.top + 1 : in.B + cnt;    // C==0: everything up to stack top
+            if (cnt < 0) tbl->multret = true;
+            for (int r = in.B; r < vend; ++r) tbl->list.push_back(env.get(r));
+            env.set(in.A, tbl);
+            d = Disp::Expr;
+        }
+        else if (op == 0x29) {                                                   // RETURN
+            Stmt s; s.k = SK::Return; s.insn = i;
+            int n = (int)in.B - 1;
+            if (n < 0) {
+                // B==0 => return every value from A to the top of the stack. This is what a tail
+                // position like `return f(x)` compiles to. Treating it as "zero values" silently
+                // produced a bare `return` and threw the result away.
+                for (int r = in.A; r <= env.top; ++r) s.list.push_back(env.get(r));
+                if (s.list.empty()) s.list.push_back(env.get(in.A));
+                if (s.list.back()) s.list.back()->multret = true;
+            } else {
+                for (int r = in.A; r < in.A + n; ++r) s.list.push_back(env.get(r));
+            }
+            bo.stmts.push_back(s); d = Disp::Stmt;
+        }
+        // ---- control flow: recorded, structured by M6d --------------------------------
+        else if (in.branch) {
+            Stmt s; s.k = SK::Branch; s.insn = i; s.target = in.target;
+            s.text = in.name + " " + in.text;
+            bo.stmts.push_back(s); d = Disp::Ctrl;
+        }
+        // ---- carries no source meaning -------------------------------------------------
+        else if (op == 0x19 || op == 0x10 || op == 0x0c || op == 0x26 || op == 0x4a) d = Disp::Skip; // FASTCALL*
+        else if (op == 0x35) d = Disp::Skip;                                     // CAPTURE (part of closure)
+        else if (op == 0x39) d = Disp::Skip;                                     // CLOSEUPVALS (scope marker)
+        else if (op == 0x11) d = Disp::Skip;                                     // PREPVARARGS (prologue)
+
+        switch (d) {
+            case Disp::Expr: ++out.n_expr; break;
+            case Disp::Stmt: ++out.n_stmt; break;
+            case Disp::Ctrl: ++out.n_ctrl; break;
+            case Disp::Skip: ++out.n_skip; break;
+            default: ++out.n_unhandled; out.unhandled[in.name]++; break;
+        }
+    }
+}
+
+} // namespace ex

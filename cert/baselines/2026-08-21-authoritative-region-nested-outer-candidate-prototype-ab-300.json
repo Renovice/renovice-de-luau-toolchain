@@ -1,0 +1,53 @@
+{
+  "changes": [
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 3,
+        "headers": 3,
+        "map_mismatch": false,
+        "mapped": 3,
+        "proto": 0
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Fx_Weapons_Railjack_MegaLaser_MegaLaser.lua_B",
+      "original": {
+        "backedges": 3,
+        "headers": 3,
+        "map_mismatch": false,
+        "mapped": 3,
+        "proto": 0
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 0
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 0
+    }
+  ],
+  "corpus": "general",
+  "errors": [],
+  "flag": "RENOVICE_AUTHORITATIVE_REGION_NESTED_OUTER",
+  "modules": 300,
+  "prototypes": 82059,
+  "schema_version": 1,
+  "summary": {
+    "changed": 1,
+    "errors": 0,
+    "improved": 1,
+    "regressed": 0,
+    "tradeoff": 0,
+    "unchanged": 82058
+  },
+  "unit": "prototype"
+}

@@ -1,0 +1,506 @@
+{
+  "errors": [],
+  "flag": "RENOVICE_LOOP_IDENTITY_REPAIR",
+  "results": [
+    {
+      "all_changed_prototypes_aligned_and_improved": true,
+      "count_distance": {
+        "experiment": [
+          4,
+          8
+        ],
+        "production": [
+          3,
+          7
+        ]
+      },
+      "deletion_only": true,
+      "file": "Lotus_Interface_1999_RetroMessenger.lua_B",
+      "identity_distance": {
+        "experiment": 27,
+        "production": 28
+      },
+      "original_prototypes": 368,
+      "passed": true,
+      "rebuilt_prototypes": 367,
+      "semantic_lines_equal": true,
+      "transitions": [
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 63,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 61,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        }
+      ]
+    },
+    {
+      "all_changed_prototypes_aligned_and_improved": true,
+      "count_distance": {
+        "experiment": [
+          3,
+          6
+        ],
+        "production": [
+          2,
+          5
+        ]
+      },
+      "deletion_only": true,
+      "file": "Lotus_Interface_ConquestSetup.lua_B",
+      "identity_distance": {
+        "experiment": 20,
+        "production": 21
+      },
+      "original_prototypes": 86,
+      "passed": true,
+      "rebuilt_prototypes": 85,
+      "semantic_lines_equal": true,
+      "transitions": [
+        {
+          "added": [],
+          "alignment_basis": "named-semantics-all-matches",
+          "original_candidates": [],
+          "proof_basis": "aggregate-identity-and-deletion-only",
+          "rebuilt_proto": 81,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        }
+      ]
+    },
+    {
+      "all_changed_prototypes_aligned_and_improved": true,
+      "count_distance": {
+        "experiment": [
+          7,
+          19
+        ],
+        "production": [
+          4,
+          14
+        ]
+      },
+      "deletion_only": true,
+      "file": "Lotus_Interface_DiegeticArtifactCards.lua_B",
+      "identity_distance": {
+        "experiment": 28,
+        "production": 29
+      },
+      "original_prototypes": 287,
+      "passed": true,
+      "rebuilt_prototypes": 286,
+      "semantic_lines_equal": true,
+      "transitions": [
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 15,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 15,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              3,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        },
+        {
+          "added": [],
+          "alignment_basis": "named-semantics-all-matches",
+          "original_candidates": [],
+          "proof_basis": "aggregate-identity-and-deletion-only",
+          "rebuilt_proto": 124,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        },
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 131,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 131,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        }
+      ]
+    },
+    {
+      "all_changed_prototypes_aligned_and_improved": true,
+      "count_distance": {
+        "experiment": [
+          0,
+          0
+        ],
+        "production": [
+          1,
+          1
+        ]
+      },
+      "deletion_only": true,
+      "file": "Lotus_Interface_EidolonMissionComplete.lua_B",
+      "identity_distance": {
+        "experiment": 0,
+        "production": 1
+      },
+      "original_prototypes": 31,
+      "passed": true,
+      "rebuilt_prototypes": 32,
+      "semantic_lines_equal": true,
+      "transitions": [
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 4,
+              "production": 1
+            },
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 14,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 5,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        }
+      ]
+    },
+    {
+      "all_changed_prototypes_aligned_and_improved": true,
+      "count_distance": {
+        "experiment": [
+          14,
+          54
+        ],
+        "production": [
+          13,
+          53
+        ]
+      },
+      "deletion_only": true,
+      "file": "Lotus_Interface_EndOfMatch.lua_B",
+      "identity_distance": {
+        "experiment": 50,
+        "production": 51
+      },
+      "original_prototypes": 286,
+      "passed": true,
+      "rebuilt_prototypes": 285,
+      "semantic_lines_equal": true,
+      "transitions": [
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 243,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 242,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        }
+      ]
+    },
+    {
+      "all_changed_prototypes_aligned_and_improved": true,
+      "count_distance": {
+        "experiment": [
+          17,
+          31
+        ],
+        "production": [
+          15,
+          29
+        ]
+      },
+      "deletion_only": true,
+      "file": "Lotus_Interface_Hub.lua_B",
+      "identity_distance": {
+        "experiment": 40,
+        "production": 42
+      },
+      "original_prototypes": 131,
+      "passed": true,
+      "rebuilt_prototypes": 129,
+      "semantic_lines_equal": true,
+      "transitions": [
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 34,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 34,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        },
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 52,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 52,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        }
+      ]
+    },
+    {
+      "all_changed_prototypes_aligned_and_improved": true,
+      "count_distance": {
+        "experiment": [
+          25,
+          35
+        ],
+        "production": [
+          21,
+          31
+        ]
+      },
+      "deletion_only": true,
+      "file": "Lotus_Interface_HudRedux.lua_B",
+      "identity_distance": {
+        "experiment": 57,
+        "production": 55
+      },
+      "original_prototypes": 318,
+      "passed": true,
+      "rebuilt_prototypes": 319,
+      "semantic_lines_equal": true,
+      "transitions": [
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 6,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 6,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        },
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 39,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 39,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        },
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 150,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 150,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        },
+        {
+          "added": [],
+          "alignment_basis": "parameters-and-named-semantics",
+          "original_candidates": [
+            {
+              "experiment": 0,
+              "improved": true,
+              "original_proto": 267,
+              "production": 1
+            }
+          ],
+          "proof_basis": "semantic-prototype-alignment",
+          "rebuilt_proto": 268,
+          "removed": [
+            [
+              "ForGen",
+              0,
+              "ROOT",
+              1,
+              1
+            ]
+          ],
+          "safe": true,
+          "semantic_profile_equal": true
+        }
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source_report": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\DeNativeDecompiler (use this instead of native)\\cert\\baselines\\2026-08-21-loop-identity-repair-prototype-ab-300.json",
+  "summary": {
+    "errors": 0,
+    "failed": 0,
+    "modules": 7,
+    "passed": 7
+  }
+}

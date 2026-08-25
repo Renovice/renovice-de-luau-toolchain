@@ -1,0 +1,151 @@
+kind	owner_hint	name	labels	return_family_hint	hash	sites	modules	prototypes	encoded_args_including_receiver	visible_args	observed_results	consumption_categories	evidence_grade	deep_contract	rationale
+method	Avatar	InventoryControl	CORE;HIGH_CONFIDENCE	InventoryControl	0xfe86e074	2252	285	1803	1	0	-1|1	MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|STORED|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Repeated receiver-chain anchor across nearly every ability module.
+method	InventoryControl	GetActivePowerSuit	CORE;HIGH_CONFIDENCE	PowerSuit	0xdcf95a75	1276	270	1167	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|STORED|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Repeated InventoryControl-to-suit chain.
+method	EngineObject	GetType	CORE;HIGH_CONFIDENCE	ResourceType	0x0218d452	1657	282	1282	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|STORED|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Widely passed to native calls as an opaque resource/type handle.
+method	AvatarOrEntity	IsKilled	CORE;HIGH_CONFIDENCE	boolean	0x94f6567d	1188	267	799	1	0	1	ARITH|BOOL_BRANCH|MULTI	OBSERVED_STABLE_SHAPE	no	Dominant boolean branch use across 267 modules.
+method	RegionOrEngineObject	IsMaster	CORE;HIGH_CONFIDENCE	boolean	0x00413bf5	1038	259	710	1	0	1	ARITH|BOOL_BRANCH|MULTI|STORED|UNKNOWN	OBSERVED_STABLE_SHAPE	no	Dominant authority guard across 259 modules.
+method	EngineObject	IsA	CORE	boolean	0x020fdf01	1009	220	582	-1|2	1|open	1	ARITH|BOOL_BRANCH|MULTI|PASSED_TO_CALL|STORED_RETURNED|TABLE_ITER	OBSERVED_VARIABLE_OR_OPEN	no	Dominant type-test branch use.
+method	EngineObject	Destroy	CORE;HIGH_CONFIDENCE	ignored	0x0ffc7aab	849	223	499	1	0	0	VOID	OBSERVED_STABLE_SHAPE	no	849 calls consistently ignore the result.
+method	AvatarOrEntity	DamageControl	CORE;HIGH_CONFIDENCE	DamageControl	0x1ccc5489	819	228	554	1	0	1	MULTI|RECEIVER|STORED|UNKNOWN	DEEP_CONTRACT	yes	Strong receiver-chain return and live Mallet confirmation.
+method	AvatarOrEntity	GetPosition	CORE;HIGH_CONFIDENCE	Vector3	0x28ef49e6	1186	246	657	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Passed into geometry/spawn calls and used arithmetically.
+method	EngineObject	GetInstance	CORE;HIGH_CONFIDENCE	InstanceId	0x684f1976	1154	215	824	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Used predominantly as a table key.
+method	AvatarOrEntity	MotionControl	CORE;HIGH_CONFIDENCE	MotionControl	0xf3170d90	310	160	250	1	0	1	MULTI|RECEIVER|STORED|UNKNOWN	OBSERVED_STABLE_SHAPE	no	Strong receiver-chain return.
+method	AgentOrEntity	GetAgent	CORE;HIGH_CONFIDENCE	Agent	0x100e6baf	461	224	361	1	0	-1|1	MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Repeated receiver-chain/object use.
+method	Avatar	GetSuit	CORE;HIGH_CONFIDENCE	PowerSuit	0x5f0ad094	201	128	195	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Repeated object-return chain.
+method	Avatar	InputControl	CORE;HIGH_CONFIDENCE	InputControl	0x437eb4a3	127	54	100	1	0	-1|1	MULTI|MULTRET_OPEN|RECEIVER	OBSERVED_STABLE_ARGS	no	125 of 127 uses immediately call methods on the result.
+method	AgentOrEngineObject	GetAvatar	CORE;HIGH_CONFIDENCE	Avatar	0xcf1b1ad7	89	46	63	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Common object-return chain.
+method	AvatarOrEntity	GetRotation	CORE;HIGH_CONFIDENCE	Rotation	0xedf4f9ec	134	73	109	1	0	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Passed to geometry/spawn APIs.
+method	AvatarOrEntity	GetSimPosition	CORE;HIGH_CONFIDENCE	Vector3	0x35f5ce30	406	151	268	1	0	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Repeated simulated-position value flow.
+method	AvatarOrEntity	GetSimRotation	CORE;HIGH_CONFIDENCE	Rotation	0x68ef07d8	102	66	86	1	0	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Repeated simulated-rotation value flow.
+method	AvatarOrEntity	GetCenter	CORE;HIGH_CONFIDENCE	Vector3	0x5f43b532	334	151	246	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Passed to calls and used via vector fields.
+method	AvatarOrEntity	GetForwardVector	CORE;HIGH_CONFIDENCE	Vector3	0x7341c420	82	58	69	1	0	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Geometry/arithmetic value use.
+method	AvatarOrEntity	EyePosition	CORE;HIGH_CONFIDENCE	Vector3	0x649cbad1	56	39	47	1	0	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Geometry and passed-to-call use.
+method	AvatarOrDamageControl	GetHealth	CORE;HIGH_CONFIDENCE	number	0x1de5188a	235	99	140	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Arithmetic and health-guard use.
+method	AvatarOrDamageControl	GetMaxHealth	CORE	number	0x7ed4f0b9	102	52	72	1|2	0|1	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED_RETURNED	OBSERVED_VARIABLE_OR_OPEN	no	Arithmetic cap/ratio use.
+method	AvatarOrDamageControl	GetShield	CORE;HIGH_CONFIDENCE	number	0x28fb0f29	112	53	79	1	0	1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_STABLE_SHAPE	no	Arithmetic and shield-guard use.
+method	AvatarOrDamageControl	GetMaxShield	CORE	number	0x5fab8e64	52	35	41	1|2	0|1	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL	OBSERVED_VARIABLE_OR_OPEN	no	Arithmetic cap/ratio use.
+method	PowerSuitOrAvatar	GetCurEnergy	CORE;HIGH_CONFIDENCE	number	0xef680aa6	69	51	61	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Energy guard and arithmetic use.
+method	PowerSuitOrAvatar	GetMaxEnergy	CORE;HIGH_CONFIDENCE	number	0x5760883e	13	10	12	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL	OBSERVED_STABLE_ARGS	no	Stable zero-visible-argument maximum-energy read used in arithmetic and guards.
+method	Avatar	GetPlayer	CORE;HIGH_CONFIDENCE	PlayerHandle	0xdecae99d	158	77	123	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|STORED	DEEP_CONTRACT	yes	Live-confirmed composition into NotifyOverguardGain; concrete type remains opaque.
+method	Region	GetNpcMgr	CORE;HIGH_CONFIDENCE	NpcManager	0x80e68a42	61	35	53	1	0	1	MULTI|PASSED_TO_CALL|RECEIVER|STORED	OBSERVED_STABLE_SHAPE	no	Receiver-chain return.
+method	Region	GetAiDirector	CORE;HIGH_CONFIDENCE	AiDirector	0xa65c92cd	18	14	16	1	0	1	MULTI|PASSED_TO_CALL|RECEIVER	OBSERVED_STABLE_SHAPE	no	Receiver-chain return.
+method	AvatarOrEntity	GetRagdoll	CORE	Ragdoll	0xe372a765	144	50	91	1|2	0|1	-1|1	MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER	OBSERVED_VARIABLE_OR_OPEN	no	Repeated object-return use.
+method	AttachmentOrEntity	GetAttachParent	CORE;HIGH_CONFIDENCE	Entity	0xef72689f	147	71	118	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER	OBSERVED_STABLE_ARGS	no	Repeated attachment parent object use.
+method	EngineObject	GetCreator	CORE;HIGH_CONFIDENCE	EntityOrObject	0x62bc2002	263	131	241	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER	OBSERVED_STABLE_ARGS	no	Repeated object/identity use; concrete subtype is contextual.
+method	DamageOrEffect	GetInstigator	CORE;HIGH_CONFIDENCE	Entity	0x4611fe55	82	46	71	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER	OBSERVED_STABLE_ARGS	no	Repeated source/instigator object use.
+method	AgentOrAbility	GetTarget	CORE;HIGH_CONFIDENCE	Entity	0xe923f5fc	154	136	150	1	0	-1|1	MULTI|MULTRET_OPEN|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Predominantly consumed as target identity/table key.
+method	EngineObject	GetName	CORE;HIGH_CONFIDENCE	NameOrString	0x34df30ff	86	76	84	1	0	-1|1	ARITH|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Predominantly passed onward as a name value.
+method	UpgradedValueOrStat	GetBaseValue	CORE;HIGH_CONFIDENCE	number	0x04108915	141	75	98	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL	OBSERVED_STABLE_ARGS	no	Arithmetic and damage/stat construction use.
+method	AnimationOrEvent	GetEventTime	CORE	number	0x0d9e16af	90	49	57	-1|2	1|open	1	ARITH|MULTI|PASSED_TO_CALL	OBSERVED_VARIABLE_OR_OPEN	no	87 of 90 sites use the result arithmetically.
+method	EntityOrDecoration	GetMeshScale	CORE;HIGH_CONFIDENCE	numberOrVector	0xb1a6cf63	62	38	48	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL	OBSERVED_STABLE_ARGS	no	Predominantly arithmetic; exact shape depends on receiver.
+method	PowerSuit	GetNumAbilities	CORE;HIGH_CONFIDENCE	number	0x2a9cc238	197	185	196	1	0	1	ARITH|BOOL_BRANCH|TABLE_ITER	OBSERVED_STABLE_SHAPE	no	Used as count/loop/guard value; name and fixture agree.
+method	PowerSuit	GetAbilityByIndex	CORE;HIGH_CONFIDENCE	Ability	0xc1d30e6f	185	97	178	2	1	-1|1	MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|STORED|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Indexed ability object return.
+method	AbilityOrPowerSuit	GetAbilityIndex	CORE;HIGH_CONFIDENCE	number	0x38c5d52f	129	75	124	2	1	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Index passed to upgrade queries.
+method	AvatarOrEntity	DistanceToEntity	CORE;HIGH_CONFIDENCE	number	0x74b75c53	125	84	106	2	1	1	ARITH|BOOL_BRANCH|MULTI|TABLE_ITER	OBSERVED_STABLE_SHAPE	no	Distance comparisons and arithmetic.
+method	AvatarOrEntity	DistanceToPoint	CORE	number	0x1b795d27	101	59	75	-1|2	1|open	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL	OBSERVED_VARIABLE_OR_OPEN	no	Distance comparisons and arithmetic.
+method	AvatarOrEntity	IsPreDeath	CORE;HIGH_CONFIDENCE	boolean	0x034e520e	348	186	298	1	0	1	ARITH|BOOL_BRANCH|MULTI	OBSERVED_STABLE_SHAPE	no	Dominant boolean branch use.
+method	AbilityOrEngineObject	IsActive	CORE;HIGH_CONFIDENCE	boolean	0x6b682b69	230	106	203	1	0	1	ARITH|BOOL_BRANCH|MULTI|PASSED_TO_CALL	OBSERVED_STABLE_SHAPE	no	Dominant boolean branch use.
+method	AvatarOrEntity	IsHumanPlayer	CORE;HIGH_CONFIDENCE	boolean	0x4e319106	421	171	315	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN	OBSERVED_STABLE_ARGS	no	Name and 381 boolean-branch uses agree.
+method	AvatarOrEntity	IsAvatarFriendly	CORE	boolean	0x1051c96b	404	210	352	-1|2	1|open	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|STORED_RETURNED	OBSERVED_VARIABLE_OR_OPEN	no	Name and 367 boolean-branch uses agree.
+method	AvatarOrEntity	ReplicaLocallyAuthoritative	CORE;HIGH_CONFIDENCE	boolean	0xc84e650e	257	112	210	1	0	1	BOOL_BRANCH|MULTI|STORED	OBSERVED_STABLE_SHAPE	no	254 of 257 proved uses are boolean guards.
+method	AbilityOwner	IsAbilityActivationBlocked	CORE;HIGH_CONFIDENCE	boolean	0xb879990b	210	135	177	1	0	1	BOOL_BRANCH|MULTI|STORED_RETURNED	OBSERVED_STABLE_SHAPE	no	208 of 210 proved uses are boolean guards.
+method	Ability	IsAbilityHeld	CORE	boolean	0x48532cca	116	62	103	-1|2	1|open	1	ARITH|BOOL_BRANCH|MULTI	OBSERVED_VARIABLE_OR_OPEN	no	114 dominant boolean uses.
+method	AvatarOrEntity	HasAbilityResistance	CORE;HIGH_CONFIDENCE	boolean	0x4a3a01eb	616	208	437	2	1	1	ARITH|BOOL_BRANCH|MULTI	OBSERVED_STABLE_SHAPE	no	559 boolean-branch sites plus live-safe negative handling.
+method	EngineObject	HasTag	CORE	boolean	0xd615b09e	116	55	91	-1|2	1|open	1	ARITH|BOOL_BRANCH|MULTI	OBSERVED_VARIABLE_OR_OPEN	no	Name and dominant boolean usage agree.
+method	AvatarOrEntity	HasPostureModifier	CORE;HIGH_CONFIDENCE	boolean	0x6e0e400f	110	70	89	2	1	1	ARITH|BOOL_BRANCH|MULTI	OBSERVED_STABLE_SHAPE	no	Name and dominant boolean usage agree.
+method	AvatarOrEntity	CanBeAffectedByAbilities	CORE;HIGH_CONFIDENCE	boolean	0x5794e1e3	94	80	88	2	1	1	ARITH|BOOL_BRANCH|MULTI|STORED_RETURNED	OBSERVED_STABLE_SHAPE	no	Name and dominant boolean usage agree.
+method	AvatarOrEntity	IsAvatarBlocked	CORE;HIGH_CONFIDENCE	boolean	0xd47e7afc	78	54	71	2	1	1	ARITH|BOOL_BRANCH|MULTI	OBSERVED_STABLE_SHAPE	no	Name and dominant boolean usage agree.
+method	AvatarOrItem	IsPrime	CORE;HIGH_CONFIDENCE	boolean	0x1ec618cb	57	45	54	1	0	1	BOOL_BRANCH|MULTI|STORED	OBSERVED_STABLE_SHAPE	no	55 of 57 sites are boolean branches.
+method	AbilityOwner	IsEvaluating	CORE;HIGH_CONFIDENCE	boolean	0xc78d3c0b	57	51	53	1	0	1	BOOL_BRANCH	OBSERVED_STABLE_SHAPE	no	All 57 sites are boolean branches.
+method	AgentOrAvatar	IsAlerted	CORE;HIGH_CONFIDENCE	boolean	0x2f969efd	55	52	54	1	0	1	BOOL_BRANCH	OBSERVED_STABLE_SHAPE	no	All 55 sites are boolean branches.
+method	AvatarOrEntity	IsVIP	CORE;HIGH_CONFIDENCE	boolean	0x3f161401	55	36	50	1	0	1	ARITH|BOOL_BRANCH|STORED_RETURNED	OBSERVED_STABLE_SHAPE	no	Name and dominant boolean usage agree.
+method	EngineObject	HasAttachment	CORE;HIGH_CONFIDENCE	boolean	0x694b7453	55	40	48	2	1	-1|1	ARITH|BOOL_BRANCH|MULTRET_OPEN|PASSED_TO_CALL	OBSERVED_STABLE_ARGS	no	52 of 55 sites are boolean branches.
+method	EngineObject	IsPinned	CORE;HIGH_CONFIDENCE	boolean	0xd8f83cd0	24	19	23	1	0	1	ARITH|BOOL_BRANCH	OBSERVED_STABLE_SHAPE	no	Name and stable boolean use agree.
+method	AvatarOrEntity	IsDead	CORE;HIGH_CONFIDENCE	boolean	0xd379cc6f	20	14	17	1	0	1	ARITH|BOOL_BRANCH	OBSERVED_STABLE_SHAPE	no	Name and stable boolean use agree.
+method	EngineObject	IsEnabled	CORE;HIGH_CONFIDENCE	boolean	0x3fbb5336	28	17	22	1	0	1	BOOL_BRANCH	OBSERVED_STABLE_SHAPE	no	Name and stable boolean use agree.
+method	DamageControlOrAvatar	IsProcActive	CORE;HIGH_CONFIDENCE	boolean	0xea902a3d	25	17	18	2	1	1	ARITH|BOOL_BRANCH|MULTI	OBSERVED_STABLE_SHAPE	no	Name and stable boolean use agree.
+method	Weapon	IsMeleeWeapon	CORE;HIGH_CONFIDENCE	boolean	0x11017c80	15	10	13	1	0	1	ARITH|BOOL_BRANCH	OBSERVED_STABLE_SHAPE	no	Name and stable boolean use agree.
+method	EngineObject	IsVisible	CORE;HIGH_CONFIDENCE	boolean	0x36940183	14	11	14	1	0	1	ARITH|BOOL_BRANCH	OBSERVED_STABLE_SHAPE	no	Name and stable boolean use agree.
+method	AttachmentOrEntity	IsAttached	CORE;HIGH_CONFIDENCE	boolean	0x4b4ddfa2	11	8	9	1	0	1	BOOL_BRANCH	OBSERVED_STABLE_SHAPE	no	Name and stable boolean use agree.
+global_function	Engine	RadialDamageData	CORE;HIGH_CONFIDENCE	RadialDamageData	-	0	0	0	-	contract_only	-	-	DEEP_CONTRACT	yes	Stock construction plus live Mallet use.
+global_function	Engine	UpgradedValue	CORE;HIGH_CONFIDENCE	UpgradedValue	-	0	0	0	-	contract_only	-	-	DEEP_CONTRACT	yes	Stock Mallet damage-value construction.
+global_function	_GLOBAL	IsNull	CORE;HIGH_CONFIDENCE	boolean	-	0	0	0	-	contract_only	-	-	DEEP_CONTRACT	yes	Stock null guard used before borrowed-object dereference.
+method	UpgradedValue	AddModifiers	CORE;HIGH_CONFIDENCE	ignored	0xb78379da	66	40	49	-1|2	1|open	0	VOID	DEEP_CONTRACT	yes	Stock Mallet modifier application.
+method	RadialDamageData	SetSource	CORE;HIGH_CONFIDENCE	ignored	0xbf4b48f6	309	180	262	-1|2	1|open	0	VOID	DEEP_CONTRACT	yes	Stock packet source configuration.
+method	RadialDamageData	SetSourceObject	CORE;HIGH_CONFIDENCE	ignored	0x835d7fe5	357	192	296	-1|2	1|open	0	VOID	DEEP_CONTRACT	yes	Stock packet source-object configuration.
+method	RadialDamageData	SetOrigin	CORE;HIGH_CONFIDENCE	ignored	0x435d1562	81	68	73	-1|2	1|open	0	VOID	DEEP_CONTRACT	yes	Stock packet origin configuration.
+method	RadialDamageData	SetBaseAmount	CORE;HIGH_CONFIDENCE	ignored	0x0362e2b8	277	159	222	-1|2	1|open	0	VOID	DEEP_CONTRACT	yes	Stock packet base amount configuration.
+method	RadialDamageData	SetDamagePct	CORE;HIGH_CONFIDENCE	ignored	0x6c05c545	350	169	234	-1|3	2|open	0	VOID	DEEP_CONTRACT	yes	Stock packet damage-type fraction configuration.
+method	RadialDamageData	SetDamageCallback	CORE;HIGH_CONFIDENCE	ignored	-	0	0	0	-	-	-	-	DEEP_CONTRACT	yes	Live-confirmed two-argument callback with numeric argument 2.
+method	Region	RadialDamage	CORE;HIGH_CONFIDENCE	ignored	0x23a0a153	93	78	85	14|15|2|5|9	1|13|14|4|8	0	VOID	DEEP_CONTRACT	yes	Live-confirmed engine-owned radial victim dispatch.
+method	AvatarOrEntity	DamageDD	CORE	ignored	0xfde7d827	274	152	209	2|3|4	1|2|3	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Repeated direct damage dispatch; result consistently ignored.
+method	DamageData	SetProc	CORE	ignored	0xaf20a314	303	148	183	-1|3	2|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Repeated proc configuration; result consistently ignored.
+method	AvatarOrEntity	SetPosition	CORE	ignored	0x1586090f	66	48	53	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Stable positional mutation action.
+method	AvatarOrDamageControl	SetHealth	CORE	ignored	0xb18c04f6	64	42	55	-1|2|3	1|2|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Health mutation; result consistently ignored.
+method	AvatarOrDamageControl	SetShield	CORE	ignored	0xe7430197	41	26	32	-1|2|3	1|2|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Shield mutation; result consistently ignored.
+method	DamageControl	GetOverguardAmount	CORE;HIGH_CONFIDENCE	number	0x9123bc96	25	13	18	1	0	1	ARITH|BOOL_BRANCH|MULTI|PASSED_TO_CALL	DEEP_CONTRACT	yes	Live-confirmed current Overguard read.
+method	DamageControl	SetOverguardAmount	CORE;HIGH_CONFIDENCE	ignored	0x8e1bfebc	20	11	16	-1|2	1|open	0	VOID	DEEP_CONTRACT	yes	Live-confirmed absolute Overguard setter.
+method	Avatar	NotifyOverguardGain	CORE;HIGH_CONFIDENCE	ignored	0x1f2735be	11	9	10	3	2	0	VOID	DEEP_CONTRACT	yes	Live-confirmed positive-delta notification composition.
+method	DamageDataOrEffect	SetRadius	CORE	ignored	0xfd84f1d5	81	53	63	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Radius mutation with consistently ignored result.
+method	EntityOrDecoration	SetMeshScale	CORE	ignored	0x052e608c	197	111	152	-1|2|3	1|2|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Mesh-scale mutation with consistently ignored result.
+method	EngineObject	SetVisibility	CORE	ignored	0x9f48255d	69	31	46	2|3	1|2	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Visibility mutation with consistently ignored result.
+method	DamageDataOrEffect	SetInstigator	CORE;HIGH_CONFIDENCE	ignored	0xe1783949	64	57	63	2	1	0	VOID	OBSERVED_STABLE_SHAPE	no	Instigator attribution mutation.
+method	DamageDataOrEffect	SetInstigatorItem	CORE	ignored	0xa1f63b59	71	60	68	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Instigator item attribution mutation.
+method	DamageData	SetDamageType	CORE;HIGH_CONFIDENCE	ignored	0x3562be43	16	15	16	2	1	0	VOID	OBSERVED_STABLE_SHAPE	no	Damage type mutation.
+method	MotionOrEntity	SetDisableGravity	CORE;HIGH_CONFIDENCE	ignored	0x045c2170	79	26	51	2	1	0	VOID	OBSERVED_STABLE_SHAPE	no	Gravity-state mutation with stable action shape.
+method	EntityOrEffect	SetLifeSpan	CORE;HIGH_CONFIDENCE	ignored	0xa91c6212	18	14	15	2	1	0	VOID	OBSERVED_STABLE_SHAPE	no	Lifetime mutation with stable action shape.
+method	AgentOrAbility	SetTarget	CORE;HIGH_CONFIDENCE	ignored	0x73ba4660	26	22	25	2	1	0	VOID	OBSERVED_STABLE_SHAPE	no	Target mutation with stable action shape.
+method	AgentOrAbility	ClearTarget	CORE;HIGH_CONFIDENCE	ignored	0x97218693	15	12	13	1	0	0	VOID	OBSERVED_STABLE_SHAPE	no	Target clear action.
+method	EngineObject	AddTag	CORE	ignored	0xeddecba6	48	40	45	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Tag mutation.
+method	EngineObject	RemoveTag	CORE	ignored	0x5f4150b6	60	34	41	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Tag mutation.
+method	RegionOrManager	CreateEntity	CORE	Entity	0x4562b2ec	751	247	511	-1|4|5|6|7	3|4|5|6|open	0|1	MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|STORED|TABLE_ITER|UNKNOWN|VOID	OBSERVED_VARIABLE_OR_OPEN	no	Common spawn operation with observed overloads.
+method	PowerSuit	GetUpgradeModifiedValue	CORE	numberOrUpgradedValue	0xe6c09e83	1233	281	531	3|5|6	2|4|5	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|STORED_RETURNED|TABLE_ITER	OBSERVED_VARIABLE_OR_OPEN	no	Core ability stat scaling; observed overloads require deeper typing.
+method	UpgradedValue	GetModifiedValue	CORE;HIGH_CONFIDENCE	number	0xec0c81d9	323	153	228	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Modified scalar read used arithmetically/stored.
+method	PowerSuit	GetAbilityAugmentLevel	CORE	number	0x78f6f9cd	574	190	567	-1|1|2	0|1|open	1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL	OBSERVED_VARIABLE_OR_OPEN	no	Core augment query; call-shape overloads remain to classify.
+method	PowerSuit	GetAbilityAugmentType	CORE	ResourceTypeOrNumber	0x5ef306cf	572	189	564	-1|1|2	0|1|open	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_VARIABLE_OR_OPEN	no	Core augment query; exact return representation remains contextual.
+method	EngineObject	GetResType	CORE	ResourceType	0x7d186aab	548	119	279	-1|2	1|open	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER|UNKNOWN	OBSERVED_VARIABLE_OR_OPEN	no	Frequently passed as an opaque resource type.
+method	Region	FindAll	CORE	array<EngineObject>	0x8814cf8a	328	188	268	-1|2|5	1|4|open	-1|1	MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER	OBSERVED_VARIABLE_OR_OPEN	no	Core target/entity enumeration with several observed overloads.
+method	Region	FindFirstTagged	CORE	EngineObjectOrNil	0x838e744d	1	1	1	-1	open	1	MULTI	OBSERVED_VARIABLE_OR_OPEN	no	Certified object-return mock; receiver/detail typing to deepen.
+method	AvatarOrEntity	GetAttachment	CORE	AttachmentOrNil	0xdc33cc11	468	163	308	-1|2	1|open	-1|0|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|TABLE_ITER|VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core attachment lookup with observed overloads.
+method	AvatarOrEntity	GetAllAttachments	CORE	array<Attachment>	0x4e4ea80b	190	91	134	-1|2	1|open	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_VARIABLE_OR_OPEN	no	Predominantly passed/iterated attachment collection.
+method	PowerSuit	GetAbilities	CORE;HIGH_CONFIDENCE	array<Ability>	0xbee1f182	27	17	25	1	0	1	MULTI|PASSED_TO_CALL	OBSERVED_STABLE_SHAPE	no	Certified typed mock and collection use.
+method	AvatarOrItem	GetCustomization	CORE	Customization	0x9c1e66db	92	67	88	1|2	0|1	1	MULTI|PASSED_TO_CALL|RECEIVER	OBSERVED_VARIABLE_OR_OPEN	no	Predominantly consumed as an object receiver.
+method	InventoryOrAvatar	GetWeaponInSlot	CORE;HIGH_CONFIDENCE	WeaponOrNil	0xc4973d1b	107	45	71	2	1	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Core equipment lookup.
+method	Avatar	GetWeaponInHand	CORE;HIGH_CONFIDENCE	WeaponOrNil	0x5f4c1355	82	49	71	2	1	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL	OBSERVED_STABLE_ARGS	no	Core equipped-weapon lookup.
+method	AvatarOrWeapon	GetAimEndPoint	CORE;HIGH_CONFIDENCE	Vector3	0x32cc8b5d	78	63	72	1	0	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|UNKNOWN	OBSERVED_STABLE_ARGS	no	Core targeting geometry value.
+method	AvatarOrWeapon	GetAimEndPointEntity	CORE;HIGH_CONFIDENCE	EntityOrNil	0xe06219e0	59	52	56	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED	OBSERVED_STABLE_ARGS	no	Core targeting identity lookup.
+method	AvatarOrEntity	GetBonePosition	CORE	Vector3	0xf3a3213c	227	126	174	-1|2|3	1|2|open	-1|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_VARIABLE_OR_OPEN	no	Core bone-space geometry with observed overloads.
+method	AvatarOrCamera	GetCameraView	CORE;HIGH_CONFIDENCE	CameraView	0x7df51c3f	272	148	219	1	0	-1|1	MULTI|MULTRET_OPEN|PASSED_TO_CALL|STORED|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Core camera/view value; concrete structure remains contextual.
+method	EngineObject	GetScriptBlackboard	CORE;HIGH_CONFIDENCE	table	0x6084b846	239	34	192	1	0	-1|1	MULTI|MULTRET_OPEN|TABLE_ITER|UNKNOWN	OBSERVED_STABLE_ARGS	no	Strong table-iteration evidence; key/value schema unresolved.
+method	AvatarOrEntity	GetFaction	CORE;HIGH_CONFIDENCE	Faction	0x7fa55d37	62	40	50	1	0	-1|1	BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Core allegiance value passed to comparisons/calls.
+method	RegionOrMission	GetLevelInfo	CORE;HIGH_CONFIDENCE	table	0x32a016c3	58	30	53	1	0	-1|1	MULTI|MULTRET_OPEN|RECEIVER|TABLE_ITER	OBSERVED_STABLE_ARGS	no	Predominantly table-iterated level information.
+method	AvatarOrEntity	GetHealthPercentage	CORE;HIGH_CONFIDENCE	number	0xefe4b2da	42	38	39	1	0	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN	OBSERVED_STABLE_ARGS	no	Health ratio/guard use.
+method	Ability	GetAbilityLevel	CORE	number	0xc6306187	165	115	165	-1|2	1|open	-1|1	BOOL_BRANCH|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_VARIABLE_OR_OPEN	no	Core rank/level value with observed overloads.
+method	Ability	GetActivationEnergyCost	CORE	number	0x1df256cf	169	109	158	1|2|3	0|1|2	-1|1	ARITH|BOOL_BRANCH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|TABLE_ITER	OBSERVED_VARIABLE_OR_OPEN	no	Core ability energy cost query.
+method	Ability	GetUniquePowerIdentifier	CORE;HIGH_CONFIDENCE	AbilityId	0x5c2be301	289	127	261	1	0	-1|1	MULTI|MULTRET_OPEN|PASSED_TO_CALL|RECEIVER|STORED	OBSERVED_STABLE_ARGS	no	Core ability identity passed to native calls.
+method	AvatarOrUi	ProcessBuffNotification	CORE;HIGH_CONFIDENCE	ignored	0xba8740d5	385	125	230	4	3	0	VOID	OBSERVED_STABLE_SHAPE	no	Common buff UI notification action.
+method	SecondaryScriptArgs	PushFloatArg	CORE	ignored	0x0bd8905a	500	143	215	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core secondary-script argument construction.
+method	SecondaryScriptArgs	PushObjectArg	CORE	ignored	0x7993444a	257	126	193	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core secondary-script argument construction.
+method	SecondaryScriptArgs	PushVector3Arg	CORE	ignored	0x12e59df4	123	66	81	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core secondary-script argument construction.
+method	Avatar	ActivateSecondaryScript	CORE	ignored	0x28e4961e	126	69	108	-1|4	3|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core secondary behavior dispatch.
+method	Avatar	ActivateSecondaryScriptEx	CORE	ignored	0xa63f5284	305	136	255	-1|4	3|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Extended secondary behavior dispatch.
+method	AvatarOrEntity	PlayAnimation	CORE	ignoredOrHandle	0xab901aae	83	50	63	-1|3|4|5|6|7|8	2|3|4|5|6|7|open	0|1	ARITH|VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core animation dispatch with several overloads.
+method	AvatarOrEntity	PlayNonReplicatedAnimation	CORE	ignoredOrHandle	0x2bc1de72	127	54	81	5|6|7	4|5|6	-1|0|1	ARITH|MULTI|MULTRET_OPEN|PASSED_TO_CALL|VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core local animation dispatch with several overloads.
+method	AvatarOrEntity	PlaySound	CORE	ignoredOrHandle	0x1cb3cf62	308	151	235	-1|3|4|5|6|7|9	2|3|4|5|6|8|open	0|1	MULTI|TABLE_ITER|VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core audio dispatch with several overloads.
+method	EntityOrMaterial	SetMaterialParam	CORE	ignored	0xd7f1df5e	272	107	152	-1|3|4|5|6|7	2|3|4|5|6|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core visual parameter mutation with several overloads.
+method	AvatarOrEntity	SetItemVisibility	CORE;HIGH_CONFIDENCE	ignored	0x8056ebae	87	33	61	3	2	0	VOID	OBSERVED_STABLE_SHAPE	no	Core equipment visibility mutation.
+method	EntityOrDecoration	SetMesh	CORE;HIGH_CONFIDENCE	ignored	0x9fda2d40	66	38	46	4	3	0	VOID	OBSERVED_STABLE_SHAPE	no	Core mesh mutation.
+method	AvatarOrEntity	ApplyCustomization	CORE;HIGH_CONFIDENCE	ignored	0x4af7c06f	48	34	42	2	1	0	VOID	OBSERVED_STABLE_SHAPE	no	Core appearance application.
+method	AvatarOrEntity	ApplyEnergyColor	CORE	ignored	0xf62ae983	56	35	40	2|3	1|2	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core energy-color visual application.
+method	AvatarOrEntity	Teleport	CORE	ignored	0xfffb533d	99	65	79	-1|2|3|4	1|2|3|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core position/teleport action with several overloads.
+method	RegionOrPhysics	Raycast	CORE	booleanOrHitData	0xd2d799a8	52	34	41	-1|6|7|8|9	5|6|7|8|open	-1|0|1	BOOL_BRANCH|MULTRET_OPEN|PASSED_TO_CALL|VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core collision query; overload/return contract requires deeper typing.
+method	MotionOrAvatar	SetPushVelocity	CORE	ignored	0xdda679a8	128	69	93	-1|2|3|4	1|2|3|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core movement impulse mutation.
+method	DamageDataOrMotion	SetImpulse	CORE	ignored	0x2d139f75	119	83	96	-1|2	1|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core impulse configuration.
+method	PowerSuitOrAvatar	AddUpgrade	CORE	ignored	0x4dc75142	299	119	159	-1|10|2|4|5|6|7|8|9	1|3|4|5|6|7|8|9|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core temporary upgrade application with many overloads.
+method	PowerSuitOrAvatar	RemoveUpgrade	CORE	ignored	0xcd38442f	266	94	130	-1|10|2|4|5|6|7|8|9	1|3|4|5|6|7|8|9|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core temporary upgrade removal with many overloads.
+method	UpgradedValueOrStat	AddModifier	CORE	ignored	0x2c0d089c	84	51	64	-1|3	2|open	0	VOID	OBSERVED_VARIABLE_OR_OPEN	no	Core modifier application.
+method	DamageDataOrAvatar	RemoveDamageModifier	CORE;HIGH_CONFIDENCE	ignored	0x20345e81	11	8	9	2	1	0	VOID	OBSERVED_STABLE_SHAPE	no	Core damage-modifier removal.
+method	AvatarOrDamageControl	AddAbilityResistance	CORE;HIGH_CONFIDENCE	ignored	0x6f303fc7	17	12	12	3	2	0	VOID	OBSERVED_STABLE_SHAPE	no	Core ability-resistance mutation.
+method	AvatarOrDamageControl	RemoveAbilityResistance	CORE;HIGH_CONFIDENCE	ignored	0xcb6feae1	18	13	13	3	2	0	VOID	OBSERVED_STABLE_SHAPE	no	Core ability-resistance mutation.
+method	AvatarOrDamageControl	AddProcImmunity	CORE;HIGH_CONFIDENCE	ignored	0x706ab784	11	6	6	3	2	0	VOID	OBSERVED_STABLE_SHAPE	no	Core proc-immunity mutation.
+method	AvatarOrDamageControl	RemoveProcImmunity	CORE;HIGH_CONFIDENCE	ignored	0x3f008c6b	19	14	14	3	2	0	VOID	OBSERVED_STABLE_SHAPE	no	Core proc-immunity mutation.

@@ -1,0 +1,2 @@
+confirmation_id	date	status	scope	artifact_sha256	confirmed	unconfirmed
+MALLET-NUMERIC-RADIAL-OG-001	2026-08-23	ACCEPTED	Octavia Mallet intentional edit on private OpenWF environment	C6BD1E4B76014B17526573BDA343B84432A1349B7540EA795A492C7123AC04E0	Mallet stock behavior remains functional; outgoing numeric radial callback path runs; Overguard edit works; threat remains fixed at 5	Multiplayer authority/replication; concrete callback argument 1 type; callback lifetime after RadialDamage returns

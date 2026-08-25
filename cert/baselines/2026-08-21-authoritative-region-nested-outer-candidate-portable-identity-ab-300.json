@@ -1,0 +1,88 @@
+{
+  "changes": [
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForNum",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 1,
+          "exit_count": 1,
+          "kind": "ForNum",
+          "latch_count": 1,
+          "parent_kind": "WhileLike"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "WhileLike",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Fx_Weapons_Railjack_MegaLaser_MegaLaser.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForNum",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 1,
+          "exit_count": 1,
+          "kind": "ForNum",
+          "latch_count": 1,
+          "parent_kind": "WhileLike"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "WhileLike",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForNum",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForNum",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 3,
+      "proto": 0
+    }
+  ],
+  "corpus": "general",
+  "errors": [],
+  "flag": "RENOVICE_AUTHORITATIVE_REGION_NESTED_OUTER",
+  "modules": 300,
+  "prototypes": 82059,
+  "schema_version": 1,
+  "summary": {
+    "changed": 1,
+    "errors": 0,
+    "improved": 1,
+    "regressed": 0,
+    "tradeoff": 0,
+    "unchanged": 82058
+  },
+  "unit": "prototype-portable-loop-identity"
+}

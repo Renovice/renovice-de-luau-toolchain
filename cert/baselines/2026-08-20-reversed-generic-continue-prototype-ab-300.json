@@ -1,0 +1,121 @@
+{
+  "changes": [
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": true,
+        "mapped": 3,
+        "proto": 14
+      },
+      "experiment_distance": [
+        1,
+        6
+      ],
+      "file": "Lotus_Interface_Background.lua_B",
+      "original": {
+        "backedges": 9,
+        "headers": 3,
+        "map_mismatch": false,
+        "mapped": 3,
+        "proto": 14
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": true,
+        "mapped": 3,
+        "proto": 14
+      },
+      "production_distance": [
+        1,
+        7
+      ],
+      "proto": 14
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 308
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_DiegeticUpgradeCards.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 308
+      },
+      "production": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 308
+      },
+      "production_distance": [
+        0,
+        1
+      ],
+      "proto": 308
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 11,
+        "headers": 9,
+        "map_mismatch": true,
+        "mapped": 10,
+        "proto": 36
+      },
+      "experiment_distance": [
+        1,
+        2
+      ],
+      "file": "Lotus_Interface_EidolonJobBoard.lua_B",
+      "original": {
+        "backedges": 13,
+        "headers": 10,
+        "map_mismatch": false,
+        "mapped": 10,
+        "proto": 36
+      },
+      "production": {
+        "backedges": 9,
+        "headers": 9,
+        "map_mismatch": true,
+        "mapped": 10,
+        "proto": 36
+      },
+      "production_distance": [
+        1,
+        4
+      ],
+      "proto": 36
+    }
+  ],
+  "corpus": "general",
+  "errors": [],
+  "flag": "RENOVICE_CLAIM_COLLISION_OUTER_CONTINUE",
+  "modules": 300,
+  "prototypes": 13571,
+  "schema_version": 1,
+  "summary": {
+    "changed": 3,
+    "errors": 0,
+    "improved": 3,
+    "regressed": 0,
+    "tradeoff": 0,
+    "unchanged": 13568
+  },
+  "unit": "prototype"
+}

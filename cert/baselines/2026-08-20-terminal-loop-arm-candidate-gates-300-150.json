@@ -1,0 +1,153 @@
+{
+  "baselines": {
+    "ACCESS_LOSS": 3,
+    "ACCESS_LOSS_TOTAL": 348,
+    "ALIGNED": 119,
+    "CMPK_SAME": 8,
+    "DROPPED": 0,
+    "EXTRA_HEADERS": 41,
+    "EXTRA_LOOPS": 26,
+    "LATCH_DIFF": 30,
+    "LOOP_MATCH": 162,
+    "LOST_CONDITION": 0,
+    "LOST_HEADERS": 368,
+    "LOST_LOOPS": 82,
+    "NAME-DIFF": 0,
+    "ORDER_DIFF_ALL": 151,
+    "realtrip_same": 150
+  },
+  "failures": [
+    "GATE 6: independent ORDER-DIFF 152 > baseline 151"
+  ],
+  "inputs": {
+    "align_count": 300,
+    "corpus": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\Transpiler\\protos2\\cache",
+    "corpus_file_count": 5386,
+    "environment": {
+      "RENOVICE_NATIVE": "JUMPXEQKN,JUMPXEQKS,JUMPXEQKB,JUMPBACK,AND,OR,ANDK,ORK,SUBK,FORGPREP",
+      "RENOVICE_NATIVE_GLOBALS": "1"
+    },
+    "realtrip_count": 150,
+    "tools": {
+      "derecomp": {
+        "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\DeNativeDecompiler (use this instead of native)\\bin\\derecomp.exe",
+        "sha256": "9A14B9241DC53AC27B76C95E1D43E46B8E10C39615905B80BDE4BEF6610750B2"
+      },
+      "luau_compile": {
+        "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\DeNativeDecompiler (use this instead of native)\\bin\\luau-compile.exe",
+        "sha256": "6156A05D9CAF9FA84E58BAECA79A244F47D86B8982F5425F2CA3E23B976ED2A4"
+      }
+    }
+  },
+  "metrics": {
+    "access": [
+      {
+        "name": "EE_Interface_Components_Grid",
+        "note": "",
+        "original": 672,
+        "passed": true,
+        "recompiled": 672
+      },
+      {
+        "name": "EE_Interface_Utilities",
+        "note": "",
+        "original": 784,
+        "passed": true,
+        "recompiled": 784
+      },
+      {
+        "name": "EE_Types_ScriptCommands_JSON",
+        "note": "",
+        "original": 176,
+        "passed": true,
+        "recompiled": 176
+      },
+      {
+        "name": "EE_Types_ScriptCommands_SetVortexWindPerZone",
+        "note": "",
+        "original": 30,
+        "passed": true,
+        "recompiled": 30
+      },
+      {
+        "name": "Lotus_Characters_Tenno_Infestation_Cyst_InfestationCyst",
+        "note": "",
+        "original": 127,
+        "passed": true,
+        "recompiled": 127
+      },
+      {
+        "name": "Lotus_Interface_AllianceView",
+        "note": "",
+        "original": 987,
+        "passed": true,
+        "recompiled": 987
+      },
+      {
+        "name": "Lotus_Interface_Backgrounds_Lotus_LotusBackground",
+        "note": "",
+        "original": 190,
+        "passed": true,
+        "recompiled": 190
+      },
+      {
+        "name": "Lotus_Interface_BeaconInProgress",
+        "note": "",
+        "original": 525,
+        "passed": true,
+        "recompiled": 525
+      },
+      {
+        "name": "Lotus_Interface_BootUpGlitch",
+        "note": "",
+        "original": 45,
+        "passed": true,
+        "recompiled": 45
+      }
+    ],
+    "alignment": {
+      "ALIGNED": 119,
+      "LOOP-DIFF": 115,
+      "ORDER-DIFF": 46,
+      "PROTO-DUP": 8
+    },
+    "backedge": {
+      "EXTRA-HEADERS": 41,
+      "EXTRA-LOOPS": 26,
+      "LATCH-DIFF": 30,
+      "LOST-HEADERS": 367,
+      "LOST-LOOPS": 82,
+      "MATCH": 162
+    },
+    "behaviour": {
+      "different": 0,
+      "different_files": [],
+      "same": 150,
+      "timeout": 0
+    },
+    "categories": {
+      "ACCESS-DIFF": 10,
+      "ACCESS-GAIN": 9,
+      "ACCESS-LOSS": 2,
+      "ACCESS-LOSS-TOTAL": 305,
+      "CLEAN": 119,
+      "LOOP-DIFF": 128,
+      "ORDER-DIFF": 152,
+      "PROTO-COUNT-DIFF": 9
+    },
+    "constant_comparison": {
+      "DIFFERENT": 0,
+      "SAME": 8
+    },
+    "dropped": {
+      "backward": 0,
+      "self": 0,
+      "total": 0
+    },
+    "lost_condition": {
+      "sites": 0
+    }
+  },
+  "passed": false,
+  "schema_version": 1
+}

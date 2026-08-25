@@ -1,0 +1,1975 @@
+{
+  "changes": [
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "EE_Interface_Utilities.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 37
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "EE_Types_ScriptCommands_JSON.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 21
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ApartmentCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 11
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_AppearanceCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 12
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_AppearanceCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 13
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_AppearanceCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 21
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ArchimedeaStickerReveal.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 30
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ArenaGambling.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 5
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 5,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Background.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 5,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 5,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 64
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_BeaconInProgress.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 4
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_BehaviourSettingsPanel.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 41
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_BlessingSelection.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 12
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksInterfaceUtil.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 35
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksInterfaceUtil.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 37
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_CardUtilitiesRedux.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 98
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ChallengesProgress.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 20
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ChatRedux.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 431
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Cipher.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 5
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ColorPicker.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 76
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ComboList.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 26
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_CommanderMap.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 35
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_AbilityList.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 19
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_AvatarDiorama.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 0,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 53
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_AvatarDiorama.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 68
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_BgCameraSway.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 1
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_CustomizationList.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 68
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_GearSpiral.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 18
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_PlayerPanelRedux.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 0
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_ThemedCustomizationList.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 37
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_ThemedCustomizationList.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 103
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Components_UserList.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 16
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ConclaveLite.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 6
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_ContextAction.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 3
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_DarvoDeal.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 5,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 9
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_DefenseReward.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 19
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_DiegeticUpgradeCards.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 71
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_DiegeticUpgradeCards.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 2,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 244
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_DrifterIntrinsics.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 45
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_DuviriBuildConfig.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 31
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_EpisodeEvidencePopup.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 3
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_FocusManager.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 21
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 5
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 9
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 25
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 27
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_HudCustomization.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 2,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 18
+    },
+    {
+      "classification": "improved",
+      "experiment": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "experiment_distance": 0,
+      "file": "Lotus_Interface_Inbox.lua_B",
+      "original": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production": [
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        },
+        {
+          "depth": 0,
+          "exit_count": 1,
+          "kind": "ForGen",
+          "latch_count": 1,
+          "parent_kind": "ROOT"
+        }
+      ],
+      "production_distance": 1,
+      "proto": 97
+    }
+  ],
+  "corpus": "general",
+  "errors": [
+    {
+      "error": "changed module has unalignable prototype counts: original=368 rebuilt=367",
+      "file": "Lotus_Interface_1999_RetroMessenger.lua_B"
+    },
+    {
+      "error": "changed module has unalignable prototype counts: original=86 rebuilt=85",
+      "file": "Lotus_Interface_ConquestSetup.lua_B"
+    },
+    {
+      "error": "changed module has unalignable prototype counts: original=287 rebuilt=286",
+      "file": "Lotus_Interface_DiegeticArtifactCards.lua_B"
+    },
+    {
+      "error": "changed module has unalignable prototype counts: original=31 rebuilt=32",
+      "file": "Lotus_Interface_EidolonMissionComplete.lua_B"
+    },
+    {
+      "error": "changed module has unalignable prototype counts: original=286 rebuilt=285",
+      "file": "Lotus_Interface_EndOfMatch.lua_B"
+    },
+    {
+      "error": "changed module has unalignable prototype counts: original=131 rebuilt=129",
+      "file": "Lotus_Interface_Hub.lua_B"
+    },
+    {
+      "error": "changed module has unalignable prototype counts: original=318 rebuilt=319",
+      "file": "Lotus_Interface_HudRedux.lua_B"
+    }
+  ],
+  "flag": "RENOVICE_LOOP_IDENTITY_REPAIR",
+  "modules": 300,
+  "prototypes": 12064,
+  "schema_version": 1,
+  "summary": {
+    "changed": 47,
+    "errors": 7,
+    "improved": 47,
+    "regressed": 0,
+    "tradeoff": 0,
+    "unchanged": 12017
+  },
+  "unit": "prototype-portable-loop-identity"
+}

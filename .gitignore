@@ -1,0 +1,18 @@
+/_wf/
+/.snapshot_pre*/
+/bin/
+/stage/
+**/__pycache__/
+*.py[cod]
+*.tmp
+*.o
+*.obj
+*.exe
+*.dll
+*.pdb
+
+# Root-level generated diagnostics and one-off measurements.
+/_*.txt
+/_*.csv
+/_*.tsv
+/CTempanchormgr_disasm.txt

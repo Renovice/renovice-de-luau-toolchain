@@ -1,0 +1,160 @@
+{
+  "baselines": {
+    "ACCESS_LOSS": 0,
+    "ACCESS_LOSS_TOTAL": 0,
+    "ALIGNED": 123,
+    "CMPK_SAME": 8,
+    "DROPPED": 0,
+    "EXTRA_HEADERS": 40,
+    "EXTRA_LOOPS": 25,
+    "LATCH_DIFF": 30,
+    "LOOP_MATCH": 163,
+    "LOST_CONDITION": 0,
+    "LOST_HEADERS": 359,
+    "LOST_LOOPS": 82,
+    "NAME-DIFF": 0,
+    "ORDER_DIFF_ALL": 149,
+    "realtrip_same": 150
+  },
+  "failures": [
+    "GATE 1: 3 file(s) lost accesses",
+    "GATE 2: NAME-DIFF 19 > 0",
+    "LOOP GATE: EXTRA-LOOPS missing",
+    "LOOP GATE: LOST-LOOPS 126 > baseline 82",
+    "LOOP GATE: LOST-HEADERS 574 > baseline 359",
+    "GATE 6: ACCESS-LOSS 51 > baseline 0 -- REAL code loss",
+    "GATE 6: ACCESS-LOSS-TOTAL 1213 > baseline 0 -- REAL code loss",
+    "GATE 7: DEADTAIL 37 > baseline 0"
+  ],
+  "inputs": {
+    "align_count": 300,
+    "corpus": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\Transpiler\\protos2\\cache",
+    "corpus_file_count": 5386,
+    "environment": {
+      "RENOVICE_NATIVE": "JUMPXEQKN,JUMPXEQKS,JUMPXEQKB,JUMPBACK,AND,OR,ANDK,ORK,SUBK,FORGPREP",
+      "RENOVICE_NATIVE_GLOBALS": "1"
+    },
+    "realtrip_count": 150,
+    "tools": {
+      "derecomp": {
+        "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\DeNativeDecompiler (use this instead of native)\\bin\\derecomp.exe",
+        "sha256": "30AF4B990CBADD7118F4419D7D7C4050CEA21D7475719232AC48A970050E7A0C"
+      },
+      "luau_compile": {
+        "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\DeNativeDecompiler (use this instead of native)\\bin\\luau-compile.exe",
+        "sha256": "6156A05D9CAF9FA84E58BAECA79A244F47D86B8982F5425F2CA3E23B976ED2A4"
+      }
+    }
+  },
+  "metrics": {
+    "access": [
+      {
+        "name": "EE_Interface_Components_Grid",
+        "note": "",
+        "original": 672,
+        "passed": true,
+        "recompiled": 672
+      },
+      {
+        "name": "EE_Interface_Utilities",
+        "note": "",
+        "original": 784,
+        "passed": true,
+        "recompiled": 784
+      },
+      {
+        "name": "EE_Types_ScriptCommands_JSON",
+        "note": "",
+        "original": 176,
+        "passed": false,
+        "recompiled": 170
+      },
+      {
+        "name": "EE_Types_ScriptCommands_SetVortexWindPerZone",
+        "note": "",
+        "original": 30,
+        "passed": true,
+        "recompiled": 30
+      },
+      {
+        "name": "Lotus_Characters_Tenno_Infestation_Cyst_InfestationCyst",
+        "note": "",
+        "original": 127,
+        "passed": true,
+        "recompiled": 127
+      },
+      {
+        "name": "Lotus_Interface_AllianceView",
+        "note": "",
+        "original": 987,
+        "passed": true,
+        "recompiled": 987
+      },
+      {
+        "name": "Lotus_Interface_Backgrounds_Lotus_LotusBackground",
+        "note": "",
+        "original": 190,
+        "passed": false,
+        "recompiled": 155
+      },
+      {
+        "name": "Lotus_Interface_BeaconInProgress",
+        "note": "",
+        "original": 525,
+        "passed": false,
+        "recompiled": 521
+      },
+      {
+        "name": "Lotus_Interface_BootUpGlitch",
+        "note": "",
+        "original": 45,
+        "passed": true,
+        "recompiled": 45
+      }
+    ],
+    "alignment": {
+      "ALIGNED": 131,
+      "LOOP-DIFF": 86,
+      "NAME-DIFF": 19,
+      "ORDER-DIFF": 44,
+      "PROTO-DUP": 8
+    },
+    "backedge": {
+      "EXTRA-HEADERS": 0,
+      "LATCH-DIFF": 5,
+      "LOST-HEADERS": 574,
+      "LOST-LOOPS": 126,
+      "MATCH": 169
+    },
+    "behaviour": {
+      "different": 0,
+      "different_files": [],
+      "same": 150,
+      "timeout": 0
+    },
+    "categories": {
+      "ACCESS-DIFF": 57,
+      "ACCESS-GAIN": 8,
+      "ACCESS-LOSS": 51,
+      "ACCESS-LOSS-TOTAL": 1213,
+      "CLEAN": 134,
+      "LOOP-DIFF": 97,
+      "ORDER-DIFF": 100,
+      "PROTO-COUNT-DIFF": 10
+    },
+    "constant_comparison": {
+      "DIFFERENT": 0,
+      "SAME": 8
+    },
+    "dropped": {
+      "backward": 0,
+      "self": 0,
+      "total": 0
+    },
+    "lost_condition": {
+      "sites": 37
+    }
+  },
+  "passed": false,
+  "schema_version": 1
+}

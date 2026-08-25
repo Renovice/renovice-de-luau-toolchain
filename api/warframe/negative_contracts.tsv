@@ -1,0 +1,7 @@
+hypothesis	result	evidence_id	consequence
+SetDamageCallback callback argument 2 is a DamageData object	FALSE	WF-LIVE-MALLET-2026-08-23	Treat argument 2 as a number. Calling GetHealthDamage, GetShieldDamage, or GetOverguardDamage on it caused repeated live runtime errors.
+The scalar passed to RadialDamageData:SetBaseAmount equals actual applied victim damage	FALSE	WF-LIVE-MALLET-2026-08-23	SetBaseAmount is configured before victim resolution. Use the numeric SetDamageCallback result when an actual per-target result is required.
+A Lua FindAll snapshot around the Mallet center reproduces RadialDamage victim selection	FALSE	WF-LIVE-MALLET-2026-08-23	The approximation missed outer-ring ranged victims and appeared melee-only. Let Region:RadialDamage own selection.
+A latest DamageControl record is a stable mutable object that can be retained across hits	FALSE	WF-LIVE-MALLET-2026-08-23	Reacquire engine-owned state when needed; do not assume Lua wrapper identity persists across events.
+The first SetDamageCallback callback argument is an Avatar or DamageData	UNRESOLVED	WF-STOCK-CALENDAR-CALLBACK	Keep it typed unknown until a controlled probe or readable stock consumer establishes its contract.
+SetOverguardAmount adds to the existing pool	FALSE	WF-LIVE-MALLET-2026-08-23	It is used as an absolute setter. Read current value, compute the new absolute value, and pass only the positive delta to NotifyOverguardGain.

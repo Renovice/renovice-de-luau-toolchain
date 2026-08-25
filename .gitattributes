@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Extracted strings and raw disassembly preserve source-significant whitespace.
+data/namebase*.tsv text eol=lf -whitespace
+cert/ops/*_disasm.txt text eol=lf -whitespace

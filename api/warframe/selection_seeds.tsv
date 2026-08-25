@@ -1,0 +1,151 @@
+kind	owner_hint	name	labels	return_family	rationale
+method	Avatar	InventoryControl	CORE;HIGH_CONFIDENCE	InventoryControl	Repeated receiver-chain anchor across nearly every ability module.
+method	InventoryControl	GetActivePowerSuit	CORE;HIGH_CONFIDENCE	PowerSuit	Repeated InventoryControl-to-suit chain.
+method	EngineObject	GetType	CORE;HIGH_CONFIDENCE	ResourceType	Widely passed to native calls as an opaque resource/type handle.
+method	AvatarOrEntity	IsKilled	CORE;HIGH_CONFIDENCE	boolean	Dominant boolean branch use across 267 modules.
+method	RegionOrEngineObject	IsMaster	CORE;HIGH_CONFIDENCE	boolean	Dominant authority guard across 259 modules.
+method	EngineObject	IsA	CORE	boolean	Dominant type-test branch use.
+method	EngineObject	Destroy	CORE;HIGH_CONFIDENCE	ignored	849 calls consistently ignore the result.
+method	AvatarOrEntity	DamageControl	CORE;HIGH_CONFIDENCE	DamageControl	Strong receiver-chain return and live Mallet confirmation.
+method	AvatarOrEntity	GetPosition	CORE;HIGH_CONFIDENCE	Vector3	Passed into geometry/spawn calls and used arithmetically.
+method	EngineObject	GetInstance	CORE;HIGH_CONFIDENCE	InstanceId	Used predominantly as a table key.
+method	AvatarOrEntity	MotionControl	CORE;HIGH_CONFIDENCE	MotionControl	Strong receiver-chain return.
+method	AgentOrEntity	GetAgent	CORE;HIGH_CONFIDENCE	Agent	Repeated receiver-chain/object use.
+method	Avatar	GetSuit	CORE;HIGH_CONFIDENCE	PowerSuit	Repeated object-return chain.
+method	Avatar	InputControl	CORE;HIGH_CONFIDENCE	InputControl	125 of 127 uses immediately call methods on the result.
+method	AgentOrEngineObject	GetAvatar	CORE;HIGH_CONFIDENCE	Avatar	Common object-return chain.
+method	AvatarOrEntity	GetRotation	CORE;HIGH_CONFIDENCE	Rotation	Passed to geometry/spawn APIs.
+method	AvatarOrEntity	GetSimPosition	CORE;HIGH_CONFIDENCE	Vector3	Repeated simulated-position value flow.
+method	AvatarOrEntity	GetSimRotation	CORE;HIGH_CONFIDENCE	Rotation	Repeated simulated-rotation value flow.
+method	AvatarOrEntity	GetCenter	CORE;HIGH_CONFIDENCE	Vector3	Passed to calls and used via vector fields.
+method	AvatarOrEntity	GetForwardVector	CORE;HIGH_CONFIDENCE	Vector3	Geometry/arithmetic value use.
+method	AvatarOrEntity	EyePosition	CORE;HIGH_CONFIDENCE	Vector3	Geometry and passed-to-call use.
+method	AvatarOrDamageControl	GetHealth	CORE;HIGH_CONFIDENCE	number	Arithmetic and health-guard use.
+method	AvatarOrDamageControl	GetMaxHealth	CORE	number	Arithmetic cap/ratio use.
+method	AvatarOrDamageControl	GetShield	CORE;HIGH_CONFIDENCE	number	Arithmetic and shield-guard use.
+method	AvatarOrDamageControl	GetMaxShield	CORE	number	Arithmetic cap/ratio use.
+method	PowerSuitOrAvatar	GetCurEnergy	CORE;HIGH_CONFIDENCE	number	Energy guard and arithmetic use.
+method	PowerSuitOrAvatar	GetMaxEnergy	CORE;HIGH_CONFIDENCE	number	Stable zero-visible-argument maximum-energy read used in arithmetic and guards.
+method	Avatar	GetPlayer	CORE;HIGH_CONFIDENCE	PlayerHandle	Live-confirmed composition into NotifyOverguardGain; concrete type remains opaque.
+method	Region	GetNpcMgr	CORE;HIGH_CONFIDENCE	NpcManager	Receiver-chain return.
+method	Region	GetAiDirector	CORE;HIGH_CONFIDENCE	AiDirector	Receiver-chain return.
+method	AvatarOrEntity	GetRagdoll	CORE	Ragdoll	Repeated object-return use.
+method	AttachmentOrEntity	GetAttachParent	CORE;HIGH_CONFIDENCE	Entity	Repeated attachment parent object use.
+method	EngineObject	GetCreator	CORE;HIGH_CONFIDENCE	EntityOrObject	Repeated object/identity use; concrete subtype is contextual.
+method	DamageOrEffect	GetInstigator	CORE;HIGH_CONFIDENCE	Entity	Repeated source/instigator object use.
+method	AgentOrAbility	GetTarget	CORE;HIGH_CONFIDENCE	Entity	Predominantly consumed as target identity/table key.
+method	EngineObject	GetName	CORE;HIGH_CONFIDENCE	NameOrString	Predominantly passed onward as a name value.
+method	UpgradedValueOrStat	GetBaseValue	CORE;HIGH_CONFIDENCE	number	Arithmetic and damage/stat construction use.
+method	AnimationOrEvent	GetEventTime	CORE	number	87 of 90 sites use the result arithmetically.
+method	EntityOrDecoration	GetMeshScale	CORE;HIGH_CONFIDENCE	numberOrVector	Predominantly arithmetic; exact shape depends on receiver.
+method	PowerSuit	GetNumAbilities	CORE;HIGH_CONFIDENCE	number	Used as count/loop/guard value; name and fixture agree.
+method	PowerSuit	GetAbilityByIndex	CORE;HIGH_CONFIDENCE	Ability	Indexed ability object return.
+method	AbilityOrPowerSuit	GetAbilityIndex	CORE;HIGH_CONFIDENCE	number	Index passed to upgrade queries.
+method	AvatarOrEntity	DistanceToEntity	CORE;HIGH_CONFIDENCE	number	Distance comparisons and arithmetic.
+method	AvatarOrEntity	DistanceToPoint	CORE	number	Distance comparisons and arithmetic.
+method	AvatarOrEntity	IsPreDeath	CORE;HIGH_CONFIDENCE	boolean	Dominant boolean branch use.
+method	AbilityOrEngineObject	IsActive	CORE;HIGH_CONFIDENCE	boolean	Dominant boolean branch use.
+method	AvatarOrEntity	IsHumanPlayer	CORE;HIGH_CONFIDENCE	boolean	Name and 381 boolean-branch uses agree.
+method	AvatarOrEntity	IsAvatarFriendly	CORE	boolean	Name and 367 boolean-branch uses agree.
+method	AvatarOrEntity	ReplicaLocallyAuthoritative	CORE;HIGH_CONFIDENCE	boolean	254 of 257 proved uses are boolean guards.
+method	AbilityOwner	IsAbilityActivationBlocked	CORE;HIGH_CONFIDENCE	boolean	208 of 210 proved uses are boolean guards.
+method	Ability	IsAbilityHeld	CORE	boolean	114 dominant boolean uses.
+method	AvatarOrEntity	HasAbilityResistance	CORE;HIGH_CONFIDENCE	boolean	559 boolean-branch sites plus live-safe negative handling.
+method	EngineObject	HasTag	CORE	boolean	Name and dominant boolean usage agree.
+method	AvatarOrEntity	HasPostureModifier	CORE;HIGH_CONFIDENCE	boolean	Name and dominant boolean usage agree.
+method	AvatarOrEntity	CanBeAffectedByAbilities	CORE;HIGH_CONFIDENCE	boolean	Name and dominant boolean usage agree.
+method	AvatarOrEntity	IsAvatarBlocked	CORE;HIGH_CONFIDENCE	boolean	Name and dominant boolean usage agree.
+method	AvatarOrItem	IsPrime	CORE;HIGH_CONFIDENCE	boolean	55 of 57 sites are boolean branches.
+method	AbilityOwner	IsEvaluating	CORE;HIGH_CONFIDENCE	boolean	All 57 sites are boolean branches.
+method	AgentOrAvatar	IsAlerted	CORE;HIGH_CONFIDENCE	boolean	All 55 sites are boolean branches.
+method	AvatarOrEntity	IsVIP	CORE;HIGH_CONFIDENCE	boolean	Name and dominant boolean usage agree.
+method	EngineObject	HasAttachment	CORE;HIGH_CONFIDENCE	boolean	52 of 55 sites are boolean branches.
+method	EngineObject	IsPinned	CORE;HIGH_CONFIDENCE	boolean	Name and stable boolean use agree.
+method	AvatarOrEntity	IsDead	CORE;HIGH_CONFIDENCE	boolean	Name and stable boolean use agree.
+method	EngineObject	IsEnabled	CORE;HIGH_CONFIDENCE	boolean	Name and stable boolean use agree.
+method	DamageControlOrAvatar	IsProcActive	CORE;HIGH_CONFIDENCE	boolean	Name and stable boolean use agree.
+method	Weapon	IsMeleeWeapon	CORE;HIGH_CONFIDENCE	boolean	Name and stable boolean use agree.
+method	EngineObject	IsVisible	CORE;HIGH_CONFIDENCE	boolean	Name and stable boolean use agree.
+method	AttachmentOrEntity	IsAttached	CORE;HIGH_CONFIDENCE	boolean	Name and stable boolean use agree.
+global_function	Engine	RadialDamageData	CORE;HIGH_CONFIDENCE	RadialDamageData	Stock construction plus live Mallet use.
+global_function	Engine	UpgradedValue	CORE;HIGH_CONFIDENCE	UpgradedValue	Stock Mallet damage-value construction.
+global_function	_GLOBAL	IsNull	CORE;HIGH_CONFIDENCE	boolean	Stock null guard used before borrowed-object dereference.
+method	UpgradedValue	AddModifiers	CORE;HIGH_CONFIDENCE	ignored	Stock Mallet modifier application.
+method	RadialDamageData	SetSource	CORE;HIGH_CONFIDENCE	ignored	Stock packet source configuration.
+method	RadialDamageData	SetSourceObject	CORE;HIGH_CONFIDENCE	ignored	Stock packet source-object configuration.
+method	RadialDamageData	SetOrigin	CORE;HIGH_CONFIDENCE	ignored	Stock packet origin configuration.
+method	RadialDamageData	SetBaseAmount	CORE;HIGH_CONFIDENCE	ignored	Stock packet base amount configuration.
+method	RadialDamageData	SetDamagePct	CORE;HIGH_CONFIDENCE	ignored	Stock packet damage-type fraction configuration.
+method	RadialDamageData	SetDamageCallback	CORE;HIGH_CONFIDENCE	ignored	Live-confirmed two-argument callback with numeric argument 2.
+method	Region	RadialDamage	CORE;HIGH_CONFIDENCE	ignored	Live-confirmed engine-owned radial victim dispatch.
+method	AvatarOrEntity	DamageDD	CORE	ignored	Repeated direct damage dispatch; result consistently ignored.
+method	DamageData	SetProc	CORE	ignored	Repeated proc configuration; result consistently ignored.
+method	AvatarOrEntity	SetPosition	CORE	ignored	Stable positional mutation action.
+method	AvatarOrDamageControl	SetHealth	CORE	ignored	Health mutation; result consistently ignored.
+method	AvatarOrDamageControl	SetShield	CORE	ignored	Shield mutation; result consistently ignored.
+method	DamageControl	GetOverguardAmount	CORE;HIGH_CONFIDENCE	number	Live-confirmed current Overguard read.
+method	DamageControl	SetOverguardAmount	CORE;HIGH_CONFIDENCE	ignored	Live-confirmed absolute Overguard setter.
+method	Avatar	NotifyOverguardGain	CORE;HIGH_CONFIDENCE	ignored	Live-confirmed positive-delta notification composition.
+method	DamageDataOrEffect	SetRadius	CORE	ignored	Radius mutation with consistently ignored result.
+method	EntityOrDecoration	SetMeshScale	CORE	ignored	Mesh-scale mutation with consistently ignored result.
+method	EngineObject	SetVisibility	CORE	ignored	Visibility mutation with consistently ignored result.
+method	DamageDataOrEffect	SetInstigator	CORE;HIGH_CONFIDENCE	ignored	Instigator attribution mutation.
+method	DamageDataOrEffect	SetInstigatorItem	CORE	ignored	Instigator item attribution mutation.
+method	DamageData	SetDamageType	CORE;HIGH_CONFIDENCE	ignored	Damage type mutation.
+method	MotionOrEntity	SetDisableGravity	CORE;HIGH_CONFIDENCE	ignored	Gravity-state mutation with stable action shape.
+method	EntityOrEffect	SetLifeSpan	CORE;HIGH_CONFIDENCE	ignored	Lifetime mutation with stable action shape.
+method	AgentOrAbility	SetTarget	CORE;HIGH_CONFIDENCE	ignored	Target mutation with stable action shape.
+method	AgentOrAbility	ClearTarget	CORE;HIGH_CONFIDENCE	ignored	Target clear action.
+method	EngineObject	AddTag	CORE	ignored	Tag mutation.
+method	EngineObject	RemoveTag	CORE	ignored	Tag mutation.
+method	RegionOrManager	CreateEntity	CORE	Entity	Common spawn operation with observed overloads.
+method	PowerSuit	GetUpgradeModifiedValue	CORE	numberOrUpgradedValue	Core ability stat scaling; observed overloads require deeper typing.
+method	UpgradedValue	GetModifiedValue	CORE;HIGH_CONFIDENCE	number	Modified scalar read used arithmetically/stored.
+method	PowerSuit	GetAbilityAugmentLevel	CORE	number	Core augment query; call-shape overloads remain to classify.
+method	PowerSuit	GetAbilityAugmentType	CORE	ResourceTypeOrNumber	Core augment query; exact return representation remains contextual.
+method	EngineObject	GetResType	CORE	ResourceType	Frequently passed as an opaque resource type.
+method	Region	FindAll	CORE	array<EngineObject>	Core target/entity enumeration with several observed overloads.
+method	Region	FindFirstTagged	CORE	EngineObjectOrNil	Certified object-return mock; receiver/detail typing to deepen.
+method	AvatarOrEntity	GetAttachment	CORE	AttachmentOrNil	Core attachment lookup with observed overloads.
+method	AvatarOrEntity	GetAllAttachments	CORE	array<Attachment>	Predominantly passed/iterated attachment collection.
+method	PowerSuit	GetAbilities	CORE;HIGH_CONFIDENCE	array<Ability>	Certified typed mock and collection use.
+method	AvatarOrItem	GetCustomization	CORE	Customization	Predominantly consumed as an object receiver.
+method	InventoryOrAvatar	GetWeaponInSlot	CORE;HIGH_CONFIDENCE	WeaponOrNil	Core equipment lookup.
+method	Avatar	GetWeaponInHand	CORE;HIGH_CONFIDENCE	WeaponOrNil	Core equipped-weapon lookup.
+method	AvatarOrWeapon	GetAimEndPoint	CORE;HIGH_CONFIDENCE	Vector3	Core targeting geometry value.
+method	AvatarOrWeapon	GetAimEndPointEntity	CORE;HIGH_CONFIDENCE	EntityOrNil	Core targeting identity lookup.
+method	AvatarOrEntity	GetBonePosition	CORE	Vector3	Core bone-space geometry with observed overloads.
+method	AvatarOrCamera	GetCameraView	CORE;HIGH_CONFIDENCE	CameraView	Core camera/view value; concrete structure remains contextual.
+method	EngineObject	GetScriptBlackboard	CORE;HIGH_CONFIDENCE	table	Strong table-iteration evidence; key/value schema unresolved.
+method	AvatarOrEntity	GetFaction	CORE;HIGH_CONFIDENCE	Faction	Core allegiance value passed to comparisons/calls.
+method	RegionOrMission	GetLevelInfo	CORE;HIGH_CONFIDENCE	table	Predominantly table-iterated level information.
+method	AvatarOrEntity	GetHealthPercentage	CORE;HIGH_CONFIDENCE	number	Health ratio/guard use.
+method	Ability	GetAbilityLevel	CORE	number	Core rank/level value with observed overloads.
+method	Ability	GetActivationEnergyCost	CORE	number	Core ability energy cost query.
+method	Ability	GetUniquePowerIdentifier	CORE;HIGH_CONFIDENCE	AbilityId	Core ability identity passed to native calls.
+method	AvatarOrUi	ProcessBuffNotification	CORE;HIGH_CONFIDENCE	ignored	Common buff UI notification action.
+method	SecondaryScriptArgs	PushFloatArg	CORE	ignored	Core secondary-script argument construction.
+method	SecondaryScriptArgs	PushObjectArg	CORE	ignored	Core secondary-script argument construction.
+method	SecondaryScriptArgs	PushVector3Arg	CORE	ignored	Core secondary-script argument construction.
+method	Avatar	ActivateSecondaryScript	CORE	ignored	Core secondary behavior dispatch.
+method	Avatar	ActivateSecondaryScriptEx	CORE	ignored	Extended secondary behavior dispatch.
+method	AvatarOrEntity	PlayAnimation	CORE	ignoredOrHandle	Core animation dispatch with several overloads.
+method	AvatarOrEntity	PlayNonReplicatedAnimation	CORE	ignoredOrHandle	Core local animation dispatch with several overloads.
+method	AvatarOrEntity	PlaySound	CORE	ignoredOrHandle	Core audio dispatch with several overloads.
+method	EntityOrMaterial	SetMaterialParam	CORE	ignored	Core visual parameter mutation with several overloads.
+method	AvatarOrEntity	SetItemVisibility	CORE;HIGH_CONFIDENCE	ignored	Core equipment visibility mutation.
+method	EntityOrDecoration	SetMesh	CORE;HIGH_CONFIDENCE	ignored	Core mesh mutation.
+method	AvatarOrEntity	ApplyCustomization	CORE;HIGH_CONFIDENCE	ignored	Core appearance application.
+method	AvatarOrEntity	ApplyEnergyColor	CORE	ignored	Core energy-color visual application.
+method	AvatarOrEntity	Teleport	CORE	ignored	Core position/teleport action with several overloads.
+method	RegionOrPhysics	Raycast	CORE	booleanOrHitData	Core collision query; overload/return contract requires deeper typing.
+method	MotionOrAvatar	SetPushVelocity	CORE	ignored	Core movement impulse mutation.
+method	DamageDataOrMotion	SetImpulse	CORE	ignored	Core impulse configuration.
+method	PowerSuitOrAvatar	AddUpgrade	CORE	ignored	Core temporary upgrade application with many overloads.
+method	PowerSuitOrAvatar	RemoveUpgrade	CORE	ignored	Core temporary upgrade removal with many overloads.
+method	UpgradedValueOrStat	AddModifier	CORE	ignored	Core modifier application.
+method	DamageDataOrAvatar	RemoveDamageModifier	CORE;HIGH_CONFIDENCE	ignored	Core damage-modifier removal.
+method	AvatarOrDamageControl	AddAbilityResistance	CORE;HIGH_CONFIDENCE	ignored	Core ability-resistance mutation.
+method	AvatarOrDamageControl	RemoveAbilityResistance	CORE;HIGH_CONFIDENCE	ignored	Core ability-resistance mutation.
+method	AvatarOrDamageControl	AddProcImmunity	CORE;HIGH_CONFIDENCE	ignored	Core proc-immunity mutation.
+method	AvatarOrDamageControl	RemoveProcImmunity	CORE;HIGH_CONFIDENCE	ignored	Core proc-immunity mutation.

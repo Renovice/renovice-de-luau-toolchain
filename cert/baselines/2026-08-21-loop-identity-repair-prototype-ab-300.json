@@ -1,0 +1,1646 @@
+{
+  "changes": [
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 37
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "EE_Interface_Utilities.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 37
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 37
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 37
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 21
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "EE_Types_ScriptCommands_JSON.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 21
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 21
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 21
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 11
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ApartmentCustomization.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 11
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 11
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 11
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 12
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_AppearanceCustomization.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 12
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 12
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 12
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 13
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_AppearanceCustomization.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 13
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 13
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 13
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 21
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_AppearanceCustomization.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 21
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 21
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 21
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 30
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ArchimedeaStickerReveal.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 30
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 30
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 30
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 5
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ArenaGambling.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 5
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 5
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 5
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 5,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 64
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Background.lua_B",
+      "original": {
+        "backedges": 5,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 64
+      },
+      "production": {
+        "backedges": 6,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 64
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 64
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 4
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_BeaconInProgress.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 4
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 4
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 4
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 41
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_BehaviourSettingsPanel.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 41
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 41
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 41
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 12
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_BlessingSelection.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 12
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 12
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 12
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 35
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksInterfaceUtil.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 35
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 35
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 35
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 37
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksInterfaceUtil.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 37
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 37
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 37
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 98
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_CardUtilitiesRedux.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 98
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 98
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 98
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 20
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ChallengesProgress.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 20
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 20
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 20
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 431
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ChatRedux.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 431
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 431
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 431
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 5
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Cipher.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 5
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 5
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 5
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 76
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ColorPicker.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 76
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 76
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 76
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 26
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ComboList.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 26
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 26
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 26
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 35
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_CommanderMap.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 35
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 35
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 35
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 19
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_AbilityList.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 19
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 19
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 19
+    },
+    {
+      "classification": "unchanged",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 53
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_AvatarDiorama.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 53
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": true,
+        "mapped": 2,
+        "proto": 53
+      },
+      "production_distance": [
+        0,
+        0
+      ],
+      "proto": 53
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 68
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_AvatarDiorama.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 68
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 68
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 68
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 1
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_BgCameraSway.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 1
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 1
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 1
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 68
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_CustomizationList.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 68
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 68
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 68
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 18
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_GearSpiral.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 18
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 18
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 18
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 0
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_PlayerPanelRedux.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 0
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 0
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 0
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 37
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_ThemedCustomizationList.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 37
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 37
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 37
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 103
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_ThemedCustomizationList.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 103
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 103
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 103
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 16
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Components_UserList.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 16
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 16
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 16
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 6
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ConclaveLite.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 6
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 6
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 6
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 3
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_ContextAction.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 3
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 3
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 3
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 9
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_DarvoDeal.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 9
+      },
+      "production": {
+        "backedges": 6,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 9
+      },
+      "production_distance": [
+        1,
+        5
+      ],
+      "proto": 9
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 19
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_DefenseReward.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 19
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 19
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 19
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 71
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_DiegeticUpgradeCards.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 71
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 71
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 71
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 244
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_DiegeticUpgradeCards.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 244
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 244
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 244
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 45
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_DrifterIntrinsics.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 45
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 45
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 45
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 31
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_DuviriBuildConfig.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 31
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 31
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 31
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 3
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_EpisodeEvidencePopup.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 3
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 3
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 3
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 21
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_FocusManager.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 21
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 21
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 21
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 5
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 5
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 5
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 5
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 9
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 9
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 9
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 9
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 25
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 25
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 25
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 25
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 27
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 27
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 27
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 27
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 18
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_HudCustomization.lua_B",
+      "original": {
+        "backedges": 2,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 18
+      },
+      "production": {
+        "backedges": 3,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 18
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 18
+    },
+    {
+      "classification": "improved",
+      "experiment": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 97
+      },
+      "experiment_distance": [
+        0,
+        0
+      ],
+      "file": "Lotus_Interface_Inbox.lua_B",
+      "original": {
+        "backedges": 1,
+        "headers": 1,
+        "map_mismatch": false,
+        "mapped": 1,
+        "proto": 97
+      },
+      "production": {
+        "backedges": 2,
+        "headers": 2,
+        "map_mismatch": false,
+        "mapped": 2,
+        "proto": 97
+      },
+      "production_distance": [
+        1,
+        1
+      ],
+      "proto": 97
+    }
+  ],
+  "corpus": "general",
+  "errors": [
+    {
+      "error": "changed module has unalignable baseline count and rebuilt prototype deltas at [61]: original=368 production=367 experiment=367",
+      "file": "Lotus_Interface_1999_RetroMessenger.lua_B"
+    },
+    {
+      "error": "changed module has unalignable baseline count and rebuilt prototype deltas at [81]: original=86 production=85 experiment=85",
+      "file": "Lotus_Interface_ConquestSetup.lua_B"
+    },
+    {
+      "error": "changed module has unalignable baseline count and rebuilt prototype deltas at [15, 124, 131]: original=287 production=286 experiment=286",
+      "file": "Lotus_Interface_DiegeticArtifactCards.lua_B"
+    },
+    {
+      "error": "changed module has unalignable baseline count and rebuilt prototype deltas at [5]: original=31 production=32 experiment=32",
+      "file": "Lotus_Interface_EidolonMissionComplete.lua_B"
+    },
+    {
+      "error": "changed module has unalignable baseline count and rebuilt prototype deltas at [242]: original=286 production=285 experiment=285",
+      "file": "Lotus_Interface_EndOfMatch.lua_B"
+    },
+    {
+      "error": "changed module has unalignable baseline count and rebuilt prototype deltas at [34, 52]: original=131 production=129 experiment=129",
+      "file": "Lotus_Interface_Hub.lua_B"
+    },
+    {
+      "error": "changed module has unalignable baseline count and rebuilt prototype deltas at [6, 39, 150, 268]: original=318 production=319 experiment=319",
+      "file": "Lotus_Interface_HudRedux.lua_B"
+    }
+  ],
+  "flag": "RENOVICE_LOOP_IDENTITY_REPAIR",
+  "modules": 300,
+  "prototypes": 12064,
+  "schema_version": 1,
+  "summary": {
+    "changed": 47,
+    "errors": 7,
+    "improved": 46,
+    "regressed": 0,
+    "tradeoff": 0,
+    "unchanged": 12017
+  },
+  "unit": "prototype"
+}

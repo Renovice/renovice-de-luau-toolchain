@@ -1,0 +1,67 @@
+# Warframe (build 2026.06.19) Lua 5.1 opcode map — current-build NUMBER -> semantic
+# luaV_execute @ 0x14198be7f ; jump table @ 0x141990dd8 (53 base entries, int32 = handlerVA-imagebase)
+# iABC preserved (A=bits8-15,B=16-23,C=24-31,Bx=16-31,sBx signed); opcode = LOW BYTE of 32-bit word.
+# TValue=16B, tag@+0xc; 53 base opcodes = 38 stock + DE vector/instrumentation; PLUS hidden inline-cache
+# specialization opcodes >52 (e.g. 45/61) created by self-modifying ops 3/15. ADD(39) fans out via a
+# SECOND tag-table @0x141990f60. confidence: H=high M=med L=low(needs deeper dump).
+#
+# idx  semantic            conf  notes
+0      MOD                 M     scalar floor-div; VEC_MOD=36
+1      GETTABLE_INT        L     DE int-index table read (cache variant of GETTABLE)
+2      GETTABLE_STR        L     calls luaV_gettable; polymorphic-inline-cache variant
+3      GETGLOBAL           L     iABx, self-patches opcode->45; Bx=const string key
+4      LOADBOOL            H     tag=1 + conditional C-skip
+5      JMP                 H     movsxd[rsi];sar 8;lea rsi (sBx)
+6      SUB                 M     scalar subss; VEC_SUB=7
+7      VEC_SUB             M     full 3-component subss +0/+4/+8
+8      POW                 H     pow_helper 0x140d0b8e0; sqrtpd/mulsd fast paths
+9      MUL                 H     mul_helper 0x141245ea0 + __mul; VEC_MUL=34
+10     FORLOOP             H     only ADDSD in dump (idx+=step), comisd vs limit
+11     FORPREP             M     numeric, tag8/nil guard
+12     SETTABLE_STR        L     DE string-key table store (cache variant)
+13     LOADNIL             M     write 0 tag@+0xc
+14     UNM                 H     negate single operand
+15     SETGLOBAL           M     self-patches opcode->61; env store [R14+0x18]+0x7b0
+16     CALL                M     stack window; (prior pass also eyed 17)
+17     VARARG              M     luaD_growstack; varargs copy
+18     LOADK               L     ** transcoder-critical; load-immediate path, confirm proto-k[] load **
+19     GETUPVAL            H     upvalue read
+20     MOVE                H     movups 16B reg->reg copy
+21     SETTABLE            H     RK key 2-word + hash write + GC barrier 0x140a69430
+22     CLOSURE             H     subproto alloc 0x140497a00 + findupval 0x140fc9b00
+23     GETTABLE_STR        L     DE cache variant (dup w/2,38 — inline-cache specialization)
+24     TEST                H     truthiness + skip
+25     TFORLOOP            M     iterator call, nresults=1
+26     VEC_DIV             H     full 3-component divss
+27     TFORLOOP_GENERIC    L     ** candidate SETLIST/CLOSE — body below cutoff **
+28     LT                  H     comiss + JA; ordererror via 0x141519c90
+29     DE_COUNTER_REWRITE  L     self-modifying saturating counter (DE instrumentation, not stock)
+30     TEST_HOOK           L     ** candidate missing stock op — body below cutoff **
+31     DE_LINEHOOK_DISPATCH L    per-PC line/debug-hook re-dispatch trampoline (DE, not stock)
+32     EQ                  H     tag3 number + tag6 object eq vs RK (luaV_equalval)
+33     LE                  H     comiss + JBE; ordererror via 0x140ad87b0
+34     VEC_MUL             H     full 3-component mulss
+35     VEC_LT              L     DE ordered compare (JC polarity); slow path off-dump
+36     VEC_MOD             M     full 3-component reciprocal-mul floor
+37     JMP_HOOK            L     ** candidate missing stock op — body below cutoff **
+38     GETTABLE_STR        L     DE cache variant (dup — inline-cache specialization)
+39     ADD                 M     polymorphic; secondary tag-table @0x141990f60 (folds VEC_ADD)
+40     CONCAT              H     luaV_concat 0x14086ff60; count=C-B+1
+41     RETURN              H     CallInfo restore + return to caller PC
+42     GETTABLE            H     general register-key + luaV_gettable fallback
+43     TESTSET_REG         L     ** candidate missing stock op — body below cutoff **
+44     NEWTABLE            M     table alloc
+45     SELF                M     (also the self-patch target of op3 GETGLOBAL)
+46     SETTABLE_INT        H     int-index store + GC barrier
+47     TESTSET_REG         L     ** candidate missing stock op — body below cutoff **
+48     FORPREP_GENERIC     L     ** candidate SETLIST/CLOSE — body below cutoff **
+49     TESTSET             M     conditional move + skip
+50     DIV                 H     __div meta selector R8D=0xb; VEC_DIV=26
+51     VEC_LE              L     DE ordered compare (JNC polarity); slow path off-dump
+52     VEC_EQ              M     tag1 boolean-immediate eq + __eq
+#
+# STILL MISSING (stock ops not yet located — hide in L-conf handlers below the 60-instr cutoff,
+#   OR among hidden >52 PIC opcodes): NOT, LEN, TAILCALL, SETLIST, CLOSE, SETUPVAL.
+# NEXT: re-dump full bodies of ops {1,12,23,27,30,38,43,47,48} + follow off-dump targets to locate them.
+#
+# wluac (OLD shuffle) known: LOADK=25, RETURN=30, SETGLOBAL=32, CLOSURE=37 (rest via probe-compile).
