@@ -6275,3 +6275,28 @@ region owner. Next implement explicit normal-completion/break/continue/function-
 
 Full evidence:
 `../RESEARCH/DE LUAU TRANSLATOR/LOST_CONDITION_FIX_2026-08-20.md`.
+
+---
+
+## 2026-09-29 — #107 U44 RAW-HASH RECOMPILE; STOCK CONSTANT-IDENTITY GATE
+
+Hypothesis: U44 round trips lose the stock hash class of native names (U43 namebase on U44 input,
+no hash metadata from `decompile-mod`, `__<hex>` suffixes read as U43 aliases, `_T` recognized only
+by spelling), and a source fixed point cannot see it.
+
+Finding: TRUE. Legacy OmegaRerollSelection round trip: CONST-ID 43/77 prototypes, 73 hash/string
+class swaps, still a fixed point. New `decompile-mod-u44` → `recompile-u44` raw-hash path: 77/77
+first pass, closed candidate CONST-ID/IR identical to the research control. Full U44 corpus
+(5,460 U44-format modules): decompile 5,459, recompile 5,459, deterministic 5,459, CONST-ID
+5,330, class swaps 0; residuals are prototype-count/dead-tail structure shared with U43.
+
+Evidence: `RESEARCH/U44_RAW_HASH_RECOMPILE_2026-09-29.md` and its `evidence/` folder;
+`derecomp const-identity`, `cert/u44_rawhash_roundtrip.py`, `u44-rawhash-selftest`.
+
+Reason: the gate compares per-prototype hash/string multisets and name-key use classes with stock,
+not with our own output. U43 A/B over 5,386 modules: sources and bytecode identical.
+
+Also found (unchanged, needs authorization): the U43 standard path has the same defect class —
+3,240 / 5,385 modules carry 39,749 hash/string class swaps after `decompile-mod` → `recompile`.
+
+Next step: authorize the U43 metadata repair, then add CONST-ID to `cert/gates.py`.

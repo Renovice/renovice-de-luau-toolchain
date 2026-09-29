@@ -13,9 +13,26 @@
 namespace de {
 
 static const uint32_t NAMEHASH_SEED_2026_06_19 = 0x7E5AF8E9u;
+static const uint32_t NAMEHASH_SEED_U44 = 0x768E5ED0u;           // build 2026.09.24.13.29 (44.x)
 
 inline std::map<uint32_t, uint32_t> source_aliases;
 inline uint32_t active_namehash_seed = NAMEHASH_SEED_2026_06_19;
+// RAW source namespace. Set only when the source itself declares the active seed with
+// `-- RENOVICE_NAME_HASH_SEED: <seed>` (emitted by the U44 decompiler) or through the explicit
+// `recompile-u44-raw` mode. A `X__aabbccdd` suffix is then the exact hash stock bytecode carries in
+// the ACTIVE build namespace and passes through unchanged; it is never looked up as a U43 alias and
+// never rehashed as a string. Without the declaration, U44 keeps the U43-alias contract below.
+inline bool raw_source_hashes = false;
+
+// `X__aabbccdd` -> true + the 32-bit suffix. Exactly the convention resolve_name_hash() honors.
+inline bool parse_hash_suffix(const std::string& name, uint32_t& hash) {
+    const size_t sz = name.size();
+    if (sz < 10 || name[sz - 9] != '_' || name[sz - 10] != '_') return false;
+    for (size_t i = sz - 8; i < sz; ++i)
+        if (!std::isxdigit((unsigned char)name[i])) return false;
+    hash = (uint32_t)std::strtoul(name.substr(sz - 8).c_str(), nullptr, 16);
+    return true;
+}
 inline uint32_t de_name_hash(const std::string& name, uint32_t seed = active_namehash_seed) {
     uint32_t h = seed;
     for (unsigned char by : name) h = (h ^ (uint32_t)by) * 0x01000193u;   // FNV-1a (prime 16777619), uint32 wrap
@@ -26,17 +43,12 @@ inline uint32_t de_name_hash(const std::string& name, uint32_t seed = active_nam
 // Honors the decompiler's `RealName__aabbccdd` convention: the __<8 hex> suffix IS the true 32-bit hash
 // (for natives whose name couldn't be resolved). Plain names hash normally.
 inline uint32_t resolve_name_hash(const std::string& name) {
-    size_t sz = name.size();
-    if (sz >= 10 && name[sz - 9] == '_' && name[sz - 10] == '_') {
-        bool hex = true;
-        for (size_t i = sz - 8; i < sz; ++i) if (!std::isxdigit((unsigned char)name[i])) { hex = false; break; }
-        if (hex) {
-            const auto hash = (uint32_t)std::strtoul(name.substr(sz - 8).c_str(), nullptr, 16);
-            if (active_namehash_seed == NAMEHASH_SEED_2026_06_19) return hash;
-            const auto found = source_aliases.find(hash);
-            if (found == source_aliases.end()) throw std::runtime_error("profile: unresolved source alias " + name);
-            return found->second;
-        }
+    uint32_t hash = 0;
+    if (parse_hash_suffix(name, hash)) {
+        if (active_namehash_seed == NAMEHASH_SEED_2026_06_19 || raw_source_hashes) return hash;
+        const auto found = source_aliases.find(hash);
+        if (found == source_aliases.end()) throw std::runtime_error("profile: unresolved source alias " + name);
+        return found->second;
     }
     return de_name_hash(name);
 }

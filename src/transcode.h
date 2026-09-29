@@ -3,6 +3,8 @@
 // -> [luau_bc.h parse] -> [here] -> DE bytecode. Reuses de_container.h primitives (enc_vi/enc_consts) and
 // de_namehash.h. Verified target: byte-identical to luau_to_de.py output (which is proven in-game).
 #pragma once
+#include <algorithm>
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <cstdlib>
@@ -52,6 +54,33 @@ inline std::set<std::string> parse_hashed_global_directives(const std::string& s
 
 inline std::set<std::string> parse_hashed_field_directives(const std::string& source) {
     return parse_name_directives(source, hashed_field_directive_prefix());
+}
+
+// Name-hash namespace declaration. A source carrying `-- RENOVICE_NAME_HASH_SEED: 768e5ed0` was
+// decompiled from U44 bytecode: plain names are hashed with that seed and every `X__aabbccdd`
+// suffix is the RAW stock hash in that namespace (see de::raw_source_hashes). Absent => legacy
+// contract. More than one distinct declaration, or a malformed seed, is rejected.
+inline const char* name_hash_seed_directive_prefix() { return "-- RENOVICE_NAME_HASH_SEED: "; }
+
+inline bool parse_name_hash_seed_directive(const std::string& source, uint32_t& seed) {
+    const std::set<std::string> values =
+        parse_name_directives(source, name_hash_seed_directive_prefix());
+    if (values.empty()) return false;
+    if (values.size() != 1) throw std::runtime_error("conflicting RENOVICE_NAME_HASH_SEED directives");
+    const std::string& text = *values.begin();
+    if (text.size() != 8) throw std::runtime_error("invalid RENOVICE_NAME_HASH_SEED directive");
+    for (char c : text)
+        if (!std::isxdigit((unsigned char)c)) throw std::runtime_error("invalid RENOVICE_NAME_HASH_SEED directive");
+    seed = (uint32_t)std::strtoul(text.c_str(), nullptr, 16);
+    return true;
+}
+
+// In a raw-hash source, an identifier carrying an explicit hash suffix can only denote a native
+// name slot, so hashed-capable positions (global reads/writes, field reads) keep the hash class
+// even when no RENOVICE_HASH_* directive names it. Legacy sources are unaffected.
+inline bool raw_hash_spelling(const std::string& name) {
+    uint32_t ignored = 0;
+    return de::raw_source_hashes && de::parse_hash_suffix(name, ignored);
 }
 
 // ---- little-endian packers ----
@@ -233,10 +262,70 @@ inline bool import_root_is_shared_T(const luau::Module& module, const luau::Prot
                                     uint32_t descriptor) {
     const int count = (descriptor >> 30) & 3;
     const uint32_t root = (descriptor >> 20) & 0x3ff;
-    return count >= 1 && root < proto.consts.size()
-        && proto.consts[root].tag == luau::C_STR
-        && luau::sstr(module, proto.consts[root].u) == "_T";
+    if (count < 1 || root >= proto.consts.size() || proto.consts[root].tag != luau::C_STR)
+        return false;
+    const std::string name = luau::sstr(module, proto.consts[root].u);
+    if (name == "_T") return true;
+    // Raw-hash sources may spell the shared-table root by its exact hash (`Name__9828c6d9` in U44).
+    // It is the same native name, so the same import-path rule applies.
+    uint32_t hash = 0;
+    return de::raw_source_hashes && de::parse_hash_suffix(name, hash)
+        && hash == de::de_name_hash("_T");
 }
+
+// Import-path hash classes that differ from the default rule (root hashed; members strings under
+// `_T`, hashed otherwise). Stock U44 also keeps members of engine-injected script properties
+// (`EndColor.x`, `floatTime.minValue`) and of string-keyed roots (`package.seeall`) as tag-3
+// strings, which the source spelling alone cannot express. The U44 decompiler records every such
+// path as `-- RENOVICE_IMPORT_CLASS: EndColor.x=HS` (one class letter per component).
+inline const char* import_class_directive_prefix() { return "-- RENOVICE_IMPORT_CLASS: "; }
+inline std::map<std::string, std::string> import_class_overrides;
+
+inline std::map<std::string, std::string> parse_import_class_directives(const std::string& source) {
+    std::map<std::string, std::string> result;
+    for (const std::string& entry : parse_name_directives(source, import_class_directive_prefix())) {
+        const size_t equals = entry.rfind('=');
+        if (equals == std::string::npos || equals == 0)
+            throw std::runtime_error("invalid RENOVICE_IMPORT_CLASS directive");
+        const std::string path = entry.substr(0, equals), classes = entry.substr(equals + 1);
+        const size_t components = 1 + (size_t)std::count(path.begin(), path.end(), '.');
+        if (classes.empty() || classes.size() != components || components > 3
+            || classes.find_first_not_of("HS") != std::string::npos)
+            throw std::runtime_error("invalid RENOVICE_IMPORT_CLASS directive");
+        const auto inserted = result.emplace(path, classes);
+        if (!inserted.second && inserted.first->second != classes)
+            throw std::runtime_error("conflicting RENOVICE_IMPORT_CLASS directives for " + path);
+    }
+    return result;
+}
+
+// Per-position hash class of one GETIMPORT descriptor.
+inline std::array<bool, 3> import_component_hashed(const luau::Module& module, const luau::Proto& proto,
+                                                   uint32_t descriptor) {
+    const bool shared_T = import_root_is_shared_T(module, proto, descriptor);
+    std::array<bool, 3> hashed = { true, !shared_T, !shared_T };
+    if (import_class_overrides.empty()) return hashed;
+    const int count = (descriptor >> 30) & 3;
+    const uint32_t ids[3] = { (descriptor >> 20) & 0x3ff, (descriptor >> 10) & 0x3ff, descriptor & 0x3ff };
+    std::string path;
+    for (int position = 0; position < count; ++position) {
+        if (ids[position] >= proto.consts.size() || proto.consts[ids[position]].tag != luau::C_STR)
+            return hashed;
+        if (position) path += '.';
+        path += luau::sstr(module, proto.consts[ids[position]].u);
+    }
+    const auto found = import_class_overrides.find(path);
+    if (found == import_class_overrides.end()) return hashed;
+    if ((int)found->second.size() != count)
+        throw std::runtime_error("RENOVICE_IMPORT_CLASS component count mismatch for " + path);
+    for (int position = 0; position < count; ++position) hashed[position] = found->second[position] == 'H';
+    return hashed;
+}
+
+// Raw-hash sources only: constants whose GETTABLEKS / GETGLOBAL / SETGLOBAL uses are string-keyed.
+// A dual-use constant (string here, hashed elsewhere, e.g. as an import member) receives a hash
+// duplicate; these string-class instructions must keep the original tag-3 operand.
+struct NameUseClasses { std::set<uint32_t> string_fields, string_globals; };
 
 inline uint32_t remap_import_component(uint32_t descriptor, int position, uint32_t index) {
     if (index > 0x3ff)
@@ -261,7 +350,8 @@ inline std::vector<de::Const> transcode_consts(const luau::Module& m, const luau
                                                std::map<uint32_t, uint32_t>& hash_remap,
                                                std::map<uint32_t, uint32_t>& import_descriptor_remap,
                                                const std::set<std::string>& hashed_globals = {},
-                                               const std::set<std::string>& hashed_fields = {}) {
+                                               const std::set<std::string>& hashed_fields = {},
+                                               NameUseClasses* name_classes = nullptr) {
     std::set<uint32_t> hash_set, str_set;
     // A string constant can also be an import/method name in the same
     // prototype. Value operands must keep tag-3 strings, even when no field
@@ -288,15 +378,19 @@ inline std::vector<de::Const> transcode_consts(const luau::Module& m, const luau
             const uint32_t index = ins.aux & 0xffffu;
             const bool hash = index < p.consts.size()
                 && p.consts[index].tag == luau::C_STR
-                && hashed_globals.count(luau::sstr(m, p.consts[index].u));
+                && (hashed_globals.count(luau::sstr(m, p.consts[index].u))
+                    || raw_hash_spelling(luau::sstr(m, p.consts[index].u)));
             (hash ? hash_set : str_set).insert(index);
+            if (!hash && name_classes) name_classes->string_globals.insert(index);
         }
         else if (nm == "GETTABLEKS" && ins.has_aux) {
             const uint32_t index = ins.aux & 0xffffu;
             const bool hash = index < p.consts.size()
                 && p.consts[index].tag == luau::C_STR
-                && hashed_fields.count(luau::sstr(m, p.consts[index].u));
+                && (hashed_fields.count(luau::sstr(m, p.consts[index].u))
+                    || raw_hash_spelling(luau::sstr(m, p.consts[index].u)));
             (hash ? hash_set : str_set).insert(index);
+            if (!hash && name_classes) name_classes->string_fields.insert(index);
         }
         // Field writes are always tag-3 in the full corpus, including when a read of the same source
         // name is hashed. The dual-use remap therefore applies only to GETTABLEKS below.
@@ -314,9 +408,9 @@ inline std::vector<de::Const> transcode_consts(const luau::Module& m, const luau
     }
     for (const luau::Const& c : p.consts) if (c.tag == luau::C_IMPORT) {
         uint32_t v = c.u; int cnt = (v >> 30) & 3; uint32_t ids[3] = { (v >> 20) & 0x3ff, (v >> 10) & 0x3ff, v & 0x3ff };
-        const bool shared_T = import_root_is_shared_T(m, p, v);
+        const std::array<bool, 3> hashed = import_component_hashed(m, p, v);
         for (int k = 0; k < cnt; ++k) {
-            if (shared_T && k > 0) str_set.insert(ids[k]);
+            if (!hashed[k]) str_set.insert(ids[k]);
             else hash_set.insert(ids[k]);
         }
     }
@@ -335,9 +429,9 @@ inline std::vector<de::Const> transcode_consts(const luau::Module& m, const luau
         const uint32_t ids[3] = {
             (c.u >> 20) & 0x3ff, (c.u >> 10) & 0x3ff, c.u & 0x3ff,
         };
-        const bool shared_T = import_root_is_shared_T(m, p, c.u);
+        const std::array<bool, 3> hashed = import_component_hashed(m, p, c.u);
         for (int position = 0; position < count; ++position) {
-            const bool hashed_context = position == 0 || !shared_T;
+            const bool hashed_context = hashed[position];
             auto remap = hash_remap.find(ids[position]);
             if (hashed_context && remap != hash_remap.end())
                 rewritten = remap_import_component(rewritten, position, remap->second);
@@ -402,7 +496,8 @@ inline std::vector<de::Const> transcode_consts(const luau::Module& m, const luau
 struct CodeResult { std::string code; int sizecode; int maxstack; };
 inline CodeResult transcode_code(const luau::Proto& p,
                                  const std::map<uint32_t, uint32_t>& hash_remap,
-                                 const std::map<uint32_t, uint32_t>& import_descriptor_remap) {
+                                 const std::map<uint32_t, uint32_t>& import_descriptor_remap,
+                                 const NameUseClasses* name_classes = nullptr) {
     const auto& ins = p.insns;
     int n = (int)ins.size();
     int maxstack = p.mx;
@@ -495,14 +590,16 @@ inline CodeResult transcode_code(const luau::Proto& p,
             DI d; d.op = 0x17; d.A = ins[i].A; d.sz = 8; d.B = 0; d.C = ins[i].C;
             d.aux = ins[i].has_aux ? (ins[i].aux & 0xFFFF) : 0;
             auto remap = hash_remap.find(d.aux);
-            if (remap != hash_remap.end()) d.aux = remap->second;
+            if (remap != hash_remap.end()
+                && !(name_classes && name_classes->string_globals.count(d.aux))) d.aux = remap->second;
             de.push_back(d); continue;
         }
         if (nm == "SETGLOBAL") {
             DI d; d.op = 0x02; d.A = ins[i].A; d.sz = 8; d.B = ins[i].B; d.C = ins[i].C;
             d.aux = ins[i].has_aux ? ins[i].aux : 0;
             auto remap = hash_remap.find(d.aux & 0xffffu);
-            if (remap != hash_remap.end()) d.aux = remap->second;
+            if (remap != hash_remap.end()
+                && !(name_classes && name_classes->string_globals.count(d.aux & 0xffffu))) d.aux = remap->second;
             de.push_back(d); continue;
         }
         // FASTCALL family. Dropping them yields CORRECT code (the complete slow path follows) but
@@ -621,7 +718,8 @@ inline CodeResult transcode_code(const luau::Proto& p,
             }
             else if (nm == "GETTABLEKS") {
                 auto it = hash_remap.find(d.aux & 0xffffu);
-                if (it != hash_remap.end()) d.aux = it->second;
+                if (it != hash_remap.end()
+                    && !(name_classes && name_classes->string_fields.count(d.aux & 0xffffu))) d.aux = it->second;
             }
             else if (nm == "GETIMPORT") {
                 auto it = import_descriptor_remap.find(d.aux);
@@ -689,10 +787,14 @@ inline std::string transcode(const std::string& luau_bytes,
     for (const luau::Proto& p : m.protos) {
         std::map<uint32_t, uint32_t> hash_remap;
         std::map<uint32_t, uint32_t> import_descriptor_remap;
+        // Legacy sources keep the historical name-level dual-use remap; raw-hash sources remap
+        // only the instructions whose own class is hashed.
+        NameUseClasses name_classes;
+        NameUseClasses* classes = de::raw_source_hashes ? &name_classes : nullptr;
         std::vector<de::Const> consts = transcode_consts(
             m, p, pool, s2i, hash_remap, import_descriptor_remap,
-            hashed_globals, hashed_fields);
-        auto cs = transcode_code(p, hash_remap, import_descriptor_remap);
+            hashed_globals, hashed_fields, classes);
+        auto cs = transcode_code(p, hash_remap, import_descriptor_remap, classes);
         blobs.push_back({ cs.maxstack, p.npar, p.nups, p.isvararg, cs.sizecode, cs.code, std::move(consts), p.kids });
     }
     std::string out = "\x09\x03";

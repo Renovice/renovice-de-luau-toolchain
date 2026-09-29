@@ -1,0 +1,97 @@
+{
+ "u44Full": {
+  "profile": "u44",
+  "exe": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\bin\\derecomp.v3.exe",
+  "exeSha256": "5295a4389a575f49e33479242ce8931bb04d934c305829bfd007fb52ad092b16",
+  "gateExeSha256": "5295a4389a575f49e33479242ce8931bb04d934c305829bfd007fb52ad092b16",
+  "stockDir": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\work\\u44-rawhash-2026-09-29\\stock",
+  "modules": 5473,
+  "decompile": 5459,
+  "recompile": 5459,
+  "deterministic": 5459,
+  "sourceFixedPoint": 2120,
+  "bytecodeFixedPoint": 2130,
+  "compilerClosed": 5372,
+  "constIdentityFirstPass": 5306,
+  "constIdentityClosed": 5217,
+  "byteIdenticalFirstPass": 0,
+  "seconds": 1904.1,
+  "modulesWithDirective": {
+   "NAME_HASH_SEED": 5459,
+   "HASH_GLOBAL": 349,
+   "HASH_FIELD": 3004,
+   "IMPORT_CLASS": 619
+  },
+  "directiveLines": {
+   "HASH_GLOBAL": 659,
+   "HASH_FIELD": 23794,
+   "IMPORT_CLASS": 1166
+  },
+  "distinctRawHashSpellingsSum": 50458,
+  "modulesWithClassSwapsFirstPass": 0,
+  "classSwapsFirstPass": 0,
+  "protoCountMismatch": 71,
+  "hashClassOk": 5330
+ },
+ "u43StandardPathBaseline": {
+  "profile": "u43",
+  "exe": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\bin\\derecomp.base.exe",
+  "exeSha256": "09b2bf39b4692f94e95eb9410319bc8fd6095d4315e94b880deba4d60a8f9d60",
+  "gateExeSha256": "5295a4389a575f49e33479242ce8931bb04d934c305829bfd007fb52ad092b16",
+  "stockDir": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\shared\\corpus\\de-luau-stock",
+  "modules": 5386,
+  "decompile": 5385,
+  "recompile": 5385,
+  "deterministic": 5385,
+  "sourceFixedPoint": 2098,
+  "bytecodeFixedPoint": 2108,
+  "compilerClosed": 5301,
+  "constIdentityFirstPass": 2129,
+  "constIdentityClosed": 2105,
+  "byteIdenticalFirstPass": 0,
+  "seconds": 1853.2,
+  "modulesWithDirective": {
+   "NAME_HASH_SEED": 0,
+   "HASH_GLOBAL": 0,
+   "HASH_FIELD": 0,
+   "IMPORT_CLASS": 0
+  },
+  "directiveLines": {
+   "HASH_GLOBAL": 0,
+   "HASH_FIELD": 0,
+   "IMPORT_CLASS": 0
+  },
+  "distinctRawHashSpellingsSum": 44416,
+  "modulesWithClassSwapsFirstPass": 3240,
+  "classSwapsFirstPass": 39749,
+  "protoCountMismatch": 69,
+  "hashClassOk": 2154
+ },
+ "u43AbIdentityFinal": {
+  "baseSha256": "09b2bf39b4692f94e95eb9410319bc8fd6095d4315e94b880deba4d60a8f9d60",
+  "newSha256": "c1672d8d70e44bf7001a68f873f229714f5afdefb0b93c8558b6abb49e187c58",
+  "modules": 5386,
+  "sourceIdentical": 5386,
+  "decompileFailedBoth": 1,
+  "recompiled": 5385,
+  "bytecodeIdentical": 5385,
+  "recompileFailedBoth": 0,
+  "seconds": 674.3,
+  "mismatches": []
+ },
+ "u44FailureClassesFinalGate": {
+  "no-candidate | u43=class-swap-only": 8,
+  "no-candidate | u43=decompile-fail": 1,
+  "no-candidate | u43=pass": 5,
+  "pass-after-regate | u43=structural": 24,
+  "proto-count | u43=absent": 2,
+  "proto-count | u43=proto-count": 69,
+  "structural | u43=class-swap-only": 18,
+  "structural | u43=structural": 40
+ },
+ "extraction": {
+  "toc": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Warframe\\Cache.Windows\\B.Font.toc",
+  "tocSha256": "10cced56a94672742917492393ebbf622212634169fbc43cd179e642a6379dfd",
+  "modules": 5473
+ }
+}

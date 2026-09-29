@@ -325,7 +325,7 @@ static int cmd_semantic_ir_render_module(int argc, char** argv) {
     const std::string output = argv[3];
     g_primary_ability_loop_scope = is_primary_ability_module_path(input);
     de::Module module;
-    const std::string bytes = read_file(input);
+    const std::string bytes = read_de_input(input);
     try { module = de::walk(bytes); }
     catch (const std::exception& error) {
         std::fprintf(stderr, "semantic-ir-render-module: walk error: %s\n", error.what());

@@ -252,6 +252,23 @@ static int cmd_recompile(int argc, char** argv) {
     try {
         hashed_globals = tc::parse_hashed_global_directives(source);
         hashed_fields = tc::parse_hashed_field_directives(source);
+        // A declared hash namespace must be the one this mode targets. Raw-hash sources carry
+        // exact stock hashes, so combining one with a U43 alias map would be ambiguous.
+        uint32_t declared_seed = 0;
+        if (tc::parse_name_hash_seed_directive(source, declared_seed)) {
+            if (declared_seed != de::active_namehash_seed) {
+                std::fprintf(stderr, "[derecomp] source declares name-hash seed %08x but this mode "
+                             "targets %08x\n", declared_seed, de::active_namehash_seed);
+                return 1;
+            }
+            if (!de::source_aliases.empty()) {
+                std::fprintf(stderr, "[derecomp] raw-hash source must not be combined with a "
+                             "source alias map\n");
+                return 1;
+            }
+            de::raw_source_hashes = true;
+        }
+        tc::import_class_overrides = tc::parse_import_class_directives(source);
     }
     catch (const std::exception& e) {
         std::fprintf(stderr, "[derecomp] source metadata error: %s\n", e.what()); return 1;
@@ -270,8 +287,9 @@ static int cmd_recompile(int argc, char** argv) {
     try { de::Module m = de::walk(de_body); nps = m.nps; } catch (const std::exception&) { loads = false; }
     if (!write_file(argv[3], de_body)) { std::fprintf(stderr, "[derecomp] cannot write %s\n", argv[3]); return 1; }
     std::printf("[derecomp] recompile %s -> %s : %zu bytes, nps=%d, re-parses=%s, "
-                "hashed-globals=%zu, hashed-fields=%zu\n", argv[2], argv[3], de_body.size(), nps,
-                loads ? "yes" : "NO", hashed_globals.size(), hashed_fields.size());
+                "hashed-globals=%zu, hashed-fields=%zu%s\n", argv[2], argv[3], de_body.size(), nps,
+                loads ? "yes" : "NO", hashed_globals.size(), hashed_fields.size(),
+                de::raw_source_hashes ? ", raw-hash-source=yes" : "");
     return loads ? 0 : 2;
 }
 
@@ -1397,6 +1415,33 @@ static bool k_aux_cmp(uint8_t op){ return op==0x20||op==0x41; }   // aux = K ind
 // values with ZERO out-of-range, which is what a real const index looks like.
 static bool reg_in_aux(uint8_t op){ return op==0x37||op==0x27||op==0x21||op==0x1c||op==0x23||op==0x33; }
 
+// ---- U44 raw-hash input profile (RESEARCH/U44_RAW_HASH_RECOMPILE_2026-09-29.md) ----------------
+// Set only by the *-u44 decompile modes. The input is lowered to U43 canonical opcodes in memory
+// (native-name hashes untouched) and names resolve through a U44-seeded namebase, never the U43
+// one: a U44 hash that happens to equal an unrelated U43 hash would otherwise render a wrong name
+// that recompiles to a different U44 hash. Legacy (U43) modes never set these.
+static bool g_input_profile_u44 = false;
+// (0 = global, 1 = field read) spellings that occur BOTH hashed and string-keyed in one module.
+// Their hashed occurrences render with the exact raw suffix so both classes survive the source.
+static std::set<std::pair<int, std::string>> g_u44_mixed_names;
+static int u44_name_class(uint8_t op) { return (op == 0x17 || op == 0x02) ? 0 : (op == 0x3d ? 1 : -1); }
+static std::string raw_hash_alias(const std::string& name, uint32_t hash) {
+    uint32_t existing = 0;
+    if (de::parse_hash_suffix(name, existing) && existing == hash) return name;
+    char suffix[16]; std::snprintf(suffix, sizeof suffix, "__%08x", hash);
+    return (ex::is_ident(name) ? name : std::string("Name")) + suffix;
+}
+// Every decompiler entry point that accepts U44 input reads through here.
+static std::string read_de_input(const std::string& path) {
+    std::string bytes = read_file(path);
+    if (!g_input_profile_u44 || bytes.empty()) return bytes;
+    try { return de::change_build_profile(bytes, false); }
+    catch (const std::exception& e) {
+        std::fprintf(stderr, "u44 input profile: %s\n", e.what());
+        return std::string();
+    }
+}
+
 static ir::IProto ir_annotate(const de::Proto& p, int pidx,
                               const std::vector<std::string>& pool, const ir::NameBase& nb) {
     ir::IProto ip; ip.index = pidx; ip.kids = p.kids;
@@ -1528,10 +1573,18 @@ static ir::IProto ir_annotate(const de::Proto& p, int pidx,
         } else if (k_aux_name(in.op)) {                            // NAMECALL
             const ir::KVal* k = kref(in, (int)(in.aux & 0xffff), "name");
             in.note = k ? k->str : "";
+            if (g_input_profile_u44 && k && k->kind == ir::KKind::NameHash && !ex::is_ident(in.note))
+                in.note = raw_hash_alias(in.note, k->hash);
             std::snprintf(buf,sizeof buf,"R%d R%d :%s", in.A, in.B, in.note.c_str());
         } else if (k_aux_str(in.op)) {                              // GET/SETFIELD, GET/SETGLOBAL
             const ir::KVal* k = kref(in, (int)(in.aux & 0xffff), "str");
             in.note = k ? k->str : "";
+            if (g_input_profile_u44 && k && k->kind == ir::KKind::NameHash) {
+                const int name_class = u44_name_class(in.op);
+                if (!ex::is_ident(in.note)
+                    || (name_class >= 0 && g_u44_mixed_names.count({name_class, in.note})))
+                    in.note = raw_hash_alias(in.note, k->hash);
+            }
             if (in.op==0x3d)      std::snprintf(buf,sizeof buf,"R%d <- R%d.%s", in.A, in.B, in.note.c_str());
             else if (in.op==0x15) std::snprintf(buf,sizeof buf,"R%d.%s <- R%d", in.B, in.note.c_str(), in.A);
             else if (in.op==0x17) std::snprintf(buf,sizeof buf,"R%d <- _ENV.%s", in.A, in.note.c_str());
@@ -1607,21 +1660,59 @@ static ir::IProto ir_annotate(const de::Proto& p, int pidx,
 }
 
 static ir::NameBase g_nb;
+// U44 namebase: every namebase entry is a verified U43 preimage (FNV(name, 7e5af8e9) == hash for
+// all rows), so the NAME is build-independent and its U44 hash is FNV(name, 768e5ed0). A U44 hash
+// reached by two different names is ambiguous and stays raw. A name that itself parses as a raw
+// `X__aabbccdd` spelling would recompile as that suffix rather than its own hash, so it stays raw.
+static long long g_u44_namebase_ambiguous = 0, g_u44_namebase_suffix_skipped = 0;
+static void ir_load_u44_namebase(const std::string& tsv) {
+    std::unordered_map<uint32_t, std::string> names;
+    std::set<uint32_t> ambiguous;
+    size_t i = 0;
+    while (i < tsv.size()) {
+        size_t e = tsv.find('\n', i);
+        if (e == std::string::npos) e = tsv.size();
+        size_t line_end = e;
+        while (line_end > i && tsv[line_end - 1] == '\r') --line_end;
+        const size_t tab = tsv.find('\t', i);
+        if (tab != std::string::npos && tab < line_end) {
+            const std::string name = tsv.substr(tab + 1, line_end - tab - 1);
+            uint32_t suffix = 0;
+            if (de::parse_hash_suffix(name, suffix)) ++g_u44_namebase_suffix_skipped;
+            else {
+                const uint32_t hash = de::de_name_hash(name, de::NAMEHASH_SEED_U44);
+                auto inserted = names.emplace(hash, name);
+                if (!inserted.second && inserted.first->second != name) ambiguous.insert(hash);
+            }
+        }
+        i = e + 1;
+    }
+    for (uint32_t hash : ambiguous) names.erase(hash);
+    g_u44_namebase_ambiguous = (long long)ambiguous.size();
+    g_nb.m = std::move(names);
+    g_nb.entries = (long long)g_nb.m.size();
+    g_nb.loaded = true;
+}
+
 static void ir_load_namebase() {
     if (g_nb.loaded) return;
     std::string t = read_file(exe_dir() + "\\..\\data\\namebase_merged.tsv");
     if (t.empty()) t = read_file("data/namebase_merged.tsv");
+    if (g_input_profile_u44) { ir_load_u44_namebase(t); return; }
     g_nb.load(t);
 }
 
 static int cmd_ir(int argc, char** argv) {
     ir_load_namebase();
-    std::string b = read_file(argv[2]);
+    std::string b = read_de_input(argv[2]);
     de::Module m; try { m = de::walk(b); } catch (const std::exception& e) {
         std::fprintf(stderr, "walk error: %s\n", e.what()); return 1; }
     std::vector<std::string> pool = ir::parse_pool(b);
     int only = (argc >= 4) ? std::atoi(argv[3]) : -1;
     std::printf("namebase=%lld entries   string pool=%zu   protos=%zu\n", g_nb.entries, pool.size(), m.protos.size());
+    if (g_input_profile_u44)
+        std::printf("u44 namebase: ambiguous hashes left raw=%lld, suffix-shaped names left raw=%lld\n",
+                    g_u44_namebase_ambiguous, g_u44_namebase_suffix_skipped);
     for (size_t i = 0; i < m.protos.size(); ++i) {
         if (only >= 0 && (int)i != only) continue;
         ir::IProto ip = ir_annotate(m.protos[i], (int)i, pool, g_nb);
@@ -2673,6 +2764,7 @@ static int cmd_de_builtins(int argc, char** argv) {
 #include "semantic_plan_cmd.h"
 #include "semantic_ir/command.h"
 #include "closure_map_cmd.h"
+#include "u44_raw_cmd.h"
 
 // The fixed-point rules below were A/B tested, then certified together at 360/360 in raw mode,
 // with five witnesses stable through ten cycles and 19 executable behavior fixtures. Keep that
@@ -2780,6 +2872,17 @@ int main(int argc, char** argv) {
         de::active_namehash_seed = 0x768e5ed0u;
         return cmd_recompile(argc, argv);
     }
+    if (mode == "recompile-u44-raw" && argc >= 4) {
+        de::active_namehash_seed = de::NAMEHASH_SEED_U44;
+        de::raw_source_hashes = true;
+        return cmd_recompile(argc, argv);
+    }
+    if (mode == "decompile-mod-u44" && argc >= 3) return cmd_decompile_mod_u44(argc, argv);
+    if (mode == "semantic-ir-render-module-u44" && argc >= 4)
+        return cmd_semantic_ir_render_module_u44(argc, argv);
+    if (mode == "ir-u44" && argc >= 3) { g_input_profile_u44 = true; return cmd_ir(argc, argv); }
+    if (mode == "const-identity" && argc >= 4) return cmd_const_identity(argc, argv);
+    if (mode == "u44-rawhash-selftest") return cmd_u44_rawhash_selftest();
     if ((mode == "profile-to-u44" || mode == "profile-from-u44") && argc == 5) {
         try {
             std::ifstream stream(long_path(argv[4]));
@@ -2908,6 +3011,11 @@ int main(int argc, char** argv) {
                 "  closure-map <lua_B> <out.tsv>          closure edges plus exact upvalue capture contracts\n"
                 "  namehash     <name>                   DE FNV name hash (self-test: GetConfigBool=0x4aec2dac)\n"
                 "  transcode    <in.luaubc> <out.lua_B>  Luau bytecode -> DE 09 03 (M4 transcoder)\n"
-                "  recompile    <in.luau>  <out.lua_B>   full: Luau source -> DE 09 03 (M1+M4)\n");
+                "  recompile    <in.luau>  <out.lua_B>   full: Luau source -> DE 09 03 (M1+M4)\n"
+                "  decompile-mod-u44 <u44.lua_B> [output] U44 module source in the raw U44 name-hash namespace\n"
+                "  semantic-ir-render-module-u44 <u44.lua_B> <out> Semantic IR render of U44 input\n"
+                "  recompile-u44 <in.luau> <out.lua_B> [alias-map] U44 build; raw when the source declares the seed\n"
+                "  recompile-u44-raw <in.luau> <out.lua_B> U44 build; X__<hex> suffixes are raw U44 hashes\n"
+                "  const-identity <stock.lua_B> <candidate.lua_B> [--u44] per-prototype hash/string/key-use gate\n");
     return (mode.empty() ? 0 : 2);
 }

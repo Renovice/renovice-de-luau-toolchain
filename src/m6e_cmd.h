@@ -598,7 +598,7 @@ static int cmd_decompile(int argc, char** argv) {
 static bool decompile_module_source(const std::string& path, std::string& src, std::string& why,
                                     size_t* prototype_count = nullptr) {
     g_primary_ability_loop_scope = is_primary_ability_module_path(path);
-    std::string b = read_file(path);
+    std::string b = read_de_input(path);
     de::Module m;
     try { m = de::walk(b); }
     catch (const std::exception& e) { why = std::string("walk error: ") + e.what(); return false; }

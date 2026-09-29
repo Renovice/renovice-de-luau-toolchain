@@ -15,6 +15,8 @@ if errorlevel 1 ( echo GLOBAL LOWERING SELFTEST FAILED & exit /b 1 )
 if errorlevel 1 ( echo SHARED STRING VERIFIER BUILD FAILED & exit /b 1 )
 bin\verify-shared-string-values.exe
 if errorlevel 1 ( echo SHARED STRING VALUE SELFTEST FAILED & exit /b 1 )
+bin\derecomp.exe u44-rawhash-selftest
+if errorlevel 1 ( echo U44 RAW-HASH SELFTEST FAILED & exit /b 1 )
 bin\derecomp.exe closure-index-selftest
 if errorlevel 1 ( echo CLOSURE INDEX SELFTEST FAILED & exit /b 1 )
 bin\derecomp.exe semantic-ir-selftest

@@ -1,0 +1,2400 @@
+{
+ "summary": {
+  "no-candidate | u43=class-swap-only": 8,
+  "no-candidate | u43=decompile-fail": 1,
+  "no-candidate | u43=pass": 5,
+  "pass-after-regate | u43=structural": 24,
+  "proto-count | u43=absent": 2,
+  "proto-count | u43=proto-count": 69,
+  "structural | u43=class-swap-only": 18,
+  "structural | u43=structural": 40
+ },
+ "rows": [
+  {
+   "module": "EE_Scripts_CommandExample.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: decompile-mod-u44: emit problem: cfg build failed\n",
+   "u43": "pass"
+  },
+  {
+   "module": "EE_Scripts_ImGuiCameraSettings.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: decompile-mod-u44: emit problem: cfg build failed\n",
+   "u43": "pass"
+  },
+  {
+   "module": "EE_Scripts_ImGuiCinematics.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: decompile-mod-u44: emit problem: cfg build failed\n",
+   "u43": "pass"
+  },
+  {
+   "module": "EE_Scripts_ImGuiEntityViewer.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: u44 input profile: profile: unsupported opcode 86\ndecompile-mod-u44: walk error: not a 09 03 container\n",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "EE_Scripts_ImGuiScriptBlackboard.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: decompile-mod-u44: emit problem: cfg build failed\n",
+   "u43": "pass"
+  },
+  {
+   "module": "EE_Scripts_ImGuiSeasonOverride.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: decompile-mod-u44: emit problem: cfg build failed\n",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "EE_Types_ScriptCommands_SetVortexWindPerZone.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: decompile-mod-u44: emit problem: cfg build failed\n",
+   "u43": "pass"
+  },
+  {
+   "module": "Lotus_Interface_1999_RetroMessenger.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "374",
+    "373"
+   ],
+   "diffs": [
+    "proto 30 HASH only-stock=[2ac10a63, 62a2a4d9, 6514b208, 7b78bbf9, c48cfabb] only-candidate=[]",
+    "proto 30 STRING only-stock=[\"GetSettings\", \"Reset\", \"SettingsChangesDone\", \"UISound_DialogOpen\", \"UISound_GridOpen\", \"mResetGroups\", \"mSetting\", \"mShowResetDialog\", \"mValue\"] only-candidate=[\"SeasonData\", \"yearIteration\"]",
+    "proto 30 KEYUSE only-stock=[FIELD H:c48cfabb, FIELD S:Reset, FIELD S:UISound_DialogOpen, FIELD S:UISound_GridOpen, FIELD S:mSetting, FIELD S:mValue, GLOBAL H:2ac10a63, GLOBAL H:62a2a4d9, GLOBAL H:6514b208, GLOBAL S:mResetGroups, GLOBAL S:mShowResetDialog, NAMECALL H:7b78bbf9 ...] only-candidate=[FIELD S:DontShowResetPopup, FIELD S:SeasonData, FIELD S:yearIteration]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Background.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "282",
+    "282"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_BoonSelection.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "71",
+    "64"
+   ],
+   "diffs": [
+    "proto 6 HASH only-stock=[4795b21c, b28160ad] only-candidate=[6514b208, 9828c6d9]",
+    "proto 6 STRING only-stock=[\"\", \"DynamicDescriptions\"] only-candidate=[\"SetButtons\"]",
+    "proto 6 KEYUSE only-stock=[GLOBAL H:4795b21c, NAMECALL H:b28160ad] only-candidate=[FIELD S:SetButtons, GLOBAL H:6514b208, GLOBAL H:9828c6d9]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_ChatRedux.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "594",
+    "594"
+   ],
+   "diffs": [
+    "proto 181 STRING only-stock=[\"\"] only-candidate=[]",
+    "proto 194 STRING only-stock=[\"omg-\", \"song-\", \"zaw-\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Interface_Codex.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "274",
+    "273"
+   ],
+   "diffs": [
+    "proto 24 STRING only-stock=[\"ToggleTransmuteMods\"] only-candidate=[\"ToggleVaultedRelics\"]",
+    "proto 25 HASH only-stock=[4795b21c, b28160ad] only-candidate=[]",
+    "proto 25 STRING only-stock=[\"\", \"ToggleVaultedRelics\"] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_CoHBuffSelection.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "41",
+    "38"
+   ],
+   "diffs": [
+    "proto 4 HASH only-stock=[] only-candidate=[4795b21c, b28160ad]",
+    "proto 4 STRING only-stock=[] only-candidate=[\"\", \"onKeyDown_MENU_CANCEL\"]",
+    "proto 4 KEYUSE only-stock=[] only-candidate=[GLOBAL H:4795b21c, NAMECALL H:b28160ad]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Components_AvatarDiorama.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "93",
+    "93"
+   ],
+   "diffs": [
+    "proto 55 STRING only-stock=[\"/Lotus/Powersuits/Operator/AdultOperatorSuit\", \"/Lotus/Powersuits/Operator/ChildOperatorSuit\", \"/Lotus/Powersuits/Operator/OperatorSuit\", \"/Lotus/Types/Game/PowerSuit\", \"/Lotus/Types/Game/PowerSuits/PlayerPowerSuit\", \"table\"] only-candidate=[]",
+    "proto 76 HASH only-stock=[327588f0] only-candidate=[142a66df, 20f6d1c9, 223bc2e2, 26672f7e, 2ac10a63, 2d1257ba, 323c0e92, 3ca198c7, 3f3779af, 48f2f3d9, 52435c51, 62b2b375 ...]",
+    "proto 76 STRING only-stock=[] only-candidate=[\"ADULT\", \"AdultOperator\", \"Horse\", \"LOADOUT\", \"Operator\", \"Sentinel\", \"TennoShip\", \"mOperatorType\", \"y\"]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_Components_CustomizationList.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "134",
+    "134"
+   ],
+   "diffs": [
+    "proto 101 HASH only-stock=[78e95254] only-candidate=[f16988b5]",
+    "proto 101 KEYUSE only-stock=[NAMECALL H:78e95254] only-candidate=[NAMECALL H:f16988b5]",
+    "proto 102 HASH only-stock=[f16988b5] only-candidate=[78e95254]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_Components_StatCompare.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "56",
+    "56"
+   ],
+   "diffs": [
+    "proto 48 STRING only-stock=[\"CONCLAVE\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_Components_ThemedSquadPanel.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "70",
+    "70"
+   ],
+   "diffs": [
+    "proto 37 STRING only-stock=[\"/Lotus/Language/Menu/GameInvitesDisabled\", \"MATCHMAKING_OFFLINE_GAMEMODE\", \"gActiveMatchMakingMode\"] only-candidate=[]",
+    "proto 37 KEYUSE only-stock=[FIELD S:MATCHMAKING_OFFLINE_GAMEMODE, FIELD S:gActiveMatchMakingMode] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_ConquestSetup.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "86",
+    "85"
+   ],
+   "diffs": [
+    "proto 8 HASH only-stock=[2ac10a63, 8069c735] only-candidate=[]",
+    "proto 8 STRING only-stock=[\"StickersChanged\"] only-candidate=[\"onKeyDown_MENU_CANCEL\"]",
+    "proto 8 KEYUSE only-stock=[GLOBAL H:2ac10a63, NAMECALL H:8069c735] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_ControllerLayout.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "62",
+    "62"
+   ],
+   "diffs": [
+    "proto 10 HASH only-stock=[327588f0, 6e962203, c614a8c6] only-candidate=[]",
+    "proto 10 STRING only-stock=[\"Action\", \"MISC\"] only-candidate=[\"Label\"]",
+    "proto 10 KEYUSE only-stock=[FIELD H:c614a8c6, FIELD S:Action, FIELD S:MISC, GLOBAL H:327588f0, GLOBAL H:6e962203, SETFIELD S:SortIndex] only-candidate=[FIELD S:Label, FIELD S:SortIndex]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_Credits.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "10",
+    "10"
+   ],
+   "diffs": [
+    "proto 1 STRING only-stock=[\"\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Interface_DiegeticArtifactCards.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "294",
+    "293"
+   ],
+   "diffs": [
+    "proto 238 HASH only-stock=[] only-candidate=[2f662e05, 4795b21c, 5aecb4eb, 6514b208, 864d3063, a005a6d0, b9fc2ae3, e1051f43, fb3b51ad]",
+    "proto 238 STRING only-stock=[] only-candidate=[\"_root\"]",
+    "proto 238 KEYUSE only-stock=[] only-candidate=[GLOBAL H:2f662e05, GLOBAL H:4795b21c, GLOBAL H:5aecb4eb, GLOBAL H:6514b208, NAMECALL H:864d3063, NAMECALL H:a005a6d0, NAMECALL H:b9fc2ae3, NAMECALL H:e1051f43, NAMECALL H:fb3b51ad]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_DiegeticUpgradeCards.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "411",
+    "411"
+   ],
+   "diffs": [
+    "proto 172 STRING only-stock=[\"AURA\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Interface_Dojo_VaultContribution.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "27",
+    "31"
+   ],
+   "diffs": [
+    "proto 17 HASH only-stock=[5aecb4eb, 6514b208, beec65c7] only-candidate=[]",
+    "proto 17 STRING only-stock=[\"GetGuilds\", \"GetScreenRes\", \"GuildSelectionDone\", \"Id\", \"InvDecoDonateMode\", \"InvResDonateMode\", \"Inventory\", \"Name\", \"mGuildId\", \"mName\"] only-candidate=[]",
+    "proto 17 KEYUSE only-stock=[FIELD S:GetScreenRes, FIELD S:mGuildId, FIELD S:mName, GLOBAL H:5aecb4eb, GLOBAL H:6514b208, NAMECALL H:beec65c7, SETFIELD S:GetGuilds, SETFIELD S:GuildSelectionDone, SETFIELD S:Id, SETFIELD S:InvDecoDonateMode, SETFIELD S:InvResDonateMode, SETFIELD S:Name] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_DuviriEndlessSetup.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "113",
+    "112"
+   ],
+   "diffs": [
+    "proto 23 STRING only-stock=[\"ForceReroll\"] only-candidate=[\"onKeyDown_MENU_CANCEL\"]",
+    "proto 24 HASH only-stock=[b28160ad] only-candidate=[013df4e5, 60024801, 6514b208, 6e962203, 9828c6d9, a2dded89, c614a8c6]",
+    "proto 24 STRING only-stock=[\"\", \"onKeyDown_MENU_CANCEL\"] only-candidate=[\"/Lotus/Language/Hints/DuviriEndless_\", \"/Lotus/Language/Menu/Exit\", \"<WARNING>\", \"CallBack\", \"CallOut\", \"Label\", \"MENU_CANCEL\", \"Padding\", \"SetButtons\", \"Tips\"]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_DuviriMissionComplete.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "21",
+    "23"
+   ],
+   "diffs": [
+    "proto 9 HASH only-stock=[4795b21c, 81da3fcd, b0ec80c8] only-candidate=[]",
+    "proto 9 STRING only-stock=[\"Popup\"] only-candidate=[\"Fx\"]",
+    "proto 9 KEYUSE only-stock=[GLOBAL H:4795b21c, GLOBAL H:b0ec80c8, NAMECALL H:81da3fcd] only-candidate=[FIELD S:Fx, SETFIELD S:Fx]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_DuviriTitleCard.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "15",
+    "16"
+   ],
+   "diffs": [
+    "proto 10 HASH only-stock=[013df4e5, 067525df, 0811edde, 0a2998ae, 0b091762, 0f2a39c9, 0f44709c, 1e78aea4, 26b0d95d, 39dcbabb, 3df6d685, 48ecbbab ...] only-candidate=[79895d5e, 8455583f]",
+    "proto 10 STRING only-stock=[\"/Lotus/Language/Duviri/\", \"Bottom\", \"CALM\", \"DBG: Title Hide 1\", \"HAPPY\", \"HatchFade\", \"HudInitialized\", \"IsleweaverTitle\", \"Lotus.Interface.Libs.TimerMgr\", \"MOOD_TYPE\", \"NV_CURRENT_MOOD\", \"OrokinTextFill\" ...] only-candidate=[\".CirclesLines\", \".InnerOverlappingU\", \".InterlockignUShapes\", \".LongCenterU.EdgeLeft\", \".LongCenterU.EdgeRight\", \".LongCenterU.LineLeft\", \".LongCenterU.LineRight\", \".LongCenterU.Top\", \".OuterCurve\"]",
+    "proto 10 KEYUSE only-stock=[FIELD H:0f2a39c9, FIELD H:66dc93fb, FIELD H:76cdd1f5, FIELD H:c48cfabb, FIELD H:c6e8ba1f, FIELD H:dae72508, FIELD H:db24fd35, FIELD S:CALM, FIELD S:HAPPY, FIELD S:HudInitialized, FIELD S:MOOD_TYPE, FIELD S:NV_CURRENT_MOOD ...] only-candidate=[GLOBAL H:8455583f, NAMECALL H:79895d5e]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_EidolonJobBoard.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "94",
+    "94"
+   ],
+   "diffs": [
+    "proto 32 STRING only-stock=[] only-candidate=[\"UpdateBtn\"]",
+    "proto 32 KEYUSE only-stock=[] only-candidate=[FIELD S:UpdateBtn]",
+    "proto 33 HASH only-stock=[] only-candidate=[4795b21c, 81da3fcd, 864d3063]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_EidolonMissionComplete.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "31",
+    "32"
+   ],
+   "diffs": [
+    "proto 20 HASH only-stock=[327588f0, 6dc737ff, 719d977f, 863e56e7, 864d3063, 9828c6d9, 9ff10ded, a005a6d0, b7686da5, d84ddeef, db24fd35, e1051f43 ...] only-candidate=[2372954a, 62a2a4d9, 6514b208, 7348ec60, 79895d5e, 82f6549c, c026db4c, c9a3fb2d, f85fb93a]",
+    "proto 20 STRING only-stock=[\"ANCHOR_H_CENTRE\", \"ANCHOR_V_TOP\", \"AllCheckpointRewardsShown\", \"EE.Interface.Components.List\", \"Lotus.Interface.Libs.TimerMgr\", \"Panel\", \"Panel.BannerSides\", \"Panel.Completed\", \"Panel.Contd\", \"Panel.FirstReward\", \"Panel.Glow\", \"Panel.Image\" ...] only-candidate=[\".Off\", \".On\", \"Bonus\", \"Off\", \"On\", \"SOUND_SET_OROKIN_TOWER\", \"Stage\", \"UIColor_White\", \"UIColor_Yellow\", \"mClipName\"]",
+    "proto 20 KEYUSE only-stock=[FIELD H:6dc737ff, FIELD H:b7686da5, FIELD H:db24fd35, FIELD H:e256561c, FIELD S:ANCHOR_H_CENTRE, FIELD S:ANCHOR_V_TOP, FIELD S:SOUND_SET_ENTRATILAB, FIELD S:SOUND_SET_ZARIMAN, GLOBAL H:327588f0, GLOBAL H:9828c6d9, GLOBAL H:9ff10ded, GLOBAL H:f51794d1 ...] only-candidate=[FIELD S:Bonus, FIELD S:SOUND_SET_OROKIN_TOWER, FIELD S:Stage, FIELD S:UIColor_White, FIELD S:UIColor_Yellow, FIELD S:mClipName, GLOBAL H:2372954a, GLOBAL H:62a2a4d9, GLOBAL H:6514b208, GLOBAL H:7348ec60, GLOBAL H:c026db4c, GLOBAL H:c9a3fb2d ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_EndOfMatch.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "286",
+    "285"
+   ],
+   "diffs": [
+    "proto 144 HASH only-stock=[19379d0c, 19517a64, 24e80424, 9d193000, f3135b0b] only-candidate=[34a7a1c9, 4af83f33, 53b00121, 5510d0c5, 57562817, 5e0c8de0, 76f6844a, 82f6549c, 8699b1ad, 9b0b43b1, a166a1ea, a8d7a860 ...]",
+    "proto 144 STRING only-stock=[] only-candidate=[\"+%.1f\", \"...\", \".Name\", \"/Lotus/Language/Intrinsics/Intrinsics\", \"/Lotus/Language/Menu/Profile_Points\", \"/Lotus/Language/Menu/Store_Owned\", \"BonusXP\", \"Icon\", \"Name\", \"ProgressInfo\", \"Rank\", \"Themed\" ...]",
+    "proto 144 KEYUSE only-stock=[FIELD H:19379d0c, FIELD H:19517a64, FIELD H:24e80424, FIELD H:f3135b0b, GLOBAL H:9d193000] only-candidate=[FIELD H:5510d0c5, FIELD H:8699b1ad, FIELD H:dae72508, FIELD H:e256561c, FIELD H:f7edbcd5, FIELD S:mClipName, FIELD S:mPlayerSkills, FIELD S:playerMissionInfo, FIELD S:playerName, GLOBAL H:4af83f33, GLOBAL H:5e0c8de0, GLOBAL H:b364fd20 ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_EndOfQuest.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "48",
+    "47"
+   ],
+   "diffs": [
+    "proto 19 HASH only-stock=[b28160ad] only-candidate=[01448d9f, 0811edde, 48889bec, 6514b208, 6e962203, 9828c6d9, a2dded89, c614a8c6]",
+    "proto 19 STRING only-stock=[\"\", \"ClearProgress\"] only-candidate=[\"/Lotus/Language/Menu/Exit\", \"/Lotus/Language/Menu/Quest_Replay\", \"/Lotus/Language/Menu/Quest_ViewStartCinematic\", \"ACQUIRING\", \"Adding exit button to end screen\", \"CallBack\", \"CallOut\", \"Failed to find SetButtons\", \"Label\", \"MENU_CANCEL\", \"MENU_GENERIC1\", \"MENU_GENERIC2\" ...]",
+    "proto 19 KEYUSE only-stock=[NAMECALL H:b28160ad] only-candidate=[FIELD H:c614a8c6, FIELD S:ACQUIRING, FIELD S:SetButtons, GLOBAL H:0811edde, GLOBAL H:6514b208, GLOBAL H:6e962203, GLOBAL H:9828c6d9, GLOBAL H:a2dded89, NAMECALL H:01448d9f, NAMECALL H:48889bec, SETFIELD S:CallBack]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Friends.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "172",
+    "171"
+   ],
+   "diffs": [
+    "proto 59 HASH only-stock=[b28160ad] only-candidate=[863e56e7]",
+    "proto 59 STRING only-stock=[\"\", \"FriendAdded\"] only-candidate=[\"ListSpinner\"]",
+    "proto 59 KEYUSE only-stock=[NAMECALL H:b28160ad] only-candidate=[NAMECALL H:863e56e7]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_GenericMenu.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "102",
+    "101"
+   ],
+   "diffs": [
+    "proto 35 HASH only-stock=[] only-candidate=[cfefce7d]",
+    "proto 35 KEYUSE only-stock=[] only-candidate=[NAMECALL H:cfefce7d]",
+    "proto 36 HASH only-stock=[cfefce7d] only-candidate=[327588f0, 4af83f33, 5e0c8de0, 6514b208, 6fb15bfc, 9828c6d9, bf97a1a6, dae72508, f47559e6]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Hub.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "131",
+    "129"
+   ],
+   "diffs": [
+    "proto 61 HASH only-stock=[20f6d1c9, 9828c6d9, c48cfabb] only-candidate=[5ebaa8da, 77aad02e]",
+    "proto 61 STRING only-stock=[\"/Lotus/Music/Events/DogDays/DogDaysBeachMusic\", \"waterFightMusicInst\"] only-candidate=[]",
+    "proto 61 KEYUSE only-stock=[FIELD H:c48cfabb, GLOBAL H:20f6d1c9, GLOBAL H:9828c6d9, SETFIELD S:waterFightMusicInst] only-candidate=[FIELD H:77aad02e, GLOBAL H:5ebaa8da]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_HudFighter.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "49",
+    "51"
+   ],
+   "diffs": [
+    "proto 18 HASH only-stock=[4795b21c, 6514b208, 79895d5e, 81da3fcd, 863e56e7, 864d3063, 9828c6d9, c0e711d5] only-candidate=[0175df34]",
+    "proto 18 STRING only-stock=[\"FighterCust.Configs\", \"FighterCust.Normal\", \"FighterCust.Normal.CornerPiece\", \"FighterCust.Normal.Image\", \"FighterCust.Prime\", \"FighterCust.Prime.CornerPiece\", \"FighterCust.Prime.Image\", \"LastChosenEntry\", \"NormalStoreItem\", \"PrimeStoreItem\", \"entry\", \"mInitListY\"] only-candidate=[\"Button\", \"Slot\", \"mEdgeAlpha\", \"mUnfocusedEdgeColor\"]",
+    "proto 18 KEYUSE only-stock=[FIELD H:c0e711d5, FIELD S:LastChosenEntry, FIELD S:NormalStoreItem, FIELD S:PrimeStoreItem, FIELD S:entry, FIELD S:mInitListY, GLOBAL H:4795b21c, GLOBAL H:6514b208, GLOBAL H:9828c6d9, NAMECALL H:79895d5e, NAMECALL H:81da3fcd, NAMECALL H:863e56e7 ...] only-candidate=[FIELD S:Button, FIELD S:Slot, FIELD S:mCurrSlot, NAMECALL H:0175df34, SETFIELD S:mEdgeAlpha, SETFIELD S:mUnfocusedEdgeColor]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_HudRedux.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "318",
+    "319"
+   ],
+   "diffs": [
+    "proto 36 HASH only-stock=[] only-candidate=[11985d72]",
+    "proto 152 STRING only-stock=[\"AbilityPanel\", \"BorderBoxOuter\", \"Card\", \"HealthAndShield\", \"HudTracker\", \"ImpactMessage\", \"LogMessageContainer\", \"MiniMapContainer\", \"MiniMapOverlayMsg\", \"RecoilReticle\", \"Reticle\", \"Reticle.Arm1\" ...] only-candidate=[]",
+    "proto 258 HASH only-stock=[6514b208, d780833c] only-candidate=[4795b21c, a005a6d0]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_InkPaint.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "143",
+    "141"
+   ],
+   "diffs": [
+    "proto 19 STRING only-stock=[\"ImportCanvas\"] only-candidate=[\"ToggleCaptura\"]",
+    "proto 20 STRING only-stock=[\"ExportCanvas\"] only-candidate=[\"ClearCanvas\"]",
+    "proto 21 STRING only-stock=[\"ToggleCaptura\"] only-candidate=[\"ResetCanvas\"]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_InlineLoadout.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "93",
+    "93"
+   ],
+   "diffs": [
+    "proto 62 STRING only-stock=[\"Los\", \"Lot\"] only-candidate=[\"QueueLoadoutChange\"]",
+    "proto 62 KEYUSE only-stock=[FIELD S:Los, FIELD S:Lot] only-candidate=[SETFIELD S:QueueLoadoutChange]",
+    "proto 63 STRING only-stock=[\"QueueLoadoutChange\"] only-candidate=[\"Los\", \"Lot\"]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_InputDialog.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "64",
+    "65"
+   ],
+   "diffs": [
+    "proto 53 HASH only-stock=[2494e1b2, 3e8ea7a1, 4795b21c, 4dc8bed2, 5e0c8de0, 6514b208, 719d977f, 7817f288, 79a5098c, 81da3fcd] only-candidate=[496b82f9]",
+    "proto 53 STRING only-stock=[\".Label\", \"mClipName\"] only-candidate=[\"Result\", \"mButton\"]",
+    "proto 53 KEYUSE only-stock=[FIELD H:2494e1b2, FIELD S:mClipName, GLOBAL H:4795b21c, GLOBAL H:4dc8bed2, GLOBAL H:5e0c8de0, GLOBAL H:6514b208, NAMECALL H:3e8ea7a1, NAMECALL H:719d977f, NAMECALL H:7817f288, NAMECALL H:79a5098c, NAMECALL H:81da3fcd] only-candidate=[FIELD S:Result, FIELD S:mButton, NAMECALL H:496b82f9]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_IntroText.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "10",
+    "10"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_InventoryTest.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "225",
+    "225"
+   ],
+   "diffs": [
+    "proto 66 STRING only-stock=[] only-candidate=[\"SearchCache\"]",
+    "proto 66 KEYUSE only-stock=[] only-candidate=[FIELD S:SearchCache]",
+    "proto 67 STRING only-stock=[\"SearchCache\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_ItemInfoPopup.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "85",
+    "85"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_LoadOutRedux.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "587",
+    "585"
+   ],
+   "diffs": [
+    "proto 366 HASH only-stock=[] only-candidate=[20d94711, 2ac10a63, 6514b208, e81d78dc, e8f47e06]",
+    "proto 366 STRING only-stock=[\"\", \"Attribute\", \"Default\", \"Items\", \"Level\", \"Overrides\", \"PetTrait\", \"Slot\", \"Title\", \"TopTitle\", \"mCosmeticsLabels\"] only-candidate=[\"Current\", \"Customization\", \"Element\", \"EquippedItem\", \"LoadOutType\", \"UID\", \"mAllowUglyMode\", \"mCurrentLoadout\", \"mCustSlot\", \"mInventory\", \"mSelected\"]",
+    "proto 366 KEYUSE only-stock=[FIELD S:Attribute, FIELD S:Default, FIELD S:Level, FIELD S:Overrides, FIELD S:PetTrait, FIELD S:Title, FIELD S:TopTitle, GLOBAL S:mCosmeticsLabels, SETFIELD S:Attribute, SETFIELD S:Items, SETFIELD S:Level, SETFIELD S:PetTrait ...] only-candidate=[FIELD S:Current, FIELD S:Customization, FIELD S:Element, FIELD S:EquippedItem, FIELD S:LoadOutType, FIELD S:UID, FIELD S:mCustSlot, GLOBAL H:2ac10a63, GLOBAL H:6514b208, GLOBAL S:mCurrentLoadout, GLOBAL S:mInventory, GLOBAL S:mSelected ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_LotusUtilities.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "572",
+    "572"
+   ],
+   "diffs": [
+    "proto 7 STRING only-stock=[\"Compact\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Interface_Map_MapLegend.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "34",
+    "34"
+   ],
+   "diffs": [
+    "proto 19 STRING only-stock=[\"\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Interface_MapRedux.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "340",
+    "340"
+   ],
+   "diffs": [
+    "proto 38 HASH only-stock=[864d3063, a005a6d0] only-candidate=[09944d8e, 62a2a4d9, 79895d5e, 82f6549c, cb160055, e375fc94, e7806a2f]",
+    "proto 38 STRING only-stock=[] only-candidate=[\".PendingIcon\", \".Shards.Shard\", \"Desc.Backer\", \"PendingIcon\", \"UIColor_Black\"]",
+    "proto 38 KEYUSE only-stock=[NAMECALL H:864d3063, NAMECALL H:a005a6d0] only-candidate=[FIELD S:UIColor_Black, GLOBAL H:09944d8e, GLOBAL H:62a2a4d9, GLOBAL H:cb160055, GLOBAL H:e7806a2f, NAMECALL H:79895d5e, NAMECALL H:82f6549c, NAMECALL H:e375fc94]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_Minigames_OlliesCrashCourseTimer.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "29",
+    "30"
+   ],
+   "diffs": [
+    "proto 3 HASH only-stock=[11985d72, 535ce996, 6514b208, 6c312046, 6dc737ff, 719d977f, 79895d5e, 864d3063, 8c8b5ba1, 9828c6d9, 9ff10ded, b364fd20 ...] only-candidate=[55daaf26, cb160055]",
+    "proto 3 STRING only-stock=[\"/Lotus/Language/CaliberChicks/ScoreScreenTime\", \"ANCHOR_H_CENTRE\", \"ANCHOR_H_LEFT\", \"ANCHOR_V_CENTRE\", \"ANCHOR_V_TOP\", \"EE.Interface.Components.List\", \"GetHudScale\", \"HUD_AddMotionClip\", \"HUD_GetAnchorMgr\", \"Lotus.Interface.Libs.TimerMgr\", \"Notification\", \"Notification.Backer\" ...] only-candidate=[\".\", \".Label.text\", \"/Lotus/Language/OlliesCrashCourse/Timer_Lap\", \":\", \"NUM\", \"TIME\", \"Time\", \"mClipName\", \"mIndex\"]",
+    "proto 3 KEYUSE only-stock=[FIELD H:11985d72, FIELD H:6dc737ff, FIELD H:db24fd35, FIELD S:ANCHOR_H_CENTRE, FIELD S:ANCHOR_H_LEFT, FIELD S:ANCHOR_V_CENTRE, FIELD S:ANCHOR_V_TOP, FIELD S:GetHudScale, FIELD S:HUD_AddMotionClip, FIELD S:HUD_GetAnchorMgr, FIELD S:mHudScalePadding, GLOBAL H:6514b208 ...] only-candidate=[FIELD H:55daaf26, FIELD S:Time, FIELD S:mClipName, FIELD S:mIndex, GLOBAL H:cb160055, SETFIELD S:NUM, SETFIELD S:TIME]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Minigames_RetroMinigame.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "53",
+    "52"
+   ],
+   "diffs": [
+    "proto 13 HASH only-stock=[] only-candidate=[013df4e5, 4795b21c, 5ebaa8da, 6e962203, 9828c6d9, a2dded89, b45b56e2, c614a8c6, d20a0b29]",
+    "proto 13 STRING only-stock=[] only-candidate=[\"\", \"/Lotus/Language/Menu/Exit\", \"CALLOUT\", \"CallBack\", \"Label\", \"SetButtons\"]",
+    "proto 13 KEYUSE only-stock=[] only-candidate=[FIELD H:b45b56e2, FIELD H:c614a8c6, FIELD H:d20a0b29, FIELD S:SetButtons, GLOBAL H:4795b21c, GLOBAL H:5ebaa8da, GLOBAL H:6e962203, GLOBAL H:9828c6d9, GLOBAL H:a2dded89, NAMECALL H:013df4e5, SETFIELD S:CallBack, SETFIELD S:Label]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_MissionRequirementUtilities.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "28",
+    "28"
+   ],
+   "diffs": [
+    "proto 21 STRING only-stock=[\"Event\", \"HUB\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Interface_Notifications.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "118",
+    "118"
+   ],
+   "diffs": [
+    "proto 88 HASH only-stock=[cb160055] only-candidate=[]",
+    "proto 88 STRING only-stock=[\"DesiredGoToNode\", \"DesiredGoToRegion\", \"MapInitLockCursor\", \"SolarMapOrigin\", \"TargetNode\", \"TargetRegion\"] only-candidate=[\"Crafting\", \"Foundry_SearchTerm\", \"TargetFoundryLoc\"]",
+    "proto 88 KEYUSE only-stock=[FIELD S:TargetNode, FIELD S:TargetRegion, GLOBAL H:cb160055, SETFIELD S:DesiredGoToNode, SETFIELD S:DesiredGoToRegion, SETFIELD S:MapInitLockCursor] only-candidate=[FIELD S:TargetFoundryLoc, SETFIELD S:Foundry_SearchTerm]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_OnslaughtWaveSummary.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "10",
+    "11"
+   ],
+   "diffs": [
+    "proto 5 HASH only-stock=[11985d72, 62a2a4d9, 6514b208, 661c31fa, 6d4563f4, 6dc737ff, 719d977f, 79895d5e, 863e56e7, 864d3063, 8fe57542, 9828c6d9 ...] only-candidate=[34a7a1c9]",
+    "proto 5 STRING only-stock=[\"\", \"ANCHOR_H_RIGHT\", \"ANCHOR_V_CENTRE\", \"Card\", \"Card.Rank\", \"Card.Score1\", \"Card.SimarisShot\", \"Card.WaveTitle\", \"EE.Interface.Components.List\", \"HUD_GetAnchorMgr\", \"OWS_PopulateWaveSummaryLine\", \"OWS_SetText\" ...] only-candidate=[\"Calc\", \"Title\", \"Value\", \"mClipName\"]",
+    "proto 5 KEYUSE only-stock=[FIELD H:11985d72, FIELD H:6dc737ff, FIELD H:c48cfabb, FIELD S:ANCHOR_H_RIGHT, FIELD S:ANCHOR_V_CENTRE, FIELD S:HUD_GetAnchorMgr, FIELD S:UIColor_MediumGrey, FIELD S:mHudScalePadding, GLOBAL H:62a2a4d9, GLOBAL H:6514b208, GLOBAL H:9828c6d9, GLOBAL H:9ff10ded ...] only-candidate=[FIELD S:Calc, FIELD S:Title, FIELD S:Value, FIELD S:mClipName, NAMECALL H:34a7a1c9]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_PostCameraUpdateHud.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "69",
+    "69"
+   ],
+   "diffs": [
+    "proto 41 HASH only-stock=[4795b21c, 48ecbbab] only-candidate=[]",
+    "proto 41 STRING only-stock=[\"CircleSettings\"] only-candidate=[\"ShowingStatus\"]",
+    "proto 41 KEYUSE only-stock=[GLOBAL H:4795b21c, NAMECALL H:48ecbbab] only-candidate=[SETFIELD S:ShowingStatus]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_Profile.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "124",
+    "121"
+   ],
+   "diffs": [
+    "proto 38 STRING only-stock=[\"Collection\", \"LEADERBOARD_LIST\", \"weekly.accounts.PlatformerScore\"] only-candidate=[\"HOVERBOARD_RACE_ROOT\"]",
+    "proto 38 KEYUSE only-stock=[FIELD S:Collection, FIELD S:LEADERBOARD_LIST] only-candidate=[FIELD S:HOVERBOARD_RACE_ROOT]",
+    "proto 39 STRING only-stock=[\"Collection\", \"weekly.accounts.RadioSetsScore\"] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Progress.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "60",
+    "58"
+   ],
+   "diffs": [
+    "proto 32 HASH only-stock=[006ceedf, 0d47871a, 11a998bc, 8b734d2e, d1781bb8, e9927426] only-candidate=[02edf32b, 06ef3292, 0811edde, 14266409, 1554aafd, 1e158b8a, 20f6d1c9, 2888fc5c, 28a5c045, 2b9bfb93, 327588f0, 3438294e ...]",
+    "proto 32 STRING only-stock=[] only-candidate=[\"\", \" done loading\", \" not found!\", \", loading progress \", \".Progress.Fill\", \"AlphaTestThreshold\", \"ArtMovie\", \"BackgroundMovie\", \"Banner\", \"DisableLoadingDiorama\", \"DisableShipAmbientAnimation\", \"ForceLoadingScreen\" ...]",
+    "proto 32 KEYUSE only-stock=[GLOBAL H:006ceedf, GLOBAL H:11a998bc, GLOBAL H:e9927426, NAMECALL H:0d47871a, NAMECALL H:8b734d2e, NAMECALL H:d1781bb8] only-candidate=[FIELD H:4042c2a4, FIELD H:5ce6de7d, FIELD H:ac7bc246, FIELD H:ae6da005, FIELD H:c1cd12d6, FIELD H:c614a8c6, FIELD S:ArtMovie, FIELD S:BackgroundMovie, FIELD S:DisableLoadingDiorama, FIELD S:ForceLoadingScreen, FIELD S:HIDDEN_PLAYER_NAME, FIELD S:Loader ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_PurgatoryReward.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "11",
+    "12"
+   ],
+   "diffs": [
+    "proto 5 HASH only-stock=[cfefce7d] only-candidate=[0f18739f, 4795b21c, 79895d5e, 82f6549c, 87cec627, d339ce1f, e375fc94]",
+    "proto 5 STRING only-stock=[] only-candidate=[\".Image\", \"FloatingContent\", \"FloatingContentHighlight\", \"Glow\", \"Image\", \"mAcquired\", \"mClipName\"]",
+    "proto 5 KEYUSE only-stock=[NAMECALL H:cfefce7d] only-candidate=[FIELD H:d339ce1f, FIELD S:FloatingContent, FIELD S:FloatingContentHighlight, FIELD S:mAcquired, FIELD S:mClipName, GLOBAL H:0f18739f, GLOBAL H:4795b21c, GLOBAL H:87cec627, NAMECALL H:79895d5e, NAMECALL H:82f6549c, NAMECALL H:e375fc94]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_PvpTeamSelect.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "108",
+    "107"
+   ],
+   "diffs": [
+    "proto 17 STRING only-stock=[\"DebugSwapTeamMode\"] only-candidate=[\"TryRunPvPvEGame\"]",
+    "proto 18 STRING only-stock=[\"TryRunPvPvEGame\"] only-candidate=[\"onKeyDown_MENU_CANCEL\"]",
+    "proto 19 HASH only-stock=[b28160ad] only-candidate=[6514b208, 6e962203, 9828c6d9, a2dded89, c614a8c6, d339ce1f]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_QuestPicker.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "42",
+    "41"
+   ],
+   "diffs": [
+    "proto 5 HASH only-stock=[27ed9333] only-candidate=[4795b21c, b28160ad]",
+    "proto 5 STRING only-stock=[] only-candidate=[\"\", \"Close\"]",
+    "proto 5 KEYUSE only-stock=[NAMECALL H:27ed9333] only-candidate=[GLOBAL H:4795b21c, NAMECALL H:b28160ad]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Quests_OrokinLock.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "101",
+    "100"
+   ],
+   "diffs": [
+    "proto 69 HASH only-stock=[] only-candidate=[4795b21c, 5ebaa8da, 6e962203, 9828c6d9, a2dded89, b45b56e2, c614a8c6, d339ce1f]",
+    "proto 69 STRING only-stock=[] only-candidate=[\"/Lotus/Language/Menu/\", \"CallBack\", \"CallOut\", \"Close\", \"Exit\", \"Global_Back\", \"Label\", \"MENU_CANCEL\", \"MenuSelectedIndex\", \"SetButtons\"]",
+    "proto 69 KEYUSE only-stock=[] only-candidate=[FIELD H:b45b56e2, FIELD H:c614a8c6, FIELD H:d339ce1f, FIELD S:MenuSelectedIndex, FIELD S:SetButtons, GLOBAL H:4795b21c, GLOBAL H:5ebaa8da, GLOBAL H:6e962203, GLOBAL H:9828c6d9, GLOBAL H:a2dded89, GLOBAL S:Close, SETFIELD S:CallBack ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_RailjackCrewMgr.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "223",
+    "223"
+   ],
+   "diffs": [
+    "proto 111 HASH only-stock=[] only-candidate=[4795b21c, 82f6549c]",
+    "proto 111 STRING only-stock=[\"mSlot\"] only-candidate=[\"FloatingContent\", \"FloatingContentHighlight\", \"Icon\", \"Rank\"]",
+    "proto 111 KEYUSE only-stock=[FIELD S:mSlot] only-candidate=[FIELD S:FloatingContent, FIELD S:FloatingContentHighlight, GLOBAL H:4795b21c, NAMECALL H:82f6549c]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_RailJackHud.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "62",
+    "60"
+   ],
+   "diffs": [
+    "proto 15 HASH only-stock=[b0ec80c8] only-candidate=[43b71aae, 5e0c8de0, 6021d2ae, 864d3063, 8699b1ad, 9fcabda9, b6e30ca3]",
+    "proto 15 STRING only-stock=[\"EnergyBar\"] only-candidate=[\"%02X%02X%02X\", \"0x\", \"ShieldGauge.DelayBar.DelayFill\", \"b\", \"blue\", \"g\", \"green\", \"r\", \"red\"]",
+    "proto 15 KEYUSE only-stock=[GLOBAL H:b0ec80c8] only-candidate=[FIELD H:8699b1ad, FIELD H:9fcabda9, FIELD S:b, FIELD S:blue, FIELD S:g, FIELD S:green, FIELD S:r, FIELD S:red, GLOBAL H:43b71aae, GLOBAL H:5e0c8de0, GLOBAL H:6021d2ae, GLOBAL H:b6e30ca3 ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_ResourceConversion.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "407",
+    "406"
+   ],
+   "diffs": [
+    "proto 48 STRING only-stock=[\"OpenDevCommands\"] only-candidate=[\"OnOverrideBtnPressed\"]",
+    "proto 49 STRING only-stock=[\"OnOverrideBtnPressed\"] only-candidate=[\"Close\"]",
+    "proto 50 STRING only-stock=[\"Close\"] only-candidate=[\"ConfirmCancelBackout\"]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Settings.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "1501",
+    "1500"
+   ],
+   "diffs": [
+    "proto 423 STRING only-stock=[\"v2.20\"] only-candidate=[\"c424v2.20\"]",
+    "proto 1373 STRING only-stock=[\"PS5\", \"XBONE\"] only-candidate=[]",
+    "proto 1419 HASH only-stock=[179314d1, 9c2a898f, b364fd20] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_SixStackSetup.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "75",
+    "73"
+   ],
+   "diffs": [
+    "proto 1 STRING only-stock=[\"DEBUG_ClaimKeys\"] only-candidate=[\"Close\"]",
+    "proto 2 HASH only-stock=[b28160ad] only-candidate=[4e3d8cf1, 6514b208, 6e962203, 9828c6d9, a2dded89, c614a8c6, d339ce1f]",
+    "proto 2 STRING only-stock=[\"\", \"DEBUG_RefreshKeys\"] only-candidate=[\"/Lotus/Language/Menu/\", \"Back\", \"CallBack\", \"CallOut\", \"Exit\", \"KEY\", \"KuvaKeysVoteData\", \"Label\", \"MENU_CANCEL\", \"STATES\", \"SetButtons\", \"mCountdown\" ...]"
+   ],
+   "class": "proto-count",
+   "u43": "absent"
+  },
+  {
+   "module": "Lotus_Interface_StoreLandingPage.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "103",
+    "104"
+   ],
+   "diffs": [
+    "proto 10 HASH only-stock=[3e8ea7a1, 4dc8bed2, 5ebaa8da, 719d977f, 866293f5, a0674cc3, b45b56e2] only-candidate=[a005a6d0]",
+    "proto 10 STRING only-stock=[\"CategoryListContainer\"] only-candidate=[\"CategoryName\", \"mClipName\", \"mMouseInClip\"]",
+    "proto 10 KEYUSE only-stock=[FIELD H:b45b56e2, GLOBAL H:4dc8bed2, GLOBAL H:5ebaa8da, NAMECALL H:3e8ea7a1, NAMECALL H:719d977f, NAMECALL H:866293f5, NAMECALL H:a0674cc3] only-candidate=[FIELD S:CategoryName, FIELD S:mClipName, FIELD S:mMouseInClip, NAMECALL H:a005a6d0, SETFIELD S:mMouseInClip]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_StoreRedux.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "223",
+    "223"
+   ],
+   "diffs": [
+    "proto 147 STRING only-stock=[\"\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Interface_TennoHubScreenLauncher.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "224",
+    "253"
+   ],
+   "diffs": [
+    "proto 37 HASH only-stock=[9828c6d9, c1cd12d6, fa66993b] only-candidate=[]",
+    "proto 37 STRING only-stock=[\"\", \"CollectorStatus\", \"CurrentSimarisDialogID\", \"HuntCompleted\", \"Simaris\", \"SimarisAnchor\"] only-candidate=[]",
+    "proto 37 KEYUSE only-stock=[FIELD H:c1cd12d6, FIELD S:CollectorStatus, GLOBAL H:9828c6d9, GLOBAL H:fa66993b, SETFIELD S:CurrentSimarisDialogID] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_Test_NemesisTest.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "134",
+    "127"
+   ],
+   "diffs": [
+    "proto 90 HASH only-stock=[b28160ad] only-candidate=[6514b208, 6e962203, 9828c6d9, a2dded89, c614a8c6]",
+    "proto 90 STRING only-stock=[\"\", \"ClipTestingCommands\"] only-candidate=[\"/Lotus/Language/Menu/Exit\", \"/Lotus/Language/Menu/General_Tutorial\", \"CallBack\", \"CallOut\", \"Label\", \"MENU_CANCEL\", \"MENU_GENERIC1\", \"SetButtons\"]",
+    "proto 90 KEYUSE only-stock=[NAMECALL H:b28160ad] only-candidate=[FIELD H:c614a8c6, FIELD S:SetButtons, GLOBAL H:6514b208, GLOBAL H:6e962203, GLOBAL H:9828c6d9, GLOBAL H:a2dded89, SETFIELD S:CallBack]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_ThemedPhotoboothControls.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "343",
+    "341"
+   ],
+   "diffs": [
+    "proto 213 HASH only-stock=[4afa616d, d200b8cc, d7e3ec85] only-candidate=[]",
+    "proto 213 STRING only-stock=[\"mValue\"] only-candidate=[]",
+    "proto 213 KEYUSE only-stock=[FIELD S:mValue, GLOBAL H:d7e3ec85, NAMECALL H:4afa616d, NAMECALL H:d200b8cc] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_ThemedSquadOverlay.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "295",
+    "297"
+   ],
+   "diffs": [
+    "proto 180 HASH only-stock=[03a72a31, 06ef3292, 0811edde, 0bec4118, 0dd3fbb4, 10af5004, 16f50bf2, 1f384038, 223c6047, 269bc960, 26b0d95d, 2888fc5c ...] only-candidate=[]",
+    "proto 180 STRING only-stock=[\"\", \"&guildId=\", \"0\", \"1\", \"Attempting CDN retrieval from: \", \"BackgroundMovie\", \"CetusHub4_HUB\", \"ContentUrlResponse\", \"CrewShipGenericTunnel\", \"DailyTributeLoginTimerId\", \"Dojo\", \"FirstLayoutUpdateTimer\" ...] only-candidate=[]",
+    "proto 180 KEYUSE only-stock=[FIELD H:1f384038, FIELD H:223c6047, FIELD H:56057148, FIELD H:6e3cbf8c, FIELD H:719d977f, FIELD H:78c7deee, FIELD H:8bec55a5, FIELD H:a0e8e841, FIELD H:a6a5da19, FIELD H:b45b56e2, FIELD H:c93bae78, FIELD H:d339ce1f ...] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_ThemedSyndicates.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "204",
+    "202"
+   ],
+   "diffs": [
+    "proto 21 HASH only-stock=[] only-candidate=[4795b21c, b28160ad]",
+    "proto 21 STRING only-stock=[] only-candidate=[\"\", \"ToggleRepPanel\"]",
+    "proto 21 KEYUSE only-stock=[] only-candidate=[GLOBAL H:4795b21c, NAMECALL H:b28160ad]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_ThemedTennoCustomization.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "313",
+    "313"
+   ],
+   "diffs": [
+    "proto 265 HASH only-stock=[4795b21c, b28160ad, cb160055] only-candidate=[98dcb966]",
+    "proto 265 STRING only-stock=[\"OnConfirmUnlockSlot\"] only-candidate=[\"Id\", \"mButton\", \"mLockFocus\"]",
+    "proto 265 KEYUSE only-stock=[GLOBAL H:4795b21c, GLOBAL H:cb160055, NAMECALL H:b28160ad] only-candidate=[FIELD S:Id, FIELD S:mButton, NAMECALL H:98dcb966, SETFIELD S:mLockFocus]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_TopMenu.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "386",
+    "383"
+   ],
+   "diffs": [
+    "proto 116 HASH only-stock=[1748f3ec, 4795b21c, 5e0c8de0, 9828c6d9, a0e8e841, b28160ad] only-candidate=[]",
+    "proto 116 STRING only-stock=[\"\", \"CheatMenuParamCallback\", \"CheatMenuSelectedCommand\", \"Enter Parameters\", \"GetComponents\", \"Item\", \"LoadMission\", \"OSKCheatMenuParamCallback\", \"ResetSelectionDone\", \"Stage\", \"Syndicate\", \"Tag\" ...] only-candidate=[]",
+    "proto 116 KEYUSE only-stock=[FIELD H:1748f3ec, FIELD H:a0e8e841, FIELD S:CheatMenuSelectedCommand, FIELD S:mCommand, GLOBAL H:4795b21c, GLOBAL H:5e0c8de0, GLOBAL H:9828c6d9, NAMECALL H:b28160ad, SETFIELD S:CheatMenuSelectedCommand, SETFIELD S:GetComponents, SETFIELD S:ResetSelectionDone] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_TouchInterface_FunctionsMenu.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "15",
+    "15"
+   ],
+   "diffs": [
+    "proto 1 STRING only-stock=[\"Close\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Interface_VeilbreakerMissionBrief.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "42",
+    "39"
+   ],
+   "diffs": [
+    "proto 14 HASH only-stock=[20f6d1c9, 2bbf5049] only-candidate=[4795b21c, b28160ad]",
+    "proto 14 STRING only-stock=[] only-candidate=[\"\", \"onKeyUp_MENU_CANCEL\"]",
+    "proto 14 KEYUSE only-stock=[GLOBAL H:20f6d1c9, GLOBAL H:2bbf5049] only-candidate=[GLOBAL H:4795b21c, NAMECALL H:b28160ad]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_WarframeSelect.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "61",
+    "61"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Interface_WorldStateWindow.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "184",
+    "190"
+   ],
+   "diffs": [
+    "proto 35 HASH only-stock=[] only-candidate=[5ebaa8da, b26a1114, c3fd0cce, cb160055]",
+    "proto 35 STRING only-stock=[] only-candidate=[\"mActivation\", \"mAlertInfo\", \"mTag\"]",
+    "proto 35 KEYUSE only-stock=[] only-candidate=[FIELD H:c3fd0cce, FIELD S:mActivation, FIELD S:mAlertInfo, FIELD S:mTag, GLOBAL H:5ebaa8da, GLOBAL H:cb160055, NAMECALL H:b26a1114]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Interface_YareliComic_YareliComic.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "120",
+    "119"
+   ],
+   "diffs": [
+    "proto 115 HASH only-stock=[6514b208, 6fb15bfc] only-candidate=[4795b21c, 7817f288]",
+    "proto 115 KEYUSE only-stock=[GLOBAL H:6514b208, NAMECALL H:6fb15bfc] only-candidate=[GLOBAL H:4795b21c, NAMECALL H:7817f288]",
+    "proto 116 HASH only-stock=[7817f288] only-candidate=[b28160ad]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Levels_1999_AA1999CarGym_PatrolScript.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "12",
+    "12"
+   ],
+   "diffs": [
+    "proto 0 STRING only-stock=[\"exit\"] only-candidate=[]",
+    "proto 1 STRING only-stock=[\"exit\"] only-candidate=[]",
+    "proto 2 STRING only-stock=[\"exit\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Powersuits_Inkblot_Abilities_InkSketch.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "44",
+    "44"
+   ],
+   "diffs": [
+    "proto 35 STRING only-stock=[\"DeathOrb\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Powersuits_Jade_Abilities_Chaos.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: terminate called after throwing an instance of 'std::out_of_range'\n  what():  map::at\n",
+   "u43": "decompile-fail"
+  },
+  {
+   "module": "Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameTestV2.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "8",
+    "8"
+   ],
+   "diffs": [
+    "proto 3 HASH only-stock=[4c69ce13] only-candidate=[]",
+    "proto 3 KEYUSE only-stock=[NAMECALL H:4c69ce13] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Cmds_CmdAvatarTracker.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: decompile-mod-u44: emit problem: cfg build failed\n",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_Cmds_CmdDamageTracker.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: u44 input profile: profile: unsupported opcode 87\ndecompile-mod-u44: walk error: not a 09 03 container\n",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_Cmds_CmdGameModeDebug.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: u44 input profile: profile: unsupported opcode 87\ndecompile-mod-u44: walk error: not a 09 03 container\n",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_Cmds_CmdImGuiUpgradeTracker.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: decompile-mod-u44: emit problem: cfg build failed\n",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_Cmds_CmdQuestDebug.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: u44 input profile: profile: unsupported opcode 90\ndecompile-mod-u44: walk error: not a 09 03 container\n",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_CrewShip_Encounters_GrineerAsteroidHangarEncounter.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "15",
+    "13"
+   ],
+   "diffs": [
+    "proto 8 HASH only-stock=[e16639b5] only-candidate=[0811edde, 0e85ce2d, 19556379, 3bcd69f0, 3df6d685, 40a91e8c, 487e26ed, 4a01380c, 5109deec, 710edd70, 8009bce6, 9220e2a9 ...]",
+    "proto 8 STRING only-stock=[] only-candidate=[\"/Lotus/Language/RailjackMissions/HangarStealDestroyer\", \"/Lotus/Language/RailjackMissions/POIDestroyFirstRadiator\", \"/Lotus/Language/RailjackMissions/POIDestroySecondRadiator\", \"/Lotus/Language/RailjackMissions/POIExposeFirstRadiator\", \"/Lotus/Language/RailjackMissions/POIExposeSecondRadiator\", \"ATTACK_ICON\", \"DestroyerReady\", \"Execute\", \"FirstWeakpointDestroyed\", \"GENERIC_ICON\", \"HangarSubObj\", \"ObjectiveComplete\" ...]",
+    "proto 8 KEYUSE only-stock=[NAMECALL H:e16639b5] only-candidate=[FIELD H:0e85ce2d, FIELD H:19556379, FIELD H:3bcd69f0, FIELD H:40a91e8c, FIELD H:710edd70, FIELD H:eda51d60, FIELD S:ATTACK_ICON, FIELD S:GENERIC_ICON, GLOBAL H:0811edde, GLOBAL H:3df6d685, GLOBAL H:9487788b, GLOBAL H:c9941740 ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_CrewShip_Encounters_GrineerMissilePlatformEncounter.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "16",
+    "14"
+   ],
+   "diffs": [
+    "proto 2 HASH only-stock=[e16639b5] only-candidate=[1877414d, 487e26ed, 995cbc09]",
+    "proto 2 KEYUSE only-stock=[NAMECALL H:e16639b5] only-candidate=[NAMECALL H:1877414d, NAMECALL H:487e26ed, NAMECALL H:995cbc09]",
+    "proto 3 HASH only-stock=[e16639b5] only-candidate=[3ca198c7]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_CrewShip_Encounters_GrineerRadarTowerEncounter.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "14",
+    "12"
+   ],
+   "diffs": [
+    "proto 6 HASH only-stock=[e16639b5] only-candidate=[0811edde, 0e85ce2d, 1877414d, 19556379, 3bcd69f0, 3df6d685, 40a91e8c, 487e26ed, 4a01380c, 6514b208, 785ac438, 8009bce6 ...]",
+    "proto 6 STRING only-stock=[] only-candidate=[\"/Lotus/Language/RailjackMissions/POIDestroyFirstRadiator\", \"/Lotus/Language/RailjackMissions/POIDestroySecondRadiator\", \"/Lotus/Language/RailjackMissions/POIExposeFirstRadiator\", \"/Lotus/Language/RailjackMissions/POIExposeSecondRadiator\", \"/Lotus/Language/RailjackMissions/RadarTowerDestroyArray\", \"ATTACK_ICON\", \"Disable\", \"FirstWeakpointDestroyed\", \"GENERIC_ICON\", \"ObjectiveComplete\", \"RadarTower\", \"SecondWeakpointDestroyed\" ...]",
+    "proto 6 KEYUSE only-stock=[NAMECALL H:e16639b5] only-candidate=[FIELD H:0e85ce2d, FIELD H:19556379, FIELD H:3bcd69f0, FIELD H:40a91e8c, FIELD H:eda51d60, FIELD S:ATTACK_ICON, FIELD S:GENERIC_ICON, GLOBAL H:0811edde, GLOBAL H:3df6d685, GLOBAL H:6514b208, GLOBAL H:785ac438, NAMECALL H:1877414d ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_CrewShip_Encounters_GrineerSuperWeaponEncounter.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "22",
+    "20"
+   ],
+   "diffs": [
+    "proto 7 HASH only-stock=[] only-candidate=[0e85ce2d, 0f12b923, 19556379, 1bf05519, 2499b21d, 2ec86e7e, 3bcd69f0, 3ca198c7, 3df6d685, 40a91e8c, 487e26ed, 4a01380c ...]",
+    "proto 7 STRING only-stock=[] only-candidate=[\"/Lotus/Language/RailjackMissions/POIDestroyFirstRadiator\", \"/Lotus/Language/RailjackMissions/POIDestroySecondRadiator\", \"/Lotus/Language/RailjackMissions/POIExposeFirstRadiator\", \"/Lotus/Language/RailjackMissions/POIExposeSecondRadiator\", \"/Lotus/Language/RailjackMissions/SuperWeaponDestroyFirstCore\", \"/Lotus/Language/RailjackMissions/SuperWeaponDestroySecondCore\", \"ATTACK_ICON\", \"DestroyInteriorWeakpoint\", \"FirstCoreMarker\", \"FirstWeakpointDestroyed\", \"GENERIC_ICON\", \"Objective\" ...]",
+    "proto 7 KEYUSE only-stock=[] only-candidate=[FIELD H:0e85ce2d, FIELD H:19556379, FIELD H:3bcd69f0, FIELD H:40a91e8c, FIELD H:710edd70, FIELD H:eda51d60, FIELD S:ATTACK_ICON, FIELD S:GENERIC_ICON, GLOBAL H:3df6d685, GLOBAL H:6514b208, GLOBAL H:b364fd20, NAMECALL H:0f12b923 ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_CrewShip_Encounters_NemesisAssassinate.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "20",
+    "20"
+   ],
+   "diffs": [
+    "proto 18 STRING only-stock=[\"\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_CrewShip_Encounters_RJCorpusCapitalShipEncounter.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "42",
+    "43"
+   ],
+   "diffs": [
+    "proto 23 HASH only-stock=[] only-candidate=[3df6d685, 570ce20f, a8fa35e4]",
+    "proto 23 STRING only-stock=[] only-candidate=[\"TennoOnBoard\"]",
+    "proto 23 KEYUSE only-stock=[] only-candidate=[FIELD H:a8fa35e4, GLOBAL H:3df6d685, NAMECALL H:570ce20f]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_CrewShip_RailjackMissionManager.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "29",
+    "28"
+   ],
+   "diffs": [
+    "proto 24 HASH only-stock=[0811edde, 3c7dc48e] only-candidate=[]",
+    "proto 24 STRING only-stock=[\"ForceFailSkirmish: Return to Dojo'\"] only-candidate=[]",
+    "proto 24 KEYUSE only-stock=[FIELD H:3c7dc48e, GLOBAL H:0811edde] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_DayNightTests.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "8",
+    "8"
+   ],
+   "diffs": [
+    "proto 5 STRING only-stock=[\"DayNightTests.lua Complete!\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_DoubleFeatureBoss.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "9",
+    "9"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Duviri_ArchivistEmpathyChallenges.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "49",
+    "43"
+   ],
+   "diffs": [
+    "proto 4 HASH only-stock=[2005241d, 3b0d8a4c, 65be499d, 86603178, a961aae9, b364fd20, cef5d9d1, fe0eadc1] only-candidate=[0811edde]",
+    "proto 4 STRING only-stock=[\"data\", \"mockPos\", \"waypoint\"] only-candidate=[\"ANGRY\", \"CALM\", \"HAPPY\", \"JEALOUS\", \"MOOD_TYPE\", \"SAD\", \"SCARED\", \"WARNING: SetupChallengeHost wasn't initialized by a mood\"]",
+    "proto 4 KEYUSE only-stock=[FIELD S:data, GLOBAL H:3b0d8a4c, GLOBAL H:b364fd20, GLOBAL H:cef5d9d1, GLOBAL H:fe0eadc1, NAMECALL H:2005241d, NAMECALL H:65be499d, NAMECALL H:86603178, NAMECALL H:a961aae9, SETFIELD S:data, SETFIELD S:mockPos, SETFIELD S:waypoint] only-candidate=[FIELD S:ANGRY, FIELD S:CALM, FIELD S:HAPPY, FIELD S:JEALOUS, FIELD S:MOOD_TYPE, FIELD S:SAD, FIELD S:SCARED, GLOBAL H:0811edde]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Duviri_DuviriMissions.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "28",
+    "28"
+   ],
+   "diffs": [
+    "proto 25 STRING only-stock=[\"DuviriMissions.lua -- DynamicMissionHUD Complete!\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_Duviri_Encounters_DuviriKomiGame.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "21",
+    "21"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Effects_LavosDeluxeEphemeraSnakes.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "4",
+    "4"
+   ],
+   "diffs": [
+    "proto 2 HASH only-stock=[] only-candidate=[ca776063]",
+    "proto 2 KEYUSE only-stock=[] only-candidate=[GLOBAL H:ca776063]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Effects_NokkoEphemeraMushrooms.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "9",
+    "9"
+   ],
+   "diffs": [
+    "proto 4 HASH only-stock=[] only-candidate=[ca776063]",
+    "proto 4 KEYUSE only-stock=[] only-candidate=[GLOBAL H:ca776063]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Effects_RailJackEnemyEffects.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "25",
+    "25"
+   ],
+   "diffs": [
+    "proto 19 HASH only-stock=[96328dcf] only-candidate=[]",
+    "proto 19 KEYUSE only-stock=[GLOBAL H:96328dcf] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Effects_SabotageOrokinEffects.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "6",
+    "6"
+   ],
+   "diffs": [
+    "proto 3 HASH only-stock=[] only-candidate=[cef05a83]",
+    "proto 3 KEYUSE only-stock=[] only-candidate=[FIELD H:cef05a83]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Eidolon_EidolonMissions.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "39",
+    "39"
+   ],
+   "diffs": [
+    "proto 4 HASH only-stock=[] only-candidate=[a6719618]",
+    "proto 4 STRING only-stock=[\"score\"] only-candidate=[]",
+    "proto 4 KEYUSE only-stock=[FIELD S:score] only-candidate=[NAMECALL H:a6719618]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Eidolon_OstronDialog.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "187",
+    "186"
+   ],
+   "diffs": [
+    "proto 96 STRING only-stock=[\"SolarisUnitedKitGun\", \"ostronWeaponOfTheDayTag\"] only-candidate=[\"ostronActionsTag\"]",
+    "proto 96 KEYUSE only-stock=[FIELD S:ostronWeaponOfTheDayTag] only-candidate=[FIELD S:ostronActionsTag]",
+    "proto 97 HASH only-stock=[baa82092] only-candidate=[0c3bd213]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Events_NidusReleaseAlchemyChair.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "53",
+    "56"
+   ],
+   "diffs": [
+    "proto 19 HASH only-stock=[] only-candidate=[6b1a53a8, 8521e28d]",
+    "proto 19 STRING only-stock=[\"HelminthDialogA\", \"HelminthDialogB\", \"HelminthDialogC\"] only-candidate=[]",
+    "proto 19 KEYUSE only-stock=[FIELD S:HelminthDialogA, FIELD S:HelminthDialogB, FIELD S:HelminthDialogC, FIELD S:mDisabled] only-candidate=[NAMECALL H:6b1a53a8, NAMECALL H:8521e28d, SETFIELD S:mDisabled]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_FreeAbilities_FreeAbilitiesCleaner.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "3",
+    "3"
+   ],
+   "diffs": [
+    "proto 1 STRING only-stock=[\"boolean\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_Gameplay_HeroicMomentManager.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "12",
+    "12"
+   ],
+   "diffs": [
+    "proto 4 HASH only-stock=[f72bfa96] only-candidate=[]",
+    "proto 4 STRING only-stock=[\"OnDeath\"] only-candidate=[]",
+    "proto 4 KEYUSE only-stock=[GLOBAL S:OnDeath, NAMECALL H:f72bfa96] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Gameplay_HexConquestReviveMechanic.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "24",
+    "24"
+   ],
+   "diffs": [
+    "proto 16 HASH only-stock=[cc94b07e, f72bfa96] only-candidate=[]",
+    "proto 16 STRING only-stock=[\"OnDeath\", \"OnPlayerSpawned\"] only-candidate=[]",
+    "proto 16 KEYUSE only-stock=[GLOBAL S:OnDeath, GLOBAL S:OnPlayerSpawned, NAMECALL H:cc94b07e, NAMECALL H:f72bfa96] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_GrineerDeathSquad.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "5",
+    "5"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_GrineerDeathSquadRaid.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "4",
+    "4"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicPurify.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "58",
+    "57"
+   ],
+   "diffs": [
+    "proto 36 HASH only-stock=[] only-candidate=[02622fe0, 1bf15218, 1c34eaf6, 21d521f0, 22021047, 3df6d685, 42fd95a5, 4b02dd7e, 5aecb4eb, 65097226, 6887172b, 7651f074 ...]",
+    "proto 36 STRING only-stock=[\"totalDmg\"] only-candidate=[\"DEBUG_SkipPhase\", \"LeavingCB\", \"OnDeath\", \"OnPlayersChanged\", \"RemoveHudTracker\", \"ReturningCB\", \"SHOW_LEVEL_MAP\"]",
+    "proto 36 KEYUSE only-stock=[FIELD S:totalDmg] only-candidate=[FIELD H:21d521f0, FIELD H:22021047, FIELD H:4b02dd7e, FIELD H:7651f074, FIELD H:901c2fe1, FIELD H:cef0124b, FIELD H:f6ca0718, FIELD S:RemoveHudTracker, GLOBAL H:1bf15218, GLOBAL H:3df6d685, GLOBAL H:5aecb4eb, GLOBAL H:9828c6d9 ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Intel.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "61",
+    "61"
+   ],
+   "diffs": [
+    "proto 20 STRING only-stock=[\"Spy: Moon Markers: Marker script ended\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageCPOI.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "37",
+    "38"
+   ],
+   "diffs": [
+    "proto 6 HASH only-stock=[19878387, 1e26c335, 327588f0, 3b0d8a4c, 3df6d685, 42c1b0c2, 6050c685, 6e962203, 86603178, 86f1e67a, 89bf5bcf, 9487788b ...] only-candidate=[8f6983e5]",
+    "proto 6 STRING only-stock=[\"KEY_SPAWN\", \"LEVEL_KEY\", \"OnPickedUp\"] only-candidate=[]",
+    "proto 6 KEYUSE only-stock=[FIELD H:19878387, FIELD H:1e26c335, FIELD H:c614a8c6, FIELD S:KEY_SPAWN, FIELD S:LEVEL_KEY, GLOBAL H:327588f0, GLOBAL H:3b0d8a4c, GLOBAL H:3df6d685, GLOBAL H:6e962203, GLOBAL H:86f1e67a, GLOBAL H:9487788b, GLOBAL H:b364fd20 ...] only-candidate=[GLOBAL H:8f6983e5]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_KahlMissions_KahlChallenges.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "51",
+    "51"
+   ],
+   "diffs": [
+    "proto 22 STRING only-stock=[\"ChallengeSetup\"] only-candidate=[]",
+    "proto 22 KEYUSE only-stock=[FIELD S:ChallengeSetup] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_KelaInWorldTransmissions.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "15",
+    "15"
+   ],
+   "diffs": [
+    "proto 12 HASH only-stock=[0811edde] only-candidate=[]",
+    "proto 12 STRING only-stock=[\"     Closing world Transmissions\"] only-candidate=[]",
+    "proto 12 KEYUSE only-stock=[GLOBAL H:0811edde] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_KuvaPath_KuvaPath.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "74",
+    "73"
+   ],
+   "diffs": [
+    "proto 62 HASH only-stock=[] only-candidate=[0811edde, 1073524c, 1877414d, 2ac10a63, 2dda6b36, 3990010e, 3b0d8a4c, 3df6d685, 3f3779af, 4042c2a4, 45fbc2b8, 46e8b1ae ...]",
+    "proto 62 STRING only-stock=[\"v\"] only-candidate=[\"CREATE_EVENTS\", \"CalculatedSquadSize\", \"CompleteEvent\", \"EndMission\", \"Execute\", \"FailEvent\", \"Hard Cap: \", \"INTRO\", \"Key seed: \", \"Kuva Complications Mgr trigger created\", \"KuvaComplicationsMgr\", \"KuvaPathReviveTrackers\" ...]",
+    "proto 62 KEYUSE only-stock=[FIELD S:v] only-candidate=[FIELD H:4042c2a4, FIELD H:45fbc2b8, FIELD H:c614a8c6, FIELD H:eda51d60, FIELD S:CREATE_EVENTS, FIELD S:INTRO, FIELD S:KuvaPathReviveTrackers, FIELD S:STATE, FIELD S:mSeed, FIELD S:metadata, FIELD S:missionType, GLOBAL H:0811edde ...]"
+   ],
+   "class": "proto-count",
+   "u43": "absent"
+  },
+  {
+   "module": "Lotus_Scripts_Libs_EndlessSpawnLib.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "23",
+    "23"
+   ],
+   "diffs": [
+    "proto 3 HASH only-stock=[38f00bf5, 3ca198c7, 76c01753, 96f07103] only-candidate=[]",
+    "proto 3 KEYUSE only-stock=[GLOBAL H:38f00bf5, GLOBAL H:76c01753, NAMECALL H:3ca198c7, NAMECALL H:96f07103] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Libs_ReplayLib.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "17",
+    "16"
+   ],
+   "diffs": [
+    "proto 10 HASH only-stock=[5aecb4eb, 6514b208, 9466a60b, 94c9a347, 9828c6d9, b28160ad, b9fc2ae3] only-candidate=[]",
+    "proto 10 STRING only-stock=[\"\", \"/Lotus/Interface/ThemedPhotoboothControls.swf\", \"CapturaRecordingTimer\", \"EndReplay\", \"OnReplayPlaybackEnded\", \"OnReplayPlaybackPreStart\", \"OnReplayPlaybackStarted\", \"OnReplayRecordEnd\", \"OnReplayRecordStart\", \"PreStartReplay\", \"RecordEnd\", \"RecordStart\" ...] only-candidate=[]",
+    "proto 10 KEYUSE only-stock=[GLOBAL H:5aecb4eb, GLOBAL H:6514b208, GLOBAL H:9466a60b, GLOBAL H:94c9a347, GLOBAL H:9828c6d9, NAMECALL H:b28160ad, NAMECALL H:b9fc2ae3, SETFIELD S:CapturaRecordingTimer] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Libs_StatsLib.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "17",
+    "20"
+   ],
+   "diffs": [
+    "proto 6 HASH only-stock=[0d6a860e, 6514b208] only-candidate=[]",
+    "proto 6 STRING only-stock=[\"jobId\", \"key\", \"mAnyLogKey\"] only-candidate=[]",
+    "proto 6 KEYUSE only-stock=[FIELD S:jobId, FIELD S:key, GLOBAL H:6514b208, GLOBAL S:mAnyLogKey, NAMECALL H:0d6a860e] only-candidate=[]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_LoopDefend.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "63",
+    "63"
+   ],
+   "diffs": [
+    "proto 57 HASH only-stock=[0811edde, 0d6a860e] only-candidate=[]",
+    "proto 57 STRING only-stock=[\"Out of MonitorDefenseAvatarHealth for \"] only-candidate=[]",
+    "proto 57 KEYUSE only-stock=[GLOBAL H:0811edde, NAMECALL H:0d6a860e] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_LotusPveDMGameRules.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "40",
+    "40"
+   ],
+   "diffs": [
+    "proto 35 STRING only-stock=[\"LEVEL_UP\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_Modes_AssassinateMission.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "4",
+    "4"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Modes_EntratiSwarmMission.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "88",
+    "89"
+   ],
+   "diffs": [
+    "proto 56 HASH only-stock=[059a89d4, 0811edde, 185e111e, 1877414d, 1d1bbf9c, 236b5541, 2499b21d, 26813824, 38551b90, 3ca198c7, 4446d73c, 46976682 ...] only-candidate=[3df6d685, 841a7046, 9828c6d9, eda51d60]",
+    "proto 56 STRING only-stock=[\"/Lotus/Language/Entrati/SwarmAssassinationObjectiveCollect\", \"/Lotus/Language/Entrati/SwarmAssassinationTearsCount\", \"Entrati Swarm: Session locked\", \"MISSION_INTRO\", \"SCANNING\", \"SCANNING_PHASE\", \"SELECTED\", \"[WARNING] Player is trying to deploy a scanner into a spot that is \", \"entity\", \"hudTracker\", \"index\", \"innerVolume\" ...] only-candidate=[\"EntratiAssassinate_MultiScansPrompt\", \"MissionTransmissionSet\"]",
+    "proto 56 KEYUSE only-stock=[FIELD H:26813824, FIELD H:4446d73c, FIELD H:7139587c, FIELD H:9550d3c6, FIELD H:f3591a8b, FIELD H:ff39ae82, FIELD S:MISSION_INTRO, FIELD S:SCANNING, FIELD S:SCANNING_PHASE, FIELD S:SELECTED, FIELD S:entity, FIELD S:index ...] only-candidate=[FIELD H:841a7046, FIELD H:eda51d60, FIELD S:MissionTransmissionSet, GLOBAL H:3df6d685, GLOBAL H:9828c6d9]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Modes_MechSurvivalMission.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "37",
+    "35"
+   ],
+   "diffs": [
+    "proto 27 HASH only-stock=[a8af37f9, f21398a2] only-candidate=[063fb94a, 0811edde, 0f7b8304, 0fdfa4ad, 185e111e, 1877414d, 20444f07, 2736b298, 3ca198c7, 3df6d685, 4042c2a4, 404c0318 ...]",
+    "proto 27 STRING only-stock=[] only-candidate=[\"'GetCrewShipExitAction' resulted in a null exitAction! Falling back to level exit\", \"/Lotus/Language/CorpusRailjack/CapitalShipOrphix\", \"/Lotus/Language/Events/MechSurvivalName\", \"AllowWrinkles\", \"CondrixObject\", \"ELITE_ALERT_PERIODIC_MISSION_TAG\", \"ELITE_ALERT_PERIODIC_MISSION_TAG_ALT\", \"EMPTY\", \"EndlessModeEnemyLevel\", \"FONT_XS\", \"GasCityArrivingShips\", \"HealthDrainAuraDotIds\" ...]",
+    "proto 27 KEYUSE only-stock=[NAMECALL H:a8af37f9, NAMECALL H:f21398a2] only-candidate=[FIELD H:063fb94a, FIELD H:20444f07, FIELD H:4042c2a4, FIELD H:404c0318, FIELD H:5ce6de7d, FIELD H:6e3cbf8c, FIELD H:6fae5589, FIELD H:a0e8e841, FIELD H:aaaa58da, FIELD H:b837c957, FIELD H:bf562e2d, FIELD H:c614a8c6 ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Modes_SurvivalMission.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "80",
+    "82"
+   ],
+   "diffs": [
+    "proto 61 HASH only-stock=[063fb94a, 0809a26e, 0811edde, 0f7b8304, 0fdfa4ad, 185e111e, 186d7b40, 1877414d, 1d10962c, 1ebea26e, 20f6d1c9, 2499b21d ...] only-candidate=[38e95013, 533794cb, 5cd0578d, 6aa78c8f, 738a61b0, a1539d80, be2914f9, c46c3a73, ecf7b2a9]",
+    "proto 61 STRING only-stock=[\"\", \"/Lotus/Language/1999/Wf99SurvivalTitle\", \"/Lotus/Language/Missions/MissionName_Survival\", \"/Lotus/Objects/Gameplay/SurvivalObjects/SurvivalLifeSupportPillar\", \"/Lotus/Objects/Gameplay/SurvivalObjects/SurvivalLifeSupportPillarIncoming\", \"<WF1999_INFESTED_SURVIVAL_LVL0>\", \"<WF1999_INFESTED_SURVIVAL_LVL1>\", \"<WF1999_INFESTED_SURVIVAL_LVL2>\", \"<WF1999_INFESTED_SURVIVAL_LVL3>\", \"<WF1999_INFESTED_SURVIVAL_LVL4>\", \"<WF1999_INFESTED_SURVIVAL_LVL5>\", \"ActivateSpeedUp\" ...] only-candidate=[\"DaxAvatar\", \"hitLoc\", \"skipLookAtDaxCheck\"]",
+    "proto 61 KEYUSE only-stock=[FIELD H:063fb94a, FIELD H:5ce6de7d, FIELD H:6e3cbf8c, FIELD H:6fe55dd4, FIELD H:862dc865, FIELD H:a0e8e841, FIELD H:aaaa58da, FIELD H:b837c957, FIELD H:c614a8c6, FIELD H:c6a0ca22, FIELD H:d339ce1f, FIELD H:db24fd35 ...] only-candidate=[FIELD S:hitLoc, FIELD S:raycastProxy, FIELD S:skipLookAtDaxCheck, GLOBAL H:be2914f9, NAMECALL H:38e95013, NAMECALL H:533794cb, NAMECALL H:5cd0578d, NAMECALL H:6aa78c8f, NAMECALL H:738a61b0, NAMECALL H:a1539d80, NAMECALL H:c46c3a73, NAMECALL H:ecf7b2a9 ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Modes_WF99PvPvEMission.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "184",
+    "184"
+   ],
+   "diffs": [
+    "proto 171 HASH only-stock=[21d521f0, 570ce20f, e1fb016f] only-candidate=[]",
+    "proto 171 STRING only-stock=[\"GetDeltaBetweenTeams\", \"GetMatchOverallStep\", \"GetPlayersCurObjectiveProgress\", \"GetStoreItemPowerRange\", \"GetTransmissionOverrideColors\", \"HasSentSharedSessionId\", \"IsPvPvE\", \"LASRIAN\", \"NotifyOpponentOfSquadBoost\", \"OnAIUpdatedModifiers\", \"OnAiBoughtItem\", \"OnAiProgressedObjective\" ...] only-candidate=[]",
+    "proto 171 KEYUSE only-stock=[FIELD H:21d521f0, FIELD H:e1fb016f, FIELD S:LASRIAN, FIELD S:PvPvE_VsTarget, FIELD S:TENNO, FIELD S:VS, NAMECALL H:570ce20f, SETFIELD S:GetDeltaBetweenTeams, SETFIELD S:GetMatchOverallStep, SETFIELD S:GetPlayersCurObjectiveProgress, SETFIELD S:GetStoreItemPowerRange, SETFIELD S:GetTransmissionOverrideColors ...] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Modes_WF99PvPvESoloAI.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "45",
+    "45"
+   ],
+   "diffs": [
+    "proto 37 STRING only-stock=[\"TriggerHindranceAgainstAI\"] only-candidate=[]",
+    "proto 37 KEYUSE only-stock=[SETFIELD S:TriggerHindranceAgainstAI] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Modes_ZarimanSurvivalWraithSpawner.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "28",
+    "21"
+   ],
+   "diffs": [
+    "proto 13 HASH only-stock=[] only-candidate=[006ceedf, 0811edde, 2f15e3df, 3b0d8a4c, 3ca198c7, 3df6d685, 5ce6de7d, 6050c685, 6514b208, 6e2b3c5e, 86603178, 9828c6d9 ...]",
+    "proto 13 STRING only-stock=[] only-candidate=[\"Anti Warframe Field will not work, monitor trigger couldn't be created!\", \"AntiWarframeMonitor\", \"Execute\", \"SetWraithSpawnActive\", \"TrySpawnWraith\"]",
+    "proto 13 KEYUSE only-stock=[] only-candidate=[FIELD H:5ce6de7d, GLOBAL H:006ceedf, GLOBAL H:0811edde, GLOBAL H:2f15e3df, GLOBAL H:3b0d8a4c, GLOBAL H:3df6d685, GLOBAL H:6514b208, GLOBAL H:9828c6d9, GLOBAL H:b364fd20, GLOBAL H:b6e30ca3, GLOBAL H:d7e3ec85, NAMECALL H:3ca198c7 ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Nightwave_GlassMakerBoss.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "75",
+    "76"
+   ],
+   "diffs": [
+    "proto 37 HASH only-stock=[1718bfe6, 263f4d5f, 3df6d685, 402a3166, 52a7edc3, 570ce20f, 6050c685, 719d977f, 8057df75, 85001d2b, 9828c6d9, a10c08e1 ...] only-candidate=[0d4f9c32, 2364ecf0, 41bc84cf, 488ee7fe, 6e962203]",
+    "proto 37 STRING only-stock=[\"Execute\", \"GetCurrentBossState\", \"IDLE\", \"PHASE_TRANSITION\", \"ShardRotation\", \"SwitchBossState\"] only-candidate=[]",
+    "proto 37 KEYUSE only-stock=[FIELD S:GetCurrentBossState, FIELD S:IDLE, FIELD S:PHASE_TRANSITION, FIELD S:SwitchBossState, GLOBAL H:1718bfe6, GLOBAL H:3df6d685, GLOBAL H:9828c6d9, GLOBAL H:b364fd20, GLOBAL H:b420c85a, GLOBAL H:c73b60a2, GLOBAL H:daf81ef9, NAMECALL H:263f4d5f ...] only-candidate=[FIELD H:0d4f9c32, GLOBAL H:41bc84cf, GLOBAL H:488ee7fe, GLOBAL H:6e962203, NAMECALL H:2364ecf0]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_NPC_NokkoBaby.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "20",
+    "20"
+   ],
+   "diffs": [
+    "proto 0 HASH only-stock=[] only-candidate=[ca776063]",
+    "proto 0 KEYUSE only-stock=[] only-candidate=[GLOBAL H:ca776063]",
+    "proto 3 HASH only-stock=[] only-candidate=[ca776063]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_OrokinGlyphScript.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "15",
+    "15"
+   ],
+   "diffs": [
+    "proto 5 STRING only-stock=[\"Glyph Visibility Loop Ended\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_PlayerShip.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "69",
+    "73"
+   ],
+   "diffs": [
+    "proto 48 HASH only-stock=[0932cf47, 0acb32fa, 0be5280f, 0d4f9c32, 0f2113b8, 133d48fe, 13bcf4ad, 213ab0b4, 2184f4b2, 26b0d95d, 2774835e, 2888fc5c ...] only-candidate=[327588f0, c614a8c6]",
+    "proto 48 STRING only-stock=[\"ArsenalOpen\", \"Close\", \"Cycle\", \"Disable\", \"EGG_TYPE_CATBROW\", \"Enable\", \"GAME_C1_EGGATTACH\", \"GAME_C1_SPHERE\", \"HatchedEgg\", \"LieDown\", \"Lotus.Scripts.PostProcess.BasePostProcessFade\", \"Open\" ...] only-candidate=[]",
+    "proto 48 KEYUSE only-stock=[FIELD H:0932cf47, FIELD H:0d4f9c32, FIELD H:443f4cf1, FIELD H:c1cd12d6, FIELD H:d339ce1f, FIELD S:ArsenalOpen, FIELD S:Close, FIELD S:EGG_TYPE_CATBROW, FIELD S:Open, FIELD S:SF_GENETIC_FOUNDRY, FIELD S:SF_GENETIC_FOUNDRY_UPGRADE, FIELD S:UseTailorShopOffsets ...] only-candidate=[FIELD H:c614a8c6, GLOBAL H:327588f0, SETFIELD S:operation]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_PrepareGolemIntroCinematic.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "16",
+    "16"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_1999_LasriaStreets.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "42",
+    "42"
+   ],
+   "diffs": [
+    "proto 39 HASH only-stock=[04a54c45, 65be499d, a5609d9a] only-candidate=[]",
+    "proto 39 KEYUSE only-stock=[GLOBAL H:04a54c45, NAMECALL H:65be499d, NAMECALL H:a5609d9a] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_DuviriQuest_AngryEncounter.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "55",
+    "56"
+   ],
+   "diffs": [
+    "proto 28 HASH only-stock=[1877414d, 1bf05519, 21d521f0, 3ca198c7, 4446d73c, 53462ebf, 6050c685, 65590ff7, 6e962203, 70c0b3b0, 849bf22e, 86fe3fbe ...] only-candidate=[b4ac2b56, eda51d60]",
+    "proto 28 STRING only-stock=[\"AngryQuestMaskCamera\", \"FIGURINE\", \"FREE_ROAM_OBJ\", \"GO_TO_MAINLAND\", \"LightsOn\", \"MASK\", \"OnActivated\", \"SECONDARYWEAPON\", \"TriggerPort\"] only-candidate=[\"DDuvParQDormCave0920\", \"DDuvParQDormCave0930\", \"DDuvParQDormCave0940\"]",
+    "proto 28 KEYUSE only-stock=[FIELD H:21d521f0, FIELD H:4446d73c, FIELD H:70c0b3b0, FIELD H:c614a8c6, FIELD S:FIGURINE, FIELD S:FREE_ROAM_OBJ, FIELD S:GO_TO_MAINLAND, FIELD S:MASK, FIELD S:SECONDARYWEAPON, GLOBAL H:65590ff7, GLOBAL H:6e962203, GLOBAL H:849bf22e ...] only-candidate=[FIELD H:b4ac2b56, FIELD H:eda51d60]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_EntratiLab_EntratiQuestCalmLikeABomb.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "58",
+    "58"
+   ],
+   "diffs": [
+    "proto 22 HASH only-stock=[3cecd218, d06efad8, d7e3ec85, f79be56d] only-candidate=[]",
+    "proto 22 KEYUSE only-stock=[GLOBAL H:d06efad8, GLOBAL H:d7e3ec85, GLOBAL H:f79be56d, NAMECALL H:3cecd218] only-candidate=[]",
+    "proto 23 HASH only-stock=[3cecd218, d06efad8, d7e3ec85, f79be56d] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_EntratiLab_EntratiQuestSearchForLoid.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "34",
+    "34"
+   ],
+   "diffs": [
+    "proto 16 HASH only-stock=[3cecd218, d06efad8, d7e3ec85, f79be56d] only-candidate=[]",
+    "proto 16 KEYUSE only-stock=[GLOBAL H:d06efad8, GLOBAL H:d7e3ec85, GLOBAL H:f79be56d, NAMECALL H:3cecd218] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_NewWarQuest_NewWarPart3SunKiller.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "31",
+    "31"
+   ],
+   "diffs": [
+    "proto 29 HASH only-stock=[6f91142f, b364fd20, df603d81] only-candidate=[]",
+    "proto 29 STRING only-stock=[\"SunKillerMissionActive\"] only-candidate=[]",
+    "proto 29 KEYUSE only-stock=[GLOBAL H:b364fd20, NAMECALL H:6f91142f, NAMECALL H:df603d81, SETFIELD S:SunKillerMissionActive] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_RevenantMaskTown.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "8",
+    "10"
+   ],
+   "diffs": [
+    "proto 5 HASH only-stock=[] only-candidate=[0d4f9c32, 2736b298, 3df6d685, 3ef608fa, 4f8a65de, 6514b208, 6b1a53a8, 6e962203, 9c6a9ac9, c6369208, c87e9347]",
+    "proto 5 STRING only-stock=[\"\", \"CurrentConversation\", \"EventVendor_SkipCameraReset\", \"mCallback\", \"mName\", \"mReset\"] only-candidate=[\"HubNpcs\", \"OnBuyVendorItemCallbacks\", \"RevenantQuest_BoughtMask\", \"activatedSpeechSets\"]",
+    "proto 5 KEYUSE only-stock=[FIELD S:CurrentConversation, SETFIELD S:EventVendor_SkipCameraReset, SETFIELD S:mCallback, SETFIELD S:mReset] only-candidate=[FIELD H:0d4f9c32, FIELD S:/Lotus/Language/Npcs/Nakak, FIELD S:HubNpcs, FIELD S:OnBuyVendorItemCallbacks, FIELD S:activatedSpeechSets, GLOBAL H:2736b298, GLOBAL H:3df6d685, GLOBAL H:6514b208, GLOBAL H:6e962203, GLOBAL H:c6369208, NAMECALL H:3ef608fa, NAMECALL H:4f8a65de ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_TauPrequel_OldPeaceBackToTheFront.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "66",
+    "66"
+   ],
+   "diffs": [
+    "proto 34 HASH only-stock=[d06efad8] only-candidate=[0811edde, 1877414d]",
+    "proto 34 STRING only-stock=[] only-candidate=[\"CANNON_DESTROYED\", \"Destroy\"]",
+    "proto 34 KEYUSE only-stock=[GLOBAL H:d06efad8] only-candidate=[FIELD S:CANNON_DESTROYED, GLOBAL H:0811edde, NAMECALL H:1877414d]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_TauPrequel_SomaticBearerEffects.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "17",
+    "18"
+   ],
+   "diffs": [
+    "proto 15 HASH only-stock=[1073524c, 167f4880, 9c6a9ac9] only-candidate=[091a2c66, 682cbf57, b2e22fcd, d06efad8, d316b0dc, decc89f9]",
+    "proto 15 STRING only-stock=[\"End\", \"ForceStop\", \"Pause\", \"Reset\", \"SetPause\", \"Start\", \"UNAIRU\", \"Update\", \"ZENURIK\"] only-candidate=[]",
+    "proto 15 KEYUSE only-stock=[FIELD S:UNAIRU, FIELD S:ZENURIK, GLOBAL H:167f4880, NAMECALL H:1073524c, NAMECALL H:9c6a9ac9, SETFIELD S:ForceStop, SETFIELD S:Reset, SETFIELD S:SetPause, SETFIELD S:Start] only-candidate=[GLOBAL H:d06efad8, NAMECALL H:091a2c66, NAMECALL H:682cbf57, NAMECALL H:b2e22fcd, NAMECALL H:d316b0dc, NAMECALL H:decc89f9]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Quests_WraitheQuestM3.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "52",
+    "51"
+   ],
+   "diffs": [
+    "proto 39 HASH only-stock=[21d521f0, 3b0d8a4c, 3ca198c7, 76c01753, 9c6a9ac9, f689125c] only-candidate=[0811edde, 26b0d95d, 2888fc5c, 2f59f4f8, 327588f0, 34d75496, 3df6d685, 3e9fdd22, 402a3166, 4289bc29, 4a01380c, 5109deec ...]",
+    "proto 39 STRING only-stock=[\"DONE\", \"LOADING M4...\", \"ShowImpactMessage\", \"TransitionShip\", \"interiorMarker\", \"marker\", \"navConsole\"] only-candidate=[\"AbortMissionCallback\", \"ArenaShipReady\", \"CINEMATIC\", \"CapitalShip\", \"DisableRailjackRecall\", \"EpilogueShipReady\", \"FIGHTERS\", \"INTRO\", \"QuestShipCaptured\", \"QuestShipEscape\", \"QuestShipSpawn\", \"Show\" ...]",
+    "proto 39 KEYUSE only-stock=[FIELD H:21d521f0, FIELD S:DONE, FIELD S:ShowImpactMessage, FIELD S:interiorMarker, FIELD S:marker, FIELD S:navConsole, GLOBAL H:3b0d8a4c, GLOBAL H:76c01753, NAMECALL H:3ca198c7, NAMECALL H:9c6a9ac9, NAMECALL H:f689125c, SETFIELD S:TransitionShip] only-candidate=[FIELD H:4289bc29, FIELD H:710edd70, FIELD H:8c2be7dd, FIELD H:ae5d2f6f, FIELD H:c4763a3a, FIELD H:d339ce1f, FIELD S:CINEMATIC, FIELD S:FIGHTERS, FIELD S:INTRO, FIELD S:VOID, FIELD S:VoidStormSetNextLevel, FIELD S:avatar ...]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Scripts_Sentient_SentientArena.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "11",
+    "11"
+   ],
+   "diffs": [
+    "proto 8 STRING only-stock=[\"SentientArena.lua -- SentientArena Mode Complete!\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_Sentient_SentientLevel.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "17",
+    "17"
+   ],
+   "diffs": [
+    "proto 13 HASH only-stock=[0b53c522, 11a998bc, 3c831418, 8b734d2e, b420c85a, bb64cd78, daf81ef9] only-candidate=[]",
+    "proto 13 STRING only-stock=[\"heading\"] only-candidate=[]",
+    "proto 13 KEYUSE only-stock=[FIELD S:heading, GLOBAL H:0b53c522, GLOBAL H:11a998bc, GLOBAL H:3c831418, GLOBAL H:b420c85a, GLOBAL H:daf81ef9, NAMECALL H:8b734d2e, NAMECALL H:bb64cd78] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Sentient_SentientMutators.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "4",
+    "4"
+   ],
+   "diffs": [
+    "proto 0 STRING only-stock=[\"CORPOREAL\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Stalker.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "71",
+    "71"
+   ],
+   "diffs": [
+    "proto 24 HASH only-stock=[0a2d4eee, 0fdfa4ad, 20f6d1c9, 263f4d5f, 297c7bbf, 30085840, 33d67970, 3a030aa2, 3cdcc59a, 402a3166, 4042c2a4, 483d0daa ...] only-candidate=[]",
+    "proto 24 STRING only-stock=[\"StalkerBaitedType\", \"faction\"] only-candidate=[]",
+    "proto 24 KEYUSE only-stock=[FIELD H:4042c2a4, FIELD H:483d0daa, FIELD H:c614a8c6, FIELD H:d339ce1f, FIELD S:StalkerBaitedType, FIELD S:faction, GLOBAL H:20f6d1c9, GLOBAL H:3a030aa2, GLOBAL H:3cdcc59a, GLOBAL H:8dae70fe, GLOBAL H:a80e8a33, GLOBAL H:b6e30ca3 ...] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_TriggerAlarm.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "44",
+    "44"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_Venus_EncounterScheduler.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "29",
+    "29"
+   ],
+   "diffs": [
+    "proto 24 STRING only-stock=[\"EncounterScheduler.lua Complete!\"] only-candidate=[]",
+    "proto 25 STRING only-stock=[\"EncounterScheduler.lua -- EncounterSchedulerHUD Complete!\"] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "class-swap-only"
+  },
+  {
+   "module": "Lotus_Scripts_WaveDefend.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "62",
+    "62"
+   ],
+   "diffs": [
+    "proto 21 HASH only-stock=[] only-candidate=[0811edde, 6514b208, b6e5ace1]",
+    "proto 21 STRING only-stock=[\"sortKey\"] only-candidate=[\"\", \" \", \" EXIMUS\", \", attempt #\", \", spawnTable[\", \"Could not spawn \", \"L\", \"Next spawn (enemy #\", \"]): \", \"genus\", \"name\", \"type\"]",
+    "proto 21 KEYUSE only-stock=[FIELD S:sortKey] only-candidate=[FIELD S:genus, FIELD S:name, FIELD S:type, GLOBAL H:0811edde, GLOBAL H:6514b208, NAMECALL H:b6e5ace1]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_CrpBFGAnimations.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "10",
+    "10"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_GrineerMicrowavePistol.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "7",
+    "7"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_GrineerWhip.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "12",
+    "12"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_GrnTwinBurstPistols.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "5",
+    "5"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_InfBoomerangPods.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "4",
+    "4"
+   ],
+   "diffs": [
+    "proto 1 HASH only-stock=[b420c85a, c9537147] only-candidate=[]",
+    "proto 1 KEYUSE only-stock=[GLOBAL H:b420c85a, NAMECALL H:c9537147] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_InfNunchaku.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "5",
+    "5"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_TnChiselKanabo.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "7",
+    "7"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_ZarimanDagger.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "21",
+    "21"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Scripts_WeaponAttachments_ZarimanTonfaWeapon.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "15",
+    "15"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Types_Challenges_EvolvingWeaponUpgrades.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "2",
+    "2"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Types_Enemies_Corpus_Drones_Vip_RaptorTwo.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "13",
+    "13"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Types_Enemies_Infested_SpecialEvents_ArloZealots.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "7",
+    "7"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Types_Enemies_Infested_Vip_J3Golem_GolemAssassinate.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "14",
+    "14"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Types_Friendly_PlayerControllable_Weapons_DuviriWeapons_Scripts_DuviriWeaponSlamUtil.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "54",
+    "55"
+   ],
+   "diffs": [
+    "proto 27 HASH only-stock=[83813dc1] only-candidate=[3ca198c7, be2914f9]",
+    "proto 27 KEYUSE only-stock=[FIELD H:83813dc1] only-candidate=[GLOBAL H:be2914f9, NAMECALL H:3ca198c7]",
+    "proto 28 HASH only-stock=[be2914f9] only-candidate=[83813dc1]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Types_Gameplay_1999Wf_HexConquest_MissionConditions_PvPvESpilloverAuraScript.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "19",
+    "20"
+   ],
+   "diffs": [
+    "proto 16 HASH only-stock=[0811edde, 6514b208, 9828c6d9, a16fa305, b364fd20, b4990ca9, ba88e5a9, ce228771, d7e3ec85, daf81ef9, dd317a7a, f21398a2 ...] only-candidate=[43b71aae, 79895d5e]",
+    "proto 16 STRING only-stock=[\"Conquest Spillover: ReplicaInit Complete\", \"Conquest Spillover: ReplicaInit...\", \"GetBoostHinderIcon\", \"SetupTexturePacks\", \"isStreamingLevel\"] only-candidate=[\"IconRes\", \"ItemList\", \"StaticIconBg\"]",
+    "proto 16 KEYUSE only-stock=[FIELD S:isStreamingLevel, GLOBAL H:0811edde, GLOBAL H:6514b208, GLOBAL H:9828c6d9, GLOBAL H:b364fd20, GLOBAL H:d7e3ec85, GLOBAL H:daf81ef9, GLOBAL H:f3c503f8, GLOBAL S:SetupTexturePacks, NAMECALL H:a16fa305, NAMECALL H:b4990ca9, NAMECALL H:ba88e5a9 ...] only-candidate=[FIELD S:IconRes, FIELD S:ItemList, GLOBAL H:43b71aae, NAMECALL H:79895d5e]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Types_Gameplay_DevilTower_Upgrades_HarrowHeatInBubbles.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "7",
+    "7"
+   ],
+   "diffs": [
+    "proto 2 HASH only-stock=[4d57d481, 6514b208, 9828c6d9] only-candidate=[]",
+    "proto 2 STRING only-stock=[\"AffectedPlayerInBubble\", \"HeatInBubblesPlayers\"] only-candidate=[]",
+    "proto 2 KEYUSE only-stock=[FIELD H:4d57d481, FIELD S:AffectedPlayerInBubble, FIELD S:HeatInBubblesPlayers, GLOBAL H:6514b208, GLOBAL H:9828c6d9] only-candidate=[]"
+   ],
+   "class": "structural",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Types_Scripts_Tau_CoH_CoHUpgrades.lua_B",
+   "verdict": "FAIL",
+   "swaps": 0,
+   "protos": [
+    "33",
+    "32"
+   ],
+   "diffs": [
+    "proto 29 HASH only-stock=[6514b208, d7e3ec85, d955208c] only-candidate=[]",
+    "proto 29 KEYUSE only-stock=[GLOBAL H:6514b208, GLOBAL H:d7e3ec85, NAMECALL H:d955208c] only-candidate=[]",
+    "proto 30 HASH only-stock=[] only-candidate=[b364fd20, ce228771]"
+   ],
+   "class": "proto-count",
+   "u43": "proto-count"
+  },
+  {
+   "module": "Lotus_Types_Scripts_Tau_CoH_Complications_CoHRaptorTwo.lua_B",
+   "verdict": "PASS",
+   "swaps": 0,
+   "protos": [
+    "17",
+    "17"
+   ],
+   "diffs": [],
+   "class": "pass-after-regate",
+   "u43": "structural"
+  },
+  {
+   "module": "Lotus_Types_Vehicles_Highway_HighwayVehicle.lua_B",
+   "class": "no-candidate",
+   "error": "decompile: u44 input profile: profile: unsupported opcode 86\ndecompile-mod-u44: walk error: not a 09 03 container\n",
+   "u43": "class-swap-only"
+  }
+ ]
+}
