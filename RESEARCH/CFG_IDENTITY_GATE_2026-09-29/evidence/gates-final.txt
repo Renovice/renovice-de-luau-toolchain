@@ -1,0 +1,89 @@
+== RELEASE GATES ==  align/backedge=300 realtrip=150  corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock
+   module-source view: decompile-mod
+   (align/backedge/access concurrent, then realtrip ALONE - it must not share CPU)
+
+-- GATE 0: native constant-comparison polarity
+   SAME=8 DIFFERENT=0
+
+-- GATE 0b: named-access normalization
+   assertions=5 passed=5 failed=0
+
+-- GATE 8: Semantic IR source-lowering execution
+   assertions=22 passed=22 failed=0 runtime_exit=0
+
+-- GATE 9: Semantic IR renderer vs ground-truth behavior
+   SAME=150 DIFFERENT=0 VACUOUS=0
+
+-- GATE 10: Semantic IR Warframe callback/API trace
+   SAME=11 DIFFERENT=0 VACUOUS=0
+
+-- GATE 11: native NAMECALL preservation
+   module=Lotus_Scripts_Effects_HarnessEffects.lua_B original=11 rebuilt=11 exact=yes
+
+-- GATE 12: natural loop around nested for (SyndicateScarves NewLokaScarfUpdate shape)
+   checks=8 passed=8 verdict=PASS
+
+-- GATE 13 (U43): stock CONST-ID + CFG-ID, first pass
+   modules=300 decompile=300 recompile=300 deterministic=300
+   CONST-ID PASS=18  CFG-ID PASS=12  class swaps=6590  CFG protos equal 7639/10925 (280 aligned modules)
+     class LABEL GETFIELD -> GETFIELD                   3298 protos
+     class LABEL GETIMPORT -> GETIMPORT                 161 protos
+     class LABEL GETIMPORT -> GETUPVAL                  141 protos
+     class LABEL GETUPVAL -> GETIMPORT                  121 protos
+     class LABEL GETFIELD -> GETTABLEN                  104 protos
+
+-- GATE 13 (U44): stock CONST-ID + CFG-ID, first pass
+   modules=110 decompile=110 recompile=110 deterministic=110
+   CONST-ID PASS=107  CFG-ID PASS=72  class swaps=0  CFG protos equal 1483/1701 (109 aligned modules)
+     class LABEL GETFIELD -> GETTABLEN                  82 protos
+     class LABEL GETIMPORT -> GETTABLEN                 20 protos
+     class LABEL CALL -> GETTABLEN                      14 protos
+     class LABEL LOAD -> GETTABLEN                      8 protos
+     class LABEL GETIMPORT -> GETUPVAL                  6 protos
+
+-- GATE 1: access count vs ORIGINAL (detects silently dropped code)
+   PASS EE_Interface_Components_Grid                   orig=672 ours=672 
+   PASS EE_Interface_Utilities                         orig=784 ours=784 
+   PASS EE_Types_ScriptCommands_JSON                   orig=176 ours=176 
+   PASS EE_Types_ScriptCommands_SetVortexWindPerZone   orig=30 ours=30 
+   PASS Lotus_Characters_Tenno_Infestation_Cyst_Infest orig=127 ours=127 
+   PASS Lotus_Interface_AllianceView                   orig=987 ours=987 
+   PASS Lotus_Interface_Backgrounds_Lotus_LotusBackgro orig=190 ours=190 
+   PASS Lotus_Interface_BeaconInProgress               orig=525 ours=525 
+   PASS Lotus_Interface_BootUpGlitch                   orig=45 ours=45 
+
+-- GATE 2/4: alignment vs ORIGINAL
+   ALIGNED                214
+   LOOP-DIFF              23
+   ORDER-DIFF             43
+   PROTO-DUP              8
+
+-- back-edge bijection (loop recovery)
+   MATCH                  266
+   EXTRA-LOOPS            5
+   LOST-LOOPS             22
+   LATCH-DIFF             7
+   LOST-HEADERS           107
+   EXTRA-HEADERS          10
+
+-- GATE 5: code paths emitted but UNREACHABLE (FINDINGS #97)
+   DROPPED                0  (backward 0, self 0)
+
+-- GATE 6: access loss, independent of category masking
+   CLEAN                  221
+   LOOP-DIFF              28
+   ORDER-DIFF             64
+   ACCESS-LOSS-TOTAL      0
+   ACCESS-GAIN            8
+   PROTO-COUNT-DIFF       8
+
+-- GATE 7: lost conditional wrappers (render pass only)
+   DEADTAIL               0
+
+-- GATE 3: behavioural round-trip
+   SAME=150 DIFFERENT=0 timeout=0
+
+== VERDICT ==
+   ALL GATES PASS  (ALIGNED 214, NAME-DIFF 0, realtrip 150/150)
+   -> accepted release baseline satisfied.
+   machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\work\cfg-identity-2026-09-29\gates-final.json

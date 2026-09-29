@@ -1,0 +1,13 @@
+== HEAD c1672d8d decompile-mod-u44 -> recompile-u44
+proto 13 CFG_DIFF kind=LABEL depth=0 stock[0]="GETUPVAL u0" candidate[16]="GETIMPORT I:H:9828c6d9.S:\x22NewLokaEffects\x22" class="LABEL GETUPVAL -> GETIMPORT"
+CFG_CLASSES {LABEL GETUPVAL -> GETIMPORT:1}
+CFG_IDENTITY protos_stock=17 protos_candidate=17 cfg_equal=16 model_errors=0 candidate_dispatch_webs=1 verdict=FAIL
+CONST_IDENTITY protos_stock=17 protos_candidate=17 hash_equal=17 string_equal=17 keyuse_equal=17 verdict=PASS
+== FIXED b4221c48
+CFG_CLASSES {}
+CFG_IDENTITY protos_stock=17 protos_candidate=17 cfg_equal=17 model_errors=0 candidate_dispatch_webs=2 verdict=PASS
+CONST_IDENTITY protos_stock=17 protos_candidate=17 hash_equal=17 string_equal=17 keyuse_equal=17 verdict=PASS
+== hand-repaired control (research candidate folder)
+proto 13 CFG_DIFF kind=LABEL depth=44 stock[184]="MULK N:0.5" candidate[143]="IF EQK nil" class="LABEL MULK -> IF EQK"
+CFG_CLASSES {LABEL MULK -> IF EQK:1}
+CFG_IDENTITY protos_stock=17 protos_candidate=17 cfg_equal=16 model_errors=0 candidate_dispatch_webs=0 verdict=FAIL

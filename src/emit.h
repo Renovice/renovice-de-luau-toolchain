@@ -932,6 +932,139 @@ struct Emitter {
         for (int p : r.parts) collect_blocks(p, outb);
     }
 
+    // Semantic entry block of a region. NaturalLoop/Proper parts come from a set, so parts[0] is
+    // only the smallest region id; the structurer records the real head in `head`. Seq has no
+    // head and keeps its parts in source order, so its first part is its entry.
+    int semantic_head_block(int id) const {
+        for (int guard = 0; guard < 100000 && id >= 0 && id < (int)A->regions.size(); ++guard) {
+            const sa::Region& r = A->regions[id];
+            if (r.kind == sa::RK::Basic) return r.block;
+            id = (r.head >= 0 && r.head != id) ? r.head : (r.parts.empty() ? -1 : r.parts[0]);
+        }
+        return -1;
+    }
+
+    // PROVEN NON-FOR NATURAL LOOP (2026-09-29, SyndicateScarves NewLokaScarfUpdate). A NaturalLoop
+    // region IS a source while/repeat, not a container for a nested `for`, when all of these hold:
+    //   - its semantic head H is the header of an authoritative While/Repeat loop with no FOR prep,
+    //     and no FOR latch branches back to H (H is not any for-loop's header);
+    //   - H dominates every block of the region (single entry at the header);
+    //   - the region contains that loop's complete dominator-derived body;
+    //   - every region block outside that body is an exit arm that never re-enters the body.
+    // Without this proof the interior-PREP scan below turned such an outer loop into its nested
+    // `for` (dropping the `while`), and `is_for_body` suppressed the wrapper for the same reason.
+    bool proven_non_for_natural_loop(int id, int& header, bool& prep_override) const {
+        header = -1;
+        prep_override = false;
+        if (id < 0 || id >= (int)A->regions.size()) return false;
+        if (A->regions[id].kind != sa::RK::NaturalLoop) return false;
+        const int H = semantic_head_block(id);
+        if (H < 0 || H >= (int)g->n.size()) return false;
+        const st::Loop* loop = nullptr;
+        for (const st::Loop& candidate : authoritative_loops) {
+            if (candidate.header != H) continue;
+            if (candidate.prep >= 0 || (candidate.kind != st::Loop::While
+                                        && candidate.kind != st::Loop::Repeat))
+                return false;
+            if (loop && loop->body != candidate.body) return false;
+            loop = &candidate;
+        }
+        if (!loop || loop->body.empty() || is_for_latch(H)) return false;
+        for (const auto& prep_latch : prep2latch) {
+            const int latch = prep_latch.second;
+            if (prep_latch.first == H || latch == H) return false;
+            if (latch >= 0 && latch < (int)g->n.size()
+                && (g->n[latch].succ_true == H || g->n[latch].succ_false == H))
+                return false;
+        }
+        std::vector<int> blocks; collect_blocks(id, blocks);
+        const std::set<int> region(blocks.begin(), blocks.end());
+        if (region.size() != blocks.size()) return false;
+        for (int block : loop->body) if (!region.count(block)) return false;
+        std::set<int> exits;
+        for (int block : region) {
+            if (block < 0 || block >= (int)g->n.size() || !st::dominates(*g, H, block)) return false;
+            for (int target : {g->n[block].succ_true, g->n[block].succ_false})
+                if (target >= 0 && !region.count(target)) exits.insert(target);
+            if (loop->body.count(block)) continue;
+            for (int target : {g->n[block].succ_true, g->n[block].succ_false})
+                if (target >= 0 && loop->body.count(target)) return false;
+        }
+        // The PREP overrides (no interior-PREP `for`, no is_for_body suppression) are narrower
+        // than the proof itself. They apply only to the shape the established paths cannot
+        // partition: a FOR prep nested inside a COMPOSITE part (SyndicateScarves p13: prep inside
+        // an IfThen) of a loop with at most one continuation outside the region.
+        //  - A DIRECT Basic prep part is handled by the interior-PREP partition and the simple
+        //    nested outer-loop repair (LocateCreaturesAbility p2 regressed when pre-empted).
+        //  - A plain `while true` + `break` cannot say WHICH of several exits was taken; multi-exit
+        //    loops keep the escape-selector paths (EncounterLib p8, MoodController p3, VoidSink p7
+        //    lost code when wrapped here).
+        bool nested_prep = false, direct_prep = false;
+        for (int part : A->regions[id].parts) {
+            std::vector<int> part_blocks; collect_blocks(part, part_blocks);
+            for (int block : part_blocks) {
+                const int last = g->n[block].last;
+                if (last < 0 || last >= (int)ip->code.size()) continue;
+                const int op = ip->code[last].op;
+                if (op != 0x47 && op != 0x0b && op != 0x30 && op != 0x1b) continue;
+                if (A->regions[part].kind == sa::RK::Basic) direct_prep = true;
+                else nested_prep = true;
+            }
+        }
+        prep_override = nested_prep && !direct_prep && exits.size() <= 1;
+        header = H;
+        return true;
+    }
+
+    // Control-flow order of a proven loop's parts: topological over part-level CFG edges starting
+    // at the part that contains the header, ignoring edges back into that part; ties break on the
+    // first bytecode instruction. Returns false (caller keeps set order) if the part graph is not
+    // a single-entry DAG once those back edges are removed.
+    bool order_loop_parts_from_header(int id, int header, std::vector<int>& ordered) const {
+        const sa::Region& r = A->regions[id];
+        std::map<int, int> owner;
+        std::map<int, int> first_instruction;
+        for (int part : r.parts) {
+            std::vector<int> blocks; collect_blocks(part, blocks);
+            if (blocks.empty()) return false;
+            int first = INT_MAX;
+            for (int block : blocks) {
+                if (owner.count(block)) return false;
+                owner[block] = part;
+                first = std::min(first, g->n[block].first);
+            }
+            first_instruction[part] = first;
+        }
+        auto head_owner = owner.find(header);
+        if (head_owner == owner.end()) return false;
+        const int head_part = head_owner->second;
+        std::map<int, std::set<int>> edges;
+        std::map<int, int> indegree;
+        for (int part : r.parts) indegree[part] = 0;
+        for (const auto& entry : owner) {
+            const int from = entry.second;
+            for (int target : {g->n[entry.first].succ_true, g->n[entry.first].succ_false}) {
+                auto to = owner.find(target);
+                if (to == owner.end() || to->second == from || to->second == head_part) continue;
+                if (edges[from].insert(to->second).second) ++indegree[to->second];
+            }
+        }
+        if (indegree[head_part] != 0) return false;
+        for (int part : r.parts)
+            if (part != head_part && indegree[part] == 0) return false;   // unreachable/second entry
+        auto later = [&](int a, int b) { return first_instruction[a] > first_instruction[b]; };
+        std::vector<int> ready{head_part};
+        ordered.clear();
+        while (!ready.empty()) {
+            std::sort(ready.begin(), ready.end(), later);
+            const int part = ready.back(); ready.pop_back();
+            ordered.push_back(part);
+            for (int next : edges[part])
+                if (--indegree[next] == 0) ready.push_back(next);
+        }
+        return ordered.size() == r.parts.size();
+    }
+
     void dump_region_tree(int id, int tree_depth) const {
         if (id < 0 || id >= (int)A->regions.size()) return;
         const sa::Region& r = A->regions[id];
@@ -1548,10 +1681,20 @@ struct Emitter {
                 const int region_condition_block = hb;
                 int header_source_blk = hb;
                 std::string hdr;
-                bool isfor = for_header(hb, hdr);
+                // A proven source while/repeat never becomes the `for` of a nested PREP or latch it
+                // happens to contain; see proven_non_for_natural_loop. RENOVICE_NO_PROVEN_WHILE_NATURAL
+                // restores the previous behavior for A/B attribution.
+                int proven_while_header = -1;
+                bool proven_prep_override = false;
+                const bool proven_loop = r.kind == sa::RK::NaturalLoop
+                    && !std::getenv("RENOVICE_NO_PROVEN_WHILE_NATURAL")
+                    && proven_non_for_natural_loop(id, proven_while_header, proven_prep_override);
+                // `proven_while`: the PREP overrides; `proven_loop`: header-first part order only.
+                const bool proven_while = proven_loop && proven_prep_override;
+                bool isfor = !proven_while && for_header(hb, hdr);
                 // A for-latch region carries no condition of its own — emit its statements flat and
                 // let the enclosing `for` drive the iteration.
-                if (!isfor && is_for_latch(hb) && r.kind != sa::RK::IfThen
+                if (!proven_while && !isfor && is_for_latch(hb) && r.kind != sa::RK::IfThen
                     && r.kind != sa::RK::IfThenElse) {
                     for (int p : r.parts) emit_region(p, depth);
                     break;
@@ -1601,7 +1744,7 @@ struct Emitter {
                 // became EXACTLY 16. So only take the latch when the region does NOT also contain a
                 // prep — if a prep is present, the prep path below owns this loop and produces the one
                 // correct header.
-                if (!isfor) {
+                if (!isfor && !proven_while) {
                     std::vector<int> blks; collect_blocks(id, blks);
                     bool has_prep = false;
                     for (int b : blks) {
@@ -1624,7 +1767,7 @@ struct Emitter {
                 int prep_part = -1;
                 // RENOVICE_NOPREPSPLIT=1 restores the pre-fix behaviour, so a regression can be
                 // ATTRIBUTED rather than guessed at: rerun an oracle with and without it.
-                if (!isfor && !std::getenv("RENOVICE_NOPREPSPLIT")) {
+                if (!isfor && !proven_while && !std::getenv("RENOVICE_NOPREPSPLIT")) {
                     // Look ONLY at each part's HEAD block, never its whole subtree. `collect_blocks`
                     // recurses, so a parent region would find a prep belonging to a NESTED region and
                     // open a header for it — and then the child would open the very same loop again.
@@ -4179,6 +4322,9 @@ emit_conditional_region:
                     // the loop still becomes a `break` — which now breaks the `for`, as intended.
                     bool is_for_body = false;
                     for (int b : bl) if (is_for_latch(b)) { is_for_body = true; break; }
+                    // A for-latch that belongs to a NESTED loop does not make a proven while/repeat
+                    // the for's iteration: suppressing the wrapper deleted the outer loop.
+                    if (proven_while) is_for_body = false;
                     // Moving a preheader outside an already-open source `for` requires cooperation
                     // from that enclosing wrapper; do not perform the non-for partition here.
                     if (partition_natural_preheader && is_for_body)
@@ -4234,8 +4380,14 @@ emit_conditional_region:
                         // the one wrapper that did not.
                         out += ind(depth) + "while true do\n";
                         ++loop_depth;
-                        const std::vector<int>& loop_parts = partition_natural_preheader
+                        std::vector<int> loop_parts = partition_natural_preheader
                             ? partition_body_parts : r.parts;
+                        // A proven loop's parts come from a set; emit them in control-flow order
+                        // from the header (the latch last), or the latch runs before the body.
+                        std::vector<int> header_ordered;
+                        if (proven_loop && !partition_natural_preheader
+                            && order_loop_parts_from_header(id, proven_while_header, header_ordered))
+                            loop_parts.swap(header_ordered);
                         for (int p : loop_parts) emit_region(p, depth + 1);
                         --loop_depth;
                         out += ind(depth) + "end\n";
@@ -4357,7 +4509,27 @@ emit_conditional_region:
                     // labelled-break shells are not compiler fixed points on the largest graphs.
                     // Keep this opt-in until loop identity, behavior, and the strict corpus prove
                     // whether direct SCC ownership is a safe replacement.
-                    if (std::getenv("RENOVICE_NO_PROPER_WHOLE_PROMOTION")) continue;
+                    //
+                    // EXCEPTION (2026-09-29): a single-exit, terminal-free child whose cycle is closed
+                    // by a FOR latch must stay whole even under that profile. The raw dispatcher
+                    // cannot spell a FORNLOOP/FORGLOOP back edge (a latch "falls through" to its exit
+                    // state), so flattening such a child deletes the loop outright. With one exit and
+                    // no returns the child is emitted as `if state == K then <region> state = exit end`
+                    // and needs no labelled-break shell. RENOVICE_NO_FOR_CYCLE_WHOLE_PART=1 restores
+                    // the flattened behavior for A/B attribution.
+                    bool for_latch_cycle_whole = false;
+                    if (!std::getenv("RENOVICE_NO_FOR_CYCLE_WHOLE_PART") && ex.size() == 1) {
+                        bool latch_closes_cycle = false, has_terminal = false;
+                        for (int b2 : pb) {
+                            const st::Node& bn = g->n[b2];
+                            if (bn.succ_true < 0 && bn.succ_false < 0) has_terminal = true;
+                            if (is_for_latch(b2) && bn.succ_true >= 0 && ps.count(bn.succ_true))
+                                latch_closes_cycle = true;
+                        }
+                        for_latch_cycle_whole = latch_closes_cycle && !has_terminal;
+                    }
+                    if (std::getenv("RENOVICE_NO_PROPER_WHOLE_PROMOTION") && !for_latch_cycle_whole)
+                        continue;
                     // Identify the normal fallthrough of a multi-exit loop. Conditional non-local
                     // exits are recorded at their source block; FOR latches are not boolean branches,
                     // so their false edge is the explicit normal-completion destination.

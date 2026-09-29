@@ -204,3 +204,17 @@ reached 100.0000% with zero duplication and fewer moving parts.
 `sa::verify_coverage` — walk the final region tree and require every reachable block to appear
 **exactly once**. Catches silent loss AND silent duplication, the two modes that hid #27.
 Result: 82,042 clean, 0 missing, 0 duplicated, deterministic across runs.
+
+---
+
+## 2026-09-29 — natural loop headed inside its own body (SyndicateScarves NewLokaScarfUpdate)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 31 | NaturalLoop rule took the first cycle edge in region-id order as a back edge | loop headed at a body test; its "body" swallowed the function prologue; output printed the loop body first, the prologue last, no `while` | hand IR order comparison (CONST-ID passed 17/17) | skip a candidate whose body holds the entry when a clean candidate of the same cycle, headed by the original loop header, exists |
+| 32 | Proper growth refused every loop-body node (`reaches(c, n)` via the back edge) | non-series-parallel loop body (`a ~= nil and b[k] ~= nil` with statement operand) left unreduced; internal branches dropped | same | for a dominance loop header, acyclicity = no direct edge back to the header |
+| 33 | outer while taken for its nested `for` (greedy interior-PREP scan, `is_for_body`) | `while` wrapper lost; parts emitted in set order | same | `proven_non_for_natural_loop` (authoritative While/Repeat header): parts ordered from the header; the PREP overrides only for a prep nested in a composite part of a loop with at most one outside exit |
+| 34 | FOR-latch cycle flattened in a Proper dispatcher (certified profile disables whole promotion) | FORNLOOP back edge becomes a fallthrough; the `for` disappears | same | single-exit, terminal-free child closed by a FOR latch stays whole |
+
+Caught by the new `cfg-identity` gate and `cert/natural_loop_nested_for.py` (gates.py 12/13).
+Details: `RESEARCH/CFG_IDENTITY_GATE_2026-09-29.md`.

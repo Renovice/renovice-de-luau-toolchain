@@ -29,6 +29,17 @@ CORE GATES (a change ships only if ALL pass):
                           boundary and compare returns, state, calls, arguments, and effect order.
  11. NATIVE NAMECALL     - render and rebuild a real Warframe module whose native method sequence is
                           known, then require every NAMECALL spelling and order to remain exact.
+ 12. NATURAL LOOP        - cert/natural_loop_nested_for.py: the SyndicateScarves NewLokaScarfUpdate
+                          shape (while around a nested for, short-circuit with statement operand) must
+                          round-trip with identical behavior and CFG-ID PASS, the legacy structurer
+                          must FAIL it, and three source mutations must each FAIL CFG-ID.
+ 13. STOCK IDENTITY      - first-pass decompile -> recompile against the ORIGINAL bytecode through
+                          cert/u44_rawhash_roundtrip.py: CONST-ID (hash/string/key-use classes) and
+                          CFG-ID (control-flow/operation-order bisimulation). U43: the first N corpus
+                          files (same selection as align). U44: every 50th module of the 44.0.2
+                          stock extraction (RENOVICE_U44_STOCK, default work/u44-rawhash-2026-09-29/stock).
+                          Ratchets: PASS counts never fall, U44 hash/string class swaps stay 0, U43
+                          swaps (known pending U43 metadata defect) never rise.
 
 Usage:
     python cert/gates.py                 # 300 files, baseline from BASELINE below
@@ -61,7 +72,25 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "DROPPED": 0, "CMPK_SAME": 8,
             "LOST_CONDITION": 0, "SEMANTIC_BEHAVIOR_SAME": 150,
             "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
-            "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0}
+            "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
+            "NATURAL_LOOP_CHECKS": 8,
+            "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 12,
+            "U43_CLASS_SWAPS": 6590,
+            "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 72,
+            "U44_CLASS_SWAPS": 0}
+
+# BASELINE ADDITION OF 2026-09-29 -- stock control-flow identity and the natural-loop fixture:
+#   Gates 12 and 13 are new. Pre/post measurement with the same gate binary on the same samples
+#   (first pass; CFG prototype totals over modules whose prototype counts agree;
+#   RESEARCH/CFG_IDENTITY_GATE_2026-09-29.md). Pre = derecomp c1672d8d (HEAD 0299da9), post = b4221c48.
+#     U43 first 300:  CONST-ID PASS 18 -> 18, CFG-ID PASS 12 -> 12, CFG protos equal 7,625 -> 7,639
+#                     of 10,925 (280 aligned modules), class swaps 6,589 -> 6,590 (AvatarDiorama: 100
+#                     non-swap key differences -> 0, one swap unmasked; U43 hash-class loss is the
+#                     known pending defect).
+#     U44 1-in-50:    CONST-ID PASS 107 -> 107, CFG-ID PASS 69 -> 72, CFG protos equal 1,474 -> 1,483
+#                     of 1,701 (109 aligned modules), class swaps 0 -> 0.
+#   The U43 CFG-ID pass rate is low because the U43 standard path still loses hash classes, which
+#   CFG-ID labels include; it is a ratchet, not a claim.
 
 # BASELINE CHANGE OF 2026-08-22 -- mocked Warframe ability/API trace closure:
 #   Ten property-focused Warframe-shaped modules exercise callback lifecycle,
@@ -471,6 +500,52 @@ def run_native_namecall_preservation():
         }
 
 
+def run_natural_loop_fixture():
+    """Gate 12: SyndicateScarves NewLokaScarfUpdate shape, behavior + CFG-ID + negative controls."""
+    p = sh([PY, os.path.join("cert", "natural_loop_nested_for.py")], timeout=900)
+    match = re.search(r"^NATURAL_LOOP_FIXTURE checks=(\d+) passed=(\d+) verdict=(\w+)$", p.stdout, re.M)
+    if not match:
+        return {"FATAL": "natural-loop fixture did not report a parseable summary: "
+                + ((p.stdout or "") + (p.stderr or ""))[-1000:]}
+    return {"checks": int(match.group(1)), "passed": int(match.group(2)), "verdict": match.group(3),
+            "failed_checks": re.findall(r"^(\S+)\s+FAIL$", p.stdout, re.M)}
+
+
+U44_STOCK = os.environ.get("RENOVICE_U44_STOCK",
+                           os.path.join(ROOT, "work", "u44-rawhash-2026-09-29", "stock"))
+
+
+def run_stock_identity(profile, n):
+    """Gate 13: CONST-ID + CFG-ID of the first-pass rebuild against the ORIGINAL bytecode."""
+    corpus = CACHE if profile == "u43" else U44_STOCK
+    if not os.path.isdir(corpus) or not any(x.endswith(".lua_B") for x in os.listdir(corpus)):
+        return {"FATAL": "%s stock corpus missing: %s (U44: extract with RESEARCH/"
+                         "U44_RAW_HASH_RECOMPILE_2026-09-29/tools/extract_u44_stock.py or set "
+                         "RENOVICE_U44_STOCK)" % (profile, corpus)}
+    selection = ["--limit", str(n)] if profile == "u43" else ["--stride", "50"]
+    # Production configuration, as in the standard corpus mode: the fidelity knobs pinned in ENV
+    # (RENOVICE_NATIVE*) are certification settings, not the deployable recompile.
+    production = {k: v for k, v in os.environ.items()
+                  if k not in ("RENOVICE_NATIVE", "RENOVICE_NATIVE_GLOBALS")}
+    with tempfile.TemporaryDirectory(prefix="renovice_stock_identity_") as temporary:
+        p = subprocess.run([PY, os.path.join("cert", "u44_rawhash_roundtrip.py"), corpus, temporary,
+                            "--profile", profile, "--first-pass-only", "--exe", DEC, "--tmp", temporary]
+                           + selection, capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=3600, env=production, cwd=ROOT)
+        result_path = os.path.join(temporary, "results-%s.json" % profile)
+        if not os.path.isfile(result_path):
+            return {"FATAL": "stock identity (%s) produced no results: %s"
+                    % (profile, ((p.stdout or "") + (p.stderr or ""))[-1000:])}
+        with open(result_path, encoding="utf-8") as stream:
+            summary = json.load(stream)["summary"]
+    keys = ("modules", "decompile", "recompile", "deterministic", "constIdentityFirstPass",
+            "cfgIdentityFirstPass", "classSwapsFirstPass", "cfgProtosCompared", "cfgProtosEqual",
+            "cfgModulesProtoAligned")
+    result = {k: summary.get(k, -1) for k in keys}
+    result["cfgFailureClassesByProto"] = dict(list(summary.get("cfgFailureClassesByProto", {}).items())[:12])
+    return result
+
+
 def access_one(item):
     """Gate 1 for one file: original access count vs our recompile."""
     name, expect = item
@@ -555,6 +630,9 @@ def main():
     SB = run_semantic_behavior()
     WF = run_warframe_api_trace()
     NC = run_native_namecall_preservation()
+    NL = run_natural_loop_fixture()
+    SI43 = run_stock_identity("u43", n_align)
+    SI44 = run_stock_identity("u44", n_align)
 
     # realtrip runs ALONE, and only after the others finish.
     #
@@ -590,6 +668,8 @@ def main():
                    ("semantic-behavior", SB),
                    ("warframe-api-trace", WF),
                    ("native-namecall", NC),
+                   ("natural-loop", NL), ("stock-identity-u43", SI43),
+                   ("stock-identity-u44", SI44),
                    ("align", A), ("backedge", B), ("dropped", D),
                    ("allcats", C), ("lost-condition", LC), ("realtrip", T)):
         if "FATAL" in d:
@@ -663,6 +743,43 @@ def main():
     if not NC.get("same"):
         fails.append("GATE 11: native NAMECALL sequence changed: %s -> %s"
                      % (NC.get("original_methods", []), NC.get("rebuilt_methods", [])))
+
+    # ---- Gate 12: SyndicateScarves natural-loop shape
+    print("\n-- GATE 12: natural loop around nested for (SyndicateScarves NewLokaScarfUpdate shape)")
+    print("   checks=%d passed=%d verdict=%s" % (NL.get("checks", 0), NL.get("passed", 0),
+                                                 NL.get("verdict", "?")))
+    for check in NL.get("failed_checks", []):
+        print("     !! %s" % check)
+    if (NL.get("checks", 0) != BASELINE["NATURAL_LOOP_CHECKS"]
+            or NL.get("passed", 0) != BASELINE["NATURAL_LOOP_CHECKS"]):
+        fails.append("GATE 12: natural-loop fixture %d/%d"
+                     % (NL.get("passed", 0), BASELINE["NATURAL_LOOP_CHECKS"]))
+
+    # ---- Gate 13: CONST-ID + CFG-ID against the ORIGINAL bytecode
+    for tag, SI in (("U43", SI43), ("U44", SI44)):
+        print("\n-- GATE 13 (%s): stock CONST-ID + CFG-ID, first pass" % tag)
+        print("   modules=%d decompile=%d recompile=%d deterministic=%d"
+              % (SI["modules"], SI["decompile"], SI["recompile"], SI["deterministic"]))
+        print("   CONST-ID PASS=%d  CFG-ID PASS=%d  class swaps=%d  CFG protos equal %d/%d (%d aligned modules)"
+              % (SI["constIdentityFirstPass"], SI["cfgIdentityFirstPass"], SI["classSwapsFirstPass"],
+                 SI["cfgProtosEqual"], SI["cfgProtosCompared"], SI["cfgModulesProtoAligned"]))
+        for name, count in list(SI.get("cfgFailureClassesByProto", {}).items())[:5]:
+            print("     class %-44s %d protos" % (name, count))
+        if SI["modules"] != BASELINE[tag + "_STOCK_MODULES"]:
+            fails.append("GATE 13 (%s): sample has %d modules, baseline %d"
+                         % (tag, SI["modules"], BASELINE[tag + "_STOCK_MODULES"]))
+        if not (SI["decompile"] == SI["recompile"] == SI["deterministic"] == SI["modules"]):
+            fails.append("GATE 13 (%s): decompile/recompile/determinism %d/%d/%d of %d"
+                         % (tag, SI["decompile"], SI["recompile"], SI["deterministic"], SI["modules"]))
+        if SI["constIdentityFirstPass"] < BASELINE[tag + "_CONST_ID_PASS"]:
+            fails.append("GATE 13 (%s): CONST-ID PASS %d < baseline %d"
+                         % (tag, SI["constIdentityFirstPass"], BASELINE[tag + "_CONST_ID_PASS"]))
+        if SI["cfgIdentityFirstPass"] < BASELINE[tag + "_CFG_ID_PASS"]:
+            fails.append("GATE 13 (%s): CFG-ID PASS %d < baseline %d"
+                         % (tag, SI["cfgIdentityFirstPass"], BASELINE[tag + "_CFG_ID_PASS"]))
+        if SI["classSwapsFirstPass"] > BASELINE[tag + "_CLASS_SWAPS"]:
+            fails.append("GATE 13 (%s): hash/string class swaps %d > baseline %d"
+                         % (tag, SI["classSwapsFirstPass"], BASELINE[tag + "_CLASS_SWAPS"]))
 
     # ---- Gate 1
     print("\n-- GATE 1: access count vs ORIGINAL (detects silently dropped code)")
@@ -818,6 +935,9 @@ def main():
             "semantic_behavior": dict(sorted(SB.items())),
             "warframe_api_trace": dict(sorted(WF.items())),
             "native_namecall": dict(sorted(NC.items())),
+            "natural_loop_fixture": dict(sorted(NL.items())),
+            "stock_identity_u43": dict(sorted(SI43.items())),
+            "stock_identity_u44": dict(sorted(SI44.items())),
         },
         "passed": not fails,
         "schema_version": 1,

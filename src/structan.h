@@ -12,6 +12,7 @@
 // Ref: Muchnick, Advanced Compiler Design & Implementation (1997), ch. 7.7.
 //      Schwartz et al., Native x86 Decompilation using Semantics-Preserving Structural Analysis.
 #pragma once
+#include <functional>
 #include <vector>
 #include <map>
 #include <set>
@@ -41,12 +42,15 @@ struct Analyzer {
     // exactly three dominated predecessors.  Dialog p62 is the motivating specimen.  Broader
     // multi-latch classes were measured and rejected because they invented loop headers.
     std::set<int> multi_latch_for_headers;
+    // Original-CFG loops (st::find_loops): header block -> body blocks. Read-only after build();
+    // used to recognise the true head of a cycle when an impossible candidate is skipped.
+    std::map<int, std::set<int>> original_loop_bodies;
     int entry = 0;
 
     void build(const st::Graph& g) {
         regions.clear(); succ.clear(); pred.clear(); live.clear();
         for_latches.clear(); nested_for_latches.clear(); nested_for_preps.clear();
-        multi_latch_for_headers.clear();
+        multi_latch_for_headers.clear(); original_loop_bodies.clear();
         for (size_t i = 0; i < g.n.size(); ++i) {
             Region r; r.kind = RK::Basic; r.block = (int)i;
             regions.push_back(r);
@@ -78,6 +82,8 @@ struct Analyzer {
                 }
         }
         std::vector<st::Loop> loops = st::find_loops(g);
+        for (const st::Loop& loop : loops)
+            if (loop.header >= 0) original_loop_bodies[loop.header].insert(loop.body.begin(), loop.body.end());
         for (size_t i = 0; i < loops.size(); ++i) {
             if (loops[i].latch < 0) continue;
             for (size_t j = 0; j < loops.size(); ++j) {
@@ -346,9 +352,32 @@ struct Analyzer {
         // Muchnick calls these "proper regions" and gives them their own node kind rather than
         // trying to express them with if/else templates. Collapsing them lets reduction continue;
         // emission handles the interior separately. Still ZERO duplication.
+        //
+        // LOOP-BODY PROPER REGION (2026-09-29, SyndicateScarves NewLokaScarfUpdate). When `n` is a
+        // dominance loop header, `reaches(c, n)` refuses EVERY body node, because every body node
+        // reaches `n` through the latch's back edge. A loop whose body is a non-series-parallel
+        // DAG (e.g. `if t ~= nil and t[k] ~= nil then A else B end`, where the second operand
+        // needs statements and cannot be merged into a predicate chain) could then only be
+        // collapsed by the NaturalLoop rule with its interior UNREDUCED, and the emitter drops
+        // branches between unreduced parts. Growing by "all predecessors already inside" means
+        // the only cycles S can contain pass through `n`; for a loop header the exact acyclicity
+        // test is therefore "no member other than n has a direct edge back to n". Latches stay
+        // outside and become the region's single exit. RENOVICE_NO_LOOP_BODY_PROPER=1 restores
+        // the previous test for A/B attribution.
+        const bool loop_body_proper = !std::getenv("RENOVICE_NO_LOOP_BODY_PROPER");
         for (int n : order) {
             if (!live.count(n)) continue;
             if (nsucc(n) < 2) continue;
+            bool header_of_current_loop = false;
+            if (loop_body_proper)
+                for (int p : pred[n])
+                    if (p != n && live.count(p) && reaches(n, p) && dominates_current(n, p)) {
+                        header_of_current_loop = true;
+                        break;
+                    }
+            auto returns_to_n = [&](int c) {
+                return header_of_current_loop ? succ[c].count(n) != 0 : reaches(c, n);
+            };
             // Grow the region from n: a node joins only if ALL its preds are already inside.
             std::set<int> S; S.insert(n);
             bool grew = true; int guard2 = 0;
@@ -360,7 +389,7 @@ struct Analyzer {
                     bool all_in = true;
                     for (int q : pred[c]) if (!S.count(q)) { all_in = false; break; }
                     if (!all_in) continue;
-                    if (reaches(c, n)) { all_in = false; }        // cyclic: not an acyclic region
+                    if (returns_to_n(c)) { all_in = false; }      // cyclic: not an acyclic region
                     if (all_in) { S.insert(c); grew = true; }
                 }
             }
@@ -369,7 +398,7 @@ struct Analyzer {
             for (int x : S) for (int s2 : succ[x]) if (!S.count(s2)) outs.insert(s2);
             if (outs.size() > 1) continue;                        // must be single-exit
             bool cyclic = false;
-            for (int x : S) if (x != n && reaches(x, n)) cyclic = true;
+            for (int x : S) if (x != n && returns_to_n(x)) cyclic = true;
             if (cyclic) continue;
             std::vector<int> parts(S.begin(), S.end());
             Region r; r.kind = RK::Proper; r.head = n; r.parts = parts;
@@ -420,35 +449,94 @@ struct Analyzer {
             }
             // No multi-latch header was ready. Preserve the established single-latch reduction below.
         }
+        // A NATURAL LOOP NEVER CONTAINS THE FUNCTION ENTRY UNLESS THE ENTRY IS ITS HEADER
+        // (2026-09-29). `order` is region-id order, so a Basic block inside a loop (low id) can be
+        // tried before the true header, whose region was collapsed into a newer id. p -> n then
+        // closes a cycle without being a back edge (n does not dominate p), and the backwards
+        // closure from p runs through the real header into the prologue; the entry has no
+        // predecessors, so the single-entry test cannot see it. SyndicateScarves NewLokaScarfUpdate:
+        // NaturalLoop(head = the `NewLokaEffects[name] ~= nil` test) swallowed the function
+        // prologue; the emitter printed the loop body first, the prologue last and no `while`.
+        //
+        // Repair, local to that candidate: when a candidate (n, p) holds the entry although n is not
+        // the entry, skip it provided a CLEAN candidate (n2, p2) of the same cycle exists -- n2 holds
+        // the header of an original-CFG loop whose body covers p2, n2 is not the entry region, and
+        // the body excludes the entry and contains both n and p. If there is none (earlier collapses have already merged the loop with the entry, measured on
+        // Lotus_Interface_Hub p117), keep the established candidate: rejecting it there, or
+        // preferring unrelated clean loops first, moved code loss between two loops (ACCESS-LOSS 11).
+        // RENOVICE_LEGACY_ENTRY_IN_LOOP=1 restores the old choice for A/B.
+        struct LoopCandidate { int n = -1, p = -1; std::set<int> body, outs; };
+        auto natural_candidate = [&](int n, int p, LoopCandidate& c) -> bool {
+            if (!live.count(p) || !reaches(n, p)) return false;   // p->n must close a cycle
+            // Strict dominance stays a diagnostic switch (it is the Hub p117 A/B above).
+            if ((std::getenv("RENOVICE_CANONICAL_NATURAL_LOOP")
+                 || std::getenv("RENOVICE_DOMINANCE_BACKEDGE"))
+                && !dominates_current(n, p)) return false;
+            c = LoopCandidate(); c.n = n; c.p = p; c.body.insert(n);
+            std::vector<int> stk{p};
+            while (!stk.empty()) {                        // natural loop = everything reaching p
+                int x = stk.back(); stk.pop_back();
+                if (c.body.count(x)) continue;
+                c.body.insert(x);
+                for (int q : pred[x]) if (!c.body.count(q) && live.count(q)) stk.push_back(q);
+            }
+            // MULTIPLE EXITS ARE FINE — they are `break`s, which Lua expresses directly. The
+            // collapsed node simply keeps several successors and later reductions handle them.
+            // Refusing them left 1,766 protos unreduced for no reason.
+            for (int x : c.body) for (int s : succ[x]) if (!c.body.count(s)) c.outs.insert(s);
+            for (int x : c.body) if (x != n)             // single entry (guaranteed if reducible)
+                for (int q : pred[x]) if (!c.body.count(q)) return false;
+            return true;
+        };
+        std::function<void(int, std::set<int>&)> region_blocks = [&](int r, std::set<int>& out) {
+            if (r < 0 || r >= (int)regions.size()) return;
+            if (regions[r].kind == RK::Basic) { out.insert(regions[r].block); return; }
+            for (int part : regions[r].parts) region_blocks(part, out);
+        };
+        // Does region `head` hold the header of an original-CFG loop whose body contains every block
+        // of region `latch`? That is the cycle's true head.
+        auto heads_cycle = [&](int head, int latch) -> bool {
+            std::set<int> head_blocks, latch_blocks;
+            region_blocks(head, head_blocks); region_blocks(latch, latch_blocks);
+            for (int block : head_blocks) {
+                auto loop = original_loop_bodies.find(block);
+                if (loop == original_loop_bodies.end()) continue;
+                bool covers = !latch_blocks.empty();
+                for (int b : latch_blocks) if (!loop->second.count(b)) { covers = false; break; }
+                if (covers) return true;
+            }
+            return false;
+        };
+        auto collapse_loop = [&](const LoopCandidate& c) {
+            std::vector<int> parts(c.body.begin(), c.body.end());
+            Region r; r.kind = RK::NaturalLoop; r.head = c.n; r.parts = parts;
+            int id = add(r); collapse(parts, id, c.outs);
+        };
         for (int n : order) {
             if (!live.count(n)) continue;
             for (int p : pred[n]) {
-                if (!live.count(p)) continue;
-                if (!reaches(n, p)) continue;                 // n->..->p means p->n closes a cycle
-                if ((std::getenv("RENOVICE_CANONICAL_NATURAL_LOOP")
-                     || std::getenv("RENOVICE_DOMINANCE_BACKEDGE"))
-                    && !dominates_current(n, p)) continue;     // but only dominance makes it a back edge
-                std::set<int> body; body.insert(n);
-                std::vector<int> stk{p};
-                while (!stk.empty()) {                        // natural loop = everything reaching p
-                    int x = stk.back(); stk.pop_back();
-                    if (body.count(x)) continue;
-                    body.insert(x);
-                    for (int q : pred[x]) if (!body.count(q) && live.count(q)) stk.push_back(q);
+                LoopCandidate first;
+                if (!natural_candidate(n, p, first)) continue;
+                if (n != entry && first.body.count(entry) && !std::getenv("RENOVICE_LEGACY_ENTRY_IN_LOOP")) {
+                    bool clean_exists = false;
+                    for (int n2 : order) {
+                        if (clean_exists) break;
+                        if (!live.count(n2) || n2 == entry || !first.body.count(n2)) continue;
+                        for (int p2 : pred[n2]) {
+                            LoopCandidate clean;
+                            if (!natural_candidate(n2, p2, clean) || clean.body.count(entry)
+                                || !clean.body.count(n) || !clean.body.count(p)
+                                || !heads_cycle(n2, p2)) continue;
+                            clean_exists = true;
+                            break;
+                        }
+                    }
+                    // Skip only this impossible candidate; the scan continues in the established
+                    // order, so nested loops of the cycle still reduce before their parent.
+                    if (clean_exists) continue;
                 }
-                std::set<int> outs;                           // exits: edges leaving the body
-                for (int x : body) for (int s : succ[x]) if (!body.count(s)) outs.insert(s);
-                // MULTIPLE EXITS ARE FINE — they are `break`s, which Lua expresses directly. The
-                // collapsed node simply keeps several successors and later reductions handle them.
-                // Refusing them left 1,766 protos unreduced for no reason.
-                if (outs.empty() && body.size() == live.size()) { /* whole graph is the loop */ }
-                bool entry_ok = true;                         // single entry (guaranteed if reducible)
-                for (int x : body) if (x != n)
-                    for (int q : pred[x]) if (!body.count(q)) entry_ok = false;
-                if (!entry_ok) continue;
-                std::vector<int> parts(body.begin(), body.end());
-                Region r; r.kind = RK::NaturalLoop; r.head = n; r.parts = parts;
-                int id = add(r); collapse(parts, id, outs); return true;
+                collapse_loop(first);
+                return true;
             }
         }
         return false;

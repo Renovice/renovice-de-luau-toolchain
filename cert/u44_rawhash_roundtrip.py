@@ -12,14 +12,19 @@ For every stock module:
                  must equal stock. This is the check the source fixed point cannot make: a fixed
                  point compares our output with itself, so a stable hash->string class loss passes it.
   CONST-ID closed  the same gate on the compiler-closed bytecode
+  CFG-ID         derecomp cfg-identity stock b1: per-prototype control-flow/operation-order identity
+                 (bisimulation of register-free operation labels, documented transcoder lowerings
+                 folded, emitter dispatch-state tests decided statically). CONST-ID compares constants
+                 only; a reordered or restructured function passes it (SyndicateScarves p13).
+  CFG-ID closed  the same gate on the compiler-closed bytecode
   byte identity  b1 == stock (measured separately; not required)
 
 Per-module work happens in a temporary directory; only failing modules keep artifacts (--keep).
 Usage:
   python cert/u44_rawhash_roundtrip.py STOCK_DIR OUT_DIR [--profile u44|u43] [--jobs N]
       [--match SUBSTR ...] [--list FILE] [--stride K] [--limit N] [--exe PATH] [--gate-exe PATH] [--keep]
-Exit status 0 only when every selected module passes decompile, recompile, determinism and
-CONST-ID on the first recompile.
+Exit status 0 only when every selected module passes decompile, recompile, determinism, CONST-ID and
+CFG-ID on the first recompile.
 """
 import argparse, concurrent.futures as cf, hashlib, json, os, re, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
@@ -67,6 +72,27 @@ def gate(exe, stock, cand, u44, cwd):
     return r
 
 
+def cfg_gate(exe, stock, cand, u44, cwd):
+    rc, out = run(exe, ["cfg-identity", stock, cand] + (["--u44"] if u44 else []), cwd)
+    m = re.search(r"CFG_IDENTITY protos_stock=(\d+) protos_candidate=(\d+) cfg_equal=(\d+) "
+                  r"model_errors=(\d+) candidate_dispatch_webs=(\d+) verdict=(\w+)", out)
+    if not m:
+        return {"verdict": "ERROR", "detail": out[-400:]}
+    r = dict(zip(["protosStock", "protosCandidate", "cfgEqual", "modelErrors", "dispatchWebs"],
+                 map(int, m.groups()[:5])))
+    r["verdict"] = m.group(6)
+    classes = re.search(r"^CFG_CLASSES \{([^}]*)\}", out, re.M)
+    r["classes"] = {}
+    if classes and classes.group(1):
+        for item in classes.group(1).split(";"):
+            name, _, count = item.rpartition(":")
+            r["classes"][name] = int(count)
+    diffs = [line for line in out.splitlines() if line.startswith("proto ")]
+    if diffs:
+        r["firstDiffs"] = diffs[:6]
+    return r
+
+
 def one(stock, args):
     u44 = args.profile == "u44"
     decomp = "decompile-mod-u44" if u44 else "decompile-mod"
@@ -91,11 +117,12 @@ def one(stock, args):
         rc2, _ = run(args.exe, [recomp, s1, b1r], work)
         res["deterministic"] = rc2 == 0 and b1r.read_bytes() == b1.read_bytes()
         res["constIdentity"] = gate(args.gate_exe, stock, b1, u44, work)
+        res["cfgIdentity"] = cfg_gate(args.gate_exe, stock, b1, u44, work)
         res["byteIdentical"] = b1.read_bytes() == stock.read_bytes()
-        # one-pass and compiler-closed fixed points
+        # one-pass and compiler-closed fixed points (skipped with --first-pass-only)
         sources, binaries = [s1.read_bytes()], [b1]
         closed_at = None
-        for k in range(2, MAX_CLOSE_PASSES + 2):
+        for k in range(2, (MAX_CLOSE_PASSES + 2) if not args.first_pass_only else 2):
             sk, bk = work / f"s{k}.luau", work / f"b{k}.lua_B"
             rc, out = run(args.exe, [decomp, binaries[-1], sk], work)
             if rc != 0:
@@ -114,12 +141,14 @@ def one(stock, args):
         if closed_at is not None and closed_at > 1:
             final = binaries[closed_at - 1]
             res["closedConstIdentity"] = gate(args.gate_exe, stock, final, u44, work)
+            res["closedCfgIdentity"] = cfg_gate(args.gate_exe, stock, final, u44, work)
             res["closedByteIdentical"] = final.read_bytes() == stock.read_bytes()
         return res
     finally:
         res["seconds"] = round(time.time() - t0, 2)
         failed = not (res.get("decompile") and res.get("recompile") and res.get("deterministic")
-                      and res.get("constIdentity", {}).get("verdict") == "PASS")
+                      and res.get("constIdentity", {}).get("verdict") == "PASS"
+                      and res.get("cfgIdentity", {}).get("verdict") == "PASS")
         if args.keep and failed:
             dest = Path(args.out) / "failures" / stock.name
             shutil.rmtree(dest, ignore_errors=True)
@@ -140,6 +169,8 @@ def main():
     ap.add_argument("--gate-exe", default=None, help="derecomp providing const-identity (default: --exe)")
     ap.add_argument("--tmp", default=None)
     ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--first-pass-only", action="store_true",
+                    help="skip the fixed-point/compiler-closed passes (release-gate sampling)")
     args = ap.parse_args()
     args.exe = str(Path(args.exe).resolve())
     args.gate_exe = str(Path(args.gate_exe).resolve()) if args.gate_exe else args.exe
@@ -160,7 +191,7 @@ def main():
     n = len(results)
     def count(pred): return sum(1 for r in results if pred(r))
     summary = {
-        "profile": args.profile, "exe": args.exe, "exeSha256": sha(args.exe), "gateExeSha256": sha(args.gate_exe),
+        "profile": args.profile, "firstPassOnly": args.first_pass_only, "exe": args.exe, "exeSha256": sha(args.exe), "gateExeSha256": sha(args.gate_exe),
         "stockDir": str(Path(args.stock).resolve()), "modules": n,
         "decompile": count(lambda r: r.get("decompile")),
         "recompile": count(lambda r: r.get("recompile")),
@@ -171,6 +202,11 @@ def main():
         "constIdentityFirstPass": count(lambda r: r.get("constIdentity", {}).get("verdict") == "PASS"),
         "constIdentityClosed": count(lambda r: (r.get("closedConstIdentity") or r.get("constIdentity", {})).get("verdict") == "PASS"
                                      and r.get("closedAtPass") is not None),
+        "cfgIdentityFirstPass": count(lambda r: r.get("cfgIdentity", {}).get("verdict") == "PASS"),
+        "cfgIdentityClosed": count(lambda r: (r.get("closedCfgIdentity") or r.get("cfgIdentity", {})).get("verdict") == "PASS"
+                                   and r.get("closedAtPass") is not None),
+        "constAndCfgIdentityFirstPass": count(lambda r: r.get("constIdentity", {}).get("verdict") == "PASS"
+                                              and r.get("cfgIdentity", {}).get("verdict") == "PASS"),
         "byteIdenticalFirstPass": count(lambda r: r.get("byteIdentical")),
         "seconds": round(time.time() - t0, 1),
     }
@@ -183,21 +219,43 @@ def main():
     summary["classSwapsFirstPass"] = sum(r.get("constIdentity", {}).get("classSwaps", 0) for r in results)
     summary["protoCountMismatch"] = count(lambda r: "protosStock" in r.get("constIdentity", {})
                                           and r["constIdentity"]["protosStock"] != r["constIdentity"]["protosCandidate"])
+    # Prototype totals only over modules whose prototype counts agree: when a prototype is lost or
+    # duplicated, same-index comparison pairs different functions (PITFALLS C2).
+    aligned = [r.get("cfgIdentity", {}) for r in results
+               if r.get("cfgIdentity", {}).get("protosStock") is not None
+               and r["cfgIdentity"]["protosStock"] == r["cfgIdentity"]["protosCandidate"]]
+    summary["cfgModulesProtoAligned"] = len(aligned)
+    summary["cfgProtosCompared"] = sum(c["protosStock"] for c in aligned)
+    summary["cfgProtosEqual"] = sum(c.get("cfgEqual", 0) for c in aligned)
+    proto_classes, module_classes = {}, {}
+    for r in results:
+        classes = r.get("cfgIdentity", {}).get("classes", {})
+        for name, n_protos in classes.items():
+            proto_classes[name] = proto_classes.get(name, 0) + n_protos
+            module_classes[name] = module_classes.get(name, 0) + 1
+        c = r.get("cfgIdentity", {})
+        if c.get("verdict") == "FAIL" and c.get("protosStock") != c.get("protosCandidate"):
+            module_classes["PROTO_COUNT"] = module_classes.get("PROTO_COUNT", 0) + 1
+    summary["cfgFailureClassesByProto"] = dict(sorted(proto_classes.items(), key=lambda kv: -kv[1]))
+    summary["cfgFailureClassesByModule"] = dict(sorted(module_classes.items(), key=lambda kv: -kv[1]))
     summary["hashClassOk"] = count(lambda r: r.get("constIdentity", {}).get("hashEqual") is not None
                                    and r["constIdentity"]["hashEqual"] == r["constIdentity"]["protosStock"]
                                    and r["constIdentity"]["stringEqual"] == r["constIdentity"]["protosStock"])
     (Path(args.out) / f"results-{args.profile}.json").write_text(json.dumps({"summary": summary, "results": results}, indent=1))
     with open(Path(args.out) / f"results-{args.profile}.tsv", "w", encoding="utf-8") as f:
-        f.write("module\tdecompile\trecompile\tdeterministic\tsrcFP\tbcFP\tclosedAt\tconstId\thashEq\tstrEq\tkeyEq\tprotos\tclosedConstId\tbyteIdentical\terror\n")
+        f.write("module\tdecompile\trecompile\tdeterministic\tsrcFP\tbcFP\tclosedAt\tconstId\thashEq\tstrEq\tkeyEq\tprotos\tclosedConstId\tbyteIdentical\tcfgId\tcfgEq\tclosedCfgId\terror\n")
         for r in results:
             c = r.get("constIdentity", {})
             f.write("\t".join(str(x) for x in [r["module"], r.get("decompile"), r.get("recompile"), r.get("deterministic"),
                     r.get("sourceFixedPoint"), r.get("bytecodeFixedPoint"), r.get("closedAtPass"), c.get("verdict"),
                     c.get("hashEqual"), c.get("stringEqual"), c.get("keyUseEqual"), c.get("protosStock"),
                     (r.get("closedConstIdentity") or {}).get("verdict"), r.get("byteIdentical"),
+                    r.get("cfgIdentity", {}).get("verdict"), r.get("cfgIdentity", {}).get("cfgEqual"),
+                    (r.get("closedCfgIdentity") or {}).get("verdict"),
                     (r.get("error") or r.get("fixedPointError") or "").replace("\t", " ").replace("\n", " ")[:200]]) + "\n")
     print(json.dumps(summary, indent=1))
-    ok = summary["decompile"] == summary["recompile"] == summary["deterministic"] == summary["constIdentityFirstPass"] == n
+    ok = (summary["decompile"] == summary["recompile"] == summary["deterministic"]
+          == summary["constIdentityFirstPass"] == summary["cfgIdentityFirstPass"] == n)
     sys.exit(0 if ok else 1)
 
 
