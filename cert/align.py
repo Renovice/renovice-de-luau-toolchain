@@ -22,11 +22,12 @@ Usage:  python cert/align.py [N]        (N = how many corpus files, default 200)
 import os, sys, re, subprocess, sys, tempfile, collections
 from concurrent.futures import ThreadPoolExecutor
 
-from workspace_paths import corpus_cache
+from workspace_paths import corpus_cache, module_decompile_mode
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DEC  = os.path.join(ROOT, "bin", "derecomp.exe")
+DECOMPILE_MODE = module_decompile_mode()
 # CORPUS LOCATION. Overridable via RENOVICE_CORPUS so the project can be COPIED to an isolated
 # workspace and still measure the real corpus. The default is RELATIVE to the project root, and that
 # relative path is what silently broke sub-agents working in temp copies: they measured an empty or
@@ -73,11 +74,40 @@ def skeleton(path, reachable=False):
     return protos
 
 
+def norm(lines):
+    """Normalize semantic-skeleton lines for named-access comparison.
+
+    Luau may compile ``_T.vipAvatar`` either as ``GETIMPORT _T`` followed by
+    ``GETFIELD vipAvatar`` or as the single fused import ``GETIMPORT
+    _T.vipAvatar``.  Those encodings perform the same named accesses.  Expand
+    only syntactically valid dotted import paths so the access oracle compares
+    the entities touched rather than charging an optimizer encoding change as
+    a lost root plus field read.
+    """
+    out = []
+    identifier = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+    for ln in lines:
+        if "\t" not in ln or ln.startswith("BRANCH\t"):
+            continue
+        if ln.startswith("CLOSURE\t"):
+            out.append("CLOSURE")
+            continue
+        if ln.startswith("GETIMPORT\t"):
+            path = ln.split("\t", 1)[1]
+            parts = path.split(".")
+            if len(parts) > 1 and all(identifier.match(part) for part in parts):
+                out.append("GETIMPORT\t" + parts[0])
+                out.extend("GETFIELD\t" + part for part in parts[1:])
+                continue
+        out.append(ln)
+    return out
+
+
 def one(f):
     a = skeleton(f)
     if a is None:
         return (f, "decompile-fail", None)
-    src = run([DEC, "decompile-mod", f])
+    src = run([DEC, DECOMPILE_MODE, f])
     if src.returncode != 0:
         return (f, "decompile-fail", None)
     fd, sp = tempfile.mkstemp(suffix=".luau"); os.close(fd)
@@ -135,14 +165,6 @@ def one(f):
     # state tests, JUMPXEQK lowering) and the closure TARGET (a module-local index; a recursive content
     # hash was tried and rejected — one benign leaf difference rewrites every ancestor's signature and
     # turned 5 real findings into 207).
-    def norm(lines):
-        out = []
-        for ln in lines:
-            if "	" not in ln or ln.startswith("BRANCH	"):
-                continue
-            out.append("CLOSURE" if ln.startswith("CLOSURE	") else ln)
-        return out
-
     # The body key must not be ORDER-SENSITIVE for pure reads. Register allocation decides when a
     # global/field load is materialised, so `tonumber(o:Get())` may load `tonumber` before or after the
     # inner call with identical meaning — measured on ScrollBar, where the two bodies were the SAME

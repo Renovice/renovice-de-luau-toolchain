@@ -1,0 +1,19 @@
+FAIL import root + literal LOADK
+FAIL import root + literal LOADKX
+FAIL import root + stored type comparison
+FAIL import root + constant fastcall argument
+FAIL import root + ANDK string result
+FAIL import root + ORK string result
+FAIL import root + table template key
+FAIL import root + table template value
+FAIL hashed field + literal LOADK
+PASS name-only import remains hashed
+HASH_IN_VALUE_LOAD proto=30 key=6
+HASH_IN_VALUE_LOAD proto=30 key=12
+HASH_IN_VALUE_LOAD proto=51 key=40
+HASH_IN_VALUE_LOAD proto=51 key=40
+HASH_IN_VALUE_LOAD proto=51 key=40
+HASH_IN_VALUE_LOAD proto=54 key=2
+VALUE_LOAD_AUDIT loads=310 bad=6
+FAIL actual DE artifact has no nonboolean name hash in LOADK value positions
+SHARED_CONSTANT_TEST failures=10

@@ -1,0 +1,331 @@
+
+************* Preparing the environment for Debugger Extensions Gallery repositories **************
+   ExtensionRepository : Implicit
+   UseExperimentalFeatureForNugetShare : true
+   AllowNugetExeUpdate : true
+   NonInteractiveNuget : true
+   AllowNugetMSCredentialProviderInstall : true
+   AllowParallelInitializationOfLocalRepositories : true
+   EnableRedirectToChakraJsProvider : false
+
+   -- Configuring repositories
+      ----> Repository : LocalInstalled, Enabled: true
+      ----> Repository : UserExtensions, Enabled: true
+
+>>>>>>>>>>>>> Preparing the environment for Debugger Extensions Gallery repositories completed, duration 0.000 seconds
+
+************* Waiting for Debugger Extensions Gallery to Initialize **************
+
+>>>>>>>>>>>>> Waiting for Debugger Extensions Gallery to Initialize completed, duration 0.015 seconds
+   ----> Repository : UserExtensions, Enabled: true, Packages count: 0
+   ----> Repository : LocalInstalled, Enabled: true, Packages count: 30
+
+Microsoft (R) Windows Debugger Version 10.0.28000.2114 AMD64
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+*** wait with pending attach
+
+************* Path validation summary **************
+Response                         Time (ms)     Location
+Deferred                                       srv*
+Symbol search path is: srv*
+Executable search path is: 
+
++------------------------------------------------------------------------+
+| This target supports Hardware-enforced Stack Protection. A HW based    |
+| "Shadow Stack" may be available to assist in debugging and analysis.   |
+| See aka.ms/userhsp for more info.                                      |
+|                                                                        |
+| dps @ssp                                                               |
+|                                                                        |
++------------------------------------------------------------------------+
+
+ModLoad: 00007ff7`ba8f0000 00007ff7`bac5b000   C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\bin\derecomp.exe
+ModLoad: 00007ffa`cfe80000 00007ffa`d00e6000   C:\WINDOWS\SYSTEM32\ntdll.dll
+ModLoad: 00007ffa`cdcc0000 00007ffa`cdd89000   C:\WINDOWS\System32\KERNEL32.DLL
+ModLoad: 00007ffa`cd1d0000 00007ffa`cd5ca000   C:\WINDOWS\System32\KERNELBASE.dll
+ModLoad: 00007ffa`ca260000 00007ffa`ca300000   C:\WINDOWS\SYSTEM32\apphelp.dll
+ModLoad: 00007ffa`cd5d0000 00007ffa`cd71c000   C:\WINDOWS\System32\ucrtbase.dll
+ModLoad: 00007ffa`cf170000 00007ffa`cf226000   C:\WINDOWS\System32\advapi32.dll
+ModLoad: 00007ffa`cfd90000 00007ffa`cfe39000   C:\WINDOWS\System32\msvcrt.dll
+ModLoad: 00007ffa`cef70000 00007ffa`cf01a000   C:\WINDOWS\System32\sechost.dll
+ModLoad: 00007ffa`cde90000 00007ffa`cdfa8000   C:\WINDOWS\System32\RPCRT4.dll
+ModLoad: 00007ffa`cc610000 00007ffa`cc61c000   C:\WINDOWS\SYSTEM32\CRYPTBASE.DLL
+ModLoad: 00007ffa`cdb40000 00007ffa`cdbe8000   C:\WINDOWS\System32\bcryptPrimitives.dll
+(7c84.4888): Break instruction exception - code 80000003 (first chance)
+ntdll!DbgBreakPoint:
+00007ffa`cff9ece0 cc              int     3
+0:001> cdb: Reading initial command 'sxe sov; g; kP 100; q'
+(7c84.7e6c): Stack overflow - code c00000fd (first chance)
+First chance exceptions are reported before any exception handling.
+This exception may be expected and handled.
+*** WARNING: Unable to verify timestamp for C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\bin\derecomp.exe
+Child-SP          RetAddr               Call Site
+00000061`50004000 00007ff7`baa674ec     derecomp+0x1b12d7
+00000061`50004120 00007ff7`ba92e45e     derecomp+0x1774ec
+00000061`500041d0 00007ff7`baa6860b     derecomp+0x3e45e
+00000061`50004260 00007ff7`baa6ce70     derecomp+0x17860b
+00000061`50004360 00007ff7`baa74b8a     derecomp+0x17ce70
+00000061`50004480 00007ff7`baa60993     derecomp+0x184b8a
+00000061`500044d0 00007ff7`baa62685     derecomp+0x170993
+00000061`50004860 00007ff7`baa723a5     derecomp+0x172685
+00000061`50004bf0 00007ff7`baa60738     derecomp+0x1823a5
+00000061`500050c0 00007ff7`baa61227     derecomp+0x170738
+00000061`50005450 00007ff7`baa6330a     derecomp+0x171227
+00000061`500057e0 00007ff7`baa62350     derecomp+0x17330a
+00000061`50005b70 00007ff7`baa627af     derecomp+0x172350
+00000061`50005f00 00007ff7`baa6330a     derecomp+0x1727af
+00000061`50006290 00007ff7`baa61227     derecomp+0x17330a
+00000061`50006620 00007ff7`baa6330a     derecomp+0x171227
+00000061`500069b0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50006d40 00007ff7`baa61227     derecomp+0x17330a
+00000061`500070d0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50007460 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500077f0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50007b80 00007ff7`baa6330a     derecomp+0x171227
+00000061`50007f10 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500082a0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50008630 00007ff7`baa6330a     derecomp+0x171227
+00000061`500089c0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50008d50 00007ff7`baa61227     derecomp+0x17330a
+00000061`500090e0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50009470 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50009800 00007ff7`baa61227     derecomp+0x17330a
+00000061`50009b90 00007ff7`baa6330a     derecomp+0x171227
+00000061`50009f20 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000a2b0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000a640 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000a9d0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000ad60 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000b0f0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000b480 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000b810 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000bba0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000bf30 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000c2c0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000c650 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000c9e0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000cd70 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000d100 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000d490 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000d820 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000dbb0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000df40 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000e2d0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000e660 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000e9f0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000ed80 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000f110 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000f4a0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5000f830 00007ff7`baa61227     derecomp+0x17330a
+00000061`5000fbc0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5000ff50 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500102e0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50010670 00007ff7`baa6330a     derecomp+0x171227
+00000061`50010a00 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50010d90 00007ff7`baa61227     derecomp+0x17330a
+00000061`50011120 00007ff7`baa6330a     derecomp+0x171227
+00000061`500114b0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50011840 00007ff7`baa61227     derecomp+0x17330a
+00000061`50011bd0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50011f60 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500122f0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50012680 00007ff7`baa6330a     derecomp+0x171227
+00000061`50012a10 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50012da0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50013130 00007ff7`baa6330a     derecomp+0x171227
+00000061`500134c0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50013850 00007ff7`baa61227     derecomp+0x17330a
+00000061`50013be0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50013f70 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50014300 00007ff7`baa61227     derecomp+0x17330a
+00000061`50014690 00007ff7`baa6330a     derecomp+0x171227
+00000061`50014a20 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50014db0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50015140 00007ff7`baa6330a     derecomp+0x171227
+00000061`500154d0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50015860 00007ff7`baa61227     derecomp+0x17330a
+00000061`50015bf0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50015f80 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50016310 00007ff7`baa61227     derecomp+0x17330a
+00000061`500166a0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50016a30 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50016dc0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50017150 00007ff7`baa6330a     derecomp+0x171227
+00000061`500174e0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50017870 00007ff7`baa61227     derecomp+0x17330a
+00000061`50017c00 00007ff7`baa6330a     derecomp+0x171227
+00000061`50017f90 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50018320 00007ff7`baa61227     derecomp+0x17330a
+00000061`500186b0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50018a40 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50018dd0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50019160 00007ff7`baa6330a     derecomp+0x171227
+00000061`500194f0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50019880 00007ff7`baa61227     derecomp+0x17330a
+00000061`50019c10 00007ff7`baa6330a     derecomp+0x171227
+00000061`50019fa0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001a330 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001a6c0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001aa50 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001ade0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001b170 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001b500 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001b890 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001bc20 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001bfb0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001c340 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001c6d0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001ca60 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001cdf0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001d180 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001d510 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001d8a0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001dc30 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001dfc0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001e350 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001e6e0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001ea70 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001ee00 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001f190 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001f520 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5001f8b0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5001fc40 00007ff7`baa6330a     derecomp+0x171227
+00000061`5001ffd0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50020360 00007ff7`baa61227     derecomp+0x17330a
+00000061`500206f0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50020a80 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50020e10 00007ff7`baa61227     derecomp+0x17330a
+00000061`500211a0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50021530 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500218c0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50021c50 00007ff7`baa6330a     derecomp+0x171227
+00000061`50021fe0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50022370 00007ff7`baa61227     derecomp+0x17330a
+00000061`50022700 00007ff7`baa6330a     derecomp+0x171227
+00000061`50022a90 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50022e20 00007ff7`baa61227     derecomp+0x17330a
+00000061`500231b0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50023540 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500238d0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50023c60 00007ff7`baa6330a     derecomp+0x171227
+00000061`50023ff0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50024380 00007ff7`baa61227     derecomp+0x17330a
+00000061`50024710 00007ff7`baa6330a     derecomp+0x171227
+00000061`50024aa0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50024e30 00007ff7`baa61227     derecomp+0x17330a
+00000061`500251c0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50025550 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500258e0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50025c70 00007ff7`baa6330a     derecomp+0x171227
+00000061`50026000 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50026390 00007ff7`baa61227     derecomp+0x17330a
+00000061`50026720 00007ff7`baa6330a     derecomp+0x171227
+00000061`50026ab0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50026e40 00007ff7`baa61227     derecomp+0x17330a
+00000061`500271d0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50027560 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500278f0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50027c80 00007ff7`baa6330a     derecomp+0x171227
+00000061`50028010 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500283a0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50028730 00007ff7`baa6330a     derecomp+0x171227
+00000061`50028ac0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50028e50 00007ff7`baa61227     derecomp+0x17330a
+00000061`500291e0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50029570 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50029900 00007ff7`baa61227     derecomp+0x17330a
+00000061`50029c90 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002a020 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002a3b0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002a740 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002aad0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002ae60 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002b1f0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002b580 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002b910 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002bca0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002c030 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002c3c0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002c750 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002cae0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002ce70 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002d200 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002d590 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002d920 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002dcb0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002e040 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002e3d0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002e760 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002eaf0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002ee80 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002f210 00007ff7`baa6330a     derecomp+0x171227
+00000061`5002f5a0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5002f930 00007ff7`baa61227     derecomp+0x17330a
+00000061`5002fcc0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50030050 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500303e0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50030770 00007ff7`baa6330a     derecomp+0x171227
+00000061`50030b00 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50030e90 00007ff7`baa61227     derecomp+0x17330a
+00000061`50031220 00007ff7`baa6330a     derecomp+0x171227
+00000061`500315b0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50031940 00007ff7`baa61227     derecomp+0x17330a
+00000061`50031cd0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50032060 00007ff7`baa6330a     derecomp+0x17330a
+00000061`500323f0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50032780 00007ff7`baa6330a     derecomp+0x171227
+00000061`50032b10 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50032ea0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50033230 00007ff7`baa6330a     derecomp+0x171227
+00000061`500335c0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50033950 00007ff7`baa61227     derecomp+0x17330a
+00000061`50033ce0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50034070 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50034400 00007ff7`baa61227     derecomp+0x17330a
+00000061`50034790 00007ff7`baa6330a     derecomp+0x171227
+00000061`50034b20 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50034eb0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50035240 00007ff7`baa6330a     derecomp+0x171227
+00000061`500355d0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50035960 00007ff7`baa61227     derecomp+0x17330a
+00000061`50035cf0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50036080 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50036410 00007ff7`baa61227     derecomp+0x17330a
+00000061`500367a0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50036b30 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50036ec0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50037250 00007ff7`baa6330a     derecomp+0x171227
+00000061`500375e0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50037970 00007ff7`baa61227     derecomp+0x17330a
+00000061`50037d00 00007ff7`baa6330a     derecomp+0x171227
+00000061`50038090 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50038420 00007ff7`baa61227     derecomp+0x17330a
+00000061`500387b0 00007ff7`baa6330a     derecomp+0x171227
+00000061`50038b40 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50038ed0 00007ff7`baa61227     derecomp+0x17330a
+00000061`50039260 00007ff7`baa6330a     derecomp+0x171227
+00000061`500395f0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`50039980 00007ff7`baa61227     derecomp+0x17330a
+00000061`50039d10 00007ff7`baa6330a     derecomp+0x171227
+00000061`5003a0a0 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5003a430 00007ff7`baa61227     derecomp+0x17330a
+00000061`5003a7c0 00007ff7`baa6330a     derecomp+0x171227
+00000061`5003ab50 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5003aee0 00007ff7`baa61227     derecomp+0x17330a
+00000061`5003b270 00007ff7`baa6330a     derecomp+0x171227
+00000061`5003b600 00007ff7`baa6330a     derecomp+0x17330a
+00000061`5003b990 00007ff7`baa61227     derecomp+0x17330a
+00000061`5003bd20 00007ff7`baa6330a     derecomp+0x171227
+quit:
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\atlmfc.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\concurrency.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\cpp_rest.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\ObjectiveC.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\stl.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\Windows.Data.Json.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\Windows.Devices.Geolocation.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\Windows.Devices.Sensors.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\Windows.Media.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\windows.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\winrt.natvis'

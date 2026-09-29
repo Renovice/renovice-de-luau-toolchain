@@ -1,0 +1,10 @@
+== INDEPENDENT CATEGORY COUNTS (no first-match masking) ==  files=360
+   CLEAN              250
+   ORDER-DIFF         94
+   LOOP-DIFF          41
+   ACCESS-DIFF        10
+   ACCESS-GAIN        10
+   PROTO-COUNT-DIFF   9
+   ACCESS-LOSS-TOTAL  0
+
+   ACCESS-LOSS is the number that must never rise: 0 file(s)

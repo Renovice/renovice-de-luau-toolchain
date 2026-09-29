@@ -1,0 +1,10 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=6EADFC126264740EEE2D8D3B0AA1855765061E35FDB23A01A55AE2846AA38587
+CYCLE2 files=360 passed=354 failed=6 errors=0
+  DRIFT Lotus_Interface_Background.lua_B                        bytes=+4 stack_sum=+0 stack_max=+0 protos=+0 ops=0x29:+1
+  DRIFT Lotus_Interface_DiegeticUpgradeCards.lua_B              bytes=+4 stack_sum=+1 stack_max=+0 protos=+0 ops=0x0d:+1,0x1c:-1,0x21:+1
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_LotusUtilities.lua_B                    bytes=-4 stack_sum=+0 stack_max=+0 protos=+0 ops=0x40:-1
+  DRIFT Lotus_Interface_MapRedux.lua_B                          bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+CYCLE10 files=5 passed=5 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\full360-strict-atomic-v24.json

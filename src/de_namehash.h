@@ -7,12 +7,16 @@
 #include <string>
 #include <cctype>
 #include <cstdlib>
+#include <map>
+#include <stdexcept>
 
 namespace de {
 
 static const uint32_t NAMEHASH_SEED_2026_06_19 = 0x7E5AF8E9u;
 
-inline uint32_t de_name_hash(const std::string& name, uint32_t seed = NAMEHASH_SEED_2026_06_19) {
+inline std::map<uint32_t, uint32_t> source_aliases;
+inline uint32_t active_namehash_seed = NAMEHASH_SEED_2026_06_19;
+inline uint32_t de_name_hash(const std::string& name, uint32_t seed = active_namehash_seed) {
     uint32_t h = seed;
     for (unsigned char by : name) h = (h ^ (uint32_t)by) * 0x01000193u;   // FNV-1a (prime 16777619), uint32 wrap
     h = ~h;                                                                // finalizer 1: bitwise NOT
@@ -26,7 +30,13 @@ inline uint32_t resolve_name_hash(const std::string& name) {
     if (sz >= 10 && name[sz - 9] == '_' && name[sz - 10] == '_') {
         bool hex = true;
         for (size_t i = sz - 8; i < sz; ++i) if (!std::isxdigit((unsigned char)name[i])) { hex = false; break; }
-        if (hex) return (uint32_t)std::strtoul(name.substr(sz - 8).c_str(), nullptr, 16);
+        if (hex) {
+            const auto hash = (uint32_t)std::strtoul(name.substr(sz - 8).c_str(), nullptr, 16);
+            if (active_namehash_seed == NAMEHASH_SEED_2026_06_19) return hash;
+            const auto found = source_aliases.find(hash);
+            if (found == source_aliases.end()) throw std::runtime_error("profile: unresolved source alias " + name);
+            return found->second;
+        }
     }
     return de_name_hash(name);
 }

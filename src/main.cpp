@@ -15,6 +15,7 @@
 #include "luau_bc.h"
 #include "de_container.h"
 #include "de_namehash.h"
+#include "de_build_profile.h"
 #include "transcode.h"
 #include "ir.h"
 #include "expr.h"
@@ -259,7 +260,10 @@ static int cmd_recompile(int argc, char** argv) {
     std::string bc = compile_luau(argv[2], err);
     if (bc.empty()) { std::fprintf(stderr, "[derecomp] luau compile failed: %s\n", err.c_str()); return 1; }
     std::string de_body;
-    try { de_body = tc::transcode(bc, hashed_globals, hashed_fields); }
+    try {
+        de_body = tc::transcode(bc, hashed_globals, hashed_fields);
+        if (de::active_namehash_seed == 0x768e5ed0u) de_body = de::change_build_profile(de_body, true);
+    }
     catch (const std::exception& e) { std::fprintf(stderr, "[derecomp] transcode error: %s\n", e.what()); return 1; }
     // sanity: the emitted body must re-parse as a valid DE container (offline load check)
     bool loads = true; int nps = -1;
@@ -1534,7 +1538,30 @@ static ir::IProto ir_annotate(const de::Proto& p, int pidx,
             else                  std::snprintf(buf,sizeof buf,"_ENV.%s <- R%d", in.note.c_str(), in.A);
         // VALUE positions: route through value_text so an overloaded tag-1 boolean renders as
         // true/false rather than as the bogus name Name__00000001. See ir.h.
-        } else if (k_in_bx(in.op)) {                                // LOADK / DUPTABLE / DUPCLOSURE
+        } else if (in.op==0x16) {                                   // NEWCLOSURE: Bx is a CHILD-LIST index
+            if ((size_t)in.Bx >= ip.kids.size()) {
+                in.annotated = false;
+                in.unresolved = "NEWCLOSURE child index out of range";
+                std::snprintf(buf,sizeof buf,"R%d <- closure(child[%d] -> OOB; children=%zu)",
+                              in.A, (int)in.Bx, ip.kids.size());
+            } else {
+                std::snprintf(buf,sizeof buf,"R%d <- closure(child[%d] -> proto[%u])",
+                              in.A, (int)in.Bx, ip.kids[(size_t)in.Bx]);
+            }
+        } else if (in.op==0x42) {                                   // DUPCLOSURE: Bx is a CLOSURE-CONST index
+            const ir::KVal* k = kref(in, in.Bx, nullptr);
+            if (k && k->kind != ir::KKind::Closure) {
+                in.annotated = false;
+                in.unresolved = "DUPCLOSURE const is not a closure";
+            }
+            if (k && k->kind == ir::KKind::Closure) {
+                std::snprintf(buf,sizeof buf,"R%d <- closure(const[%d] -> proto[%llu])",
+                              in.A, (int)in.Bx, (unsigned long long)k->sub);
+            } else {
+                std::snprintf(buf,sizeof buf,"R%d <- closure(const[%d] -> INVALID)",
+                              in.A, (int)in.Bx);
+            }
+        } else if (k_in_bx(in.op)) {                                // LOADK / DUPTABLE
             const ir::KVal* k = kref(in, in.Bx, nullptr);
             in.note = k ? ir::value_text(*k) : "";
             std::snprintf(buf,sizeof buf,"R%d <- %s", in.A, in.note.c_str());
@@ -1573,7 +1600,6 @@ static ir::IProto ir_annotate(const de::Proto& p, int pidx,
         } else if (in.op==0x12) { std::snprintf(buf,sizeof buf,"R%d <- %d", in.A, (int)(int16_t)in.Bx);
         } else if (in.op==0x13) { std::snprintf(buf,sizeof buf,"R%d <- U%d", in.A, in.B);
         } else if (in.op==0x53) { std::snprintf(buf,sizeof buf,"U%d <- R%d", in.B, in.A);
-        } else if (in.op==0x16) { std::snprintf(buf,sizeof buf,"R%d <- closure(proto %d)", in.A, (int)in.Bx);
         } else                  { std::snprintf(buf,sizeof buf,"A=%d B=%d C=%d", in.A, in.B, in.C); }
         in.text = buf;
     }
@@ -1609,6 +1635,71 @@ static int cmd_ir(int argc, char** argv) {
                         in.annotated ? "" : ("   <<< " + in.unresolved).c_str());
     }
     return 0;
+}
+
+static int cmd_closure_index_selftest() {
+    int checks = 0;
+    int failures = 0;
+    auto check = [&](bool condition, const char* label) {
+        ++checks;
+        if (condition) std::printf("PASS %s\n", label);
+        else { ++failures; std::fprintf(stderr, "FAIL %s\n", label); }
+    };
+    auto make_proto = [](uint8_t op, uint8_t a, uint16_t bx) {
+        de::Proto p;
+        p.hdr.assign({(char)8, (char)0, (char)0, (char)0});
+        const uint32_t word = (uint32_t)op | ((uint32_t)a << 8) | ((uint32_t)bx << 16);
+        p.code.resize(sizeof word);
+        std::memcpy(p.code.data(), &word, sizeof word);
+        return p;
+    };
+    const std::vector<std::string> pool;
+    const ir::NameBase names;
+
+    de::Proto fresh = make_proto(0x16, 3, 1);
+    fresh.kids = {7, 42};
+    ir::IProto fresh_ir = ir_annotate(fresh, 100, pool, names);
+    check(fresh_ir.code.size() == 1 && fresh_ir.code[0].annotated,
+          "NEWCLOSURE valid child index accepted");
+    check(fresh_ir.code.size() == 1
+          && fresh_ir.code[0].text == "R3 <- closure(child[1] -> proto[42])",
+          "NEWCLOSURE labels child index and resolved global prototype separately");
+
+    de::Proto oob = make_proto(0x16, 2, 2);
+    oob.kids = {9, 10};
+    ir::IProto oob_ir = ir_annotate(oob, 101, pool, names);
+    check(oob_ir.code.size() == 1 && !oob_ir.code[0].annotated
+          && oob_ir.code[0].unresolved == "NEWCLOSURE child index out of range",
+          "NEWCLOSURE out-of-range child index fails closed");
+    check(oob_ir.code.size() == 1
+          && oob_ir.code[0].text == "R2 <- closure(child[2] -> OOB; children=2)",
+          "NEWCLOSURE out-of-range diagnostic preserves operand and child count");
+
+    de::Proto duplicate = make_proto(0x42, 4, 0);
+    de::Const closure_constant;
+    closure_constant.tag = 6;
+    closure_constant.idx = 99;
+    duplicate.consts.push_back(closure_constant);
+    ir::IProto duplicate_ir = ir_annotate(duplicate, 102, pool, names);
+    check(duplicate_ir.code.size() == 1 && duplicate_ir.code[0].annotated,
+          "DUPCLOSURE valid closure constant accepted");
+    check(duplicate_ir.code.size() == 1
+          && duplicate_ir.code[0].text == "R4 <- closure(const[0] -> proto[99])",
+          "DUPCLOSURE labels constant index and resolved global prototype separately");
+
+    de::Proto invalid_duplicate = make_proto(0x42, 5, 0);
+    de::Const number_constant;
+    number_constant.tag = 2;
+    number_constant.raw.assign(8, '\0');
+    invalid_duplicate.consts.push_back(number_constant);
+    ir::IProto invalid_duplicate_ir = ir_annotate(invalid_duplicate, 103, pool, names);
+    check(invalid_duplicate_ir.code.size() == 1 && !invalid_duplicate_ir.code[0].annotated
+          && invalid_duplicate_ir.code[0].unresolved == "DUPCLOSURE const is not a closure",
+          "DUPCLOSURE wrong constant type fails closed");
+
+    std::printf("CLOSURE INDEX SELFTEST %s checks=%d failures=%d\n",
+                failures == 0 ? "PASS" : "FAIL", checks, failures);
+    return failures == 0 ? 0 : 1;
 }
 
 // The M6a acceptance metric: annotate every instruction in the corpus, count what does not resolve.
@@ -2428,6 +2519,80 @@ static int cmd_lbc_cmp(int argc, char** argv) {
     return ((size_t)opseq_ok == n) ? 0 : 1;
 }
 
+// Per-prototype DE comparison for fixed-point work. Whole-file deltas hide which closure changed;
+// this keeps the container parser authoritative and reports code/header/constant differences plus
+// opcode deltas without generating or modifying source.
+static int cmd_de_proto_diff(int argc, char** argv) {
+    const std::string left_bytes = read_file(argv[2]);
+    const std::string right_bytes = read_file(argv[3]);
+    if (left_bytes.empty() || right_bytes.empty()) {
+        std::fprintf(stderr, "cannot read inputs\n");
+        return 2;
+    }
+    de::Module left, right;
+    try {
+        left = de::walk(left_bytes);
+        right = de::walk(right_bytes);
+    } catch (const std::exception& error) {
+        std::fprintf(stderr, "walk: %s\n", error.what());
+        return 2;
+    }
+    auto const_equal = [](const de::Const& a, const de::Const& b) {
+        return a.tag == b.tag && a.raw == b.raw && a.idx == b.idx && a.list == b.list
+            && a.items == b.items && a.sign == b.sign && a.val == b.val;
+    };
+    auto instruction_metrics = [](const de::Proto& proto, long long (&histogram)[256]) {
+        long long instructions = 0;
+        for (size_t offset = 0; offset + 4 <= proto.code.size();) {
+            const uint8_t opcode = (uint8_t)proto.code[offset];
+            ++histogram[opcode];
+            ++instructions;
+            offset += tc::is_de_width8(opcode) ? 8 : 4;
+        }
+        return instructions;
+    };
+
+    const size_t shared = std::min(left.protos.size(), right.protos.size());
+    int changed = left.protos.size() == right.protos.size() ? 0 : 1;
+    std::printf("protos=%zu->%zu shared=%zu\n", left.protos.size(), right.protos.size(), shared);
+    for (size_t pidx = 0; pidx < shared; ++pidx) {
+        const de::Proto& a = left.protos[pidx];
+        const de::Proto& b = right.protos[pidx];
+        bool constants_equal = a.consts.size() == b.consts.size();
+        for (size_t index = 0; constants_equal && index < a.consts.size(); ++index)
+            constants_equal = const_equal(a.consts[index], b.consts[index]);
+        const bool header_equal = a.hdr == b.hdr;
+        const bool code_equal = a.code == b.code;
+        const bool post_equal = a.post == b.post;
+        if (header_equal && code_equal && constants_equal && post_equal) continue;
+        changed = 1;
+        long long left_histogram[256] = {};
+        long long right_histogram[256] = {};
+        const long long left_instructions = instruction_metrics(a, left_histogram);
+        const long long right_instructions = instruction_metrics(b, right_histogram);
+        const int left_stack = a.hdr.empty() ? -1 : (uint8_t)a.hdr[0];
+        const int right_stack = b.hdr.empty() ? -1 : (uint8_t)b.hdr[0];
+        std::printf("pidx=%zu code_bytes=%zu->%zu (%+lld) instructions=%lld->%lld (%+lld) "
+                    "maxstack=%d->%d header=%d constants=%zu->%zu equal=%d post=%d ops=",
+                    pidx, a.code.size(), b.code.size(),
+                    (long long)b.code.size() - (long long)a.code.size(),
+                    left_instructions, right_instructions,
+                    right_instructions - left_instructions, left_stack, right_stack,
+                    header_equal ? 1 : 0, a.consts.size(), b.consts.size(),
+                    constants_equal ? 1 : 0, post_equal ? 1 : 0);
+        bool first = true;
+        for (int opcode = 0; opcode < 256; ++opcode) {
+            const long long delta = right_histogram[opcode] - left_histogram[opcode];
+            if (!delta) continue;
+            std::printf("%s0x%02x:%+lld", first ? "" : ",", opcode, delta);
+            first = false;
+        }
+        if (first) std::printf("none");
+        std::printf("\n");
+    }
+    return changed;
+}
+
 // =============================================================================================
 // de-builtins <dir> — recover DE's BUILTIN-ID table from the corpus, offline.
 //
@@ -2507,17 +2672,150 @@ static int cmd_de_builtins(int argc, char** argv) {
 #include "skel_cmd.h"
 #include "semantic_plan_cmd.h"
 #include "semantic_ir/command.h"
+#include "closure_map_cmd.h"
+
+// The fixed-point rules below were A/B tested, then certified together at 360/360 in raw mode,
+// with five witnesses stable through ten cycles and 19 executable behavior fixtures. Keep that
+// proven behavior in the actual binary;
+// requiring callers to reconstruct a long environment profile made ordinary `decompile` silently
+// fall back to the older, less stable renderer. The single opt-out exists for research comparisons.
+static void install_certified_decompiler_defaults() {
+    if (std::getenv("RENOVICE_NO_CERTIFIED_DEFAULT_PROFILE")) return;
+    static const char* const defaults[] = {
+        "RENOVICE_LOCAL_BUDGET_195",
+        "RENOVICE_NO_PROPER_WHOLE_PROMOTION",
+        "RENOVICE_STRUCTURED_RAW_FORNPREP",
+        "RENOVICE_REMOVE_PURE_EMPTY_TRUTHINESS",
+        "RENOVICE_CANONICAL_SCC_GUARD_LOOP",
+        "RENOVICE_DIRECT_STATE_SPELLING",
+        "RENOVICE_FINAL_STATE_SPELLING",
+        "RENOVICE_REDUNDANT_POST_BREAK_GUARDS",
+        "RENOVICE_COLLAPSE_NESTED_SINGLE_ARM_AND",
+        "RENOVICE_CFG_SKIP_FOR_PREP_WHILE",
+        "RENOVICE_CFG_EARLY_RETURN_JOIN",
+        "RENOVICE_CFG_GUARD_STRUCTURED_JOIN",
+        "RENOVICE_CFG_STRUCTURED_LOOP_TRIANGLE",
+        "RENOVICE_CFG_DUPLICATE_BARE_RETURNS",
+        "RENOVICE_CFG_PRIVATE_RETURN_LOOP_ARMS",
+        "RENOVICE_CFG_EXACT_RETURN_GUARD",
+        "RENOVICE_CFG_GUARD_BOUNDARY_TRIANGLE",
+        "RENOVICE_CFG_GUARD_ACYCLIC_DISPATCH",
+        "RENOVICE_CFG_SKIP_SMALL_NESTED_TERMINAL_REPEAT",
+        "RENOVICE_CFG_RETRY_OWNERSHIP_COLLISION",
+        "RENOVICE_CFG_RETRY_LOOP_ACYCLIC_DISPATCH",
+        "RENOVICE_CFG_TERMINAL_DISPATCH_RETURN",
+        "RENOVICE_CFG_STRUCTURED_EXACT_RETURN_ARM",
+        "RENOVICE_CFG_ALLOW_MIXED_FOR_WHILE",
+        "RENOVICE_CAPTURED_INDEX_KEY_TEMPORARIES",
+        "RENOVICE_GENERATED_FRAME_TEMPORARIES",
+        "RENOVICE_LINEAR_BREAK_REPEAT_STATES",
+        "RENOVICE_COMPOUND_COMPARISON_WHILE_GUARDS",
+        "RENOVICE_CANONICAL_EMPTY_ELSE_RETURN",
+        "RENOVICE_CANONICAL_EMPTY_OR_TRUTHINESS",
+        "RENOVICE_CANONICAL_EMPTY_RETURN_CONTINUATION",
+        "RENOVICE_CANONICAL_INLINE_GUARD_CHAIN",
+        "RENOVICE_CANONICAL_LATE_RETURNING_REPEAT_ARM",
+        "RENOVICE_CANONICAL_LEADING_REPEAT_GUARDS",
+        "RENOVICE_CANONICAL_LINEAR_RETURN_GUARDS",
+        "RENOVICE_CANONICAL_LITERAL_RETURN_TAIL",
+        "RENOVICE_CANONICAL_NESTED_RETURN_GUARDS",
+        "RENOVICE_CANONICAL_NIL_WHILE",
+        "RENOVICE_CANONICAL_OR_VALUE_TEMPORARIES",
+        "RENOVICE_CANONICAL_PREDICATE_ASSOCIATION",
+        "RENOVICE_CANONICAL_RETURN_ELSEIF",
+        "RENOVICE_CANONICAL_RETURNING_REPEAT_ARM",
+        "RENOVICE_CANONICAL_ROOT_REPEAT_LITERAL_TAIL",
+        "RENOVICE_CANONICAL_ROOT_REPEAT_RETURN_TAIL",
+        "RENOVICE_CANONICAL_ROOT_RETURN_TAIL",
+        "RENOVICE_CFG_DISTINCT_GUARD_DISPATCH",
+        "RENOVICE_CFG_EARLY_GUARD_JOIN",
+        "RENOVICE_CFG_EFFECTFUL_LATCH_GUARD_REPEAT",
+        "RENOVICE_CFG_EXPANDED_BOUNDARY_RETRY",
+        "RENOVICE_CFG_EXPANDED_GUARD_EXIT_TAIL",
+        "RENOVICE_CFG_GUARD_ATOMIC_JOIN",
+        "RENOVICE_CFG_GUARD_PRIVATE_TERMINALS",
+        "RENOVICE_CFG_GUARD_TERMINALS_INITIAL_RETRY",
+        "RENOVICE_CFG_INTERIOR_EXIT_WHILE",
+        "RENOVICE_CFG_INTERIOR_GUARD_CHAIN",
+        "RENOVICE_CFG_LOOP_EARLY_RETURN_JOIN",
+        "RENOVICE_CFG_PARTITION_SHARED_GUARD",
+        "RENOVICE_CFG_PENDING_GUARD_JOIN",
+        "RENOVICE_CFG_PREFER_PRIVATE_RETURN_TRIANGLE",
+        "RENOVICE_CFG_PREFER_STRUCTURED_PLAIN",
+        "RENOVICE_CFG_PRIVATE_TAIL_RETURN_GUARD",
+        "RENOVICE_CFG_REJECT_OWNERSHIP_NOOP",
+        "RENOVICE_CFG_RESPECT_OUTER_JOIN",
+        "RENOVICE_CFG_RETRY_COMPLETE_LOOP_DISPATCH",
+        "RENOVICE_CFG_SHARED_TERMINAL_EFFECT",
+        "RENOVICE_CFG_TRANSPARENT_LOOP_EXIT",
+        "RENOVICE_EXACT_ORDERED_PREDICATES",
+        "RENOVICE_LEGACY_UNCONDITIONAL_FOR_BREAK",
+        "RENOVICE_LOCALIZED_INDEX_STORE_LIFETIMES",
+        "RENOVICE_MAPPED_EXIT_STATE_RELAYS",
+        "RENOVICE_MULTIPLE_FORNPREP_ZERO_LIFETIMES",
+        "RENOVICE_NESTED_INDEX_RESULT_LIFETIMES",
+        "RENOVICE_SCOPED_STATE_PREFIX_REUSE",
+    };
+    for (const char* feature : defaults)
+        if (!std::getenv(feature)) _putenv_s(feature, "1");
+}
 
 int main(int argc, char** argv) {
+    install_certified_decompiler_defaults();
     std::string mode = (argc >= 2) ? argv[1] : "";
+    if (mode == "recompile-u44" && argc >= 4) {
+        if (argc >= 5) {
+            std::ifstream map(long_path(argv[4]));
+            if (!map) { std::fprintf(stderr, "profile: cannot read source alias map\n"); return 1; }
+            std::uint32_t old_hash, new_hash;
+            while (map >> std::hex >> old_hash >> new_hash) {
+                const auto existing = de::source_aliases.find(old_hash);
+                if (existing != de::source_aliases.end() && existing->second != new_hash) {
+                    std::fprintf(stderr, "profile: ambiguous source alias\n"); return 1;
+                }
+                de::source_aliases[old_hash] = new_hash;
+            }
+            if (!map.eof()) { std::fprintf(stderr, "profile: invalid source alias map\n"); return 1; }
+        }
+        de::active_namehash_seed = 0x768e5ed0u;
+        return cmd_recompile(argc, argv);
+    }
+    if ((mode == "profile-to-u44" || mode == "profile-from-u44") && argc == 5) {
+        try {
+            std::ifstream stream(long_path(argv[4]));
+            if (!stream) throw std::runtime_error("profile: cannot read native-name map");
+            std::map<std::uint32_t, std::uint32_t> names;
+            std::string line;
+            while (std::getline(stream, line)) {
+                if (line.empty() || line[0] == '#') continue;
+                std::istringstream row(line);
+                std::uint32_t a = 0, b = 0;
+                if (!(row >> std::hex >> a >> b)) throw std::runtime_error("profile: invalid name map row");
+                if (mode == "profile-from-u44") std::swap(a, b);
+                const auto previous = names.find(a);
+                if (previous != names.end() && previous->second != b) throw std::runtime_error("profile: ambiguous native-name map");
+                names[a] = b;
+            }
+            const auto result = de::change_build_profile(read_file(argv[2]), mode == "profile-to-u44", &names);
+            if (!write_file(argv[3], result)) throw std::runtime_error("profile: cannot write output");
+            std::printf("PROFILE PASS %s bytes=%zu\n", mode.c_str(), result.size());
+            return 0;
+        } catch (const std::exception& e) { std::fprintf(stderr, "%s\n", e.what()); return 1; }
+    }
     if (mode == "transcode-global-selftest") return cmd_transcode_global_selftest();
+    if (mode == "closure-index-selftest") return cmd_closure_index_selftest();
+    if (mode == "closure-map" && argc >= 4) return cmd_closure_map(argc, argv);
     if (mode == "semantic-ir-selftest") return cmd_semantic_ir_selftest(argc, argv);
+    if (mode == "semantic-ir-readable-selftest")
+        return cmd_semantic_ir_readable_selftest();
     if (mode == "semantic-ir-lowering-selftest")
         return cmd_semantic_ir_lowering_selftest(argc, argv);
     if (mode == "semantic-ir-verify" && argc >= 3) return cmd_semantic_ir_verify(argc, argv);
     if (mode == "semantic-ir-render" && argc >= 4) return cmd_semantic_ir_render(argc, argv);
     if (mode == "semantic-ir-render-module" && argc >= 4)
         return cmd_semantic_ir_render_module(argc, argv);
+    if (mode == "semantic-ir-render-module-readable" && argc >= 6)
+        return cmd_semantic_ir_render_module_readable(argc, argv);
     if (mode == "semantic-ir-render-module-corpus" && argc >= 3)
         return cmd_semantic_ir_render_module_corpus(argc, argv);
     if (mode == "semantic-ir-verify-corpus" && argc >= 3)
@@ -2528,6 +2826,9 @@ int main(int argc, char** argv) {
     if (mode == "sa-validate" && argc >= 3) return cmd_sa_validate(argc, argv);
     if (mode == "decompile" && argc >= 3) return cmd_decompile(argc, argv);
     if (mode == "decompile-mod" && argc >= 3) return cmd_decompile_mod(argc, argv);
+    if (mode == "decompile-mod-raw" && argc >= 3) return cmd_decompile_mod(argc, argv, false);
+    if (mode == "decompile-mod-stable" && argc >= 3)
+        return cmd_decompile_mod(argc, argv, true, true);
     if (mode == "decompile-corpus" && argc >= 4) return cmd_decompile_corpus(argc, argv);
     if (mode == "skeleton" && argc >= 3) return cmd_skeleton(argc, argv);
     if (mode == "orphans" && argc >= 3) return cmd_orphans(argc, argv);
@@ -2541,6 +2842,7 @@ int main(int argc, char** argv) {
     if (mode == "de-builtins" && argc >= 3) return cmd_de_builtins(argc, argv);
     if (mode == "rt-build" && argc >= 3) return cmd_rt_build(argc, argv);
     if (mode == "lbc-cmp"  && argc >= 4) return cmd_lbc_cmp(argc, argv);
+    if (mode == "de-proto-diff" && argc >= 4) return cmd_de_proto_diff(argc, argv);
     if (mode == "de-fastcall" && argc >= 3) return cmd_de_fastcall(argc, argv);
     if (mode == "de-patchop" && argc >= 8) return cmd_de_patchop(argc, argv);
     if (mode == "de-forgprep" && argc >= 3) return cmd_de_forgprep(argc, argv);
@@ -2584,17 +2886,26 @@ int main(int argc, char** argv) {
                 "  dump         <in.luaubc> [protoIdx]   parse Luau bytecode -> structure (M2 parser)\n"
                 "  de-roundtrip <in.lua_B>               parse+re-emit DE 09 03, verify byte-exact (M3)\n"
                 "  de-stats     <dir>                    const-tag + edge census over a corpus\n"
+                "  de-proto-diff <left.lua_B> <right.lua_B> per-prototype fixed-point deltas\n"
+                "  decompile    <in.lua_B> [proto] [output] native Luau source pass\n"
+                "  decompile-mod <in.lua_B> [output]      recompilable module source pass\n"
+                "  decompile-mod-raw <in.lua_B> [output]  one-pass source (bypass compiler canonicalization)\n"
+                "  decompile-mod-stable <in.lua_B> [output] compiler-closed deterministic source pass\n"
                 "  decompile-corpus <in> <out> [--abilities] native batch module source pass\n"
                 "  plan-verify <in.lua_B> [proto]         pre-render semantic ownership audit\n"
                 "  plan-verify-corpus <dir> [--abilities] [--json-out file] corpus ownership audit\n"
                 "  semantic-ir-selftest [--json]         Phase-1 Semantic IR verifier fixtures\n"
+                "  semantic-ir-readable-selftest         identifier/provenance regression fixtures\n"
                 "  semantic-ir-lowering-selftest         execute exact source-lowering semantics oracles\n"
                 "  semantic-ir-verify <lua_B> [proto]     build and verify read-only Semantic IR\n"
                 "  semantic-ir-render <lua_B> <out> [proto] isolated fail-closed Semantic IR renderer\n"
                 "  semantic-ir-render-module <lua_B> <out> render verified prototype/capture tree\n"
-                "  semantic-ir-render-module-corpus <dir> [--abilities] [--compile-rendered]\n"
+                "  semantic-ir-render-module-readable <lua_B> <fidelity> <readable> <map.tsv> [--semantic-sdk symbols.tsv] [--call-map calls.tsv] [--failure-readable source.luau]\n"
+                "  semantic-ir-render-module-corpus <dir> [--abilities] [--compile-rendered] [--readable] [--semantic-sdk symbols.tsv]\n"
                 "  semantic-ir-verify-corpus <dir> [--abilities] [--limit N] [--json-out file]\n"
                 "  transcode-global-selftest              native global lowering regression\n"
+                "  closure-index-selftest                 child/constant/global closure-index regression\n"
+                "  closure-map <lua_B> <out.tsv>          closure edges plus exact upvalue capture contracts\n"
                 "  namehash     <name>                   DE FNV name hash (self-test: GetConfigBool=0x4aec2dac)\n"
                 "  transcode    <in.luaubc> <out.lua_B>  Luau bytecode -> DE 09 03 (M4 transcoder)\n"
                 "  recompile    <in.luau>  <out.lua_B>   full: Luau source -> DE 09 03 (M1+M4)\n");

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "emit.h",
+    "exit_code": 1,
+    "diagnostics": [],
+    "passed": true
+  },
+  {
+    "file": "expr.h",
+    "exit_code": 0,
+    "diagnostics": [],
+    "passed": true
+  },
+  {
+    "file": "m6e_cmd.h",
+    "exit_code": 0,
+    "diagnostics": [],
+    "passed": true
+  },
+  {
+    "file": "main.cpp",
+    "exit_code": 1,
+    "diagnostics": [],
+    "passed": true
+  }
+]

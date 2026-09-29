@@ -1,0 +1,32 @@
+{
+  "checks": [
+    {
+      "file": "default-full360-v35.json",
+      "passed": true
+    },
+    {
+      "file": "default-difficult-cycle10-v35.json",
+      "passed": true
+    },
+    {
+      "file": "default-promotion-comparison-v35.json",
+      "passed": true
+    },
+    {
+      "file": "default-release-gates-v35.json",
+      "passed": true
+    },
+    {
+      "file": "artifacts/default-runtime-suite-v35/suite.json",
+      "passed": true
+    },
+    {
+      "file": "artifacts/default-runtime-fidelity-suite-v35/suite.json",
+      "passed": true
+    }
+  ],
+  "source_files": 35,
+  "missing_result_links": [],
+  "saved_binary_sha256": "40BC733B43E366A7E65CFB40BDFD13D3F71B268C65F3841155B593D3F3DBA5D3",
+  "passed": true
+}

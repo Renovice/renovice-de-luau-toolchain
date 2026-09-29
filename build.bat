@@ -11,4 +11,18 @@ REM receive different hashes solely from the linker timestamp and cannot match c
 if errorlevel 1 ( echo BUILD FAILED & exit /b 1 )
 bin\derecomp.exe transcode-global-selftest
 if errorlevel 1 ( echo GLOBAL LOWERING SELFTEST FAILED & exit /b 1 )
+"%GPP%" -O2 -std=c++17 -Wall -Wextra -Werror -static -Isrc -o bin\verify-shared-string-values.exe RESEARCH\SHARED_STRING_CONSTANTS_2026-09-15\tools\verify_constant_use.cpp
+if errorlevel 1 ( echo SHARED STRING VERIFIER BUILD FAILED & exit /b 1 )
+bin\verify-shared-string-values.exe
+if errorlevel 1 ( echo SHARED STRING VALUE SELFTEST FAILED & exit /b 1 )
+bin\derecomp.exe closure-index-selftest
+if errorlevel 1 ( echo CLOSURE INDEX SELFTEST FAILED & exit /b 1 )
+bin\derecomp.exe semantic-ir-selftest
+if errorlevel 1 ( echo SEMANTIC IR SELFTEST FAILED & exit /b 1 )
+bin\derecomp.exe semantic-ir-lowering-selftest
+if errorlevel 1 ( echo SEMANTIC IR LOWERING SELFTEST FAILED & exit /b 1 )
+bin\derecomp.exe semantic-ir-readable-selftest
+if errorlevel 1 ( echo READABLE NAMING SELFTEST FAILED & exit /b 1 )
+bin\derecomp.exe closure-map cert\cert_all.spawn.lua_B cert\closure-map-smoke.tsv
+if errorlevel 1 ( echo CLOSURE MAP SMOKE TEST FAILED & exit /b 1 )
 echo BUILD OK -^> bin\derecomp.exe

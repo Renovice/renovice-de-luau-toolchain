@@ -1,0 +1,17 @@
+{
+  "scope": "all",
+  "directory": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\work\\cert-sample-360-20260904",
+  "files": 360,
+  "prototypes": 17374,
+  "manifest_ok": 17374,
+  "render_semantics_verified": false,
+  "failed": 0,
+  "reachable_blocks": 148662,
+  "edges": 225843,
+  "predicates": 77241,
+  "obvious_effects": 247689,
+  "loops": 4998,
+  "terminal_for_fragments": 2,
+  "failure_categories": {  },
+  "examples": [  ]
+}

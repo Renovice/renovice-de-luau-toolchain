@@ -1,0 +1,3 @@
+. (Join-Path $PSScriptRoot 'Set-CandidateProfileV21.ps1')
+$env:RENOVICE_CFG_EXPANDED_BOUNDARY_RETRY = '1'
+$env:RENOVICE_CFG_SHARED_TERMINAL_EFFECT = '1'

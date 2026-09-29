@@ -1,0 +1,5 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=F449812A45B3044D2A27D51AAB5F82202EDF62D495AD842957716EB15CD2ECBA
+CYCLE2 files=360 passed=359 failed=1 errors=0
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+92 stack_sum=+0 stack_max=+0 protos=+0 ops=0x12:+10,0x20:+5,0x27:+2,0x37:-2,0x40:+3
+CYCLE10 files=5 passed=5 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\full360-early-join-v33.json

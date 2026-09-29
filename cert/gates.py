@@ -34,6 +34,7 @@ Usage:
     python cert/gates.py                 # 300 files, baseline from BASELINE below
     python cert/gates.py 300 150         # align/backedge N, realtrip M
     python cert/gates.py 300 150 --json-out cert/baselines/latest.json
+    python cert/gates.py 300 150 --decompile-mode decompile-mod-stable
     RENOVICE_CORPUS=... python cert/gates.py
 
 A TIMEOUT in realtrip is NOT a behavioural difference - it is reported separately, because treating
@@ -48,6 +49,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DEC  = os.path.join(ROOT, "bin", "derecomp.exe")
 PY   = sys.executable or "python3"
+DECOMPILE_MODE = "decompile-mod"
 
 # Update these when a change legitimately ships, so the gate always compares against the CURRENT
 # shipped state rather than a stale number. A gate that measures against the wrong baseline is worse
@@ -351,6 +353,25 @@ def run_cmpk_polarity():
     return {"SAME": int(match.group(1)), "DIFFERENT": int(match.group(2))}
 
 
+def run_access_normalization_selftest():
+    """Gate the fused-GETIMPORT equivalence used by every named-access oracle."""
+    p = sh([PY, os.path.join("cert", "access_normalization_selftest.py")])
+    match = re.search(
+        r"^ACCESS_NORMALIZATION_SELFTEST assertions=(\d+) passed=(\d+) failed=(\d+)$",
+        p.stdout, re.M)
+    if not match:
+        return {"FATAL": "access normalization selftest did not report a parseable summary: "
+                + ((p.stdout or "") + (p.stderr or ""))[-1000:]}
+    result = {
+        "assertions": int(match.group(1)),
+        "passed": int(match.group(2)),
+        "failed": int(match.group(3)),
+    }
+    if p.returncode != 0 and result["failed"] == 0:
+        result["FATAL"] = "access normalization selftest exited nonzero without failures"
+    return result
+
+
 def run_semantic_lowerings():
     """Gate 8: execute the exact production source-lowering templates in real Luau."""
     p = sh([DEC, "semantic-ir-lowering-selftest"], timeout=300)
@@ -463,7 +484,7 @@ def access_one(item):
         return sum(1 for ln in p.stdout.splitlines()
                    if ln.startswith(("GETIMPORT", "NAMECALL", "GETFIELD")))
     orig = count(f)
-    src = sh([DEC, "decompile-mod", f], timeout=300)
+    src = sh([DEC, DECOMPILE_MODE, f], timeout=300)
     if src.returncode != 0:
         return (name, orig, None, "decompile failed")
     # ACCESS_FILES run in parallel inside one process.  The old name used only the first 20 filename
@@ -486,16 +507,23 @@ def access_one(item):
 
 
 def main():
+    global DECOMPILE_MODE
     parser = argparse.ArgumentParser(description="Run the consolidated DeNative release gates.")
     parser.add_argument("n_align", nargs="?", type=int, default=300,
                         help="file count for alignment, back-edge, dropped, and all-category gates")
     parser.add_argument("n_trip", nargs="?", type=int, default=150,
                         help="file count for the behavioural realtrip gate")
     parser.add_argument("--json-out", help="write a deterministic machine-readable result file")
+    parser.add_argument("--decompile-mode",
+                        choices=("decompile-mod", "decompile-mod-stable"),
+                        default="decompile-mod",
+                        help="module-source view to certify (default: decompile-mod)")
     args = parser.parse_args()
     n_align = args.n_align
     n_trip = args.n_trip
     json_out = args.json_out
+    DECOMPILE_MODE = args.decompile_mode
+    ENV["RENOVICE_DECOMPILE_MODE"] = DECOMPILE_MODE
 
     def fatal(message):
         print("FATAL: %s" % message)
@@ -516,11 +544,13 @@ def main():
         return fatal("corpus not found at %s" % CACHE)
 
     print("== RELEASE GATES ==  align/backedge=%d realtrip=%d  corpus=%s" % (n_align, n_trip, CACHE))
+    print("   module-source view: %s" % DECOMPILE_MODE)
     print("   (align/backedge/access concurrent, then realtrip ALONE - it must not share CPU)")
 
     # The native constant-comparison regression is quick and must pass independently of corpus
     # aggregate metrics. Run it before the expensive oracles so its result is always visible.
     P = run_cmpk_polarity()
+    AN = run_access_normalization_selftest()
     L = run_semantic_lowerings()
     SB = run_semantic_behavior()
     WF = run_warframe_api_trace()
@@ -555,7 +585,8 @@ def main():
                                f_cats.result(), f_lostc.result(), f_acc.result())
     T = run_realtrip(n_trip)
 
-    for tag, d in (("cmpk", P), ("semantic-lowering", L),
+    for tag, d in (("cmpk", P), ("access-normalization", AN),
+                   ("semantic-lowering", L),
                    ("semantic-behavior", SB),
                    ("warframe-api-trace", WF),
                    ("native-namecall", NC),
@@ -572,6 +603,15 @@ def main():
     if P.get("SAME", 0) != BASELINE["CMPK_SAME"] or P.get("DIFFERENT", 0) != 0:
         fails.append("GATE 0: native comparison polarity %d/%d"
                      % (P.get("SAME", 0), BASELINE["CMPK_SAME"]))
+
+    print("\n-- GATE 0b: named-access normalization")
+    print("   assertions=%d passed=%d failed=%d"
+          % (AN.get("assertions", 0), AN.get("passed", 0), AN.get("failed", 0)))
+    if (AN.get("assertions", 0) != 5 or AN.get("passed", 0) != 5
+            or AN.get("failed", 0) != 0):
+        fails.append("GATE 0b: access normalization %d/%d, failures=%d"
+                     % (AN.get("passed", 0), AN.get("assertions", 0),
+                        AN.get("failed", 0)))
 
     # ---- Gate 8: exact Semantic IR source-lowering behavior
     print("\n-- GATE 8: Semantic IR source-lowering execution")
@@ -744,6 +784,7 @@ def main():
             "align_count": n_align,
             "corpus": CACHE,
             "corpus_file_count": corpus_file_count,
+            "decompile_mode": DECOMPILE_MODE,
             "environment": {
                 "RENOVICE_NATIVE": ENV["RENOVICE_NATIVE"],
                 "RENOVICE_NATIVE_GLOBALS": ENV["RENOVICE_NATIVE_GLOBALS"],
@@ -766,6 +807,7 @@ def main():
             },
             "categories": dict(sorted(C.items())),
             "constant_comparison": dict(sorted(P.items())),
+            "access_normalization": dict(sorted(AN.items())),
             "dropped": {
                 "backward": D.get("BACKWARD", 0),
                 "self": D.get("SELF", 0),

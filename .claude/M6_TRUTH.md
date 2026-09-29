@@ -7,14 +7,55 @@ would otherwise be re-derived.
 Companion to `FINDINGS.md` (chronological log) and **`.claude/PITFALLS.md`** (every way this project
 has fooled itself — read that before trusting any measurement). This file is the distilled state.
 
-**Run all four gates with one command:** `python cert/gates.py 300 150` — runs concurrently,
-~1m45s instead of ~15 min serial, and refuses to ship on any failure.
+**Run the consolidated gates with one command:** `python cert/gates.py 300 150` — runs structural
+checks concurrently, then runs `realtrip` alone, and refuses to ship on any failure. Do not run other
+test workloads alongside the behavioral stage.
 Set `RENOVICE_CORPUS` if working from a copied workspace, or the oracles measure nothing.
-Last updated: 2026-07-28.
+Last updated: 2026-09-05.
 
 ---
 
 ## 1. CURRENT STATE
+
+| metric | value | meaning |
+|---|---|---|
+| raw default fixed point | **360 / 360** | `decompile-mod`, exact cycle-1/cycle-2 source, rebuilt bytecode, prototype, frame/max-stack, and opcode stability |
+| long-cycle witnesses | **11 / 11 through cycle 10** | five defaults plus six distinct difficult specimens |
+| added executable regression suite | **19 / 19; 3,213 case assertions per configuration** | passes with ordinary and native-opcode fidelity settings; ground-truth source and two recovered cycles; sensitive negative controls retained from earlier binaries |
+| named-access loss | **0 files / 0 accesses over 360** | independent categories, compared against original stock |
+| canonical release suite | **PASS (300/150)** | ALIGNED 211; realtrip 150/150, zero timeouts; no detected dropped paths or dead tails |
+| Semantic IR behavior / Warframe API trace | **150 / 150 and 11 / 11** | zero differences and zero vacuous cases in both mocked-runtime suites |
+| certified binary | `40BC733B43E366A7E65CFB40BDFD13D3F71B268C65F3841155B593D3F3DBA5D3` | SHA-256 of `bin/derecomp.exe`; default profile, no external experimental flags |
+
+This is a deterministic **360-file sample certificate**, not a full-5,386-file or exhaustive
+in-game-runtime claim. Raw `decompile-mod` now supplies the fixed point directly; the stable wrapper
+was not used for acceptance. Exact rebuilt cycles do not imply original-container byte identity or
+complete semantic proof. The standard native-opcode/global compiler settings remain part of the
+certification harness. The latest work also corrects lost loop breaks, NaN/metamethod-sensitive
+ordered predicates, and shared-continuation ownership; it rejects the unsafe complete-ownership
+no-op instead of using it to improve the fixed-point count. Changes use general structural rules.
+
+The earlier 17,374/17,374 semantic ownership/IR result is a prototype count from the prior 360-file
+certificate, not a current whole-corpus script count or a newly rerun ownership audit. The separate
+ability-editor semantic presentation layer still has its own older pinned 318/360 result; it has
+not been certified against this new binary here.
+
+Primary evidence:
+
+- `RESEARCH/RAW360_STRICT_2026-09-05/RESULTS.md`
+- `RESEARCH/RAW360_STRICT_2026-09-05/default-full360-v35.json`
+- `RESEARCH/RAW360_STRICT_2026-09-05/default-difficult-cycle10-v35.json`
+- `RESEARCH/RAW360_STRICT_2026-09-05/default-release-gates-v35.json`
+- `RESEARCH/RAW360_STRICT_2026-09-05/default-promotion-comparison-v35.json`
+- `RESEARCH/RAW360_STRICT_2026-09-05/artifacts/default-runtime-suite-v35/suite.json`
+- `RESEARCH/RAW360_STRICT_2026-09-05/artifacts/default-runtime-fidelity-suite-v35/suite.json`
+- `RESEARCH/COMPILER_CLOSED_FIXEDPOINT_360_2026-09-05.md` (superseded checkpoint, retained)
+
+The remaining numbered material below is retained as historical diagnosis and methodology. In
+particular, its old totals, open defects, and final "next target" do not supersede the certified state
+above.
+
+### Historical 2026-07-28 snapshot (retained as defect provenance)
 
 | metric | value | meaning |
 |---|---|---|
@@ -259,7 +300,7 @@ every access count exact.
 
 ---
 
-## 9. NEXT TARGET
+## 9. HISTORICAL NEXT TARGET (OBSOLETE)
 
 **Shape 1 — numeric-for LOST.** 53 files standalone, ~106 files in total; the single largest
 mechanism. It GREW (53 → 131 lost headers) as the accepted cost of #93, so the mechanism is fresh and

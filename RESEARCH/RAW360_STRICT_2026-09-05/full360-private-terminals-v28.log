@@ -1,0 +1,8 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=D3FF0EDAC62CEC2098F1C13707CE5BDF67C7C4AE36F6A85C859A209B17B4C644
+CYCLE2 files=360 passed=356 failed=4 errors=0
+  DRIFT Lotus_Interface_CharacterIntro.lua_B                    bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=0x0d:+1,0x40:-1
+  DRIFT Lotus_Interface_Friends.lua_B                           bytes=-4 stack_sum=+0 stack_max=+0 protos=+0 ops=0x40:-1
+  DRIFT Lotus_Interface_LotusUtilities.lua_B                    bytes=+12 stack_sum=+0 stack_max=+0 protos=+0 ops=0x0d:-1,0x14:+6,0x40:-2
+  DRIFT Lotus_Interface_MapRedux.lua_B                          bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+CYCLE10 files=5 passed=5 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\full360-private-terminals-v28.json

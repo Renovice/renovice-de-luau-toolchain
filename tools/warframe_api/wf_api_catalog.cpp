@@ -283,14 +283,14 @@ int main(int argc, char **argv)
     }
     output.close();
 
-    if (seeds.size() != 150 || core != 150 || high != 100 || supported != 150)
+    if (seeds.size() != 225 || core != 225 || high != 175 || supported != 225)
     {
         std::cerr << "wf_api_catalog: selection gate failed rows=" << seeds.size()
                   << " core=" << core << " high=" << high
                   << " supported=" << supported << '\n';
         return 1;
     }
-    std::cout << "CATALOG PASS rows=150 core=150 high_confidence=100 supported=150"
+    std::cout << "CATALOG PASS rows=225 core=225 high_confidence=175 supported=225"
               << " deep_contracts=" << deep << " census_rows=" << censusRows << '\n';
     return 0;
 }

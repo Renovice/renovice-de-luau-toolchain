@@ -92,6 +92,18 @@ inline Adaptation adapt_manifest(const ir::IProto& proto, const sem::Manifest& m
         Edge adapted{BlockId(edge.source), BlockId(edge.target), adapt_edge_kind(edge.kind)};
         model.cfg_edges.insert(adapted);
     }
+    for (const auto& item : manifest.terminal_fors) {
+        const sem::TerminalForPlan& source = item.second;
+        TerminalNumericFor terminal;
+        terminal.prep = BlockId(source.prep);
+        terminal.body = BlockId(source.body);
+        terminal.exit = BlockId(source.exit);
+        for (const int block : source.region_blocks)
+            terminal.region_blocks.insert(BlockId(block));
+        if (!model.authoritative_terminal_numeric_fors.emplace(
+                terminal.prep, std::move(terminal)).second)
+            result.failures.push_back("SIR_TERMINAL_NUMERIC_FOR_PREP_DUPLICATE");
+    }
 
     std::map<int, NodeId> loop_nodes;
     int next_node = 2;
@@ -150,6 +162,33 @@ inline Adaptation adapt_manifest(const ir::IProto& proto, const sem::Manifest& m
     for (const sem::EdgePlan& edge : manifest.edges)
         if (edge.loop_header >= 0)
             edge_loop_header[{edge.source, edge.target}] = edge.loop_header;
+    const auto is_terminal_numeric_for_guard = [&](const sem::PredicatePlan& predicate) {
+        if (!predicate.proven
+            || (predicate.role != "short_circuit_shared_true"
+                && predicate.role != "short_circuit_shared_false"))
+            return false;
+        const auto found = model.authoritative_terminal_numeric_fors.find(
+            BlockId(predicate.chain_next));
+        if (found == model.authoritative_terminal_numeric_fors.end()) return false;
+        const TerminalNumericFor& terminal = found->second;
+        const auto arm_equals = [](const auto& source,
+                                   const std::set<BlockId>& expected) {
+            if (source.size() != expected.size()) return false;
+            for (const int block : source)
+                if (!expected.count(BlockId(block))) return false;
+            return true;
+        };
+        if (predicate.chain_shared_target != terminal.exit.value) return false;
+        if (predicate.role == "short_circuit_shared_true")
+            return predicate.true_target == terminal.exit.value
+                && predicate.false_target == terminal.prep.value
+                && predicate.true_blocks.empty()
+                && arm_equals(predicate.false_blocks, terminal.region_blocks);
+        return predicate.false_target == terminal.exit.value
+            && predicate.true_target == terminal.prep.value
+            && predicate.false_blocks.empty()
+            && arm_equals(predicate.true_blocks, terminal.region_blocks);
+    };
     for (const sem::PredicatePlan& predicate : manifest.predicates) {
         predicates_by_block[predicate.block] = predicate;
         BranchContract branch;
@@ -165,7 +204,12 @@ inline Adaptation adapt_manifest(const ir::IProto& proto, const sem::Manifest& m
         branch.true_has_terminal = predicate.true_has_terminal;
         branch.false_has_terminal = predicate.false_has_terminal;
         branch.loop = LoopId(predicate.loop_header);
-        if (predicate.role == "loop_condition") branch.role = BranchRole::LoopCondition;
+        if (is_terminal_numeric_for_guard(predicate)) {
+            branch.role = BranchRole::PreservedEscaping;
+            result.observations.push_back(
+                "SIR_TERMINAL_NUMERIC_FOR_GUARD_RECOVERED");
+        }
+        else if (predicate.role == "loop_condition") branch.role = BranchRole::LoopCondition;
         else if (predicate.role == "redundant_predicate") branch.role = BranchRole::Redundant;
         else if (predicate.role == "short_circuit_shared_true")
             branch.role = BranchRole::ShortCircuitSharedTrue;
@@ -705,7 +749,10 @@ inline Adaptation adapt_manifest(const ir::IProto& proto, const sem::Manifest& m
                     control.branch_true_blocks.insert(BlockId(value));
                 for (int value : predicate.false_blocks)
                     control.branch_false_blocks.insert(BlockId(value));
-                if (predicate.role == "redundant_predicate" && predicate.proven) {
+                if (is_terminal_numeric_for_guard(predicate)) {
+                    control.kind = NodeKind::PreservedEscapingBranch;
+                    control.branch_role = BranchRole::PreservedEscaping;
+                } else if (predicate.role == "redundant_predicate" && predicate.proven) {
                     control.kind = NodeKind::RedundantPredicate;
                     control.branch_role = BranchRole::Redundant;
                 } else if (predicate.role == "loop_condition" && predicate.proven) {

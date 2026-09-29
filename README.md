@@ -20,18 +20,40 @@ script corpus — all from this folder, against one local knowledge base.
 | **M3** DE container reader/writer | done — **5382/5382 byte-exact** round-trip |
 | **M4** Transcoder (Luau → DE) | **done, in-game certified** — 10/10 cert modules, 0 unmapped ops over a 250-file sample |
 | **M5** Corpus parity sweep | **done — 100.0000%** (see `M5_PARITY.md`) |
-| **M6** C++ decompiler (DE → Luau) | **in progress — the active front.** M6a–M6d done; **M6e emission holds all remaining work: ALIGNED 112/300 vs the ORIGINAL bytecode, NAME-DIFF 0, 5386/5386 recompile** |
+| **M6** C++ decompiler (DE → Luau) | **Raw default `decompile-mod`: 360/360 strict source-and-bytecode fixed points.** Eleven distinct witnesses remain exact through **10 cycles**, the independent 360-file audit finds **0 lost named accesses**, and the canonical 300/150 release suite passes. The 19 added executable regression fixtures pass 3,213 case assertions across source and two recovered cycles. This is a selected-sample certificate; see [the raw closeout](RESEARCH/RAW360_STRICT_2026-09-05/RESULTS.md) for hashes, evidence, and limits. |
 | **M7** Retire Python | blocked on M6 |
 
 **Decode map is complete for all 77 opcodes** that occur in the corpus, which is M6's prerequisite.
 
 ## Working on the decompiler? Read these first
 
+> **Closure-index rule:** `NEWCLOSURE.Bx` indexes the current prototype's child
+> list; `DUPCLOSURE.Bx` indexes a tag-6 closure constant. The `ir` command now
+> prints both the operand namespace and resolved flat/global prototype, for
+> example `child[132] -> proto[349]`. Run `closure-index-selftest` before using
+> IR output for runtime-hook ownership. See
+> `RESEARCH/TOPMENU_CLOSURE_INDEX_NAMESPACE_FIX_2026-08-27.md`.
+
+For large UI modules, generate a machine-readable closure/capture ownership map:
+
+```powershell
+.\bin\derecomp.exe closure-map input.lua_B closure-map.tsv
+```
+
+The TSV keeps the parent prototype, instruction index, child/constant operand
+namespace, operand index, resolved global target, target shape, and every
+`VAL:Rn`, `REF:Rn`, or `UPVAL:Un` capture in separate fields. A bad target,
+capture mode, source range, or capture count fails the command instead of
+producing a best-effort ownership map. This is the preferred evidence for
+mapping runtime paths such as `Initialize.U14`; never infer a runtime upvalue
+from a flat prototype number alone.
+
 | file | what it gives you |
 |---|---|
 | **`.claude/M6_TRUTH.md`** | the distilled state — verified facts, and the beliefs that were measured and **disproven** (several cost days each) |
 | **`.claude/PITFALLS.md`** | every way this project has fooled itself: tooling, metric, comparison, reasoning and process traps, plus the parallel-workspace rules |
-| **`python cert/gates.py 300 150`** | all **six** release gates concurrently, one verdict, refuses to ship on any failure |
+| **`python cert/gates.py 300 150`** | consolidated release gates, one verdict, refuses to ship on any failure |
+| `python cert/idempotence.py 360 --json-out RESEARCH/raw360-rerun.json` | raw source, bytecode, frame, prototype, max-stack, and opcode fixed-point certificate; current default result is **360/360**, plus **5/5** default witnesses through cycle 10; six additional difficult ten-cycle witnesses also pass |
 | `python cert/dropped.py 300` | GATE 5 — code paths emitted but **unreachable**. Nothing else detects this class |
 | `python cert/allcats.py 300` | GATE 6 — **honest** access loss. `NAME-DIFF` only sees files with no loop difference, so it read 0 while 46 files were losing accesses (one of them 293) |
 
@@ -44,7 +66,12 @@ The goal is **complete 1:1 translation**: any of the 5386 scripts may be decompi
 recompiled, and a single wrong instruction makes that script unusable in game — so partial fidelity is
 worthless.
 
-### The largest known defect: the Proper-region state machine (FINDINGS #97)
+### Historical Proper-region defect record (FINDINGS #97)
+
+The measurements below are retained as the evidence that found the defect. The
+current 2026-08-30 release gate reports `DROPPED 0`, `DEADTAIL 0`, and
+`ACCESS-LOSS-TOTAL 0`; do not reuse the historical 741-path figure as current
+status.
 
 `src/emit.h` emits `Proper` regions as a synthesized state machine (`local p29 = 0` / `if p29 == N
 then ... p29 = M end`), relying on an **unchecked** comment-stated precondition that the region is
@@ -65,9 +92,14 @@ backward `p = N` transitions. Worst-hit files are core gameplay, including
 `Lotus_Powersuits_PowersuitAbilities_OperatorTransference` — the exact file class this toolchain
 exists to edit.
 
-**Related and equally serious: the decompiler is DIVERGENT.** Each decompile→recompile cycle inflates
-a script ~20 % at bytecode level with no fixed point (`BindingsUtil` 32,474 → 37,997 → 44,947 bytes;
-2,285 → 3,739 → 5,367 code lines). A second edit operates on a materially different file.
+**Historical divergence evidence:** the original emitter inflated some scripts by about 20% per
+decompile→recompile cycle (`BindingsUtil` 32,474 → 37,997 → 44,947 bytes; 2,285 → 3,739 → 5,367
+code lines). The certified raw default now makes the deterministic expansion **360/360**
+source-and-bytecode fixed points and keeps eleven distinct specimens exact through ten cycles. Its
+independent 360-file access audit reports zero missing accesses. The earlier raw 345/360 and 350/360
+checkpoints are superseded by [the pinned raw certificate](RESEARCH/RAW360_STRICT_2026-09-05/RESULTS.md).
+The stable wrapper is not needed to obtain this result. Full-corpus closure and exhaustive in-game
+behavioral coverage have not been claimed.
 
 Because the emitted form is a flat ascending `if` chain, a backward `p = N` targets a guard already
 passed. `Lotus_Interface_Hub` turns a `Sleep(0)` polling loop into a one-shot. **No pre-existing gate
@@ -119,6 +151,110 @@ FINDINGS.md         dated log of every investigation and correction
 # regression: container round-trip over the whole corpus
 ./bin/derecomp.exe de-roundtrip-batch ../../../shared/corpus/de-luau-stock
 ```
+
+### Fidelity and human-readable source side by side
+
+The verified Semantic IR renderer now has two views over the same model. The
+fidelity view keeps the canonical `p<proto>_<register>` / `v<proto>_<web>`
+identifiers. The readable view changes identifiers only, using exact exported
+function roles, confirmed API contracts, the corpus-derived API catalog, and
+conservative structural hints. It never rewrites rendered text. Every applied
+alias is recorded with its prototype, value web, confidence, and evidence.
+
+```powershell
+.\bin\derecomp.exe semantic-ir-render-module-readable `
+  input.lua_B fidelity.luau readable.luau readable.names.tsv `
+  --semantic-sdk ..\..\..\shared\semantic-sdk\symbols.tsv `
+  --call-map readable.calls.tsv
+```
+
+The Semantic SDK adds evidence-backed receiver, argument, return, and field
+types to the sidecar without rewriting executable expressions. The sidecar
+columns are `prototype`, `web`, `canonical`, `readable`, `confidence`,
+`evidence`, `semantic_type`, `type_confidence`, and `type_evidence`. A missing,
+invalid, or explicitly requested-but-unreadable SDK fails the command before
+publishing outputs; ambiguous candidates remain canonical and are diagnosed.
+
+API type names do not imply value ownership or snapshot semantics. The live
+Ice Wave investigation proved that a correctly typed `UpgradedValue` returned
+by `DamageData:GetBaseAmount()` can remain a live view of its owning packet:
+after the packet changed, a retained wrapper read the new value. It also proved
+that a repeated native address can belong to consecutive logical packets and
+that Lua-entry and native-call hooks can observe different nested boundaries.
+The readable layer must preserve the SDK's authority and lifetime fields; it
+must never translate `UpgradedValue` into an immutable number, infer logical
+identity from userdata equality, or present direct-call membership as a live
+execution guarantee. See
+`RESEARCH/ICE_WAVE_RUNTIME_SEMANTICS_2026-09-14.md`.
+
+The optional call map is a separate instruction-addressed artifact. Every row
+is keyed by `(prototype, instruction, source_occurrence)`: the first two fields
+identify one bytecode call, while the contiguous occurrence records every
+mutually exclusive expression produced by structured rendering. It records effect order, method/global/
+dynamic call kind, callee and receiver value webs, ordered argument/result
+webs, open-width flags, receiver type/confidence/evidence, an explicit
+descriptor-join basis, exact readable and fidelity source spans, and at most
+one Semantic SDK descriptor. `RECEIVER_TYPE` requires compatible receiver
+evidence; `UNIQUE_METHOD_NAME` keeps a single name candidate without treating
+same-call inference as independent type proof; `RECEIVER_TYPE_CONFLICT` exposes
+incompatible receiver evidence. Call-map schema 2 and semantic-proof schema 3
+make those fields hash-bound and fail closed in Ability Studio.
+
+The compact SDK feed retains the catalog's exact `observed_args` set and its
+separate `observed_open_args` flag. A catalog observation such as `2|4|5`
+therefore does not silently become the continuous range `2..5`. A descriptor
+proves only its recorded call form. Until the SDK carries an explicit
+exhaustive-overload flag, a stock
+call outside that form is `OBSERVED_MISMATCH`, not an invented confirmed
+violation. `CONFIRMED_MISMATCH` remains a fail-closed consumer state for future
+contracts that explicitly prove exhaustiveness.
+
+Uncertain or conflicting names deliberately stay canonical. Unresolved native
+hashes such as `Name__a50e34c3` are never renamed. The command fails before
+publishing outputs if the readable source does not compile or if naming changes
+the renderer's dispatcher/frame strategy.
+
+Release gate for all primary ability modules:
+
+```powershell
+.\bin\derecomp.exe semantic-ir-render-module-corpus `
+  ..\..\..\shared\corpus\de-luau-stock `
+  --abilities --compile-rendered --readable `
+  --semantic-sdk ..\..\..\shared\semantic-sdk\symbols.tsv `
+  --json-out stage\readable-corpus.json
+```
+
+Long all-module research runs report progress every 100 modules by default.
+Use `--progress-every 1` while isolating a hard native crash; per-module C++
+exceptions are contained and named in the JSON report instead of aborting the
+entire corpus.
+
+The 2026-08-29 SDK gate rendered and compiled 286/286 fidelity modules and
+286/286 readable modules (6,035 prototypes), with zero render or compile
+failures. It emitted 150,521 aliases and 67,836 typed value webs. Ambiguity
+diagnostics are intentional fail-closed decisions, not silently chosen names.
+`RESEARCH/SEMANTIC_IR_READABLE_LAYER_2026-08-28.md` records the readable-layer
+design; the Semantic SDK toolchain records the cross-tool evidence closeout.
+
+The newer 2026-09-06 Ability Studio transaction audit covers the pinned
+360-file compiler-closed sample and accepts 360/360 with zero rejects,
+2,160/2,160 coordinated artifacts, and zero temporary residue. It adds
+lossless mixed hash/plaintext disambiguation, explicit dead-orphan prototype
+markers, verified terminal numeric-for regions, syntax-safe computed-index
+bases, a dominance-plus-containment proof for compiler-generated nested loop
+roles, and exact API-call expressions for 143,691 distinct bytecode calls. The
+same final `derecomp.exe` independently passes raw 360/360, five default
+ten-cycle witnesses, the canonical 300/150 release gates, and the two
+3,213-assertion fixture configurations. See the Ability Editor's
+`RESEARCH/API_CALLSITE_INTEGRATION_2026-09-06/STATUS.md` for the exact
+artifact hashes and validation boundary. An exploratory unfiltered scan of all
+5,386 local scripts still has 20 ownership-manifest and 8 Semantic IR failures;
+the 360/360 result is not a whole-corpus claim.
+
+`data/ability_stats_labeled.json` is older AI-authored discovery material and
+is not part of the readable renderer or Ability Studio's trusted bindings. See
+`data/ABILITY_STATS_LABELED_STATUS.md` before using it; exact body-key/value-flow
+registries are authoritative.
 
 Deploy by copying the `.lua_B` into `OpenWF/CustomScripts/Inject/`, then press **F9** in-game. Results
 appear in `%LOCALAPPDATA%\Warframe\EE.log` as `Script Error: <TAG>` lines (the cert scripts signal via

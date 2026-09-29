@@ -4,7 +4,9 @@
 // authored/reconstructed source file against api/warframe/contracts.tsv.
 // Receiver types are not inferred yet, so method overloads are matched by name
 // and visible argument count. Qualified global functions (for example
-// Engine.RadialDamageData) are matched exactly.
+// Engine.RadialDamageData) are matched exactly. Replacement builds may supply
+// an exact stock baseline; calls already present in that baseline are removed
+// as a multiset before strict checking so only introduced call shapes are gated.
 
 #include <algorithm>
 #include <cctype>
@@ -15,6 +17,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace wfapi
@@ -437,11 +440,11 @@ namespace wfapi
                 return false;
             }
         }
-        if (seedIds != catalogIds || seedCore != 150 || seedHigh != 100 ||
-            catalogCore != 150 || catalogHigh != 100)
+        if (seedIds != catalogIds || seedCore != 225 || seedHigh != 175 ||
+            catalogCore != 225 || catalogHigh != 175)
         {
-            error = "API selection/catalog gate failed: expected matching 150 CORE / "
-                    "100 HIGH_CONFIDENCE identities";
+            error = "API selection/catalog gate failed: expected matching 225 CORE / "
+                    "175 HIGH_CONFIDENCE identities";
             return false;
         }
         stats.coreApis = catalogCore;
@@ -460,9 +463,11 @@ namespace wfapi
         return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
     }
 
-    // Remove comments and strings while preserving line breaks and source
-    // offsets. That keeps call line numbers deterministic and prevents API-like
-    // text inside documentation from becoming a false call.
+    // Remove comments and string contents while preserving line breaks and
+    // source offsets. Each string literal leaves one non-identifier sentinel
+    // byte at its opening delimiter. This prevents API-looking text inside a
+    // string from becoming a false call while still making a string-only call
+    // argument observable to argumentCount().
     static std::string sanitize(const std::string &source)
     {
         std::string out = source;
@@ -501,17 +506,18 @@ namespace wfapi
                 }
                 else if (c == '\'')
                 {
-                    out[i] = ' ';
+                    out[i] = '0';
                     state = SingleQuote;
                 }
                 else if (c == '"')
                 {
-                    out[i] = ' ';
+                    out[i] = '0';
                     state = DoubleQuote;
                 }
                 else if (c == '[' && n == '[')
                 {
-                    out[i] = out[i + 1] = ' ';
+                    out[i] = '0';
+                    out[i + 1] = ' ';
                     ++i;
                     state = LongString;
                 }
@@ -764,6 +770,12 @@ namespace wfapi
         return c.owner + (c.kind == "method" ? ":" : ".") + c.name;
     }
 
+    static std::string callShape(const Call &call)
+    {
+        return call.kind + "|" + call.name + "|" + std::to_string(call.args)
+               + "|" + std::to_string(call.callbackArity);
+    }
+
     static bool catalogAllowsArgs(const CatalogEntry &entry, int args)
     {
         if (args < 0)
@@ -785,14 +797,15 @@ namespace wfapi
 
 int main(int argc, char **argv)
 {
-    if (argc < 3 || argc > 5)
+    if (argc < 3)
     {
         std::fprintf(stderr,
                      "usage: wf_api_check CONTRACTS.TSV SOURCE.LUAU "
-                     "[--show-unknown] [--strict-unknown]\n");
+                     "[--baseline STOCK.LUAU] [--show-unknown] [--strict-unknown]\n");
         return 2;
     }
     bool showUnknown = false, strictUnknown = false;
+    std::string baselinePath;
     for (int i = 3; i < argc; ++i)
     {
         std::string option = argv[i];
@@ -800,6 +813,15 @@ int main(int argc, char **argv)
             showUnknown = true;
         else if (option == "--strict-unknown")
             showUnknown = strictUnknown = true;
+        else if (option == "--baseline")
+        {
+            if (++i >= argc)
+            {
+                std::fprintf(stderr, "--baseline requires a stock .luau path\n");
+                return 2;
+            }
+            baselinePath = argv[i];
+        }
         else
         {
             std::fprintf(stderr, "unknown option: %s\n", argv[i]);
@@ -856,11 +878,45 @@ int main(int argc, char **argv)
     }
 
     std::vector<wfapi::Call> calls = wfapi::findCalls(source, contracts);
+    std::size_t baselineCalls = 0;
+    std::size_t baselineSuppressed = 0;
+    if (!baselinePath.empty())
+    {
+        std::string baselineSource;
+        if (!wfapi::readFile(baselinePath, baselineSource))
+        {
+            std::fprintf(stderr, "wf_api_check: cannot read baseline source: %s\n",
+                         baselinePath.c_str());
+            return 2;
+        }
+        const std::vector<wfapi::Call> stockCalls =
+            wfapi::findCalls(baselineSource, contracts);
+        baselineCalls = stockCalls.size();
+        std::map<std::string, std::size_t> remainingStockShapes;
+        for (const wfapi::Call &call : stockCalls)
+            ++remainingStockShapes[wfapi::callShape(call)];
+        std::vector<wfapi::Call> introducedCalls;
+        introducedCalls.reserve(calls.size());
+        for (const wfapi::Call &call : calls)
+        {
+            std::size_t &remaining = remainingStockShapes[wfapi::callShape(call)];
+            if (remaining > 0)
+            {
+                --remaining;
+                ++baselineSuppressed;
+            }
+            else
+                introducedCalls.push_back(call);
+        }
+        calls = std::move(introducedCalls);
+    }
     std::printf("REGISTRY contracts=%zu evidence_ids=%zu negative_contracts=%zu "
-                "core_apis=%zu high_confidence_apis=%zu catalog_deep_contracts=%zu\n",
+                "core_apis=%zu high_confidence_apis=%zu catalog_deep_contracts=%zu "
+                "baseline_calls=%zu baseline_suppressed=%zu candidate_calls=%zu\n",
                 contracts.size(), registryStats.evidenceIds,
                 registryStats.negativeContracts, registryStats.coreApis,
-                registryStats.highConfidenceApis, registryStats.catalogDeepContracts);
+                registryStats.highConfidenceApis, registryStats.catalogDeepContracts,
+                baselineCalls, baselineSuppressed, calls.size());
     int verified = 0, catalogMatched = 0, catalogHigh = 0;
     int violations = 0, unknown = 0;
     std::set<std::string> unknownNames;

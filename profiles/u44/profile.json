@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "build": "2026.09.24.13.29",
+  "nameHashSeed": "768e5ed0",
+  "sourceAliasBuild": "U43 / 7e5af8e9",
+  "nativeExecutableSha256": [
+    "45fa6ad0769cc8ca7fa7e0ffdee65c0c0932e11744146781ad18c45b16e4a81c",
+    "87fc60ce65e015c6c8d4be5ac353538c37392efb6793dd17f0a17cf126d3fb5c"
+  ],
+  "nativeUndumpRva": "191a960",
+  "nativeDispatchTableRva": "192ed38",
+  "sourceAliasMap": "name-map.tsv",
+  "sourceAliasSha256": "d27c3a00d0693b7c86c97831de047f69115a17a1115f54556cdc3c8dcdde4f59",
+  "unknownAliases": "reject",
+  "opcodeCount": 86,
+  "prototypeLayout": {
+    "codePointer": 16,
+    "childPointer": 24,
+    "codeCount": 136,
+    "childCount": 140,
+    "bytecodeId": 168
+  },
+  "evidence": "work/research/U44-2026-09-27/lua-port/artifacts"
+}

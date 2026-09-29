@@ -263,8 +263,24 @@ inline std::vector<de::Const> transcode_consts(const luau::Module& m, const luau
                                                const std::set<std::string>& hashed_globals = {},
                                                const std::set<std::string>& hashed_fields = {}) {
     std::set<uint32_t> hash_set, str_set;
+    // A string constant can also be an import/method name in the same
+    // prototype. Value operands must keep tag-3 strings, even when no field
+    // write exists. Omitting these uses turned `type(x) == "table"` into a
+    // comparison with the FNV name hash when that prototype used table.concat.
+    const auto value_use = [&](uint32_t index) {
+        if (index >= p.consts.size())
+            throw std::runtime_error("value constant index outside prototype");
+        if (p.consts[index].tag == luau::C_STR) str_set.insert(index);
+    };
     for (const luau::Insn& ins : p.insns) {
         const std::string nm = ins.name();
+        if (nm == "LOADK") value_use(static_cast<uint32_t>(ins.B | (ins.C << 8)));
+        else if (nm == "LOADKX" || nm == "FASTCALL2K") value_use(ins.aux);
+        else if (nm == "JUMPXEQKS") value_use(ins.aux & 0x00ffffffu);
+        else if (nm == "ADDK" || nm == "SUBK" || nm == "MULK" || nm == "DIVK"
+            || nm == "MODK" || nm == "POWK" || nm == "IDIVK"
+            || nm == "ANDK" || nm == "ORK") value_use(ins.C);
+        else if (nm == "SUBRK" || nm == "DIVRK") value_use(ins.B);
         if (nm == "NAMECALL" && ins.has_aux) {
             hash_set.insert(ins.aux & 0xFFFF);
         }
@@ -285,6 +301,16 @@ inline std::vector<de::Const> transcode_consts(const luau::Module& m, const luau
         // Field writes are always tag-3 in the full corpus, including when a read of the same source
         // name is hashed. The dual-use remap therefore applies only to GETTABLEKS below.
         else if (nm == "SETTABLEKS" && ins.has_aux) str_set.insert(ins.aux & 0xFFFF);
+    }
+    for (const luau::Const& c : p.consts) {
+        if (c.tag == luau::C_TABLE) {
+            for (uint32_t key : c.keys) value_use(key);
+        } else if (c.tag == luau::C_TABLEK) {
+            for (const auto& item : c.items) {
+                value_use(item.first);
+                if (item.second >= 0) value_use(static_cast<uint32_t>(item.second));
+            }
+        }
     }
     for (const luau::Const& c : p.consts) if (c.tag == luau::C_IMPORT) {
         uint32_t v = c.u; int cnt = (v >> 30) & 3; uint32_t ids[3] = { (v >> 20) & 0x3ff, (v >> 10) & 0x3ff, v & 0x3ff };

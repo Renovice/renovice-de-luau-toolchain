@@ -22,12 +22,13 @@ Usage:  python cert/realtrip.py [N]      (N = how many corpus files, default 200
 import os, sys, re, subprocess, sys, tempfile
 from concurrent.futures import ThreadPoolExecutor
 
-from workspace_paths import corpus_cache
+from workspace_paths import corpus_cache, module_decompile_mode
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 LUAU = os.path.join(ROOT, "bin", "luau.exe")
 DEC  = os.path.join(ROOT, "bin", "derecomp.exe")
+DECOMPILE_MODE = module_decompile_mode()
 # CORPUS LOCATION. Overridable via RENOVICE_CORPUS so the project can be COPIED to an isolated
 # workspace and still measure the real corpus. The default is RELATIVE to the project root, and that
 # relative path is what silently broke sub-agents working in temp copies: they measured an empty or
@@ -191,7 +192,7 @@ ENV = dict(os.environ, RENOVICE_NATIVE_GLOBALS="1",
 
 
 def dec_mod(f):
-    p = subprocess.run([DEC, "decompile-mod", f], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=120, env=ENV)
+    p = subprocess.run([DEC, DECOMPILE_MODE, f], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=120, env=ENV)
     return p.stdout if p.returncode == 0 else None
 
 

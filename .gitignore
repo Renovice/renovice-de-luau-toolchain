@@ -16,3 +16,7 @@
 /_*.csv
 /_*.tsv
 /CTempanchormgr_disasm.txt
+
+# Generated output (regenerable; kept locally, not published)
+/work/
+/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/

@@ -1,0 +1,68 @@
+== RELEASE GATES ==  align/backedge=300 realtrip=150  corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock
+   module-source view: decompile-mod
+   (align/backedge/access concurrent, then realtrip ALONE - it must not share CPU)
+
+-- GATE 0: native constant-comparison polarity
+   SAME=8 DIFFERENT=0
+
+-- GATE 0b: named-access normalization
+   assertions=5 passed=5 failed=0
+
+-- GATE 8: Semantic IR source-lowering execution
+   assertions=22 passed=22 failed=0 runtime_exit=0
+
+-- GATE 9: Semantic IR renderer vs ground-truth behavior
+   SAME=150 DIFFERENT=0 VACUOUS=0
+
+-- GATE 10: Semantic IR Warframe callback/API trace
+   SAME=11 DIFFERENT=0 VACUOUS=0
+
+-- GATE 11: native NAMECALL preservation
+   module=Lotus_Scripts_Effects_HarnessEffects.lua_B original=11 rebuilt=11 exact=yes
+
+-- GATE 1: access count vs ORIGINAL (detects silently dropped code)
+   PASS EE_Interface_Components_Grid                   orig=672 ours=672 
+   PASS EE_Interface_Utilities                         orig=784 ours=784 
+   PASS EE_Types_ScriptCommands_JSON                   orig=176 ours=176 
+   PASS EE_Types_ScriptCommands_SetVortexWindPerZone   orig=30 ours=30 
+   PASS Lotus_Characters_Tenno_Infestation_Cyst_Infest orig=127 ours=127 
+   PASS Lotus_Interface_AllianceView                   orig=987 ours=987 
+   PASS Lotus_Interface_Backgrounds_Lotus_LotusBackgro orig=190 ours=190 
+   PASS Lotus_Interface_BeaconInProgress               orig=525 ours=525 
+   PASS Lotus_Interface_BootUpGlitch                   orig=45 ours=45 
+
+-- GATE 2/4: alignment vs ORIGINAL
+   ALIGNED                211
+   LOOP-DIFF              20
+   ORDER-DIFF             49
+   PROTO-DUP              8
+
+-- back-edge bijection (loop recovery)
+   MATCH                  266
+   EXTRA-LOOPS            2
+   LOST-LOOPS             23
+   LATCH-DIFF             9
+   LOST-HEADERS           106
+   EXTRA-HEADERS          2
+
+-- GATE 5: code paths emitted but UNREACHABLE (FINDINGS #97)
+   DROPPED                0  (backward 0, self 0)
+
+-- GATE 6: access loss, independent of category masking
+   CLEAN                  218
+   LOOP-DIFF              24
+   ORDER-DIFF             69
+   ACCESS-LOSS-TOTAL      0
+   ACCESS-GAIN            8
+   PROTO-COUNT-DIFF       8
+
+-- GATE 7: lost conditional wrappers (render pass only)
+   DEADTAIL               0
+
+-- GATE 3: behavioural round-trip
+   SAME=150 DIFFERENT=0 timeout=0
+
+== VERDICT ==
+   ALL GATES PASS  (ALIGNED 211, NAME-DIFF 0, realtrip 150/150)
+   -> accepted release baseline satisfied.
+   machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\default-release-gates-v35.json

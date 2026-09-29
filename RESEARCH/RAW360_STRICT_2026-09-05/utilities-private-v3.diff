@@ -1,0 +1,1146 @@
+diff --git a/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/private-tail-strict-v3/cycle2/Lotus_Interface_LotusUtilities.lua_B/01.luau b/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/private-tail-strict-v3/cycle2/Lotus_Interface_LotusUtilities.lua_B/02.luau
+index c69c4a3..8f4b69f 100644
+--- a/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/private-tail-strict-v3/cycle2/Lotus_Interface_LotusUtilities.lua_B/01.luau
++++ b/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/private-tail-strict-v3/cycle2/Lotus_Interface_LotusUtilities.lua_B/02.luau
+@@ -5322,7 +5322,7 @@
+           c91v10 = c91v10 + 80
+           __renovice_state_0 = 4
+         end
+-        if (__renovice_state_0 ~= 4 and (c91v8 == 2 and c91v10 == 0)) then
++        if ((__renovice_state_0 ~= 4 and c91v8 == 2) and c91v10 == 0) then
+           c91v12 = string.find
+           c91v14 = "NokkoColony"
+           c91v12 = c91v12(c91v7, c91v14)
+@@ -8651,8 +8651,60 @@
+       c210v7 = 0
+       __renovice_state_0 = 6
+     end
+-    while ((((__renovice_state_0 == 6 or __renovice_state_0 == 7) or __renovice_state_0 == 15) or __renovice_state_0 == 16) or __renovice_state_0 == 17) or __renovice_state_0 == 18 do
+-      if __renovice_state_0 == 6 then
++    while true do
++      if ((__renovice_state_0 ~= 6 and __renovice_state_0 ~= 7) and ((__renovice_state_0 ~= 15 and __renovice_state_0 ~= 16) and (__renovice_state_0 ~= 17 and __renovice_state_0 ~= 18))) then
++        if __renovice_state_0 == 8 then
++          c210v9 = {c210v7, c210v7}
++          c210v10 = c210v7 - 1
++          __renovice_state_0 = 9
++        end
++        while __renovice_state_0 == 9 or __renovice_state_0 == 10 do
++          if __renovice_state_0 == 9 then
++            c210v12 = c210v0[c210v10]
++            c210v11 = c210v2(c210v12)
++            if c210v1 ~= c210v11 then
++              __renovice_state_0 = 11
++            else
++              __renovice_state_0 = 10
++            end
++          end
++          if __renovice_state_0 ~= 10 then
++            continue
++          end
++          c210v11 = c210v10 - 1
++          c210v9[1] = c210v10
++          c210v10 = c210v11
++          __renovice_state_0 = 9
++        end
++        if __renovice_state_0 == 11 then
++          c210v10 = c210v7 + 1
++          __renovice_state_0 = 12
++        end
++        while __renovice_state_0 == 12 or __renovice_state_0 == 13 do
++          if __renovice_state_0 == 12 then
++            c210v12 = c210v0[c210v10]
++            c210v11 = c210v2(c210v12)
++            if c210v1 ~= c210v11 then
++              __renovice_state_0 = 14
++            else
++              __renovice_state_0 = 13
++            end
++          end
++          if __renovice_state_0 ~= 13 then
++            continue
++          end
++          c210v11 = c210v10 + 1
++          c210v9[2] = c210v10
++          c210v10 = c210v11
++          __renovice_state_0 = 12
++        end
++        if __renovice_state_0 == 14 then
++          do return c210v9 end
++        elseif __renovice_state_0 == 19 then
++          do return end
++        end
++        do return end
++      elseif __renovice_state_0 == 6 then
+         if c210v6 < c210v5 then
+           __renovice_state_0 = 19
+         else
+@@ -8693,56 +8745,6 @@
+       end
+       __renovice_state_0 = 6
+     end
+-    if __renovice_state_0 == 8 then
+-      c210v9 = {c210v7, c210v7}
+-      c210v10 = c210v7 - 1
+-      __renovice_state_0 = 9
+-    end
+-    while __renovice_state_0 == 9 or __renovice_state_0 == 10 do
+-      if __renovice_state_0 == 9 then
+-        c210v12 = c210v0[c210v10]
+-        c210v11 = c210v2(c210v12)
+-        if c210v1 ~= c210v11 then
+-          __renovice_state_0 = 11
+-        else
+-          __renovice_state_0 = 10
+-        end
+-      end
+-      if __renovice_state_0 ~= 10 then
+-        continue
+-      end
+-      c210v11 = c210v10 - 1
+-      c210v9[1] = c210v10
+-      c210v10 = c210v11
+-      __renovice_state_0 = 9
+-    end
+-    if __renovice_state_0 == 11 then
+-      c210v10 = c210v7 + 1
+-      __renovice_state_0 = 12
+-    end
+-    while __renovice_state_0 == 12 or __renovice_state_0 == 13 do
+-      if __renovice_state_0 == 12 then
+-        c210v12 = c210v0[c210v10]
+-        c210v11 = c210v2(c210v12)
+-        if c210v1 ~= c210v11 then
+-          __renovice_state_0 = 14
+-        else
+-          __renovice_state_0 = 13
+-        end
+-      end
+-      if __renovice_state_0 ~= 13 then
+-        continue
+-      end
+-      c210v11 = c210v10 + 1
+-      c210v9[2] = c210v10
+-      c210v10 = c210v11
+-      __renovice_state_0 = 12
+-    end
+-    if __renovice_state_0 == 14 then
+-      do return c210v9 end
+-    elseif __renovice_state_0 == 19 then
+-      do return end
+-    end
+     do return end
+   end
+   v104 = function(c211v0, c211v1, c211v2, c211v3)
+@@ -12313,7 +12315,8 @@
+       c240v6 = c240v9
+       c240v8 = c240v3:TintIconToTheme()
+       do return c240v2, c240v6, c240v5, c240v7, c240v8 end
+-    elseif c240v4 ~= nil then
++    end
++    if c240v4 ~= nil then
+       c240v5 = c240v4
+       c240v9 = Resource
+       c240v4 = c240v9(c240v4)
+@@ -16865,7 +16868,8 @@
+     c317v11 = 2
+     while true do
+       if (c317v5 or c317v8) then break end
+-      while c317v8 == nil do
++      while true do
++        if c317v8 ~= nil then break end
+         c317v12 = Sleep
+         c317v13 = 0
+         c317v12(c317v13)
+@@ -20921,16 +20925,16 @@
+   GetPresetInfo = v152
+   v152 = function(c394v0)
+     local c394v1, c394v2, c394v3, c394v4, c394v5, c394v6, c394v7, c394v8, c394v9, c394v10, c394v11, c394v12
+-    c394v1 = c394v0.mCount
+-    c394v2 = 0
+-    c394v3 = c394v0.mGoal
+-    c394v4 = c394v0.mPersonal
+-    if not c394v4 then
++    repeat
++      c394v1 = c394v0.mCount
++      c394v2 = 0
++      c394v3 = c394v0.mGoal
++      c394v4 = c394v0.mPersonal
++      if c394v4 then break end
+       c394v4 = c394v0.mInvasion
+-      if not c394v4 then
+-        do return c394v1, c394v2, c394v3 end
+-      end
+-    end
++      if c394v4 then break end
++      do return c394v1, c394v2, c394v3 end
++    until true
+     c394v4 = c394v0.mTag
+     c394v5 = Symbol
+     c394v6 = "HeatFissure"
+@@ -21337,29 +21341,29 @@
+   HasRelayReconstructionEnemy = v152
+   v152 = function(c397v0, c397v1)
+     local c397v2, c397v3, c397v4, c397v5, c397v6, c397v7, c397v8, c397v9, c397v10, c397v11, c397v12
+-    c397v2 = tostring
+-    c397v2 = c397v2(c397v1:GetName())
+-    c397v3 = v40[c397v2]
+-    c397v6 = v14
+-    c397v4 = c397v0:IsA(c397v6)
+-    if c397v4 then
++    repeat
++      c397v2 = tostring
++      c397v2 = c397v2(c397v1:GetName())
++      c397v3 = v40[c397v2]
++      c397v6 = v14
++      c397v4 = c397v0:IsA(c397v6)
++      if not c397v4 then break end
+       c397v6 = v15
+       c397v4 = c397v1:IsA(c397v6)
+-      if c397v4 then
+-        c397v4 = false
+-        do return c397v4 end
+-      end
+-    end
+-    c397v6 = v13
+-    c397v4 = c397v0:IsA(c397v6)
+-    if c397v4 then
++      if not c397v4 then break end
++      c397v4 = false
++      do return c397v4 end
++    until true
++    repeat
++      c397v6 = v13
++      c397v4 = c397v0:IsA(c397v6)
++      if not c397v4 then break end
+       c397v6 = gLotusMeleeWeaponType
+       c397v4 = c397v1:IsA(c397v6)
+-      if c397v4 then
+-        c397v4 = false
+-        do return c397v4 end
+-      end
+-    end
++      if not c397v4 then break end
++      c397v4 = false
++      do return c397v4 end
++    until true
+     if c397v3 == nil then
+       c397v6 = gLotusMeleeWeaponType
+       c397v4 = c397v1:IsA(c397v6)
+@@ -25579,304 +25583,304 @@
+     c477v2 = gGameRules
+     c477v1 = IsNull
+     c477v1 = c477v1(c477v2)
+-    if c477v1 then
+-      c477v1 = ""
+-      do return c477v1 end
+-    end
+-    c477v1 = c477v0
+     if not c477v1 then
+-      c477v1 = gGameRules
+-      c477v1 = c477v1:GetMission()
+-    end
+-    c477v2 = c477v1.location
+-    c477v3 = tostring
+-    c477v3 = c477v3(c477v2)
+-    c477v4 = c477v3
+-    c477v5 = v57
+-    c477v5 = c477v5()
+-    c477v6 = IsNull
+-    c477v6 = c477v6(c477v5)
+-    if not c477v6 then
+-      c477v6 = c477v5:GetNodeLabel(c477v2)
+-      c477v6 = c477v6:c_str()
+-      c477v7 = WeakResource
+-      c477v8 = "/Lotus/Types/GameRules/Lotus1999GameRules"
+-      c477v7 = c477v7(c477v8)
+-      c477v9 = c477v1.gameRules
+-      c477v8 = IsNull
+-      c477v8 = c477v8(c477v9)
+-      if not c477v8 then
+-        c477v8 = c477v1.gameRules
+-        c477v8 = c477v8:IsA(c477v7)
+-        if c477v8 then
+-          c477v9 = "StreetName"
+-          c477v6 = c477v6 .. c477v9
+-        end
+-      end
+-      c477v8 = Localize
+-      c477v10 = false
+-      c477v4 = c477v8(c477v6, c477v10)
+-    end
+-    c477v7 = gGameData
+-    c477v6 = IsNull
+-    c477v6 = c477v6(c477v7)
+-    if not c477v6 then
+-      c477v6 = gGameData
+-      c477v6 = c477v6:GetWorldState()
+-      c477v9 = 1
+-      c477v10 = c477v6.mGoals
+-      c477v7 = #c477v10
+-      c477v8 = 1
+-      for __renovice_for_0_0 = c477v9, c477v7, c477v8 do
+-        c477v11 = c477v6.mGoals
+-        c477v10 = c477v11[__renovice_for_0_0]
+-        c477v12 = c477v10.mId
+-        c477v11 = tostring
+-        c477v11 = c477v11(c477v12)
+-        c477v12 = c477v1.goalId
+-        c477v11 = c477v10.mNode
+-        c477v11 = c477v10.mNode
+-        if c477v11 == c477v3 then break end
+-        c477v11 = false
+-        c477v14 = 1
+-        c477v15 = c477v10.mConcurrentNodes
+-        c477v12 = #c477v15
+-        c477v13 = 1
+-        for __renovice_for_1_0 = c477v14, c477v12, c477v13 do
+-          c477v16 = c477v10.mConcurrentNodes
+-          c477v15 = c477v16[__renovice_for_1_0]
+-          c477v16 = c477v10.mConcurrentNodes
+-          c477v15 = c477v16[__renovice_for_1_0]
+-          if c477v15 == c477v3 then break end
+-        end
+-        if c477v11 then break end
+-        c477v15 = Localize
+-        c477v16 = c477v10.mDesc
+-        c477v17 = false
+-        c477v4 = c477v15(c477v16, c477v17)
+-        c477v16 = c477v10.mConcurrentNodeReqs
+-        c477v15 = #c477v16
+-        if c477v14 <= c477v15 then
+-          c477v16 = c477v10.mConcurrentNodeReqs
+-          c477v15 = c477v16[c477v14]
+-          c477v16 = c477v10.mGoal
+-          if c477v16 <= c477v15 then
+-            c477v15 = c477v10.mTag
+-            c477v16 = Symbol
+-            c477v17 = "WaterFight"
+-            c477v16 = c477v16(c477v17)
+-            if c477v15 ~= c477v16 then
+-              c477v16 = " "
+-              c477v17 = Localize
+-              c477v18 = "/Lotus/Language/Menu/WorldStateChallengeMode"
+-              c477v19 = false
+-              c477v17 = c477v17(c477v18, c477v19)
+-              c477v4 = c477v4 .. c477v16 .. c477v17
+-            end
+-          end
+-        end
+-        c477v11 = true
+-        if c477v11 == c477v12 then
+-          continue
+-        end
+-        c477v11 = Localize
+-        c477v12 = c477v10.mDesc
+-        c477v13 = false
+-        c477v4 = c477v11(c477v12, c477v13)
+-      end
+-      c477v7 = c477v1.alertId
+-      if c477v7 ~= "" then
++      c477v1 = c477v0
++      if not c477v1 then
++        c477v1 = gGameRules
++        c477v1 = c477v1:GetMission()
++      end
++      c477v2 = c477v1.location
++      c477v3 = tostring
++      c477v3 = c477v3(c477v2)
++      c477v4 = c477v3
++      c477v5 = v57
++      c477v5 = c477v5()
++      c477v6 = IsNull
++      c477v6 = c477v6(c477v5)
++      if not c477v6 then
++        c477v6 = c477v5:GetNodeLabel(c477v2)
++        c477v6 = c477v6:c_str()
++        c477v7 = WeakResource
++        c477v8 = "/Lotus/Types/GameRules/Lotus1999GameRules"
++        c477v7 = c477v7(c477v8)
++        c477v9 = c477v1.gameRules
++        c477v8 = IsNull
++        c477v8 = c477v8(c477v9)
++        if not c477v8 then
++          c477v8 = c477v1.gameRules
++          c477v8 = c477v8:IsA(c477v7)
++          if c477v8 then
++            c477v9 = "StreetName"
++            c477v6 = c477v6 .. c477v9
++          end
++        end
++        c477v8 = Localize
++        c477v10 = false
++        c477v4 = c477v8(c477v6, c477v10)
++      end
++      c477v7 = gGameData
++      c477v6 = IsNull
++      c477v6 = c477v6(c477v7)
++      if not c477v6 then
++        c477v6 = gGameData
++        c477v6 = c477v6:GetWorldState()
+         c477v9 = 1
+-        c477v10 = c477v6.mAlerts
++        c477v10 = c477v6.mGoals
+         c477v7 = #c477v10
+         c477v8 = 1
+-        for __renovice_for_2_0 = c477v9, c477v7, c477v8 do
+-          c477v11 = c477v6.mAlerts
+-          c477v10 = c477v11[__renovice_for_2_0]
++        for __renovice_for_0_0 = c477v9, c477v7, c477v8 do
++          c477v11 = c477v6.mGoals
++          c477v10 = c477v11[__renovice_for_0_0]
+           c477v12 = c477v10.mId
+           c477v11 = tostring
+           c477v11 = c477v11(c477v12)
+-          c477v12 = c477v1.alertId
+-          if c477v11 ~= c477v12 then
+-            continue
++          c477v12 = c477v1.goalId
++          c477v11 = c477v10.mNode
++          c477v11 = c477v10.mNode
++          if c477v11 == c477v3 then break end
++          c477v11 = false
++          c477v14 = 1
++          c477v15 = c477v10.mConcurrentNodes
++          c477v12 = #c477v15
++          c477v13 = 1
++          for __renovice_for_1_0 = c477v14, c477v12, c477v13 do
++            c477v16 = c477v10.mConcurrentNodes
++            c477v15 = c477v16[__renovice_for_1_0]
++            c477v16 = c477v10.mConcurrentNodes
++            c477v15 = c477v16[__renovice_for_1_0]
++            if c477v15 == c477v3 then break end
++          end
++          if c477v11 then break end
++          c477v15 = Localize
++          c477v16 = c477v10.mDesc
++          c477v17 = false
++          c477v4 = c477v15(c477v16, c477v17)
++          c477v16 = c477v10.mConcurrentNodeReqs
++          c477v15 = #c477v16
++          if c477v14 <= c477v15 then
++            c477v16 = c477v10.mConcurrentNodeReqs
++            c477v15 = c477v16[c477v14]
++            c477v16 = c477v10.mGoal
++            if c477v16 <= c477v15 then
++              c477v15 = c477v10.mTag
++              c477v16 = Symbol
++              c477v17 = "WaterFight"
++              c477v16 = c477v16(c477v17)
++              if c477v15 ~= c477v16 then
++                c477v16 = " "
++                c477v17 = Localize
++                c477v18 = "/Lotus/Language/Menu/WorldStateChallengeMode"
++                c477v19 = false
++                c477v17 = c477v17(c477v18, c477v19)
++                c477v4 = c477v4 .. c477v16 .. c477v17
++              end
++            end
+           end
+-          c477v11 = c477v10.mTag
+-          c477v12 = EMPTY_SYMBOL
++          c477v11 = true
+           if c477v11 == c477v12 then
+             continue
+           end
+           c477v11 = Localize
+-          c477v13 = c477v10.mMissionInfo
+-          c477v13 = c477v13.descText
+-          c477v12 = tostring
+-          c477v12 = c477v12(c477v13)
++          c477v12 = c477v10.mDesc
+           c477v13 = false
+           c477v4 = c477v11(c477v12, c477v13)
+         end
++        c477v7 = c477v1.alertId
++        if c477v7 ~= "" then
++          c477v9 = 1
++          c477v10 = c477v6.mAlerts
++          c477v7 = #c477v10
++          c477v8 = 1
++          for __renovice_for_2_0 = c477v9, c477v7, c477v8 do
++            c477v11 = c477v6.mAlerts
++            c477v10 = c477v11[__renovice_for_2_0]
++            c477v12 = c477v10.mId
++            c477v11 = tostring
++            c477v11 = c477v11(c477v12)
++            c477v12 = c477v1.alertId
++            if c477v11 ~= c477v12 then
++              continue
++            end
++            c477v11 = c477v10.mTag
++            c477v12 = EMPTY_SYMBOL
++            if c477v11 == c477v12 then
++              continue
++            end
++            c477v11 = Localize
++            c477v13 = c477v10.mMissionInfo
++            c477v13 = c477v13.descText
++            c477v12 = tostring
++            c477v12 = c477v12(c477v13)
++            c477v13 = false
++            c477v4 = c477v11(c477v12, c477v13)
++          end
++        end
+       end
+-    end
+-    local __renovice_state_0 = 32
+-    c477v6 = #c477v4
+-    if c477v6 ~= 0 then
+-      __renovice_state_0 = 34
+-    else
+-      __renovice_state_0 = 33
+-    end
+-    if __renovice_state_0 == 33 then
+-      c477v6 = Localize
+-      c477v7 = c477v1.uniqueName
+-      c477v8 = false
+-      c477v4 = c477v6(c477v7, c477v8)
+-      __renovice_state_0 = 34
+-    end
+-    if __renovice_state_0 == 34 then
+-      c477v7 = c477v1.keyChainName
+-      c477v6 = IsNull
+-      c477v6 = c477v6(c477v7)
+-      if not c477v6 then
+-        __renovice_state_0 = 36
+-      else
+-        __renovice_state_0 = 35
+-      end
+-    end
+-    if __renovice_state_0 == 35 then
++      local __renovice_state_0 = 32
+       c477v6 = #c477v4
+       if c477v6 ~= 0 then
+-        __renovice_state_0 = 38
++        __renovice_state_0 = 34
+       else
+-        __renovice_state_0 = 36
++        __renovice_state_0 = 33
+       end
+-    end
+-    if __renovice_state_0 == 36 then
+-      c477v6 = Resource
+-      c477v7 = c477v1.levelKeyName
+-      c477v6 = c477v6(c477v7)
+-      c477v7 = IsNull
+-      c477v7 = c477v7(c477v6)
+-      if c477v7 then
++      if __renovice_state_0 == 33 then
++        c477v6 = Localize
++        c477v7 = c477v1.uniqueName
++        c477v8 = false
++        c477v4 = c477v6(c477v7, c477v8)
++        __renovice_state_0 = 34
++      end
++      if __renovice_state_0 == 34 then
++        c477v7 = c477v1.keyChainName
++        c477v6 = IsNull
++        c477v6 = c477v6(c477v7)
++        if not c477v6 then
++          __renovice_state_0 = 36
++        else
++          __renovice_state_0 = 35
++        end
++      end
++      if __renovice_state_0 == 35 then
++        c477v6 = #c477v4
++        if c477v6 ~= 0 then
++          __renovice_state_0 = 38
++        else
++          __renovice_state_0 = 36
++        end
++      end
++      if __renovice_state_0 == 36 then
++        c477v6 = Resource
++        c477v7 = c477v1.levelKeyName
++        c477v6 = c477v6(c477v7)
++        c477v7 = IsNull
++        c477v7 = c477v7(c477v6)
++        if c477v7 then
++          __renovice_state_0 = 38
++        else
++          __renovice_state_0 = 37
++        end
++      end
++      if __renovice_state_0 == 37 then
++        c477v7 = c477v6:GetLocalizeTag()
++        c477v8 = Localize
++        c477v9 = c477v7:c_str()
++        c477v10 = false
++        c477v4 = c477v8(c477v9, c477v10)
+         __renovice_state_0 = 38
+-      else
+-        __renovice_state_0 = 37
+       end
+-    end
+-    if __renovice_state_0 == 37 then
+-      c477v7 = c477v6:GetLocalizeTag()
+-      c477v8 = Localize
+-      c477v9 = c477v7:c_str()
+-      c477v10 = false
+-      c477v4 = c477v8(c477v9, c477v10)
+-      __renovice_state_0 = 38
+-    end
+-    if __renovice_state_0 == 38 then
+-      c477v6 = #c477v4
+-      if c477v6 ~= 0 then
+-        __renovice_state_0 = 44
+-      else
+-        __renovice_state_0 = 39
++      if __renovice_state_0 == 38 then
++        c477v6 = #c477v4
++        if c477v6 ~= 0 then
++          __renovice_state_0 = 44
++        else
++          __renovice_state_0 = 39
++        end
+       end
+-    end
+-    if __renovice_state_0 == 39 then
+-      c477v7 = c477v1.levelOverride
+-      c477v6 = IsNull
+-      c477v6 = c477v6(c477v7)
+-      if c477v6 then
++      if __renovice_state_0 == 39 then
++        c477v7 = c477v1.levelOverride
++        c477v6 = IsNull
++        c477v6 = c477v6(c477v7)
++        if c477v6 then
++          __renovice_state_0 = 44
++        else
++          __renovice_state_0 = 40
++        end
++      end
++      if __renovice_state_0 == 40 then
++        c477v6 = c477v1.levelOverride
++        c477v6 = c477v6:GetFullName()
++        c477v7 = string.find
++        c477v9 = "Derelict"
++        c477v7 = c477v7(c477v6, c477v9)
++        if not c477v7 then
++          __renovice_state_0 = 42
++        else
++          __renovice_state_0 = 41
++        end
++      end
++      if __renovice_state_0 == 41 then
++        c477v7 = Localize
++        c477v8 = "/Lotus/Language/Locations/Derelict"
++        c477v9 = false
++        c477v4 = c477v7(c477v8, c477v9)
+         __renovice_state_0 = 44
+-      else
+-        __renovice_state_0 = 40
+       end
+-    end
+-    if __renovice_state_0 == 40 then
+-      c477v6 = c477v1.levelOverride
+-      c477v6 = c477v6:GetFullName()
+-      c477v7 = string.find
+-      c477v9 = "Derelict"
+-      c477v7 = c477v7(c477v6, c477v9)
+-      if not c477v7 then
+-        __renovice_state_0 = 42
+-      else
+-        __renovice_state_0 = 41
++      if __renovice_state_0 == 42 then
++        c477v7 = string.find
++        c477v9 = "OrokinTower"
++        c477v7 = c477v7(c477v6, c477v9)
++        if not c477v7 then
++          __renovice_state_0 = 44
++        else
++          __renovice_state_0 = 43
++        end
+       end
+-    end
+-    if __renovice_state_0 == 41 then
+-      c477v7 = Localize
+-      c477v8 = "/Lotus/Language/Locations/Derelict"
+-      c477v9 = false
+-      c477v4 = c477v7(c477v8, c477v9)
+-      __renovice_state_0 = 44
+-    end
+-    if __renovice_state_0 == 42 then
+-      c477v7 = string.find
+-      c477v9 = "OrokinTower"
+-      c477v7 = c477v7(c477v6, c477v9)
+-      if not c477v7 then
++      if __renovice_state_0 == 43 then
++        c477v7 = Localize
++        c477v8 = "/Lotus/Language/Locations/Void"
++        c477v9 = false
++        c477v4 = c477v7(c477v8, c477v9)
+         __renovice_state_0 = 44
+-      else
+-        __renovice_state_0 = 43
+       end
+-    end
+-    if __renovice_state_0 == 43 then
+-      c477v7 = Localize
+-      c477v8 = "/Lotus/Language/Locations/Void"
+-      c477v9 = false
+-      c477v4 = c477v7(c477v8, c477v9)
+-      __renovice_state_0 = 44
+-    end
+-    if __renovice_state_0 == 44 then
+-      c477v6 = gGameRules
+-      c477v8 = gLotusBaseGameRulesType
+-      c477v6 = c477v6:IsA(c477v8)
+-      if not c477v6 then
+-        __renovice_state_0 = 47
+-      else
+-        __renovice_state_0 = 45
++      if __renovice_state_0 == 44 then
++        c477v6 = gGameRules
++        c477v8 = gLotusBaseGameRulesType
++        c477v6 = c477v6:IsA(c477v8)
++        if not c477v6 then
++          __renovice_state_0 = 47
++        else
++          __renovice_state_0 = 45
++        end
+       end
+-    end
+-    if __renovice_state_0 == 45 then
+-      c477v6 = gGameRules
+-      c477v6 = c477v6:Name__84c483f1()
+-      if not c477v6 then
++      if __renovice_state_0 == 45 then
++        c477v6 = gGameRules
++        c477v6 = c477v6:Name__84c483f1()
++        if not c477v6 then
++          __renovice_state_0 = 47
++        else
++          __renovice_state_0 = 46
++        end
++      end
++      if __renovice_state_0 == 46 then
++        c477v6 = Localize
++        c477v7 = "/Lotus/Language/Missions/MissionName_Badlands"
++        c477v8 = { MISSION_NAME = nil }
++        c477v8.MISSION_NAME = c477v4
++        c477v4 = c477v6(c477v7, c477v8)
+         __renovice_state_0 = 47
+-      else
+-        __renovice_state_0 = 46
+       end
+-    end
+-    if __renovice_state_0 == 46 then
+-      c477v6 = Localize
+-      c477v7 = "/Lotus/Language/Missions/MissionName_Badlands"
+-      c477v8 = { MISSION_NAME = nil }
+-      c477v8.MISSION_NAME = c477v4
+-      c477v4 = c477v6(c477v7, c477v8)
+-      __renovice_state_0 = 47
+-    end
+-    if __renovice_state_0 == 47 then
+-      c477v6 = #c477v4
+-      if c477v6 ~= 0 then
+-        __renovice_state_0 = 50
+-      else
+-        __renovice_state_0 = 48
++      if __renovice_state_0 == 47 then
++        c477v6 = #c477v4
++        if c477v6 ~= 0 then
++          __renovice_state_0 = 50
++        else
++          __renovice_state_0 = 48
++        end
+       end
+-    end
+-    if __renovice_state_0 == 48 then
+-      c477v6 = string.find
+-      c477v8 = "Kullervo"
+-      c477v6 = c477v6(c477v3, c477v8)
+-      if not c477v6 then
++      if __renovice_state_0 == 48 then
++        c477v6 = string.find
++        c477v8 = "Kullervo"
++        c477v6 = c477v6(c477v3, c477v8)
++        if not c477v6 then
++          __renovice_state_0 = 50
++        else
++          __renovice_state_0 = 49
++        end
++      end
++      if __renovice_state_0 == 49 then
++        c477v6 = Localize
++        c477v7 = "/Lotus/Language/Duviri/ThePrison"
++        c477v8 = false
++        c477v4 = c477v6(c477v7, c477v8)
+         __renovice_state_0 = 50
+-      else
+-        __renovice_state_0 = 49
+       end
++      if __renovice_state_0 == 50 then
++        do return c477v4 end
++      end
++      do return end
+     end
+-    if __renovice_state_0 == 49 then
+-      c477v6 = Localize
+-      c477v7 = "/Lotus/Language/Duviri/ThePrison"
+-      c477v8 = false
+-      c477v4 = c477v6(c477v7, c477v8)
+-      __renovice_state_0 = 50
+-    end
+-    if __renovice_state_0 == 50 then
+-      do return c477v4 end
+-    end
+-    do return end
++    c477v1 = ""
++    do return c477v1 end
+   end
+   GetMissionName = v159
+   v159 = function()
+@@ -30245,8 +30249,175 @@
+       c531v8 = 1
+       __renovice_state_0 = 12
+     end
+-    while (((__renovice_state_0 == 12 or __renovice_state_0 == 13) or __renovice_state_0 == 14) or __renovice_state_0 == 15) or __renovice_state_0 == 16 do
+-      if __renovice_state_0 == 12 then
++    while true do
++      if ((__renovice_state_0 ~= 12 and __renovice_state_0 ~= 13) and ((__renovice_state_0 ~= 14 and __renovice_state_0 ~= 15) and __renovice_state_0 ~= 16)) then
++        if __renovice_state_0 == 17 then
++          c531v9 = #c531v5
++          if c531v9 ~= 0 then
++            __renovice_state_0 = 20
++          else
++            __renovice_state_0 = 18
++          end
++        end
++        if __renovice_state_0 == 18 then
++          c531v5 = c531v3[c531v0]
++          __renovice_state_0 = 20
++        end
++        if __renovice_state_0 == 19 then
++          c531v5 = c531v3[c531v0]
++          __renovice_state_0 = 20
++        end
++        if __renovice_state_0 == 20 then
++          c531v8 = SRandomInt
++          c531v9 = 1
++          c531v10 = #c531v5
++          c531v8 = c531v8(c531v9, c531v10)
++          c531v9 = c531v5[c531v8]
++          c531v10 = IsNull
++          c531v10 = c531v10(c531v9)
++          if c531v10 then
++            __renovice_state_0 = 32
++          else
++            __renovice_state_0 = 21
++          end
++        end
++        if __renovice_state_0 == 21 then
++          c531v10 = string.gsub
++          c531v12 = "/StoreItems"
++          c531v13 = ""
++          c531v10 = c531v10(c531v9, c531v12, c531v13)
++          c531v11 = WeakResource
++          c531v6 = c531v11(c531v10)
++          c531v11 = 3
++          if c531v0 == c531v11 then
++            __renovice_state_0 = 26
++          else
++            __renovice_state_0 = 22
++          end
++        end
++        if __renovice_state_0 == 22 then
++          c531v11 = IsWeaponMastered
++          c531v11 = c531v11(c531v6)
++          if (not c531v11 or c531v4) then
++            __renovice_state_0 = 26
++          else
++            __renovice_state_0 = 24
++          end
++        end
++        if __renovice_state_0 == 24 then
++          c531v11 = SRandom
++          c531v12 = 0
++          c531v13 = 1
++          c531v11 = c531v11(c531v12, c531v13)
++          c531v12 = 0.25
++          if c531v12 < c531v11 then
++            __renovice_state_0 = 26
++          else
++            __renovice_state_0 = 25
++          end
++        end
++        if __renovice_state_0 == 25 then
++          c531v12 = v168
++          c531v14 = 1
++          c531v17 = true
++          c531v6 = c531v12(c531v0, c531v14, c531v2, c531v3, c531v17)
++          c531v12 = print
++          c531v14 = "GenerateWeaponSelection - Rerolling mastered, unowned weapon. Original weapon: "
++          c531v15 = c531v6:GetName()
++          c531v16 = ". New weapon: "
++          c531v17 = c531v6:GetName()
++          c531v13 = c531v14 .. c531v15 .. c531v16 .. c531v17
++          c531v12(c531v13)
++          __renovice_state_0 = 26
++        end
++        if __renovice_state_0 == 26 then
++          c531v11 = IsNull
++          c531v11 = c531v11(c531v6)
++          if c531v11 then
++            __renovice_state_0 = 28
++          else
++            __renovice_state_0 = 27
++          end
++        end
++        if __renovice_state_0 == 27 then
++          c531v11 = print
++          c531v13 = c531v6:GetFullName()
++          c531v14 = " generated as an unowned Cave selection for category: "
++          c531v15 = tostring
++          c531v15 = c531v15(c531v0)
++          c531v12 = c531v13 .. c531v14 .. c531v15
++          c531v11(c531v12)
++          __renovice_state_0 = 28
++        end
++        if __renovice_state_0 == 28 then
++          c531v11 = v166
++          c531v12 = c531v3[c531v0]
++          c531v11(c531v12, c531v6)
++          c531v11 = v166
++          c531v12 = c531v2[c531v0]
++          c531v11(c531v12, c531v6)
++          __renovice_state_0 = 32
++        end
++        if __renovice_state_0 == 29 then
++          c531v5 = c531v2[c531v0]
++          c531v8 = SRandomInt
++          c531v9 = 1
++          c531v10 = #c531v5
++          c531v8 = c531v8(c531v9, c531v10)
++          c531v9 = c531v5[c531v8]
++          c531v6 = c531v9.mItemType
++          c531v9 = v165
++          c531v6 = c531v9(c531v6, c531v0, c531v2)
++          c531v9 = IsNull
++          c531v9 = c531v9(c531v6)
++          if c531v9 then
++            __renovice_state_0 = 31
++          else
++            __renovice_state_0 = 30
++          end
++        end
++        if __renovice_state_0 == 30 then
++          c531v9 = print
++          c531v11 = c531v6:GetFullName()
++          c531v12 = " generated as an owned Cave selection for category: "
++          c531v13 = tostring
++          c531v13 = c531v13(c531v0)
++          c531v10 = c531v11 .. c531v12 .. c531v13
++          c531v9(c531v10)
++          __renovice_state_0 = 31
++        end
++        if __renovice_state_0 == 31 then
++          c531v9 = v166
++          c531v10 = c531v2[c531v0]
++          c531v9(c531v10, c531v6)
++          c531v9 = v166
++          c531v10 = c531v3[c531v0]
++          c531v9(c531v10, c531v6)
++          __renovice_state_0 = 32
++        end
++        if __renovice_state_0 == 32 then
++          c531v8 = IsNull
++          c531v8 = c531v8(c531v6)
++          if not c531v8 then
++            __renovice_state_0 = 34
++          else
++            __renovice_state_0 = 33
++          end
++        end
++        if __renovice_state_0 == 33 then
++          c531v8 = print
++          c531v10 = "Null WeaponInfo generated as a Cave selection for category: "
++          c531v11 = tostring
++          c531v11 = c531v11(c531v0)
++          c531v9 = c531v10 .. c531v11
++          c531v8(c531v9)
++          __renovice_state_0 = 34
++        end
++        if __renovice_state_0 == 34 then
++          do return c531v6 end
++        end
++        do return end
++      elseif __renovice_state_0 == 12 then
+         c531v9 = #c531v5
+         if c531v9 < c531v8 then
+           __renovice_state_0 = 17
+@@ -30284,171 +30455,6 @@
+       end
+       __renovice_state_0 = 12
+     end
+-    if __renovice_state_0 == 17 then
+-      c531v9 = #c531v5
+-      if c531v9 ~= 0 then
+-        __renovice_state_0 = 20
+-      else
+-        __renovice_state_0 = 18
+-      end
+-    end
+-    if __renovice_state_0 == 18 then
+-      c531v5 = c531v3[c531v0]
+-      __renovice_state_0 = 20
+-    end
+-    if __renovice_state_0 == 19 then
+-      c531v5 = c531v3[c531v0]
+-      __renovice_state_0 = 20
+-    end
+-    if __renovice_state_0 == 20 then
+-      c531v8 = SRandomInt
+-      c531v9 = 1
+-      c531v10 = #c531v5
+-      c531v8 = c531v8(c531v9, c531v10)
+-      c531v9 = c531v5[c531v8]
+-      c531v10 = IsNull
+-      c531v10 = c531v10(c531v9)
+-      if c531v10 then
+-        __renovice_state_0 = 32
+-      else
+-        __renovice_state_0 = 21
+-      end
+-    end
+-    if __renovice_state_0 == 21 then
+-      c531v10 = string.gsub
+-      c531v12 = "/StoreItems"
+-      c531v13 = ""
+-      c531v10 = c531v10(c531v9, c531v12, c531v13)
+-      c531v11 = WeakResource
+-      c531v6 = c531v11(c531v10)
+-      c531v11 = 3
+-      if c531v0 == c531v11 then
+-        __renovice_state_0 = 26
+-      else
+-        __renovice_state_0 = 22
+-      end
+-    end
+-    if __renovice_state_0 == 22 then
+-      c531v11 = IsWeaponMastered
+-      c531v11 = c531v11(c531v6)
+-      if (not c531v11 or c531v4) then
+-        __renovice_state_0 = 26
+-      else
+-        __renovice_state_0 = 24
+-      end
+-    end
+-    if __renovice_state_0 == 24 then
+-      c531v11 = SRandom
+-      c531v12 = 0
+-      c531v13 = 1
+-      c531v11 = c531v11(c531v12, c531v13)
+-      c531v12 = 0.25
+-      if c531v12 < c531v11 then
+-        __renovice_state_0 = 26
+-      else
+-        __renovice_state_0 = 25
+-      end
+-    end
+-    if __renovice_state_0 == 25 then
+-      c531v12 = v168
+-      c531v14 = 1
+-      c531v17 = true
+-      c531v6 = c531v12(c531v0, c531v14, c531v2, c531v3, c531v17)
+-      c531v12 = print
+-      c531v14 = "GenerateWeaponSelection - Rerolling mastered, unowned weapon. Original weapon: "
+-      c531v15 = c531v6:GetName()
+-      c531v16 = ". New weapon: "
+-      c531v17 = c531v6:GetName()
+-      c531v13 = c531v14 .. c531v15 .. c531v16 .. c531v17
+-      c531v12(c531v13)
+-      __renovice_state_0 = 26
+-    end
+-    if __renovice_state_0 == 26 then
+-      c531v11 = IsNull
+-      c531v11 = c531v11(c531v6)
+-      if c531v11 then
+-        __renovice_state_0 = 28
+-      else
+-        __renovice_state_0 = 27
+-      end
+-    end
+-    if __renovice_state_0 == 27 then
+-      c531v11 = print
+-      c531v13 = c531v6:GetFullName()
+-      c531v14 = " generated as an unowned Cave selection for category: "
+-      c531v15 = tostring
+-      c531v15 = c531v15(c531v0)
+-      c531v12 = c531v13 .. c531v14 .. c531v15
+-      c531v11(c531v12)
+-      __renovice_state_0 = 28
+-    end
+-    if __renovice_state_0 == 28 then
+-      c531v11 = v166
+-      c531v12 = c531v3[c531v0]
+-      c531v11(c531v12, c531v6)
+-      c531v11 = v166
+-      c531v12 = c531v2[c531v0]
+-      c531v11(c531v12, c531v6)
+-      __renovice_state_0 = 32
+-    end
+-    if __renovice_state_0 == 29 then
+-      c531v5 = c531v2[c531v0]
+-      c531v8 = SRandomInt
+-      c531v9 = 1
+-      c531v10 = #c531v5
+-      c531v8 = c531v8(c531v9, c531v10)
+-      c531v9 = c531v5[c531v8]
+-      c531v6 = c531v9.mItemType
+-      c531v9 = v165
+-      c531v6 = c531v9(c531v6, c531v0, c531v2)
+-      c531v9 = IsNull
+-      c531v9 = c531v9(c531v6)
+-      if c531v9 then
+-        __renovice_state_0 = 31
+-      else
+-        __renovice_state_0 = 30
+-      end
+-    end
+-    if __renovice_state_0 == 30 then
+-      c531v9 = print
+-      c531v11 = c531v6:GetFullName()
+-      c531v12 = " generated as an owned Cave selection for category: "
+-      c531v13 = tostring
+-      c531v13 = c531v13(c531v0)
+-      c531v10 = c531v11 .. c531v12 .. c531v13
+-      c531v9(c531v10)
+-      __renovice_state_0 = 31
+-    end
+-    if __renovice_state_0 == 31 then
+-      c531v9 = v166
+-      c531v10 = c531v2[c531v0]
+-      c531v9(c531v10, c531v6)
+-      c531v9 = v166
+-      c531v10 = c531v3[c531v0]
+-      c531v9(c531v10, c531v6)
+-      __renovice_state_0 = 32
+-    end
+-    if __renovice_state_0 == 32 then
+-      c531v8 = IsNull
+-      c531v8 = c531v8(c531v6)
+-      if not c531v8 then
+-        __renovice_state_0 = 34
+-      else
+-        __renovice_state_0 = 33
+-      end
+-    end
+-    if __renovice_state_0 == 33 then
+-      c531v8 = print
+-      c531v10 = "Null WeaponInfo generated as a Cave selection for category: "
+-      c531v11 = tostring
+-      c531v11 = c531v11(c531v0)
+-      c531v9 = c531v10 .. c531v11
+-      c531v8(c531v9)
+-      __renovice_state_0 = 34
+-    end
+-    if __renovice_state_0 == 34 then
+-      do return c531v6 end
+-    end
+     do return end
+   end
+   v169 = function(c532v0)

@@ -66,7 +66,7 @@ def make_roundtrip(source, stage_root):
     os.makedirs(case_dir, exist_ok=True)
     source_path = os.path.join(case_dir, stem + ".decompiled.luau")
     rebuilt_path = os.path.join(case_dir, stem + ".recompiled.lua_B")
-    text = run_checked([align.DEC, "decompile-mod", source])
+    text = run_checked([align.DEC, align.DECOMPILE_MODE, source])
     with open(source_path, "w", encoding="utf-8", newline="\n") as stream:
         stream.write(text)
     run_checked([align.DEC, "recompile", source_path, rebuilt_path])

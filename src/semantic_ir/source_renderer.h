@@ -27,6 +27,120 @@ struct Result {
     BlockId duplicate_second_region_stop;
     bool used_dispatcher = false;
     bool used_frame_storage = false;
+    // Models outside the root closure graph are compiler-carried dead prototypes.  They cannot be
+    // instantiated at runtime and therefore cannot be represented as executable Luau without
+    // inventing a new closure site.  Keep their exact identities visible in the source and sidecars.
+    std::set<int> omitted_orphan_prototypes;
+    struct CallSourceSpan {
+        size_t offset = 0;
+        size_t length = 0;
+    };
+    // Exact byte spans of every rendered source expression for each authoritative
+    // call.  A structured renderer can project one bytecode call into several
+    // mutually exclusive source regions.  The renderer records every projection
+    // before any consumer tokenizes source; no text search or method-name
+    // heuristic participates in the mapping.
+    std::map<std::pair<int, int>, std::vector<CallSourceSpan>> call_spans;
+};
+
+inline void shift_call_spans(Result& result, const size_t prefix_bytes) {
+    for (auto& item : result.call_spans)
+        for (auto& span : item.second) span.offset += prefix_bytes;
+}
+
+inline bool extract_call_spans(Result& result) {
+    constexpr char marker = '\x1e';
+    constexpr char terminator = '\x1f';
+    std::string clean;
+    clean.reserve(result.source.size());
+    std::vector<std::pair<std::pair<int, int>, size_t>> open;
+    for (size_t cursor = 0; cursor < result.source.size();) {
+        if (result.source[cursor] != marker) {
+            clean.push_back(result.source[cursor++]);
+            continue;
+        }
+        const size_t end = result.source.find(terminator, cursor + 1);
+        if (end == std::string::npos) {
+            result.failures.push_back("RENDER_CALL_SPAN_MARKER_UNTERMINATED");
+            result.ok = false;
+            return false;
+        }
+        const std::string payload = result.source.substr(cursor + 1, end - cursor - 1);
+        if (payload.size() < 4 || (payload[0] != 'B' && payload[0] != 'E')) {
+            result.failures.push_back("RENDER_CALL_SPAN_MARKER_INVALID");
+            result.ok = false;
+            return false;
+        }
+        const size_t separator = payload.find(':', 1);
+        if (separator == std::string::npos) {
+            result.failures.push_back("RENDER_CALL_SPAN_ID_INVALID");
+            result.ok = false;
+            return false;
+        }
+        int prototype = -1, instruction = -1;
+        try {
+            size_t consumed_prototype = 0, consumed_instruction = 0;
+            prototype = std::stoi(payload.substr(1, separator - 1), &consumed_prototype);
+            instruction = std::stoi(payload.substr(separator + 1), &consumed_instruction);
+            if (consumed_prototype != separator - 1
+                || consumed_instruction != payload.size() - separator - 1
+                || prototype < 0 || instruction < 0)
+                throw std::runtime_error("invalid call span identity");
+        } catch (...) {
+            result.failures.push_back("RENDER_CALL_SPAN_ID_INVALID");
+            result.ok = false;
+            return false;
+        }
+        const std::pair<int, int> identity{prototype, instruction};
+        if (payload[0] == 'B') {
+            open.push_back({identity, clean.size()});
+        } else {
+            if (open.empty() || open.back().first != identity) {
+                result.failures.push_back("RENDER_CALL_SPAN_NESTING_INVALID");
+                result.ok = false;
+                return false;
+            }
+            const size_t start = open.back().second;
+            open.pop_back();
+            if (clean.size() <= start) {
+                result.failures.push_back("RENDER_CALL_SPAN_EMPTY");
+                result.ok = false;
+                return false;
+            }
+            result.call_spans[identity].push_back(
+                Result::CallSourceSpan{start, clean.size() - start});
+        }
+        cursor = end + 1;
+    }
+    if (!open.empty()) {
+        result.failures.push_back("RENDER_CALL_SPAN_MARKER_UNCLOSED");
+        result.ok = false;
+        return false;
+    }
+    result.source = std::move(clean);
+    for (auto& item : result.call_spans)
+        std::sort(item.second.begin(), item.second.end(),
+            [](const Result::CallSourceSpan& left, const Result::CallSourceSpan& right) {
+                if (left.offset != right.offset) return left.offset < right.offset;
+                return left.length < right.length;
+            });
+    return true;
+}
+
+// Optional identifier-only view over the verified value-web model.  The
+// renderer still owns every statement, expression, closure, and control-flow
+// decision; this table can only replace a web's source identifier.  Keeping
+// naming outside Model is deliberate: Model remains the fidelity contract and
+// a human-readable view can never silently become authoritative semantics.
+struct Naming {
+    std::map<int, std::map<int, std::string>> web_names;
+
+    const std::string* find(int prototype, int web) const {
+        auto owner = web_names.find(prototype);
+        if (owner == web_names.end()) return nullptr;
+        auto value = owner->second.find(web);
+        return value == owner->second.end() ? nullptr : &value->second;
+    }
 };
 
 inline std::string global_name(const std::string& name) {
@@ -76,6 +190,7 @@ inline std::string return_lowering_source(
 class Renderer {
     const Model& model_;
     const std::map<int, Model>* module_models_ = nullptr;
+    const Naming* naming_ = nullptr;
     std::vector<std::string> upvalue_names_;
     std::map<ValueOriginContract, int> web_by_origin_;
     std::map<ValueOriginContract, const ExpressionDefinitionContract*> expression_by_origin_;
@@ -91,6 +206,7 @@ class Renderer {
     std::map<int, const PredicateExpressionContract*> predicate_expressions_by_block_;
     std::map<int, const AuthoritativeLoop*> loops_by_header_;
     std::map<int, const AuthoritativeLoop*> numeric_loops_by_prep_;
+    std::map<int, const TerminalNumericFor*> terminal_numeric_fors_by_prep_;
     std::map<int, NodeKind> loop_kind_by_header_;
     std::map<int, const BranchContract*> loop_condition_by_header_;
     std::map<int, const PredicateTestContract*> numeric_prep_test_by_loop_;
@@ -113,6 +229,26 @@ class Renderer {
     std::set<int> parameter_webs_;
     std::map<int, int> parameter_reg_by_web_;
     bool frame_storage_ = false;
+    bool record_call_spans_ = false;
+
+    std::string mark_call(const int instruction, std::string source) const {
+        if (!record_call_spans_) return source;
+        const std::string identity = std::to_string(model_.prototype.value)
+            + ":" + std::to_string(instruction);
+        return std::string(1, '\x1e') + "B" + identity + std::string(1, '\x1f')
+            + source + std::string(1, '\x1e') + "E" + identity
+            + std::string(1, '\x1f');
+    }
+
+    bool call_starts_parenthesized(const std::string& source) const {
+        size_t offset = 0;
+        if (record_call_spans_ && !source.empty() && source.front() == '\x1e') {
+            const size_t marker_end = source.find('\x1f');
+            if (marker_end == std::string::npos) return false;
+            offset = marker_end + 1;
+        }
+        return offset < source.size() && source[offset] == '(';
+    }
 
     void fail(const std::string& message) {
         if (std::find(failures_.begin(), failures_.end(), message) == failures_.end())
@@ -131,6 +267,13 @@ class Renderer {
     bool used_frame_storage_ = false;
 
     std::string web_name(int web) const {
+        // Dispatcher/frame lowering requires indexed storage.  Friendly names
+        // remain present in the provenance sidecar, but cannot replace an
+        // indexed lvalue without changing the lowering strategy.
+        if (!frame_storage_ && naming_) {
+            const std::string* readable = naming_->find(model_.prototype.value, web);
+            if (readable) return *readable;
+        }
         auto parameter = parameter_reg_by_web_.find(web);
         if (parameter != parameter_reg_by_web_.end())
             return "p" + std::to_string(model_.prototype.value) + "_"
@@ -204,9 +347,10 @@ class Renderer {
                 return ex::is_ident(value.name) ? "(" + base + ")." + value.name
                     : "(" + base + ")[" + ir::quote_lua(value.name) + "]";
             }
-            case ExpressionKind::IndexRead: return operand(0) + "[" + operand(1) + "]";
+            case ExpressionKind::IndexRead:
+                return "(" + operand(0) + ")[" + operand(1) + "]";
             case ExpressionKind::NumberIndexRead:
-                return operand(0) + "[" + value.constant_text + "]";
+                return "(" + operand(0) + ")[" + value.constant_text + "]";
             case ExpressionKind::NewTable: return "{}";
             case ExpressionKind::Unary:
                 return "(" + value.operator_text
@@ -335,7 +479,7 @@ class Renderer {
             }
         }
         rendering_open_calls_.erase(value.instruction);
-        return out + ")";
+        return mark_call(value.instruction, out + ")");
     }
 
     std::string specialised_iterator_call(const CallContract& value) {
@@ -352,8 +496,8 @@ class Renderer {
         // Spell the recognised builtin directly.  Going through its materialised
         // value (`frame[n](arg)`) prevents Luau from selecting INEXT/NEXT even
         // though the callee is semantically the same function.
-        return callee->second->name + "("
-            + origin_value(value.fixed_argument_origins[0]) + ")";
+        return mark_call(value.instruction, callee->second->name + "("
+            + origin_value(value.fixed_argument_origins[0]) + ")");
     }
 
     std::string table_write(const TableOperationContract& value) {
@@ -449,7 +593,9 @@ class Renderer {
             case PredicateTestKind::NumericForExhausted:
             case PredicateTestKind::NumericForAdvance:
             case PredicateTestKind::GenericForAdvance:
-                fail("RENDER_LOOP_PREDICATE_AS_BRANCH"); value = "false"; break;
+                fail("RENDER_LOOP_PREDICATE_AS_BRANCH block="
+                     + std::to_string(test.block.value) + " opcode=" + test.opcode);
+                value = "false"; break;
             case PredicateTestKind::Preserved:
                 fail("RENDER_PRESERVED_PREDICATE"); value = "false"; break;
         }
@@ -519,9 +665,13 @@ class Renderer {
             std::vector<std::string> deferred_self_snapshots;
             for (const CaptureContract& capture : closure.captures) {
                 if (capture.mode == CaptureMode::Value) {
-                    const std::string snapshot = "cap_" + std::to_string(model_.prototype.value)
+                    const std::string snapshot_id = "cap_" + std::to_string(model_.prototype.value)
                         + "_" + std::to_string(instruction) + "_"
                         + std::to_string(capture.slot);
+                    const std::string snapshot = frame_storage_
+                        ? "frame_" + std::to_string(model_.prototype.value)
+                            + "[\"" + snapshot_id + "\"]"
+                        : snapshot_id;
                     const bool self_capture = capture.source_origins.size() == 1
                         && *capture.source_origins.begin() == identity;
                     if (self_capture) {
@@ -531,11 +681,16 @@ class Renderer {
                         // and breaks recursion. Declare the lexical cell now,
                         // then bind it to the completed closure immediately
                         // after the destination assignment.
-                        out << padding << "local " << snapshot << '\n';
+                        if (!frame_storage_)
+                            out << padding << "local " << snapshot << '\n';
                         deferred_self_snapshots.push_back(snapshot);
                     } else {
-                        out << padding << "local " << snapshot << " = "
-                            << origin_value(capture.source_origins) << '\n';
+                        if (frame_storage_)
+                            out << padding << snapshot << " = "
+                                << origin_value(capture.source_origins) << '\n';
+                        else
+                            out << padding << "local " << snapshot << " = "
+                                << origin_value(capture.source_origins) << '\n';
                     }
                     captures.push_back(snapshot);
                 } else if (capture.mode == CaptureMode::Reference) {
@@ -549,11 +704,16 @@ class Renderer {
                         upvalue_names_[(size_t)capture.parent_upvalue_slot]);
                 }
             }
-            Renderer child(target->second, module_models_, captures);
+            Renderer child(target->second, module_models_, captures, naming_,
+                           record_call_spans_);
             Result function = child.render_function_literal(indent);
             if (function.used_dispatcher) used_dispatcher_ = true;
             if (function.used_frame_storage) used_frame_storage_ = true;
-            for (const std::string& failure : function.failures) fail(failure);
+            // Preserve the prototype that originated a nested renderer failure.
+            // Module-level rendering otherwise collapses the whole closure tree
+            // into an unactionable bare code such as RENDER_LOOP_BLOCK_COVERAGE.
+            for (const std::string& failure : function.failures)
+                fail("proto=" + std::to_string(closure.target.value) + " " + failure);
             if (first_duplicate_prototype_ < 0
                 && function.first_duplicate_prototype >= 0) {
                 first_duplicate_block_ = function.first_duplicate_block;
@@ -599,8 +759,7 @@ class Renderer {
             // parsed as a continuation of the previous statement.  A lexical
             // `do` boundary is accepted by Luau in every statement position and
             // does not alter the call's evaluation or result-discard semantics.
-            if (results.empty() && !rendered_call.empty()
-                && rendered_call.front() == '(')
+            if (results.empty() && call_starts_parenthesized(rendered_call))
                 out << "do " << rendered_call << " end\n";
             else out << rendered_call << '\n';
             return;
@@ -1868,6 +2027,49 @@ class Renderer {
         }
     }
 
+    void emit_terminal_numeric_for(const TerminalNumericFor& terminal,
+                                   BlockId stop,
+                                   const std::set<BlockId>* outer_domain,
+                                   int indent,
+                                   std::set<BlockId>& emitted_blocks,
+                                   std::ostringstream& out) {
+        auto test = predicates_by_block_.find(terminal.prep.value);
+        if (test == predicates_by_block_.end()
+            || test->second->kind != PredicateTestKind::NumericForExhausted
+            || test->second->operands.size() != 3) {
+            fail("RENDER_TERMINAL_NUMERIC_FOR_PREP_MISSING"); return;
+        }
+        const PredicateTestContract& header = *test->second;
+        emit_block_events(terminal.prep, indent, emitted_blocks, out);
+        if (!failures_.empty()) return;
+
+        const std::string variable_target = origin_value(header.operands[2]);
+        const std::string iterator_name = frame_storage_
+            ? "terminal_for_value_" + std::to_string(model_.prototype.value)
+                + "_" + std::to_string(terminal.prep.value)
+            : variable_target;
+        const std::string padding((size_t)indent * 4, ' ');
+        out << padding << "for " << iterator_name
+            << " = " << origin_value(header.operands[2])
+            << ", " << origin_value(header.operands[0])
+            << ", " << origin_value(header.operands[1]) << " do\n";
+        if (frame_storage_)
+            out << padding << "    " << variable_target << " = "
+                << iterator_name << "\n";
+
+        std::set<BlockId> body_domain = terminal.region_blocks;
+        body_domain.erase(terminal.prep);
+        emit_region(terminal.body, terminal.exit, &body_domain, indent + 1,
+                    emitted_blocks, out);
+        out << padding << "end\n";
+        for (const BlockId block : body_domain)
+            if (!emitted_blocks.count(block))
+                fail("RENDER_TERMINAL_NUMERIC_FOR_BLOCK_COVERAGE");
+        if (!failures_.empty()) return;
+        emit_region(terminal.exit, stop, outer_domain, indent,
+                    emitted_blocks, out);
+    }
+
     void emit_region(BlockId start, BlockId stop, const std::set<BlockId>* domain,
                      int indent, std::set<BlockId>& emitted_blocks,
                      std::ostringstream& out) {
@@ -1888,7 +2090,18 @@ class Renderer {
             emit_loop(*loop->second, stop, domain, indent, emitted_blocks, out);
             return;
         }
+        auto terminal_start = terminal_numeric_fors_by_prep_.find(start.value);
+        if (terminal_start != terminal_numeric_fors_by_prep_.end()) {
+            emit_terminal_numeric_for(*terminal_start->second, stop, domain,
+                                      indent, emitted_blocks, out);
+            return;
+        }
         emit_block_events(start, indent, emitted_blocks, out);
+        // emit_block_events fails closed when a region attempts to own the same
+        // block twice.  Do not continue into that block's branch/join after the
+        // failure: doing so recursively revisits the same duplicate join and
+        // turns a reportable structural rejection into STATUS_STACK_OVERFLOW.
+        if (!failures_.empty()) return;
         if (block_returns(start.value)) return;
 
         auto branch = branches_by_block_.find(start.value);
@@ -2086,6 +2299,51 @@ class Renderer {
                             &cyclic.latch_path_blocks, indent,
                             emitted_blocks, out);
                 return;
+            }
+            // A guard immediately before a latch-elided numeric for can share
+            // the for's exhausted continuation.  The region planner describes
+            // that CFG as a short-circuit chain, but FORNPREP is a statement
+            // owner, never a boolean operand.  Require the chain arm to equal
+            // the manifest-proved terminal-for region before rendering the
+            // guard and loop as two source constructs.
+            if (contract.role == BranchRole::ShortCircuitSharedTrue
+                || contract.role == BranchRole::ShortCircuitSharedFalse
+                || contract.role == BranchRole::PreservedEscaping) {
+                auto terminal = terminal_numeric_fors_by_prep_.find(
+                    contract.chain_next.value);
+                if (terminal != terminal_numeric_fors_by_prep_.end()) {
+                    const TerminalNumericFor& value = *terminal->second;
+                    const bool shared_true = contract.true_target == value.exit;
+                    const bool exact_targets = contract.chain_shared_target == value.exit
+                        && (shared_true
+                            ? contract.true_target == value.exit
+                                && contract.false_target == value.prep
+                                && contract.false_blocks == value.region_blocks
+                                && contract.true_blocks.empty()
+                            : contract.false_target == value.exit
+                                && contract.true_target == value.prep
+                                && contract.true_blocks == value.region_blocks
+                                && contract.false_blocks.empty());
+                    auto guard = predicates_by_block_.find(start.value);
+                    if (!exact_targets || guard == predicates_by_block_.end()) {
+                        fail("RENDER_TERMINAL_NUMERIC_FOR_GUARD_CONTRACT");
+                        return;
+                    }
+                    const std::string padding((size_t)indent * 4, ' ');
+                    const std::string guard_test = predicate(*guard->second);
+                    out << padding << "if "
+                        << (shared_true ? "not (" + guard_test + ")" : guard_test)
+                        << " then\n";
+                    emit_terminal_numeric_for(value, value.exit,
+                                              &value.region_blocks, indent + 1,
+                                              emitted_blocks, out);
+                    out << padding << "end\n";
+                    if (!failures_.empty()) return;
+                    if (!domain || domain->count(value.exit) || value.exit == stop)
+                        emit_region(value.exit, stop, domain, indent,
+                                    emitted_blocks, out);
+                    return;
+                }
             }
             if ((contract.role == BranchRole::ShortCircuitSharedTrue
                  || contract.role == BranchRole::ShortCircuitSharedFalse)
@@ -2670,9 +2928,12 @@ class Renderer {
 public:
     explicit Renderer(const Model& model,
                       const std::map<int, Model>* module_models = nullptr,
-                      std::vector<std::string> upvalue_names = {})
+                      std::vector<std::string> upvalue_names = {},
+                      const Naming* naming = nullptr,
+                      const bool record_call_spans = false)
         : model_(model), module_models_(module_models),
-          upvalue_names_(std::move(upvalue_names)) {
+          naming_(naming), upvalue_names_(std::move(upvalue_names)),
+          record_call_spans_(record_call_spans) {
         for (const ValueWebContract& web : model.authoritative_value_webs)
             for (const ValueOriginContract& origin : web.members) web_by_origin_[origin] = web.id;
         for (const LocalValueContract& local : model.authoritative_local_values)
@@ -2695,8 +2956,15 @@ public:
         for (const auto& value : model.authoritative_table_operations) tables_[value.instruction] = &value;
         for (const auto& value : model.authoritative_closures)
             closures_[value.instruction] = &value;
+        for (const auto& value : model.authoritative_terminal_numeric_fors)
+            terminal_numeric_fors_by_prep_[value.first.value] = &value.second;
+        // Terminal FORNPREP owns its two CFG edges through the explicit
+        // terminal-for contract.  Keeping the same source in the ordinary
+        // branch lookup lets surrounding branch-folding heuristics consume the
+        // loop opcode as a boolean predicate before emit_region reaches it.
         for (const auto& value : model.authoritative_branches)
-            branches_by_block_[value.source.value] = &value;
+            if (!model.authoritative_terminal_numeric_fors.count(value.source))
+                branches_by_block_[value.source.value] = &value;
         for (const auto& value : model.authoritative_predicate_tests)
             predicates_by_block_[value.block.value] = &value;
         for (const auto& value : model.authoritative_predicate_expressions)
@@ -3026,7 +3294,12 @@ public:
         // decisions, and compiler temporaries; smaller functions retain normal
         // readable locals, while only provably high-pressure functions use a
         // private value frame.
-        frame_storage_ = non_parameter_webs
+        size_t value_capture_snapshots = 0;
+        for (const ClosureContract& closure : model_.authoritative_closures)
+            for (const CaptureContract& capture : closure.captures)
+                if (capture.mode == CaptureMode::Value)
+                    ++value_capture_snapshots;
+        frame_storage_ = non_parameter_webs + value_capture_snapshots
             + (size_t)std::max(0, root.parameter_count) >= 160;
         if (frame_storage_) used_frame_storage_ = true;
         validate_contracts();
@@ -3110,6 +3383,8 @@ public:
         std::map<int, const AuthoritativeLoop*> for_by_prep;
         std::map<int, std::set<BlockId>> for_bodies;
         std::map<int, std::set<BlockId>> direct_domains;
+        std::map<int, std::set<BlockId>> terminal_for_bodies;
+        std::map<int, std::set<BlockId>> terminal_for_direct_domains;
         std::set<BlockId> root_domain = model_.reachable_blocks;
         for (const auto& item : model_.authoritative_loops) {
             const AuthoritativeLoop& loop = item.second;
@@ -3158,13 +3433,33 @@ public:
             }
             direct_domains[loop.id.value] = std::move(domain);
         }
+        for (const auto& item : model_.authoritative_terminal_numeric_fors) {
+            const TerminalNumericFor& terminal = item.second;
+            std::set<BlockId> body = terminal.region_blocks;
+            body.erase(terminal.prep);
+            std::set<BlockId> direct = body;
+            for (const auto& loop_item : model_.authoritative_loops) {
+                const AuthoritativeLoop& nested = loop_item.second;
+                if (!is_for(nested)) continue;
+                const std::set<BlockId>& nested_body = for_bodies.at(nested.id.value);
+                if (std::includes(body.begin(), body.end(),
+                                  nested_body.begin(), nested_body.end()))
+                    for (const BlockId block : nested_body) direct.erase(block);
+            }
+            terminal_for_bodies[terminal.prep.value] = std::move(body);
+            terminal_for_direct_domains[terminal.prep.value] = std::move(direct);
+            for (const BlockId block : terminal_for_bodies.at(terminal.prep.value))
+                root_domain.erase(block);
+        }
         if (!failures_.empty()) return {false, "", failures_};
 
         std::set<BlockId> emitted_blocks;
 
-        std::function<void(const std::set<BlockId>&, const AuthoritativeLoop*, int)>
+        std::function<void(const std::set<BlockId>&, const AuthoritativeLoop*,
+                           const TerminalNumericFor*, int)>
             emit_dispatch_domain;
         std::function<void(const AuthoritativeLoop&, int)> emit_dispatch_for;
+        std::function<void(const TerminalNumericFor&, int)> emit_dispatch_terminal_for;
 
         emit_dispatch_for = [&](const AuthoritativeLoop& loop, int line_indent) {
             auto kind = loop_kind_by_header_.find(loop.id.value);
@@ -3289,7 +3584,8 @@ public:
                 out << "\n";
             }
             out << padding << "    " << control << " = " << inside.value << "\n";
-            emit_dispatch_domain(domain_item->second, &loop, line_indent + 1);
+            emit_dispatch_domain(domain_item->second, &loop, nullptr,
+                                 line_indent + 1);
             out << padding << "    if " << leave << " then break end\n"
                 << padding << "end\n"
                 << padding << "if not " << leave << " then\n"
@@ -3297,8 +3593,44 @@ public:
                 << padding << "end\n";
         };
 
+        emit_dispatch_terminal_for = [&](const TerminalNumericFor& terminal,
+                                         int line_indent) {
+            auto test_item = predicates_by_block_.find(terminal.prep.value);
+            auto domain_item = terminal_for_direct_domains.find(terminal.prep.value);
+            if (test_item == predicates_by_block_.end()
+                || test_item->second->kind
+                    != PredicateTestKind::NumericForExhausted
+                || test_item->second->operands.size() != 3
+                || domain_item == terminal_for_direct_domains.end()) {
+                fail("RENDER_DISPATCHER_TERMINAL_FOR_CONTRACT"); return;
+            }
+            const PredicateTestContract& test = *test_item->second;
+            const std::string padding((size_t)line_indent * 4, ' ');
+            const std::string iterator = "terminal_for_value_"
+                + std::to_string(model_.prototype.value) + "_"
+                + std::to_string(terminal.prep.value);
+            const std::string leave = "leave_terminal_for_"
+                + std::to_string(model_.prototype.value) + "_"
+                + std::to_string(terminal.prep.value);
+            out << padding << "local " << leave << " = false\n"
+                << padding << "for " << iterator << " = "
+                << origin_value(test.operands[2]) << ", "
+                << origin_value(test.operands[0]) << ", "
+                << origin_value(test.operands[1]) << " do\n"
+                << padding << "    " << origin_value(test.operands[2])
+                << " = " << iterator << "\n"
+                << padding << "    " << control << " = "
+                << terminal.body.value << "\n";
+            emit_dispatch_domain(domain_item->second, nullptr, &terminal,
+                                 line_indent + 1);
+            out << padding << "    if " << leave << " then break end\n"
+                << padding << "end\n"
+                << padding << control << " = " << terminal.exit.value << "\n";
+        };
+
         emit_dispatch_domain = [&](const std::set<BlockId>& domain,
                                    const AuthoritativeLoop* owner,
+                                   const TerminalNumericFor* terminal_owner,
                                    int dispatcher_indent) {
             const std::string dispatcher_padding(
                 (size_t)dispatcher_indent * 4, ' ');
@@ -3309,7 +3641,11 @@ public:
             const std::string owner_leave = owner
                 ? "leave_for_" + std::to_string(model_.prototype.value) + "_"
                     + std::to_string(owner->id.value)
-                : std::string();
+                : terminal_owner
+                    ? "leave_terminal_for_"
+                        + std::to_string(model_.prototype.value) + "_"
+                        + std::to_string(terminal_owner->prep.value)
+                    : std::string();
             const BranchContract* owner_condition = nullptr;
             if (owner) {
                 auto found = loop_condition_by_header_.find(owner->id.value);
@@ -3340,7 +3676,7 @@ public:
                 if (nested_for != for_by_prep.end()) {
                     emit_dispatch_for(*nested_for->second, dispatcher_indent + 2);
                     if (!failures_.empty()) return;
-                    if (owner) {
+                    if (owner || terminal_owner) {
                         out << statement_padding << "if ";
                         bool first_member = true;
                         for (BlockId member : domain) {
@@ -3356,13 +3692,27 @@ public:
                     }
                     continue;
                 }
+                auto terminal_for = terminal_numeric_fors_by_prep_.find(block.value);
+                if (terminal_for != terminal_numeric_fors_by_prep_.end()) {
+                    emit_dispatch_terminal_for(*terminal_for->second,
+                                               dispatcher_indent + 2);
+                    if (!failures_.empty()) return;
+                    continue;
+                }
 
                 auto transfer = [&](BlockId target, int transfer_indent) {
                     const std::string padding((size_t)transfer_indent * 4, ' ');
                     if (!target.valid()) {
                         fail("RENDER_DISPATCHER_TARGET_INVALID"); return;
                     }
-                    if (owner && !for_bodies.at(owner->id.value).count(target)) {
+                    const bool leaves_natural = owner
+                        && !for_bodies.at(owner->id.value).count(target);
+                    const bool leaves_terminal = terminal_owner
+                        && !terminal_for_bodies.at(
+                            terminal_owner->prep.value).count(target);
+                    if (leaves_terminal && target != terminal_owner->exit) {
+                        fail("RENDER_DISPATCHER_TERMINAL_FOR_EXIT_MISMATCH");
+                    } else if (leaves_natural || leaves_terminal) {
                         out << padding << control << " = " << target.value << "\n"
                             << padding << owner_leave << " = true\n"
                             << padding << "break\n";
@@ -3394,7 +3744,8 @@ public:
                     if (edge.source == block && edge.target.valid())
                         successors.insert(edge.target);
                 if (successors.empty()) {
-                    if (owner) out << statement_padding << "return\n";
+                    if (owner || terminal_owner)
+                        out << statement_padding << "return\n";
                     else out << statement_padding << "break\n";
                 } else if (successors.size() == 1) {
                     transfer(*successors.begin(), dispatcher_indent + 2);
@@ -3411,7 +3762,7 @@ public:
             out << dispatcher_padding << "end\n";
         };
 
-        emit_dispatch_domain(root_domain, nullptr, body_indent);
+        emit_dispatch_domain(root_domain, nullptr, nullptr, body_indent);
         out << std::string((size_t)indent * 4, ' ') << "end";
         if (emitted_blocks != model_.reachable_blocks)
             fail("RENDER_BLOCK_COVERAGE");
@@ -3437,19 +3788,32 @@ public:
                 std::fprintf(stderr, " %s", failure.c_str());
             std::fprintf(stderr, "\n");
         }
-        Renderer dispatcher(model_, module_models_, upvalue_names_);
+        Renderer dispatcher(model_, module_models_, upvalue_names_, naming_,
+                            record_call_spans_);
         return dispatcher.render_function_literal_dispatcher(indent);
     }
 
     Result render_chunk() {
-        validate_contracts();
         const Node& root = model_.nodes.at(model_.root);
         if (root.parameter_count != 0) fail("RENDER_MODULE_ROOT_PARAMETERS");
         if (!upvalue_names_.empty()) fail("RENDER_MODULE_ROOT_UPVALUES");
+        size_t value_capture_snapshots = 0;
+        for (const ClosureContract& closure : model_.authoritative_closures)
+            for (const CaptureContract& capture : closure.captures)
+                if (capture.mode == CaptureMode::Value)
+                    ++value_capture_snapshots;
+        frame_storage_ = model_.authoritative_value_webs.size()
+            + value_capture_snapshots >= 160;
+        if (frame_storage_) used_frame_storage_ = true;
+        validate_contracts();
         if (!failures_.empty()) return {false, "", failures_};
         std::ostringstream out;
-        for (const ValueWebContract& web : model_.authoritative_value_webs)
-            if (!parameter_webs_.count(web.id)) out << "local " << web_name(web.id) << "\n";
+        if (frame_storage_)
+            out << "local frame_" << model_.prototype.value << " = {}\n";
+        else
+            for (const ValueWebContract& web : model_.authoritative_value_webs)
+                if (!parameter_webs_.count(web.id))
+                    out << "local " << web_name(web.id) << "\n";
         std::set<BlockId> emitted_blocks;
         emit_region(BlockId(0), BlockId(), &model_.reachable_blocks, 0,
                     emitted_blocks, out);
@@ -3486,14 +3850,6 @@ inline Result render_semantic(const Model& model) { return Renderer(model).rende
 
 inline Result render_semantic_with_module_context(const Model& model,
                                                   const std::map<int, Model>& models) {
-    std::map<int, int> target_sites;
-    for (const auto& owner : models)
-        for (const ClosureContract& closure : owner.second.authoritative_closures)
-            ++target_sites[closure.target.value];
-    for (const auto& target : target_sites)
-        if (target.second != 1)
-            return {false, "", {"RENDER_SHARED_CLOSURE_PROTOTYPE_PENDING"}};
-
     std::vector<std::string> upvalue_names;
     std::ostringstream declarations;
     for (int slot = 0; slot < model.authoritative_upvalue_count; ++slot) {
@@ -3507,20 +3863,22 @@ inline Result render_semantic_with_module_context(const Model& model,
     return result;
 }
 
-inline Result render_module(const std::map<int, Model>& models, int root_prototype) {
+inline Result render_module(const std::map<int, Model>& models, int root_prototype,
+                            const Naming* naming = nullptr) {
     auto root = models.find(root_prototype);
     if (root == models.end())
         return {false, "", {"RENDER_MODULE_ROOT_MODEL_MISSING"}};
-    std::map<int, int> target_sites;
     std::map<int, std::set<int>> children;
     for (const auto& model : models)
         for (const ClosureContract& closure : model.second.authoritative_closures) {
-            ++target_sites[closure.target.value];
             children[model.first].insert(closure.target.value);
         }
-    for (const auto& target : target_sites)
-        if (target.second != 1)
-            return {false, "", {"RENDER_SHARED_CLOSURE_PROTOTYPE_PENDING"}};
+    // A prototype may be instantiated by more than one NEWCLOSURE/DUPCLOSURE
+    // site.  That is ordinary Luau semantics: each site creates a distinct
+    // closure and supplies that site's capture cells/values.  Renderer already
+    // emits the target function literal at the closure instruction and passes
+    // the site-specific capture vector to the child Renderer, so rejecting a
+    // shared prototype here incorrectly excluded valid mission modules.
     std::set<int> reachable;
     std::vector<int> pending{root_prototype};
     while (!pending.empty()) {
@@ -3530,10 +3888,20 @@ inline Result render_module(const std::map<int, Model>& models, int root_prototy
         if (found != children.end())
             pending.insert(pending.end(), found->second.begin(), found->second.end());
     }
-    if (reachable.size() != models.size())
-        return {false, "", {"RENDER_ORPHAN_PROTOTYPE_PENDING"}};
-    Renderer renderer(root->second, &models, {});
-    return renderer.render_chunk();
+    Renderer renderer(root->second, &models, {}, naming, true);
+    Result result = renderer.render_chunk();
+    if (!result.ok) return result;
+    for (const auto& model : models)
+        if (!reachable.count(model.first))
+            result.omitted_orphan_prototypes.insert(model.first);
+    if (!result.omitted_orphan_prototypes.empty()) {
+        std::ostringstream markers;
+        for (const int prototype : result.omitted_orphan_prototypes)
+            markers << "-- RENOVICE_DEAD_ORPHAN_PROTOTYPE_OMITTED: " << prototype << '\n';
+        result.source = markers.str() + result.source;
+    }
+    if (!extract_call_spans(result)) return result;
+    return result;
 }
 
 } // namespace sir::source

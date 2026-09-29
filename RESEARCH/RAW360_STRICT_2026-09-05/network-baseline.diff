@@ -1,0 +1,2769 @@
+diff --git a/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/baseline/cycle2/Lotus_Interface_LotusNetworkUtilities.lua_B/01.luau b/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/baseline/cycle2/Lotus_Interface_LotusNetworkUtilities.lua_B/02.luau
+index 375d5e2..95c49ad 100644
+--- a/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/baseline/cycle2/Lotus_Interface_LotusNetworkUtilities.lua_B/01.luau
++++ b/RESEARCH/RAW360_STRICT_2026-09-05/artifacts/baseline/cycle2/Lotus_Interface_LotusNetworkUtilities.lua_B/02.luau
+@@ -3138,1429 +3138,1431 @@
+     do return c21v4 end
+   end
+   v64 = function(c22v0, c22v1, c22v2, c22v3, c22v4, c22v5, c22v6, c22v7)
+-    local c22v8, c22v9, c22v10, c22v11, c22v12, c22v13, c22v14, c22v15, c22v16, c22v17, c22v18, c22v19, c22v20, c22v21, c22v22, c22v23, c22v24, c22v25, c22v26, c22v27, c22v28, c22v29, c22v30, c22v31, c22v32, c22v33, c22v34, c22v35, c22v36, c22v37, c22v38, c22v39, c22v40, c22v41, c22v42, c22v43, c22v44, c22v45, c22v46, c22v47, c22v48
+-    c22v35 = c22v1.periodicMissionTag
+-    c22v36 = v1
+-    c22v36 = c22v36.ELITE_ALERT_PERIODIC_MISSION_TAG_ALT
+-    c22v37 = v30
+-    c22v29 = nil
+-    c22v29:AddContextObject(c22v37)
+-    c22v35 = IsHostElectionAllowed
+-    c22v35 = c22v35(c22v1)
+-    c22v35 = true
+-    c22v29.chooseBestHost = c22v35
+-    c22v35 = false
+-    c22v29.chooseBestHost = c22v35
+-    c22v35 = print
+-    c22v36 = "ContextObjects:"
+-    c22v35(c22v36)
+-    c22v35 = c22v29.contextObjects
+-    c22v38 = 1
+-    c22v36 = #c22v35
+-    c22v37 = 1
+-    for __renovice_for_0_0 = c22v38, c22v36, c22v37 do
+-      c22v40 = c22v35[__renovice_for_0_0]
+-      c22v39 = IsNull
+-      c22v39 = c22v39(c22v40)
+-      if c22v39 then
+-        c22v40 = false
+-        c22v42 = "null context object at index "
+-        c22v44 = "! Check for broken types referenced by mission info enemySpec etc"
+-        c22v41 = c22v42 .. __renovice_for_0_0 .. c22v44
+-        c22v39 = assert
+-        c22v39(c22v40, c22v41)
+-        continue
+-      end
+-      c22v39 = print
+-      c22v41 = "    "
+-      c22v43 = c22v35[__renovice_for_0_0]
+-      c22v42 = tostring
+-      c22v42 = c22v42(c22v43:GetFullName())
+-      c22v40 = c22v41 .. c22v42
+-      c22v39(c22v40)
+-    end
+-    c22v28 = nil
+-    c22v29.loadFromLobby = c22v28
+-    c22v17 = nil
+-    c22v29.isAutonomous = c22v17
+-    c22v36 = c22v1.gameRules
+-    c22v35 = IsNull
+-    c22v35 = c22v35(c22v36)
+-    if not c22v35 then
+-      c22v35 = c22v1.gameRules
+-      c22v37 = gLotusAttractModeGameRulesType
+-      c22v35 = c22v35:IsA(c22v37)
+-      if c22v35 then
+-        c22v35 = gGameConfig
+-        c22v35 = c22v35:Name__5a6733e0()
+-        c22v29.menuMovie = c22v35
+-      end
+-    end
+-    c22v35 = print
+-    c22v37 = "Lobby::Host_StartMatch: launching level for "
+-    c22v38 = _T.gSelectedNodeName
+-    c22v39 = " ("
+-    c22v27 = nil
+-    c22v40 = c22v27:GetFullName()
+-    c22v41 = ")"
+-    c22v36 = c22v37 .. c22v38 .. c22v39 .. c22v40 .. c22v41
+-    c22v35(c22v36)
+-    c22v35 = c22v1.missionType
+-    c22v36 = 28
+-    c22v23 = nil
+-    local __renovice_local_0 = c22v23:GetWorldState()
+-    c22v34 = ipairs
+-    c22v35 = __renovice_local_0.mGoals
+-    c22v34, c22v35, c22v36 = c22v34(c22v35)
+-    for __renovice_for_1_0, __renovice_for_1_1 in c22v34, c22v35, c22v36 do
+-      c22v40 = __renovice_for_1_1.mRoamingVIP
+-      c22v39 = IsNull
+-      c22v39 = c22v39(c22v40)
+-      c22v39 = c22v1:GetFactionTag()
+-      c22v40 = EMPTY_SYMBOL
+-      c22v39 = __renovice_for_1_1.mFaction
+-      c22v40 = c22v1.faction
+-      c22v39 = Engine.Name__b38e1642
+-      c22v40 = __renovice_for_1_1.mActivation
+-      c22v39 = c22v39(c22v40)
+-      c22v40 = 0
+-      if c22v39 < c22v40 then
+-        c22v39 = Engine.Name__b38e1642
+-        c22v40 = __renovice_for_1_1.mExpiry
+-        c22v39 = c22v39(c22v40)
+-        c22v40 = 0
+-        if c22v40 < c22v39 then
+-          c22v41 = __renovice_for_1_1.mRoamingVIP
+-          c22v29:AddContextObject(c22v41)
+-        end
+-      end
+-      c22v8 = IsNull
+-      c22v8 = c22v8(c22v0)
+-      c22v8 = EMPTY_SYMBOL
+-      c22v27 = string.find
+-      c22v29 = v1
+-      c22v29 = c22v29.HARD_DAILY_TAG
+-      c22v27 = c22v27(c22v8, c22v29)
+-      c22v32 = string.find
+-      __renovice_local_0 = "DeimosHub"
+-      c22v32 = c22v32(c22v8, __renovice_local_0)
+-      c22v34 = _T.gPendingDuel.OpponentId
+-      __renovice_local_0 = IsNull
+-      __renovice_local_0 = __renovice_local_0(c22v34)
+-      __renovice_local_0 = gGameRules
+-      c22v35 = _T.gPendingDuel.OpponentId
+-      __renovice_local_0 = __renovice_local_0:Name__0a508693(c22v35)
++    local c22v8, c22v9, c22v10, c22v11, c22v12, c22v13, c22v14, c22v15, c22v16, c22v17, c22v18, c22v19, c22v20, c22v21, c22v22, c22v23, c22v24, c22v25, c22v26, c22v27, c22v28, c22v29, c22v30, c22v31, c22v32, c22v33, c22v34, c22v35, c22v36, c22v37, c22v38, c22v39, c22v40, c22v41, c22v42, c22v43, c22v44, c22v45, c22v46, c22v47, c22v48, c22v49, c22v50, c22v51, c22v52
++    c22v49 = nil
++    c22v37 = c22v49.mRoamingVIP
++    c22v36 = IsNull
++    c22v36 = c22v36(c22v37)
++    c22v36 = c22v1:GetFactionTag()
++    c22v37 = EMPTY_SYMBOL
++    c22v36 = c22v49.mFaction
++    c22v37 = c22v1.faction
++    c22v36 = Engine.Name__b38e1642
++    c22v37 = c22v49.mActivation
++    c22v36 = c22v36(c22v37)
++    c22v37 = 0
++    if c22v36 < c22v37 then
++      c22v36 = Engine.Name__b38e1642
++      c22v37 = c22v49.mExpiry
++      c22v36 = c22v36(c22v37)
++      c22v37 = 0
++      if c22v37 < c22v36 then
++        c22v38 = c22v49.mRoamingVIP
++        c22v27 = nil
++        c22v27:AddContextObject(c22v38)
++      end
++    end
++    c22v8 = IsNull
++    c22v8 = c22v8(c22v0)
++    c22v8 = EMPTY_SYMBOL
++    local __renovice_local_0 = string.find
++    c22v27 = v1
++    c22v27 = c22v27.HARD_DAILY_TAG
++    __renovice_local_0 = __renovice_local_0(c22v8, c22v27)
++    c22v29 = string.find
++    local __renovice_local_1 = "DeimosHub"
++    c22v29 = c22v29(c22v8, __renovice_local_1)
++    c22v31 = _T.gPendingDuel.OpponentId
++    __renovice_local_1 = IsNull
++    __renovice_local_1 = __renovice_local_1(c22v31)
++    __renovice_local_1 = gGameRules
++    c22v32 = _T.gPendingDuel.OpponentId
++    __renovice_local_1 = __renovice_local_1:Name__0a508693(c22v32)
++    c22v33 = 0
++    c22v48 = 8
++    c22v31 = c22v48 - 1
++    c22v32 = 1
++    for __renovice_for_0_0 = c22v33, c22v31, c22v32 do
+       c22v36 = 0
+-      __renovice_for_1_0 = 8
+-      c22v34 = __renovice_for_1_0 - 1
+-      c22v35 = 1
+-      for __renovice_for_2_0 = c22v36, c22v34, c22v35 do
+-        c22v39 = 0
+-        __renovice_for_1_0 = __renovice_local_0:GetWeaponInfo(c22v39, __renovice_for_2_0)
+-        __renovice_for_1_1 = IsNull
+-        __renovice_for_1_1 = __renovice_for_1_1(__renovice_for_1_0)
+-        if __renovice_for_1_1 then
+-          continue
+-        end
+-        c22v39 = __renovice_for_1_0.mItemType
+-        __renovice_for_1_1 = IsNull
+-        __renovice_for_1_1 = __renovice_for_1_1(c22v39)
+-        if __renovice_for_1_1 then
+-          continue
+-        end
+-        __renovice_for_1_1 = v60
+-        c22v40 = __renovice_for_1_0.mItemType
+-        __renovice_for_1_1(c22v29, c22v40)
+-        c22v39 = __renovice_for_1_0.mWeaponUpgrades
+-        __renovice_for_1_1 = IsNull
+-        __renovice_for_1_1 = __renovice_for_1_1(c22v39)
+-        if __renovice_for_1_1 then
+-          continue
+-        end
+-        c22v40 = 1
+-        c22v41 = __renovice_for_1_0.mWeaponUpgrades
+-        __renovice_for_1_1 = #c22v41
+-        c22v39 = 1
+-        for __renovice_for_3_0 = c22v40, __renovice_for_1_1, c22v39 do
+-          c22v41 = v60
+-          c22v44 = __renovice_for_1_0.mWeaponUpgrades
+-          c22v43 = c22v44[__renovice_for_3_0]
+-          c22v41(c22v29, c22v43)
+-        end
++      c22v48 = __renovice_local_1:GetWeaponInfo(c22v36, __renovice_for_0_0)
++      c22v49 = IsNull
++      c22v49 = c22v49(c22v48)
++      if c22v49 then
++        continue
+       end
+-      c22v32 = v63
+-      c22v33 = 12
+-      c22v32 = c22v32(c22v33)
+-      if c22v32 then
+-        c22v32 = Resource
+-        c22v33 = "/Lotus/Types/Keys/EntratiLab/EntratiQuestHubKey"
+-        c22v32 = c22v32(c22v33)
+-        c22v33 = c22v32:GetMission()
+-        c22v33 = c22v33.levelOverride
+-        c22v1.levelOverride = c22v33
+-        c22v33 = c22v32:GetMission()
+-        c22v27 = c22v33.levelOverride
+-      end
+-      c22v27 = ApplyDifficultyChanges
+-      c22v28 = c22v1
+-      c22v29 = 1
+-      c22v31 = string.find
+-      c22v33 = v1
+-      c22v33 = c22v33.HARD_DAILY_TAG
+-      c22v31 = c22v31(c22v8, c22v33)
+-      if c22v31 == nil then
+-        c22v30 = false
+-      else
+-        c22v30 = true
++      c22v36 = c22v48.mItemType
++      c22v49 = IsNull
++      c22v49 = c22v49(c22v36)
++      if c22v49 then
++        continue
+       end
+-      c22v27(c22v28, c22v29, c22v30)
+-      c22v26 = true
+-      c22v8 = tostring
+-      c22v8 = c22v8(c22v0)
+-      c22v9 = c22v8
+-      c22v10 = string.find
+-      c22v12 = v1
+-      c22v12 = c22v12.TAG_SEPERATOR
+-      c22v10 = c22v10(c22v8, c22v12)
+-      if c22v10 ~= nil then
+-        c22v13 = 1
+-        c22v14 = c22v10 - 1
+-        c22v11 = string.sub
+-        c22v9 = c22v11(c22v8, c22v13, c22v14)
+-      end
+-      c22v11 = v1
+-      c22v11 = c22v11.IsDuviriNode
+-      c22v11 = c22v11(c22v9)
+-      if c22v1 == nil then
+-        c22v12 = print
+-        c22v13 = "LotusNetworkUtilities:Host_LoadMission, missionInfo is null"
+-        c22v12(c22v13)
+-        do return end
++      c22v49 = v60
++      c22v37 = c22v48.mItemType
++      c22v49(c22v27, c22v37)
++      c22v36 = c22v48.mWeaponUpgrades
++      c22v49 = IsNull
++      c22v49 = c22v49(c22v36)
++      if c22v49 then
++        continue
+       end
+-      c22v12 = false
+-      c22v13 = gMatchingService
+-      c22v13 = c22v13:GetSession()
+-      c22v15 = IsNull
+-      c22v15 = c22v15(c22v13)
+-      c22v14 = not c22v15
+-      if c22v14 then
+-        c22v14 = c22v13:IsDedicatedServer()
+-      end
+-      if not c22v14 then
+-        local __renovice_state_0 = 10
+-        c22v15 = v1
+-        c22v15 = c22v15.ENTRATI_LANDSCAPE_NODE_TAG
+-        if c22v0 ~= c22v15 then
+-          __renovice_state_0 = 14
++      c22v37 = 1
++      c22v38 = c22v48.mWeaponUpgrades
++      c22v49 = #c22v38
++      c22v36 = 1
++      for __renovice_for_1_0 = c22v37, c22v49, c22v36 do
++        c22v38 = v60
++        c22v41 = c22v48.mWeaponUpgrades
++        c22v40 = c22v41[__renovice_for_1_0]
++        c22v38(c22v27, c22v40)
++      end
++    end
++    c22v30 = gGameData
++    c22v30 = c22v30:GetInventory()
++    c22v32 = 0
++    c22v49 = 0
++    __renovice_local_1 = c22v30:GetPreset(c22v32, c22v30:Name__9adc88cf(c22v49))
++    c22v31 = __renovice_local_1:Copy()
++    c22v48 = 0
++    c22v32 = __renovice_local_1:GetEntry(c22v48)
++    c22v33 = c22v32.mItemId
++    c22v36 = 3
++    c22v48 = __renovice_local_1:GetEntry(c22v36)
++    c22v49 = c22v48.mItemId
++    c22v36 = c22v30:GetSuits()
++    c22v37 = c22v30:GetMelee()
++    c22v40 = 1
++    c22v38 = #c22v36
++    c22v39 = 1
++    c22v52 = c22v40
++    c22v50 = c22v38
++    c22v51 = c22v39
++    c22v40 = 1
++    c22v38 = #c22v37
++    c22v39 = 1
++    local __renovice_state_0 = 0
++    __renovice_state_0 = 0
++    c22v41 = c22v37[c22v40]
++    local __renovice_local_2 = c22v41.mItemType
++    c22v42 = v19
++    c22v40 = 0
++    __renovice_local_2 = false
++    c22v30:SetLoadoutPreset(c22v40, __renovice_local_1, __renovice_local_2)
++    c22v38 = gGameData
++    c22v40 = 0
++    __renovice_local_2 = true
++    c22v42 = false
++    c22v43 = false
++    c22v38:ApplyLoadOutPreset(c22v40, __renovice_local_1, __renovice_local_2, c22v42, c22v43)
++    c22v40 = 0
++    __renovice_local_2 = false
++    c22v30:SetLoadoutPreset(c22v40, c22v31, __renovice_local_2)
++    c22v41 = c22v36[c22v52]
++    __renovice_local_2 = c22v41.mItemType
++    c22v42 = v18
++    if __renovice_local_2 == c22v42 then
++      __renovice_local_2 = c22v41.mItemId
++      __renovice_local_2 = __renovice_local_2.mId
++      c22v42 = c22v33.mId
++      if __renovice_local_2 ~= c22v42 then
++        __renovice_local_2 = Lotus_Game.PresetEntry
++        __renovice_local_2 = __renovice_local_2()
++        c22v42 = c22v41.mItemId
++        __renovice_local_2.mItemId = c22v42
++        c22v44 = 0
++        __renovice_local_1:SetEntry(c22v44, __renovice_local_2)
++      end
++    end
++    if __renovice_local_2 == c22v42 then
++      __renovice_local_2 = c22v41.mItemId
++      __renovice_local_2 = __renovice_local_2.mId
++      c22v42 = c22v49.mId
++      if __renovice_local_2 ~= c22v42 then
++        __renovice_local_2 = Lotus_Game.PresetEntry
++        __renovice_local_2 = __renovice_local_2()
++        c22v42 = c22v41.mItemId
++        __renovice_local_2.mItemId = c22v42
++        c22v44 = 3
++        __renovice_local_1:SetEntry(c22v44, __renovice_local_2)
++      end
++    end
++    c22v30 = false
++    __renovice_local_1 = c22v1.missionType
++    c22v31 = 10
++    if __renovice_local_1 == c22v31 then
++      c22v18 = nil
++      c22v30 = not c22v18
++      if c22v30 then
++        c22v16 = nil
++        c22v30 = not c22v16
++      end
++    end
++    __renovice_local_1 = SetContextObjectsFromSquadLoadOuts
++    c22v33 = c22v1.archwingRequired
++    __renovice_local_1(c22v27, c22v30, c22v33, c22v1)
++    __renovice_local_1 = AddMissionContextObjects
++    c22v33 = nil
++    __renovice_local_1(c22v27, c22v1, c22v33, c22v2)
++    if c22v8 then
++      do return end
++    end
++    __renovice_local_1 = c22v1.goalTag
++    c22v31 = v1
++    c22v31 = c22v31.KUVA_TOWER_GOAL_TAG
++    if __renovice_local_1 == c22v31 then
++      c22v31 = v13
++      __renovice_local_1 = IsNull
++      __renovice_local_1 = __renovice_local_1(c22v31)
++      if not __renovice_local_1 then
++        __renovice_local_1 = AddEnemiesToContextObjects
++        c22v31 = v13
++        c22v31 = c22v31:GetEnemies()
++        __renovice_local_1(c22v31, c22v27)
++      end
++      c22v31 = v31
++      __renovice_local_1 = IsNull
++      __renovice_local_1 = __renovice_local_1(c22v31)
++      if not __renovice_local_1 then
++        c22v32 = v31
++        c22v27:AddContextObject(c22v32)
++      end
++    end
++    __renovice_local_1 = c22v1.voidStorm
++    if __renovice_local_1 then
++      c22v31 = v32
++      __renovice_local_1 = IsNull
++      __renovice_local_1 = __renovice_local_1(c22v31)
++      if not __renovice_local_1 then
++        c22v32 = v32
++        c22v27:AddContextObject(c22v32)
++      end
++    end
++    __renovice_local_1 = IsNull
++    c22v22 = nil
++    __renovice_local_1 = __renovice_local_1(c22v22)
++    c22v29 = v63
++    c22v30 = 12
++    c22v29 = c22v29(c22v30)
++    if c22v29 then
++      c22v29 = Resource
++      c22v30 = "/Lotus/Types/Keys/EntratiLab/EntratiQuestHubKey"
++      c22v29 = c22v29(c22v30)
++      c22v30 = c22v29:GetMission()
++      c22v30 = c22v30.levelOverride
++      c22v1.levelOverride = c22v30
++      c22v30 = c22v29:GetMission()
++      __renovice_local_0 = c22v30.levelOverride
++    end
++    __renovice_local_0 = ApplyDifficultyChanges
++    c22v26 = c22v1
++    c22v27 = 1
++    local __renovice_local_3 = string.find
++    c22v30 = v1
++    c22v30 = c22v30.HARD_DAILY_TAG
++    __renovice_local_3 = __renovice_local_3(c22v8, c22v30)
++    if __renovice_local_3 == nil then
++      c22v28 = false
++    else
++      c22v28 = true
++    end
++    __renovice_local_0(c22v26, c22v27, c22v28)
++    c22v25 = true
++    c22v8 = tostring
++    c22v8 = c22v8(c22v0)
++    c22v9 = c22v8
++    c22v10 = string.find
++    c22v12 = v1
++    c22v12 = c22v12.TAG_SEPERATOR
++    c22v10 = c22v10(c22v8, c22v12)
++    if c22v10 ~= nil then
++      c22v13 = 1
++      c22v14 = c22v10 - 1
++      c22v11 = string.sub
++      c22v9 = c22v11(c22v8, c22v13, c22v14)
++    end
++    c22v11 = v1
++    c22v11 = c22v11.IsDuviriNode
++    c22v11 = c22v11(c22v9)
++    if c22v1 == nil then
++      c22v12 = print
++      c22v13 = "LotusNetworkUtilities:Host_LoadMission, missionInfo is null"
++      c22v12(c22v13)
++      do return end
++    end
++    c22v12 = false
++    c22v13 = gMatchingService
++    c22v13 = c22v13:GetSession()
++    local __renovice_local_4 = IsNull
++    __renovice_local_4 = __renovice_local_4(c22v13)
++    c22v14 = not __renovice_local_4
++    if c22v14 then
++      c22v14 = c22v13:IsDedicatedServer()
++    end
++    if not c22v14 then
++      local __renovice_state_1 = 10
++      __renovice_local_4 = v1
++      __renovice_local_4 = __renovice_local_4.ENTRATI_LANDSCAPE_NODE_TAG
++      if c22v0 ~= __renovice_local_4 then
++        __renovice_state_1 = 14
++      else
++        __renovice_state_1 = 11
++      end
++      if __renovice_state_1 == 11 then
++        __renovice_local_4 = v1
++        __renovice_local_4 = __renovice_local_4.HasCompletedQuest
++        c22v15 = v33
++        c22v15 = c22v15.quest
++        __renovice_local_4 = __renovice_local_4(c22v15)
++        if not __renovice_local_4 then
++          __renovice_state_1 = 13
+         else
+-          __renovice_state_0 = 11
+-        end
+-        if __renovice_state_0 == 11 then
+-          c22v15 = v1
+-          c22v15 = c22v15.HasCompletedQuest
+-          c22v16 = v33
+-          c22v16 = c22v16.quest
+-          c22v15 = c22v15(c22v16)
+-          if not c22v15 then
+-            __renovice_state_0 = 13
+-          else
+-            __renovice_state_0 = 12
+-          end
+-        end
+-        if __renovice_state_0 == 12 then
+-          c22v15 = v1
+-          c22v15 = c22v15.GetActiveQuest
+-          c22v16 = gGameData
+-          c22v15 = c22v15(c22v16)
+-          c22v16 = v33
+-          c22v16 = c22v16.quest
+-          if c22v15 ~= c22v16 then
+-            __renovice_state_0 = 14
+-          else
+-            __renovice_state_0 = 13
+-          end
+-        end
+-        if __renovice_state_0 == 13 then
+-          c22v1 = c22v1:Copy()
+-          c22v15 = v33
+-          c22v15 = c22v15.level
+-          c22v1.levelOverride = c22v15
+-          c22v15 = true
+-          c22v1.soloMode = c22v15
+-          c22v12 = true
+-        end
+-        if __renovice_state_0 == 14 then
+-          c22v15 = string.find
+-          c22v18 = v1
+-          c22v18 = c22v18.ZARIMAN_NODE_TAG
+-          c22v17 = tostring
+-          c22v17 = c22v17(c22v18)
+-          c22v15 = c22v15(c22v8, c22v17)
+-          if c22v15 == nil then
+-            __renovice_state_0 = 17
+-          else
+-            __renovice_state_0 = 15
+-          end
+-        end
+-        if __renovice_state_0 == 15 then
+-          c22v15 = v1
+-          c22v15 = c22v15.HasCompletedQuest
+-          c22v16 = v34
+-          c22v15 = c22v15(c22v16)
+-          if c22v15 then
+-            __renovice_state_0 = 17
+-          else
+-            __renovice_state_0 = 16
+-          end
+-        end
+-        if __renovice_state_0 == 16 then
+-          c22v1 = c22v1:Copy()
+-          c22v15 = true
+-          c22v1.soloMode = c22v15
+-        end
+-        if __renovice_state_0 == 17 then
+-          c22v15 = v1
+-          c22v15 = c22v15.IsNonEndlessDuviriNode
+-          c22v15 = c22v15(c22v9)
+-          if not c22v15 then
+-            __renovice_state_0 = 20
+-          else
+-            __renovice_state_0 = 18
+-          end
+-        end
+-        if __renovice_state_0 == 18 then
+-          c22v15 = IsNull
+-          c22v15 = c22v15(c22v2)
+-          if not c22v15 then
+-            __renovice_state_0 = 20
+-          else
+-            __renovice_state_0 = 19
+-          end
+-        end
+-        if __renovice_state_0 == 19 then
+-          c22v15 = v4
+-          c22v15 = c22v15.ApplyMissionOverrides
+-          c22v15(c22v1)
+-        end
+-        if __renovice_state_0 == 20 then
+-          c22v15 = v5
+-          c22v15 = c22v15.IsSeasonalSector
+-          c22v15 = c22v15(c22v9)
+-          if not c22v15 then
+-            __renovice_state_0 = 22
+-          else
+-            __renovice_state_0 = 21
+-          end
+-        end
+-        if __renovice_state_0 == 21 then
+-          c22v1 = c22v1:Copy()
+-          c22v15 = v5
+-          c22v15 = c22v15.ApplyMissionOverrides
+-          c22v15(c22v9, c22v1)
+-        end
+-        if __renovice_state_0 == 22 then
+-          if (c22v9 == "SolNode250" or c22v9 == "SolNode251") then
+-            __renovice_state_0 = 26
+-          else
+-            __renovice_state_0 = 24
+-          end
+-        end
+-        if __renovice_state_0 == 24 then
+-          if (c22v9 ~= "SolNode252" and c22v9 ~= "SolNode257") then
+-          else
+-            __renovice_state_0 = 26
+-          end
+-        end
+-        if __renovice_state_0 == 26 then
+-          c22v15 = _G
+-          c22v15 = c22v15.CachedGoalInfo
+-          if not c22v15 then
+-          else
+-            __renovice_state_0 = 27
+-          end
+-        end
+-        if __renovice_state_0 == 27 then
+-          c22v16 = _G
+-          c22v16 = c22v16.CachedGoalInfo
+-          c22v15 = c22v16.SolNode251
+-          if not c22v15 then
+-          else
+-            __renovice_state_0 = 28
+-          end
+-        end
+-        if __renovice_state_0 == 28 then
+-          c22v16 = _G
+-          c22v16 = c22v16.CachedGoalInfo
+-          c22v15 = c22v16.SolNode251
+-          c22v15 = c22v15.mTag
+-          c22v16 = Symbol
+-          c22v17 = "12MinWarEvent"
+-          c22v16 = c22v16(c22v17)
+-          if c22v15 ~= c22v16 then
+-          else
+-            __renovice_state_0 = 29
+-          end
+-        end
+-        if __renovice_state_0 == 29 then
+-          c22v1 = c22v1:Copy()
+-          c22v15 = Symbol
+-          c22v16 = "12MinWarEvent"
+-          c22v15 = c22v15(c22v16)
+-          c22v1.goalTag = c22v15
+-        end
+-      end
+-      c22v15 = v1
+-      c22v15 = c22v15.ApplyPostNewWarMissionOverrides
+-      c22v15(c22v1)
+-      c22v15 = _T
+-      c22v16 = c22v0:c_str()
+-      c22v15.gSelectedNodeName = c22v16
+-      c22v15 = _G
+-      c22v16 = _T.gSelectedNodeName
+-      c22v15.gSelectedNodeName = c22v16
+-      c22v15 = string.find
+-      c22v16 = _T.gSelectedNodeName
+-      c22v17 = v1
+-      c22v17 = c22v17.HUB_TAG
+-      c22v15 = c22v15(c22v16, c22v17)
+-      c22v16 = c22v1.soloMode
+-      if c22v15 == nil then
+-        c22v17 = false
+-      else
+-        c22v17 = true
+-      end
+-      c22v18 = c22v17
+-      if c22v18 then
+-        c22v20 = _T.gDojoData
+-        c22v19 = IsNull
+-        c22v19 = c22v19(c22v20)
+-        c22v18 = not c22v19
+-        if c22v18 then
+-          c22v18 = _T.gDojoData.Result
+-        end
+-      end
+-      c22v20 = string.find
+-      c22v22 = "DojoDuel"
+-      c22v20 = c22v20(c22v8, c22v22)
+-      if c22v20 == nil then
+-        c22v19 = false
+-      else
+-        c22v19 = true
+-      end
+-      c22v21 = string.find
+-      c22v23 = "DojoCustomObstacleCourse"
+-      c22v21 = c22v21(c22v8, c22v23)
+-      if c22v21 == nil then
+-        c22v20 = false
+-      else
+-        c22v20 = true
+-      end
+-      c22v21 = IsHostingHighMemoryMission
+-      c22v21 = c22v21(c22v1)
+-      if (c22v16 or c22v21) then
+-        c22v22 = IsNull
+-        c22v22 = c22v22(c22v13)
+-        if not c22v22 then
+-          c22v22 = c22v13:GetSettings()
+-          c22v23 = c22v22.regionId
+-          c22v24 = 2
+-          if c22v23 ~= c22v24 then
+-            c22v23 = 2
+-            c22v22.regionId = c22v23
+-            c22v23 = gMatchingService
+-            c22v26 = "OnUpdateSessionSettings"
+-            c22v23:UpdateSessionSettings(c22v22, c22v26)
+-            if c22v21 then
+-              c22v23 = print
+-              c22v24 = "Disabled clients from joining a session hosted by min-spec device for high memory mission"
+-              c22v23(c22v24)
+-            end
+-          end
++          __renovice_state_1 = 12
++        end
++      end
++      if __renovice_state_1 == 12 then
++        __renovice_local_4 = v1
++        __renovice_local_4 = __renovice_local_4.GetActiveQuest
++        c22v15 = gGameData
++        __renovice_local_4 = __renovice_local_4(c22v15)
++        c22v15 = v33
++        c22v15 = c22v15.quest
++        if __renovice_local_4 ~= c22v15 then
++          __renovice_state_1 = 14
++        else
++          __renovice_state_1 = 13
++        end
++      end
++      if __renovice_state_1 == 13 then
++        c22v1 = c22v1:Copy()
++        __renovice_local_4 = v33
++        __renovice_local_4 = __renovice_local_4.level
++        c22v1.levelOverride = __renovice_local_4
++        __renovice_local_4 = true
++        c22v1.soloMode = __renovice_local_4
++        c22v12 = true
++      end
++      if __renovice_state_1 == 14 then
++        __renovice_local_4 = string.find
++        c22v17 = v1
++        c22v17 = c22v17.ZARIMAN_NODE_TAG
++        c22v16 = tostring
++        c22v16 = c22v16(c22v17)
++        __renovice_local_4 = __renovice_local_4(c22v8, c22v16)
++        if __renovice_local_4 == nil then
++          __renovice_state_1 = 17
++        else
++          __renovice_state_1 = 15
+         end
+-      else
+-        if ((c22v15 == nil and not c22v19) and not c22v20) then
+-          c22v22 = v0
+-          c22v22 = c22v22.Ternary
+-          if c22v7 ~= true then
+-            c22v23 = false
+-          else
+-            c22v23 = true
+-          end
+-          c22v24 = c22v1.maxPlayersOverride
+-          c22v25 = nil
+-          c22v22 = c22v22(c22v23, c22v24, c22v25)
+-          c22v23 = Host_AdvertisePublicGame
+-          c22v24 = _T.gSelectedNodeName
+-          if c22v15 ~= nil then
+-            c22v25 = false
+-          else
+-            c22v25 = true
+-          end
+-          c22v27 = "OnUpdateSessionSettings"
+-          c22v23 = c22v23(c22v24, c22v25, c22v3, c22v27, c22v22)
+-          if not c22v23 then
+-            c22v24 = v0
+-            c22v24 = c22v24.ShowMessage
+-            c22v25 = "/Lotus/Language/Menu/Multiplayer_FailedToHost"
+-            c22v26 = "ConfirmLaunchFailurePopup"
+-            c22v24(c22v25, c22v26)
+-            do return end
+-          end
++      end
++      if __renovice_state_1 == 15 then
++        __renovice_local_4 = v1
++        __renovice_local_4 = __renovice_local_4.HasCompletedQuest
++        c22v15 = v34
++        __renovice_local_4 = __renovice_local_4(c22v15)
++        if __renovice_local_4 then
++          __renovice_state_1 = 17
++        else
++          __renovice_state_1 = 16
+         end
+       end
+-      c22v22 = gPlayerProfileMgr
+-      c22v24 = 0
+-      c22v22 = c22v22:GetPlayerProfile(c22v24)
+-      c22v23 = nil
+-      c22v24 = IsNull
+-      c22v24 = c22v24(c22v22)
+-      if c22v24 then
+-        c22v24 = print
+-        c22v25 = "GetMissionOpenLevelArgs: playerProfile is null"
+-        c22v24(c22v25)
+-        do return end
++      if __renovice_state_1 == 16 then
++        c22v1 = c22v1:Copy()
++        __renovice_local_4 = true
++        c22v1.soloMode = __renovice_local_4
+       end
+-      c22v23 = c22v22:GetGameSpecificData()
+-      c22v24 = IsNull
+-      c22v24 = c22v24(c22v23)
+-      if c22v24 then
+-        c22v24 = v1
+-        c22v24 = c22v24.BuildGameModeIdForNode
+-        c22v25 = _T.gSelectedNodeName
+-        c22v24 = c22v24(c22v25)
+-        c22v25 = v1
+-        c22v25 = c22v25.IsHubGameModeId
+-        c22v25 = c22v25(c22v24)
+-        if not c22v25 then
+-          if not c22v3 then
+-            c22v23:Name__9c91150f(c22v24)
+-          end
+-          c22v23:Name__d9a1e645(c22v24)
++      if __renovice_state_1 == 17 then
++        __renovice_local_4 = v1
++        __renovice_local_4 = __renovice_local_4.IsNonEndlessDuviriNode
++        __renovice_local_4 = __renovice_local_4(c22v9)
++        if not __renovice_local_4 then
++          __renovice_state_1 = 20
++        else
++          __renovice_state_1 = 18
+         end
+       end
+-      c22v25 = _T.gKeyChainUsed
+-      c22v24 = IsNull
+-      c22v24 = c22v24(c22v25)
+-      if not c22v24 then
+-        c22v24 = ""
+-        c22v1.levelKeyOwnerId = c22v24
+-      else
+-        c22v24 = IsNull
+-        c22v24 = c22v24(c22v6)
+-        if (c22v24 or c22v6) then
+-          c22v24 = IsPlayingLevelKey
+-          c22v24 = c22v24()
+-          if c22v24 then
+-            if c22v16 then
+-              c22v24 = IsNull
+-              c22v24 = c22v24(c22v22)
+-              if not c22v24 then
+-                c22v24 = c22v22:GetAccountIDString()
+-                c22v1.levelKeyOwnerId = c22v24
+-              end
+-            else
+-              c22v24 = gMatchingService
+-              c22v24 = c22v24:Name__c7f72506()
+-              c22v1.levelKeyOwnerId = c22v24
+-            end
+-          end
++      if __renovice_state_1 == 18 then
++        __renovice_local_4 = IsNull
++        __renovice_local_4 = __renovice_local_4(c22v2)
++        if not __renovice_local_4 then
++          __renovice_state_1 = 20
++        else
++          __renovice_state_1 = 19
+         end
+       end
+-      if c22v7 then
+-        c22v24 = IsNull
+-        c22v24 = c22v24(c22v2)
+-        if c22v24 then
+-          c22v24 = string.find
+-          c22v25 = _T.gSelectedNodeName
+-          c22v26 = v1
+-          c22v26 = c22v26.NIGHTMARE_TAG
+-          c22v24 = c22v24(c22v25, c22v26)
+-          if c22v24 then
+-            c22v24 = c22v1.missionType
+-            c22v25 = 18
+-            if c22v24 ~= c22v25 then
+-              c22v24 = v1
+-              c22v24 = c22v24.GetStarChart
+-              c22v24 = c22v24()
+-              c22v26 = c22v1.location
+-              c22v24 = c22v24:Name__19dfa8ea(c22v26)
+-              c22v25 = c22v24.mission
+-              c22v25 = c22v25.seed
+-              c22v1.seed = c22v25
+-              c22v25 = 1
+-              c22v1.difficulty = c22v25
+-              c22v26 = c22v1.minEnemyLevel
+-              c22v25 = c22v26 + 10
+-              c22v1.minEnemyLevel = c22v25
+-              c22v26 = c22v1.maxEnemyLevel
+-              c22v25 = c22v26 + 10
+-              c22v1.maxEnemyLevel = c22v25
+-              c22v25 = Symbol
+-              c22v27 = "NightmareRegion"
+-              c22v29 = c22v24.region
+-              c22v28 = c22v29 + 1
+-              c22v26 = c22v27 .. c22v28
+-              c22v25 = c22v25(c22v26)
+-              c22v1.periodicMissionTag = c22v25
+-              c22v25 = v1
+-              c22v25 = c22v25.NIGHTMARE_MISSION_INTERVAL
+-              c22v1.periodicMissionCooldown = c22v25
+-            end
+-          end
+-        end
++      if __renovice_state_1 == 19 then
++        __renovice_local_4 = v4
++        __renovice_local_4 = __renovice_local_4.ApplyMissionOverrides
++        __renovice_local_4(c22v1)
+       end
+-      c22v24 = string.find
+-      c22v26 = v1
+-      c22v26 = c22v26.EVENT_TAG
+-      c22v24 = c22v24(c22v8, c22v26)
+-      c22v25 = string.find
+-      c22v27 = v1
+-      c22v27 = c22v27.HARD_EVENT_TAG
+-      c22v25 = c22v25(c22v8, c22v27)
+-      c22v26 = false
+-      c22v27 = string.find
+-      c22v29 = v1
+-      c22v29 = c22v29.HARD_MODE_TAG
+-      c22v27 = c22v27(c22v8, c22v29)
+-      local __renovice_state_1 = 87
+-      c22v27 = string.find
+-      c22v29 = c22v1.alertTag
+-      c22v28 = tostring
+-      c22v28 = c22v28(c22v29)
+-      c22v29 = "Hard"
+-      c22v27 = c22v27(c22v28, c22v29)
+-      if c22v27 == nil then
+-        __renovice_state_1 = 89
+-      else
+-        __renovice_state_1 = 88
+-      end
+-      if __renovice_state_1 == 88 then
+-        c22v27 = ApplyDifficultyChanges
+-        c22v29 = 0
+-        c22v30 = true
+-        c22v27(c22v1, c22v29, c22v30)
+-      end
+-      if __renovice_state_1 == 89 then
+-        c22v27 = c22v1.goalTag
+-        c22v28 = Symbol
+-        c22v29 = "JadeShadowsEvent"
+-        c22v28 = c22v28(c22v29)
+-        if c22v27 == c22v28 then
+-          __renovice_state_1 = 91
++      if __renovice_state_1 == 20 then
++        __renovice_local_4 = v5
++        __renovice_local_4 = __renovice_local_4.IsSeasonalSector
++        __renovice_local_4 = __renovice_local_4(c22v9)
++        if not __renovice_local_4 then
++          __renovice_state_1 = 22
+         else
+-          __renovice_state_1 = 90
++          __renovice_state_1 = 21
+         end
+       end
+-      if __renovice_state_1 == 90 then
+-        c22v27 = c22v1.goalTag
+-        c22v28 = Symbol
+-        c22v29 = "ShadowgrapherEvent"
+-        c22v28 = c22v28(c22v29)
+-        if c22v27 ~= c22v28 then
+-          __renovice_state_1 = 99
++      if __renovice_state_1 == 21 then
++        c22v1 = c22v1:Copy()
++        __renovice_local_4 = v5
++        __renovice_local_4 = __renovice_local_4.ApplyMissionOverrides
++        __renovice_local_4(c22v9, c22v1)
++      end
++      if __renovice_state_1 == 22 then
++        if (c22v9 == "SolNode250" or c22v9 == "SolNode251") then
++          __renovice_state_1 = 26
+         else
+-          __renovice_state_1 = 91
++          __renovice_state_1 = 24
+         end
+       end
+-      if __renovice_state_1 == 91 then
+-        c22v27 = gGameData
+-        c22v27 = c22v27:GetMissionDifficultyTier()
+-        if (not c22v24 and not c22v25) then
+-          __renovice_state_1 = 97
++      if __renovice_state_1 == 24 then
++        if (c22v9 ~= "SolNode252" and c22v9 ~= "SolNode257") then
+         else
+-          __renovice_state_1 = 93
++          __renovice_state_1 = 26
+         end
+       end
+-      if __renovice_state_1 == 93 then
+-        if not c22v25 then
+-          __renovice_state_1 = 95
++      if __renovice_state_1 == 26 then
++        __renovice_local_4 = _G
++        __renovice_local_4 = __renovice_local_4.CachedGoalInfo
++        if not __renovice_local_4 then
+         else
+-          __renovice_state_1 = 94
++          __renovice_state_1 = 27
+         end
+       end
+-      if __renovice_state_1 == 94 then
+-        c22v28 = 1
+-        __renovice_state_1 = 96
+-      end
+-      if __renovice_state_1 == 95 then
+-        c22v28 = 0
+-        __renovice_state_1 = 96
+-      end
+-      if __renovice_state_1 == 96 then
+-        c22v27 = c22v28
+-        __renovice_state_1 = 97
+-      end
+-      if __renovice_state_1 == 97 then
+-        c22v28 = ApplyDifficultyChanges
+-        c22v31 = false
+-        c22v28(c22v1, c22v27, c22v31)
+-        c22v28 = c22v1.tier
+-        c22v29 = 0
+-        if c22v28 <= c22v29 then
++      if __renovice_state_1 == 27 then
++        c22v15 = _G
++        c22v15 = c22v15.CachedGoalInfo
++        __renovice_local_4 = c22v15.SolNode251
++        if not __renovice_local_4 then
+         else
+-          __renovice_state_1 = 98
++          __renovice_state_1 = 28
++        end
++      end
++      if __renovice_state_1 == 28 then
++        c22v15 = _G
++        c22v15 = c22v15.CachedGoalInfo
++        __renovice_local_4 = c22v15.SolNode251
++        __renovice_local_4 = __renovice_local_4.mTag
++        c22v15 = Symbol
++        c22v16 = "12MinWarEvent"
++        c22v15 = c22v15(c22v16)
++        if __renovice_local_4 ~= c22v15 then
++        else
++          __renovice_state_1 = 29
++        end
++      end
++      if __renovice_state_1 == 29 then
++        c22v1 = c22v1:Copy()
++        __renovice_local_4 = Symbol
++        c22v15 = "12MinWarEvent"
++        __renovice_local_4 = __renovice_local_4(c22v15)
++        c22v1.goalTag = __renovice_local_4
++      end
++    end
++    __renovice_local_4 = v1
++    __renovice_local_4 = __renovice_local_4.ApplyPostNewWarMissionOverrides
++    __renovice_local_4(c22v1)
++    __renovice_local_4 = _T
++    c22v15 = c22v0:c_str()
++    __renovice_local_4.gSelectedNodeName = c22v15
++    __renovice_local_4 = _G
++    c22v15 = _T.gSelectedNodeName
++    __renovice_local_4.gSelectedNodeName = c22v15
++    __renovice_local_4 = string.find
++    c22v15 = _T.gSelectedNodeName
++    c22v16 = v1
++    c22v16 = c22v16.HUB_TAG
++    __renovice_local_4 = __renovice_local_4(c22v15, c22v16)
++    c22v15 = c22v1.soloMode
++    if __renovice_local_4 == nil then
++      c22v16 = false
++    else
++      c22v16 = true
++    end
++    c22v17 = c22v16
++    if c22v17 then
++      c22v19 = _T.gDojoData
++      c22v18 = IsNull
++      c22v18 = c22v18(c22v19)
++      c22v17 = not c22v18
++      if c22v17 then
++        c22v17 = _T.gDojoData.Result
++      end
++    end
++    c22v19 = string.find
++    c22v21 = "DojoDuel"
++    c22v19 = c22v19(c22v8, c22v21)
++    if c22v19 == nil then
++      c22v18 = false
++    else
++      c22v18 = true
++    end
++    c22v20 = string.find
++    c22v22 = "DojoCustomObstacleCourse"
++    c22v20 = c22v20(c22v8, c22v22)
++    if c22v20 == nil then
++      c22v19 = false
++    else
++      c22v19 = true
++    end
++    c22v20 = IsHostingHighMemoryMission
++    c22v20 = c22v20(c22v1)
++    if (c22v15 or c22v20) then
++      c22v21 = IsNull
++      c22v21 = c22v21(c22v13)
++      if not c22v21 then
++        c22v21 = c22v13:GetSettings()
++        c22v22 = c22v21.regionId
++        c22v23 = 2
++        if c22v22 ~= c22v23 then
++          c22v22 = 2
++          c22v21.regionId = c22v22
++          c22v22 = gMatchingService
++          c22v25 = "OnUpdateSessionSettings"
++          c22v22:UpdateSessionSettings(c22v21, c22v25)
++          if c22v20 then
++            c22v22 = print
++            c22v23 = "Disabled clients from joining a session hosted by min-spec device for high memory mission"
++            c22v22(c22v23)
++          end
+         end
+       end
+-      if __renovice_state_1 == 98 then
+-        c22v26 = true
+-      end
+-      if __renovice_state_1 == 99 then
+-        c22v27 = string.find
+-        c22v29 = c22v1.alertTag
+-        c22v28 = tostring
+-        c22v28 = c22v28(c22v29)
+-        c22v29 = "JadeShadows"
+-        c22v27 = c22v27(c22v28, c22v29)
+-        if c22v27 ~= nil then
+-          __renovice_state_1 = 101
++    else
++      if ((__renovice_local_4 == nil and not c22v18) and not c22v19) then
++        c22v21 = v0
++        c22v21 = c22v21.Ternary
++        if c22v7 ~= true then
++          c22v22 = false
+         else
+-          __renovice_state_1 = 100
+-        end
+-      end
+-      if __renovice_state_1 == 100 then
+-        c22v27 = string.find
+-        c22v29 = c22v1.alertTag
+-        c22v28 = tostring
+-        c22v28 = c22v28(c22v29)
+-        c22v29 = "12MinWarEvent"
+-        c22v27 = c22v27(c22v28, c22v29)
+-        if c22v27 == nil then
+-          __renovice_state_1 = 109
++          c22v22 = true
++        end
++        c22v23 = c22v1.maxPlayersOverride
++        c22v24 = nil
++        c22v21 = c22v21(c22v22, c22v23, c22v24)
++        c22v22 = Host_AdvertisePublicGame
++        c22v23 = _T.gSelectedNodeName
++        if __renovice_local_4 ~= nil then
++          c22v24 = false
+         else
+-          __renovice_state_1 = 101
++          c22v24 = true
++        end
++        __renovice_local_0 = "OnUpdateSessionSettings"
++        c22v22 = c22v22(c22v23, c22v24, c22v3, __renovice_local_0, c22v21)
++        if not c22v22 then
++          c22v23 = v0
++          c22v23 = c22v23.ShowMessage
++          c22v24 = "/Lotus/Language/Menu/Multiplayer_FailedToHost"
++          c22v25 = "ConfirmLaunchFailurePopup"
++          c22v23(c22v24, c22v25)
++          do return end
+         end
+       end
+-      if __renovice_state_1 == 101 then
+-        c22v27 = gGameData
+-        c22v27 = c22v27:GetMissionDifficultyTier()
+-        if (not c22v24 and not c22v25) then
+-          __renovice_state_1 = 107
+-        else
+-          __renovice_state_1 = 103
++    end
++    c22v21 = gPlayerProfileMgr
++    c22v23 = 0
++    c22v21 = c22v21:GetPlayerProfile(c22v23)
++    c22v22 = nil
++    c22v23 = IsNull
++    c22v23 = c22v23(c22v21)
++    if c22v23 then
++      c22v23 = print
++      c22v24 = "GetMissionOpenLevelArgs: playerProfile is null"
++      c22v23(c22v24)
++      do return end
++    end
++    c22v22 = c22v21:GetGameSpecificData()
++    c22v23 = IsNull
++    c22v23 = c22v23(c22v22)
++    if c22v23 then
++      c22v23 = v1
++      c22v23 = c22v23.BuildGameModeIdForNode
++      c22v24 = _T.gSelectedNodeName
++      c22v23 = c22v23(c22v24)
++      c22v24 = v1
++      c22v24 = c22v24.IsHubGameModeId
++      c22v24 = c22v24(c22v23)
++      if not c22v24 then
++        if not c22v3 then
++          c22v22:Name__9c91150f(c22v23)
+         end
++        c22v22:Name__d9a1e645(c22v23)
+       end
+-      if __renovice_state_1 == 103 then
+-        if not c22v25 then
+-          __renovice_state_1 = 105
+-        else
+-          __renovice_state_1 = 104
++    end
++    c22v24 = _T.gKeyChainUsed
++    c22v23 = IsNull
++    c22v23 = c22v23(c22v24)
++    if not c22v23 then
++      c22v23 = ""
++      c22v1.levelKeyOwnerId = c22v23
++    else
++      c22v23 = IsNull
++      c22v23 = c22v23(c22v6)
++      if (c22v23 or c22v6) then
++        c22v23 = IsPlayingLevelKey
++        c22v23 = c22v23()
++        if c22v23 then
++          if c22v15 then
++            c22v23 = IsNull
++            c22v23 = c22v23(c22v21)
++            if not c22v23 then
++              c22v23 = c22v21:GetAccountIDString()
++              c22v1.levelKeyOwnerId = c22v23
++            end
++          else
++            c22v23 = gMatchingService
++            c22v23 = c22v23:Name__c7f72506()
++            c22v1.levelKeyOwnerId = c22v23
++          end
+         end
+       end
+-      if __renovice_state_1 == 104 then
+-        c22v28 = 1
+-        __renovice_state_1 = 106
++    end
++    if c22v7 then
++      c22v23 = IsNull
++      c22v23 = c22v23(c22v2)
++      if c22v23 then
++        c22v23 = string.find
++        c22v24 = _T.gSelectedNodeName
++        c22v25 = v1
++        c22v25 = c22v25.NIGHTMARE_TAG
++        c22v23 = c22v23(c22v24, c22v25)
++        if c22v23 then
++          c22v23 = c22v1.missionType
++          c22v24 = 18
++          if c22v23 ~= c22v24 then
++            c22v23 = v1
++            c22v23 = c22v23.GetStarChart
++            c22v23 = c22v23()
++            c22v25 = c22v1.location
++            c22v23 = c22v23:Name__19dfa8ea(c22v25)
++            c22v24 = c22v23.mission
++            c22v24 = c22v24.seed
++            c22v1.seed = c22v24
++            c22v24 = 1
++            c22v1.difficulty = c22v24
++            c22v25 = c22v1.minEnemyLevel
++            c22v24 = c22v25 + 10
++            c22v1.minEnemyLevel = c22v24
++            c22v25 = c22v1.maxEnemyLevel
++            c22v24 = c22v25 + 10
++            c22v1.maxEnemyLevel = c22v24
++            c22v24 = Symbol
++            __renovice_local_0 = "NightmareRegion"
++            c22v27 = c22v23.region
++            c22v26 = c22v27 + 1
++            c22v25 = __renovice_local_0 .. c22v26
++            c22v24 = c22v24(c22v25)
++            c22v1.periodicMissionTag = c22v24
++            c22v24 = v1
++            c22v24 = c22v24.NIGHTMARE_MISSION_INTERVAL
++            c22v1.periodicMissionCooldown = c22v24
++          end
++        end
+       end
+-      if __renovice_state_1 == 105 then
+-        c22v28 = 0
+-        __renovice_state_1 = 106
++    end
++    c22v23 = string.find
++    c22v25 = v1
++    c22v25 = c22v25.EVENT_TAG
++    c22v23 = c22v23(c22v8, c22v25)
++    c22v24 = string.find
++    __renovice_local_0 = v1
++    __renovice_local_0 = __renovice_local_0.HARD_EVENT_TAG
++    c22v24 = c22v24(c22v8, __renovice_local_0)
++    c22v25 = false
++    __renovice_local_0 = string.find
++    c22v27 = v1
++    c22v27 = c22v27.HARD_MODE_TAG
++    __renovice_local_0 = __renovice_local_0(c22v8, c22v27)
++    local __renovice_state_2 = 87
++    __renovice_local_0 = string.find
++    c22v27 = c22v1.alertTag
++    c22v26 = tostring
++    c22v26 = c22v26(c22v27)
++    c22v27 = "Hard"
++    __renovice_local_0 = __renovice_local_0(c22v26, c22v27)
++    if __renovice_local_0 == nil then
++      __renovice_state_2 = 89
++    else
++      __renovice_state_2 = 88
++    end
++    if __renovice_state_2 == 88 then
++      __renovice_local_0 = ApplyDifficultyChanges
++      c22v27 = 0
++      c22v28 = true
++      __renovice_local_0(c22v1, c22v27, c22v28)
++    end
++    if __renovice_state_2 == 89 then
++      __renovice_local_0 = c22v1.goalTag
++      c22v26 = Symbol
++      c22v27 = "JadeShadowsEvent"
++      c22v26 = c22v26(c22v27)
++      if __renovice_local_0 == c22v26 then
++        __renovice_state_2 = 91
++      else
++        __renovice_state_2 = 90
+       end
+-      if __renovice_state_1 == 106 then
+-        c22v27 = c22v28
+-        __renovice_state_1 = 107
++    end
++    if __renovice_state_2 == 90 then
++      __renovice_local_0 = c22v1.goalTag
++      c22v26 = Symbol
++      c22v27 = "ShadowgrapherEvent"
++      c22v26 = c22v26(c22v27)
++      if __renovice_local_0 ~= c22v26 then
++        __renovice_state_2 = 99
++      else
++        __renovice_state_2 = 91
+       end
+-      if __renovice_state_1 == 107 then
+-        c22v28 = ApplyDifficultyChanges
+-        c22v31 = false
+-        c22v28(c22v1, c22v27, c22v31)
+-        c22v28 = c22v1.tier
+-        c22v29 = 0
+-        if c22v28 <= c22v29 then
+-        else
+-          __renovice_state_1 = 108
+-        end
++    end
++    if __renovice_state_2 == 91 then
++      __renovice_local_0 = gGameData
++      __renovice_local_0 = __renovice_local_0:GetMissionDifficultyTier()
++      if (not c22v23 and not c22v24) then
++        __renovice_state_2 = 97
++      else
++        __renovice_state_2 = 93
+       end
+-      if __renovice_state_1 == 108 then
+-        c22v26 = true
++    end
++    if __renovice_state_2 == 93 then
++      if not c22v24 then
++        __renovice_state_2 = 95
++      else
++        __renovice_state_2 = 94
+       end
+-      if __renovice_state_1 == 109 then
+-        c22v27 = c22v1.tier
+-        c22v28 = 0
+-        if c22v27 <= c22v28 then
++    end
++    if __renovice_state_2 == 94 then
++      c22v26 = 1
++      __renovice_state_2 = 96
++    end
++    if __renovice_state_2 == 95 then
++      c22v26 = 0
++      __renovice_state_2 = 96
++    end
++    if __renovice_state_2 == 96 then
++      __renovice_local_0 = c22v26
++      __renovice_state_2 = 97
++    end
++    if __renovice_state_2 == 97 then
++      c22v26 = ApplyDifficultyChanges
++      __renovice_local_3 = false
++      c22v26(c22v1, __renovice_local_0, __renovice_local_3)
++      c22v26 = c22v1.tier
++      c22v27 = 0
++      if c22v26 <= c22v27 then
++      else
++        __renovice_state_2 = 98
++      end
++    end
++    if __renovice_state_2 == 98 then
++      c22v25 = true
++    end
++    if __renovice_state_2 == 99 then
++      __renovice_local_0 = string.find
++      c22v27 = c22v1.alertTag
++      c22v26 = tostring
++      c22v26 = c22v26(c22v27)
++      c22v27 = "JadeShadows"
++      __renovice_local_0 = __renovice_local_0(c22v26, c22v27)
++      if __renovice_local_0 ~= nil then
++        __renovice_state_2 = 101
++      else
++        __renovice_state_2 = 100
++      end
++    end
++    if __renovice_state_2 == 100 then
++      __renovice_local_0 = string.find
++      c22v27 = c22v1.alertTag
++      c22v26 = tostring
++      c22v26 = c22v26(c22v27)
++      c22v27 = "12MinWarEvent"
++      __renovice_local_0 = __renovice_local_0(c22v26, c22v27)
++      if __renovice_local_0 == nil then
++        __renovice_state_2 = 109
++      else
++        __renovice_state_2 = 101
++      end
++    end
++    if __renovice_state_2 == 101 then
++      __renovice_local_0 = gGameData
++      __renovice_local_0 = __renovice_local_0:GetMissionDifficultyTier()
++      if (not c22v23 and not c22v24) then
++        __renovice_state_2 = 107
++      else
++        __renovice_state_2 = 103
++      end
++    end
++    if __renovice_state_2 == 103 then
++      if not c22v24 then
++        __renovice_state_2 = 105
++      else
++        __renovice_state_2 = 104
++      end
++    end
++    if __renovice_state_2 == 104 then
++      c22v26 = 1
++      __renovice_state_2 = 106
++    end
++    if __renovice_state_2 == 105 then
++      c22v26 = 0
++      __renovice_state_2 = 106
++    end
++    if __renovice_state_2 == 106 then
++      __renovice_local_0 = c22v26
++      __renovice_state_2 = 107
++    end
++    if __renovice_state_2 == 107 then
++      c22v26 = ApplyDifficultyChanges
++      __renovice_local_3 = false
++      c22v26(c22v1, __renovice_local_0, __renovice_local_3)
++      c22v26 = c22v1.tier
++      c22v27 = 0
++      if c22v26 <= c22v27 then
++      else
++        __renovice_state_2 = 108
++      end
++    end
++    if __renovice_state_2 == 108 then
++      c22v25 = true
++    end
++    if __renovice_state_2 == 109 then
++      __renovice_local_0 = c22v1.tier
++      c22v26 = 0
++      if __renovice_local_0 <= c22v26 then
++      else
++        __renovice_state_2 = 110
++      end
++    end
++    if __renovice_state_2 == 110 then
++      c22v25 = true
++    end
++    __renovice_local_0 = c22v1.goalId
++    if __renovice_local_0 ~= "" then
++      __renovice_state_0 = 112
++      __renovice_local_0 = _G
++      __renovice_local_0 = __renovice_local_0.CachedGoalInfo
++      if not __renovice_local_0 then
++      else
++        __renovice_state_0 = 113
++      end
++      if __renovice_state_0 == 113 then
++        c22v26 = _G
++        c22v26 = c22v26.CachedGoalInfo
++        __renovice_local_0 = c22v26[c22v9]
++        if not __renovice_local_0 then
+         else
+-          __renovice_state_1 = 110
++          __renovice_state_0 = 114
+         end
+       end
+-      if __renovice_state_1 == 110 then
+-        c22v26 = true
+-      end
+-      c22v27 = c22v1.goalId
+-      if c22v27 ~= "" then
+-        local __renovice_state_2 = 112
++      if __renovice_state_0 == 114 then
+         c22v27 = _G
+         c22v27 = c22v27.CachedGoalInfo
+-        if not c22v27 then
++        c22v26 = c22v27[c22v9]
++        c22v26 = c22v26.mNightLevel
++        __renovice_local_0 = IsNull
++        __renovice_local_0 = __renovice_local_0(c22v26)
++        if __renovice_local_0 then
+         else
+-          __renovice_state_2 = 113
+-        end
+-        if __renovice_state_2 == 113 then
+-          c22v28 = _G
+-          c22v28 = c22v28.CachedGoalInfo
+-          c22v27 = c22v28[c22v9]
+-          if not c22v27 then
+-          else
+-            __renovice_state_2 = 114
+-          end
+-        end
+-        if __renovice_state_2 == 114 then
+-          c22v29 = _G
+-          c22v29 = c22v29.CachedGoalInfo
+-          c22v28 = c22v29[c22v9]
+-          c22v28 = c22v28.mNightLevel
+-          c22v27 = IsNull
+-          c22v27 = c22v27(c22v28)
+-          if c22v27 then
+-          else
+-            __renovice_state_2 = 115
+-          end
+-        end
+-        if __renovice_state_2 == 115 then
+-          c22v27 = v1
+-          c22v27 = c22v27.CalculateTimeOfDay
+-          c22v28 = v1
+-          c22v28 = c22v28.CETUS_NODE_TAG
+-          c22v27 = c22v27(c22v28)
+-          c22v28 = 6
+-          if c22v27 < c22v28 then
+-            __renovice_state_2 = 117
+-          else
+-            __renovice_state_2 = 116
+-          end
+-        end
+-        if __renovice_state_2 == 116 then
+-          c22v28 = 22
+-          if c22v27 < c22v28 then
+-          else
+-            __renovice_state_2 = 117
+-          end
+-        end
+-        if __renovice_state_2 == 117 then
+-          c22v29 = _G
+-          c22v29 = c22v29.CachedGoalInfo
+-          c22v28 = c22v29[c22v9]
+-          c22v28 = c22v28.mNightLevel
+-          c22v1.levelOverride = c22v28
++          __renovice_state_0 = 115
++        end
++      end
++      if __renovice_state_0 == 115 then
++        __renovice_local_0 = v1
++        __renovice_local_0 = __renovice_local_0.CalculateTimeOfDay
++        c22v26 = v1
++        c22v26 = c22v26.CETUS_NODE_TAG
++        __renovice_local_0 = __renovice_local_0(c22v26)
++        c22v26 = 6
++        if __renovice_local_0 < c22v26 then
++          __renovice_state_0 = 117
++        else
++          __renovice_state_0 = 116
+         end
+       end
+-      c22v27 = c22v1.levelOverride
+-      c22v28 = not c22v16
+-      c22v29 = Engine.OpenLevelArgs
+-      c22v29 = c22v29()
+-      c22v29.hostingMultiplayer = c22v28
+-      c22v30 = true
+-      c22v29.migrateServer = c22v30
+-      c22v30 = c22v1.location
+-      c22v31 = c22v30:IsValid()
+-      if not c22v31 then
+-        c22v31 = IsNull
+-        c22v31 = c22v31(c22v2)
+-        if not c22v31 then
+-          c22v31 = Resource
+-          c22v31 = c22v31(c22v2)
+-          c22v32 = IsNull
+-          c22v32 = c22v32(c22v31)
+-          if not c22v32 then
+-            c22v30 = c22v31:GetNode()
+-          end
++      if __renovice_state_0 == 116 then
++        c22v26 = 22
++        if __renovice_local_0 < c22v26 then
++        else
++          __renovice_state_0 = 117
+         end
+       end
+-      c22v31 = v1
+-      c22v31 = c22v31.ENTRATI_LAB_NODE_TAG
+-      if c22v30 == c22v31 then
+-        c22v31 = v63
+-        c22v31 = c22v31()
+-        if not c22v31 then
+-          c22v31 = Symbol
+-          c22v32 = "DeimosHub"
+-          c22v31 = c22v31(c22v32)
+-          c22v1.location = c22v31
+-        end
+-      end
+-      c22v31 = v1
+-      c22v31 = c22v31.SetLevelStreamingArgs
+-      c22v31(c22v30, c22v29)
+-      if not c22v12 then
+-        c22v31 = _T.LNU_levelGenerationSeed
+-        if c22v31 then
+-          c22v33 = Name__6dd598b2
+-          __renovice_local_0 = _T.LNU_levelGenerationSeed
+-          c22v29:SetRandSeed(c22v33(__renovice_local_0))
++      if __renovice_state_0 == 117 then
++        c22v27 = _G
++        c22v27 = c22v27.CachedGoalInfo
++        c22v26 = c22v27[c22v9]
++        c22v26 = c22v26.mNightLevel
++        c22v1.levelOverride = c22v26
++      end
++    end
++    __renovice_local_0 = c22v1.levelOverride
++    c22v26 = not c22v15
++    c22v27 = Engine.OpenLevelArgs
++    c22v27 = c22v27()
++    c22v27.hostingMultiplayer = c22v26
++    c22v28 = true
++    c22v27.migrateServer = c22v28
++    c22v28 = c22v1.location
++    __renovice_local_3 = c22v28:IsValid()
++    if not __renovice_local_3 then
++      __renovice_local_3 = IsNull
++      __renovice_local_3 = __renovice_local_3(c22v2)
++      if not __renovice_local_3 then
++        __renovice_local_3 = Resource
++        __renovice_local_3 = __renovice_local_3(c22v2)
++        c22v29 = IsNull
++        c22v29 = c22v29(__renovice_local_3)
++        if not c22v29 then
++          c22v28 = __renovice_local_3:GetNode()
++        end
++      end
++    end
++    __renovice_local_3 = v1
++    __renovice_local_3 = __renovice_local_3.ENTRATI_LAB_NODE_TAG
++    if c22v28 == __renovice_local_3 then
++      __renovice_local_3 = v63
++      __renovice_local_3 = __renovice_local_3()
++      if not __renovice_local_3 then
++        __renovice_local_3 = Symbol
++        c22v29 = "DeimosHub"
++        __renovice_local_3 = __renovice_local_3(c22v29)
++        c22v1.location = __renovice_local_3
++      end
++    end
++    __renovice_local_3 = v1
++    __renovice_local_3 = __renovice_local_3.SetLevelStreamingArgs
++    __renovice_local_3(c22v28, c22v27)
++    if not c22v12 then
++      __renovice_local_3 = _T.LNU_levelGenerationSeed
++      if __renovice_local_3 then
++        c22v30 = Name__6dd598b2
++        __renovice_local_1 = _T.LNU_levelGenerationSeed
++        c22v27:SetRandSeed(c22v30(__renovice_local_1))
++      else
++        __renovice_local_3 = _T.LNU_fixedLevelGenerationSeed
++        if __renovice_local_3 then
++          __renovice_local_3 = RandomInt
++          c22v29 = 1
++          c22v30 = 1000000
++          __renovice_local_3 = __renovice_local_3(c22v29, c22v30)
++          c22v29 = Name__6dd598b2
++          c22v29 = c22v29(__renovice_local_3)
++          c22v31 = c22v29
++          c22v27:SetRandSeed(c22v31)
++          c22v30 = gMatchingService
++          c22v30:SetSquadMissionSeed(c22v29)
+         else
+-          c22v31 = _T.LNU_fixedLevelGenerationSeed
+-          if c22v31 then
+-            c22v31 = RandomInt
+-            c22v32 = 1
+-            c22v33 = 1000000
+-            c22v31 = c22v31(c22v32, c22v33)
+-            c22v32 = Name__6dd598b2
+-            c22v32 = c22v32(c22v31)
+-            c22v34 = c22v32
+-            c22v29:SetRandSeed(c22v34)
+-            c22v33 = gMatchingService
+-            c22v33:SetSquadMissionSeed(c22v32)
+-          else
+-            c22v31 = c22v1.missionType
+-            c22v32 = 42
+-            if c22v31 == c22v32 then
+-              c22v31 = gMatchingService
+-              c22v31 = c22v31:GetSquadMissionSeed()
+-              c22v32 = _T.IsPvPvERandSeedSet
+-              if not c22v32 then
+-                c22v32 = RandomInt
+-                c22v33 = 1
+-                __renovice_local_0 = 1000000
+-                c22v32 = c22v32(c22v33, __renovice_local_0)
+-                c22v33 = Name__6dd598b2
+-                c22v31 = c22v33(c22v32)
+-                c22v33 = gMatchingService
+-                c22v33:SetSquadMissionSeed(c22v31)
+-              end
+-              c22v32 = Name__b7874e81
+-              c22v32 = c22v32(c22v31)
+-              c22v29:SetRandSeed(c22v31)
+-              c22v33 = print
+-              c22v34 = "PvPvE SquadPair - Using Fixed seed "
+-              c22v36 = " from PvPvE mode"
+-              __renovice_local_0 = c22v34 .. c22v32 .. c22v36
+-              c22v33(__renovice_local_0)
++          __renovice_local_3 = c22v1.missionType
++          c22v29 = 42
++          if __renovice_local_3 == c22v29 then
++            __renovice_local_3 = gMatchingService
++            __renovice_local_3 = __renovice_local_3:GetSquadMissionSeed()
++            c22v29 = _T.IsPvPvERandSeedSet
++            if not c22v29 then
++              c22v29 = RandomInt
++              c22v30 = 1
++              __renovice_local_1 = 1000000
++              c22v29 = c22v29(c22v30, __renovice_local_1)
++              c22v30 = Name__6dd598b2
++              __renovice_local_3 = c22v30(c22v29)
++              c22v30 = gMatchingService
++              c22v30:SetSquadMissionSeed(__renovice_local_3)
+             end
++            c22v29 = Name__b7874e81
++            c22v29 = c22v29(__renovice_local_3)
++            c22v27:SetRandSeed(__renovice_local_3)
++            c22v30 = print
++            c22v31 = "PvPvE SquadPair - Using Fixed seed "
++            c22v33 = " from PvPvE mode"
++            __renovice_local_1 = c22v31 .. c22v29 .. c22v33
++            c22v30(__renovice_local_1)
+           end
+         end
+       end
+-      c22v31 = nil
++    end
++    __renovice_local_3 = nil
++    if c22v17 then
++      c22v29 = Resource
++      c22v30 = v14
++      __renovice_local_3 = c22v29(c22v30)
++      c22v31 = _T.gDojoData.GuildId
++      c22v32 = gGameData
++      c22v32 = c22v32:GetGuildId()
++      if c22v31 == c22v32 then
++        __renovice_local_1 = false
++      else
++        __renovice_local_1 = true
++      end
++      __renovice_local_3:Name__974dcc29(__renovice_local_1)
++      __renovice_local_1 = _T.gDojoData.Body
++      __renovice_local_0 = __renovice_local_3:Name__765fbc41(__renovice_local_1)
++      c22v29 = IsNull
++      c22v29 = c22v29(__renovice_local_0)
++      if c22v29 then
++        c22v29 = print
++        c22v30 = "Error constructing Dojo with data retrieved!"
++        c22v29(c22v30)
++        c22v29 = nil
++        do return c22v29 end
++      end
++      c22v29 = __renovice_local_3:GetComponents()
++      c22v31 = 1
++      c22v30 = #c22v29
++      __renovice_local_1 = 1
++      for __renovice_for_2_0 = c22v31, c22v30, __renovice_local_1 do
++        c22v48 = c22v29[__renovice_for_2_0]
++        c22v48 = c22v48.prefab
++        c22v27:AddContextObject(c22v48)
++      end
++      c22v30 = __renovice_local_3:Name__9d767882()
++      c22v32 = 1
++      __renovice_local_1 = #c22v30
++      c22v31 = 1
++      for __renovice_for_3_0 = c22v32, __renovice_local_1, c22v31 do
++        c22v49 = c22v30[__renovice_for_3_0]
++        c22v27:AddContextObject(c22v49)
++      end
++      __renovice_local_1 = __renovice_local_3:GetGuildEmblem()
++      c22v31 = IsNull
++      c22v31 = c22v31(__renovice_local_1)
++      if not c22v31 then
++        c22v27:AddContextObject(__renovice_local_1)
++      end
++      c22v31 = Symbol
++      c22v32 = _T.gDojoData.GuildId
++      c22v31 = c22v31(c22v32)
++      c22v1.location = c22v31
++      c22v31 = __renovice_local_3:ShouldForceSoloMode()
++      if c22v31 then
++        c22v31 = true
++        c22v1.soloMode = c22v31
++      end
++      c22v31 = gMatchingService
++      c22v31:Name__5e74a65b(__renovice_local_3:GetContentURL())
++    else
+       if c22v18 then
+-        c22v32 = Resource
+-        c22v33 = v14
+-        c22v31 = c22v32(c22v33)
+-        c22v34 = _T.gDojoData.GuildId
+-        c22v35 = gGameData
+-        c22v35 = c22v35:GetGuildId()
+-        if c22v34 == c22v35 then
+-          __renovice_local_0 = false
++        c22v29 = Resource
++        c22v30 = v15
++        c22v29 = c22v29(c22v30)
++        __renovice_local_1 = _T.gPendingDuel
++        c22v30 = IsNull
++        c22v30 = c22v30(__renovice_local_1)
++        if c22v30 then
++          __renovice_local_0 = nil
+         else
+-          __renovice_local_0 = true
+-        end
+-        c22v31:Name__974dcc29(__renovice_local_0)
+-        __renovice_local_0 = _T.gDojoData.Body
+-        c22v27 = c22v31:Name__765fbc41(__renovice_local_0)
+-        c22v32 = IsNull
+-        c22v32 = c22v32(c22v27)
+-        if c22v32 then
+-          c22v32 = print
+-          c22v33 = "Error constructing Dojo with data retrieved!"
+-          c22v32(c22v33)
+-          c22v32 = nil
+-          do return c22v32 end
++          __renovice_local_1 = _T.DojoMgr
++          c22v32 = _T.gPendingDuel.RoomId
++          c22v32 = {__renovice_local_1:GetStandaloneComponent(c22v32)}
++          __renovice_local_0 = c22v29:QuBlackout(c22v32)
++        end
++        c22v30 = IsNull
++        c22v30 = c22v30(__renovice_local_0)
++        if c22v30 then
++          c22v30 = print
++          __renovice_local_1 = "Error constructing Dojo Duel level!"
++          c22v30(__renovice_local_1)
++          c22v30 = nil
++          do return c22v30 end
++        end
++        c22v30 = c22v29:Name__9d767882()
++        c22v32 = 1
++        __renovice_local_1 = #c22v30
++        c22v31 = 1
++        for __renovice_for_4_0 = c22v32, __renovice_local_1, c22v31 do
++          c22v49 = c22v30[__renovice_for_4_0]
++          c22v27:AddContextObject(c22v49)
++        end
++        __renovice_local_1 = c22v29:GetGuildEmblem()
++        c22v31 = IsNull
++        c22v31 = c22v31(__renovice_local_1)
++        if not c22v31 then
++          c22v27:AddContextObject(__renovice_local_1)
+         end
+-        c22v32 = c22v31:GetComponents()
+-        c22v34 = 1
+-        c22v33 = #c22v32
+-        __renovice_local_0 = 1
+-        for __renovice_for_4_0 = c22v34, c22v33, __renovice_local_0 do
+-          __renovice_for_1_0 = c22v32[__renovice_for_4_0]
+-          __renovice_for_1_0 = __renovice_for_1_0.prefab
+-          c22v29:AddContextObject(__renovice_for_1_0)
+-        end
+-        c22v33 = c22v31:Name__9d767882()
+-        c22v35 = 1
+-        __renovice_local_0 = #c22v33
+-        c22v34 = 1
+-        for __renovice_for_5_0 = c22v35, __renovice_local_0, c22v34 do
+-          __renovice_for_1_1 = c22v33[__renovice_for_5_0]
+-          c22v29:AddContextObject(__renovice_for_1_1)
+-        end
+-        __renovice_local_0 = c22v31:GetGuildEmblem()
+-        c22v34 = IsNull
+-        c22v34 = c22v34(__renovice_local_0)
+-        if not c22v34 then
+-          c22v29:AddContextObject(__renovice_local_0)
+-        end
+-        c22v34 = Symbol
+-        c22v35 = _T.gDojoData.GuildId
+-        c22v34 = c22v34(c22v35)
+-        c22v1.location = c22v34
+-        c22v34 = c22v31:ShouldForceSoloMode()
+-        if c22v34 then
+-          c22v34 = true
+-          c22v1.soloMode = c22v34
+-        end
+-        c22v34 = gMatchingService
+-        c22v34:Name__5e74a65b(c22v31:GetContentURL())
+       else
+         if c22v19 then
+-          c22v32 = Resource
+-          c22v33 = v15
+-          c22v32 = c22v32(c22v33)
+-          __renovice_local_0 = _T.gPendingDuel
+-          c22v33 = IsNull
+-          c22v33 = c22v33(__renovice_local_0)
+-          if c22v33 then
+-            c22v27 = nil
+-          else
+-            __renovice_local_0 = _T.DojoMgr
+-            c22v35 = _T.gPendingDuel.RoomId
+-            c22v35 = {__renovice_local_0:GetStandaloneComponent(c22v35)}
+-            c22v27 = c22v32:QuBlackout(c22v35)
+-          end
+-          c22v33 = IsNull
+-          c22v33 = c22v33(c22v27)
+-          if c22v33 then
+-            c22v33 = print
+-            __renovice_local_0 = "Error constructing Dojo Duel level!"
+-            c22v33(__renovice_local_0)
+-            c22v33 = nil
+-            do return c22v33 end
++          c22v29 = _T.ActivatedObstacleCourse.RoomID
++          _G.obstacleCourseRoomID = c22v29
++          __renovice_local_1 = _T.DojoMgr
++          c22v30 = {__renovice_local_1:GetStandaloneComponent(c22v29)}
++          __renovice_local_1 = Resource
++          c22v31 = v16
++          __renovice_local_1 = __renovice_local_1(c22v31)
++          __renovice_local_0 = __renovice_local_1:QuBlackout(c22v30)
++          c22v31 = IsNull
++          c22v31 = c22v31(__renovice_local_0)
++          if c22v31 then
++            c22v31 = print
++            c22v32 = "Error constructing custom obstacle course level!"
++            c22v31(c22v32)
++            c22v31 = nil
++            do return c22v31 end
+           end
+-          c22v33 = c22v32:Name__9d767882()
+-          c22v35 = 1
+-          __renovice_local_0 = #c22v33
+-          c22v34 = 1
+-          for __renovice_for_6_0 = c22v35, __renovice_local_0, c22v34 do
+-            __renovice_for_1_1 = c22v33[__renovice_for_6_0]
+-            c22v29:AddContextObject(__renovice_for_1_1)
++          c22v31 = __renovice_local_1:Name__9d767882()
++          c22v48 = 1
++          c22v32 = #c22v31
++          c22v33 = 1
++          for __renovice_for_5_0 = c22v48, c22v32, c22v33 do
++            c22v37 = c22v31[__renovice_for_5_0]
++            c22v27:AddContextObject(c22v37)
+           end
+-          __renovice_local_0 = c22v32:GetGuildEmblem()
+-          c22v34 = IsNull
+-          c22v34 = c22v34(__renovice_local_0)
+-          if not c22v34 then
+-            c22v29:AddContextObject(__renovice_local_0)
++          c22v32 = __renovice_local_1:GetGuildEmblem()
++          c22v33 = IsNull
++          c22v33 = c22v33(c22v32)
++          if not c22v33 then
++            c22v27:AddContextObject(c22v32)
+           end
+         else
+-          if c22v20 then
+-            c22v32 = _T.ActivatedObstacleCourse.RoomID
+-            _G.obstacleCourseRoomID = c22v32
+-            __renovice_local_0 = _T.DojoMgr
+-            c22v33 = {__renovice_local_0:GetStandaloneComponent(c22v32)}
+-            __renovice_local_0 = Resource
+-            c22v34 = v16
+-            __renovice_local_0 = __renovice_local_0(c22v34)
+-            c22v27 = __renovice_local_0:QuBlackout(c22v33)
+-            c22v34 = IsNull
+-            c22v34 = c22v34(c22v27)
+-            if c22v34 then
+-              c22v34 = print
+-              c22v35 = "Error constructing custom obstacle course level!"
+-              c22v34(c22v35)
+-              c22v34 = nil
+-              do return c22v34 end
+-            end
+-            c22v34 = __renovice_local_0:Name__9d767882()
+-            __renovice_for_1_0 = 1
+-            c22v35 = #c22v34
+-            c22v36 = 1
+-            for __renovice_for_7_0 = __renovice_for_1_0, c22v35, c22v36 do
+-              c22v40 = c22v34[__renovice_for_7_0]
+-              c22v29:AddContextObject(c22v40)
+-            end
+-            c22v35 = __renovice_local_0:GetGuildEmblem()
+-            c22v36 = IsNull
+-            c22v36 = c22v36(c22v35)
+-            if not c22v36 then
+-              c22v29:AddContextObject(c22v35)
+-            end
+-          else
+-            c22v33 = gGameRules
+-            c22v32 = IsNull
+-            c22v32 = c22v32(c22v33)
+-            if not c22v32 then
+-              c22v32 = gGameRules
+-              __renovice_local_0 = gLotusAttractModeGameRulesType
+-              c22v32 = c22v32:IsA(__renovice_local_0)
+-              if c22v32 then
+-                c22v32 = gGameRules
+-                c22v27 = c22v32:GetLevelForMission(c22v27, c22v0)
+-                c22v32 = IsNull
+-                c22v32 = c22v32(c22v27)
+-                if c22v32 then
+-                  c22v32 = print
+-                  c22v33 = "Error nil level from GetLevelForMission!"
+-                  c22v32(c22v33)
+-                  c22v32 = nil
+-                  do return c22v32 end
+-                end
++          c22v30 = gGameRules
++          c22v29 = IsNull
++          c22v29 = c22v29(c22v30)
++          if not c22v29 then
++            c22v29 = gGameRules
++            __renovice_local_1 = gLotusAttractModeGameRulesType
++            c22v29 = c22v29:IsA(__renovice_local_1)
++            if c22v29 then
++              c22v29 = gGameRules
++              __renovice_local_0 = c22v29:GetLevelForMission(__renovice_local_0, c22v0)
++              c22v29 = IsNull
++              c22v29 = c22v29(__renovice_local_0)
++              if c22v29 then
++                c22v29 = print
++                c22v30 = "Error nil level from GetLevelForMission!"
++                c22v29(c22v30)
++                c22v29 = nil
++                do return c22v29 end
+               end
+             end
+           end
+         end
+       end
+-      c22v32 = string.find
+-      __renovice_local_0 = "EntratiLabHub"
+-      c22v32 = c22v32(c22v8, __renovice_local_0)
+-      c22v32 = IsNull
+-      c22v32 = c22v32(c22v27)
+-      if c22v32 then
+-        c22v32 = print
+-        c22v33 = "Error nil level from missionInfo.levelOverride!"
+-        c22v32(c22v33)
+-        c22v32 = nil
+-        do return c22v32 end
+-      end
+-      c22v29:SetLevel(c22v27:GetFullName())
+-      if c22v11 then
+-        local __renovice_state_3 = 177
+-        c22v32 = IsNull
+-        c22v32 = c22v32(c22v2)
+-        if c22v32 then
++    end
++    c22v29 = string.find
++    __renovice_local_1 = "EntratiLabHub"
++    c22v29 = c22v29(c22v8, __renovice_local_1)
++    c22v29 = IsNull
++    c22v29 = c22v29(__renovice_local_0)
++    if c22v29 then
++      c22v29 = print
++      c22v30 = "Error nil level from missionInfo.levelOverride!"
++      c22v29(c22v30)
++      c22v29 = nil
++      do return c22v29 end
++    end
++    c22v27:SetLevel(__renovice_local_0:GetFullName())
++    if c22v11 then
++      __renovice_state_0 = 177
++      c22v29 = IsNull
++      c22v29 = c22v29(c22v2)
++      if c22v29 then
++      else
++        __renovice_state_0 = 178
++      end
++      if __renovice_state_0 == 178 then
++        c22v29 = string.find
++        __renovice_local_1 = "DuviriKullervoEventKey"
++        c22v29 = c22v29(c22v8, __renovice_local_1)
++        if c22v29 then
++          __renovice_state_0 = 181
+         else
+-          __renovice_state_3 = 178
+-        end
+-        if __renovice_state_3 == 178 then
+-          c22v32 = string.find
+-          __renovice_local_0 = "DuviriKullervoEventKey"
+-          c22v32 = c22v32(c22v8, __renovice_local_0)
+-          if c22v32 then
+-            __renovice_state_3 = 181
+-          else
+-            __renovice_state_3 = 179
+-          end
+-        end
+-        if __renovice_state_3 == 179 then
+-          c22v32 = string.find
+-          __renovice_local_0 = "DuviriMITWKey"
+-          c22v32 = c22v32(c22v8, __renovice_local_0)
+-          if c22v32 then
+-            __renovice_state_3 = 181
+-          else
+-            __renovice_state_3 = 180
+-          end
++          __renovice_state_0 = 179
+         end
+-        if __renovice_state_3 == 180 then
+-          c22v32 = string.find
+-          __renovice_local_0 = "DuviriMITWEventKey"
+-          c22v32 = c22v32(c22v8, __renovice_local_0)
+-          if not c22v32 then
+-          else
+-            __renovice_state_3 = 181
+-          end
++      end
++      if __renovice_state_0 == 179 then
++        c22v29 = string.find
++        __renovice_local_1 = "DuviriMITWKey"
++        c22v29 = c22v29(c22v8, __renovice_local_1)
++        if c22v29 then
++          __renovice_state_0 = 181
++        else
++          __renovice_state_0 = 180
+         end
+-        if __renovice_state_3 == 181 then
++      end
++      if __renovice_state_0 == 180 then
++        c22v29 = string.find
++        __renovice_local_1 = "DuviriMITWEventKey"
++        c22v29 = c22v29(c22v8, __renovice_local_1)
++        if not c22v29 then
++        else
++          __renovice_state_0 = 181
++        end
++      end
++      if __renovice_state_0 == 181 then
++        c22v29 = nil
++        c22v1.levelKeyName = c22v29
++        c22v29 = ""
++        c22v1.levelKeyOwnerId = c22v29
++      end
++    end
++    c22v29 = _T.gPendingMission
++    if c22v29 then
++      c22v29 = _T.gPendingMission.metadata
++      if c22v29 then
++        c22v30 = _T.gPendingMission.metadata
++        c22v29 = tostring
++        c22v29 = c22v29(c22v30)
++        c22v1.metadata = c22v29
++      end
++    end
++    c22v29 = c22v1:EncodeAsString()
++    c22v30 = print
++    c22v31 = "Host loading "
++    c22v49 = gMatchingService
++    c22v32 = c22v49:GetSquadMission()
++    c22v33 = " with MissionInfo: \n"
++    __renovice_local_1 = c22v31 .. c22v32 .. c22v33 .. c22v29
++    c22v30(__renovice_local_1)
++    c22v27:AddContextTag(c22v29)
++    c22v30 = c22v1.soloMode
++    if c22v30 then
++      c22v30 = true
++      c22v27.isSoloMode = c22v30
++    end
++    if c22v17 then
++      c22v30 = _T.gDojoData.DryDockRequired
++      if c22v30 then
++        c22v30 = WeakResource
++        __renovice_local_1 = "/Lotus/Levels/ClanDojo/DojoRailjackHangar.level"
++        c22v33 = c22v30(__renovice_local_1)
++        c22v31 = __renovice_local_3:GetLevelCount(c22v33)
++        c22v32 = 0
++        if c22v31 <= c22v32 then
++          __renovice_local_1 = false
++        else
++          __renovice_local_1 = true
++        end
++        if not __renovice_local_1 then
++          c22v31 = print
++          c22v32 = "Dojo does not have a DryDock component, where would we park the Railjack?!"
++          c22v31(c22v32)
++          c22v31 = Engine.OpenLevelArgs
++          c22v48 = c22v31()
++          c22v49 = ""
++          c22v22:SetReturnToLobbyLevelArgs(c22v48, c22v49)
+           c22v32 = nil
+-          c22v1.levelKeyName = c22v32
+-          c22v32 = ""
+-          c22v1.levelKeyOwnerId = c22v32
++          do return c22v32 end
+         end
+       end
+-      c22v32 = _T.gPendingMission
+-      if c22v32 then
+-        c22v32 = _T.gPendingMission.metadata
+-        if c22v32 then
+-          c22v33 = _T.gPendingMission.metadata
+-          c22v32 = tostring
+-          c22v32 = c22v32(c22v33)
+-          c22v1.metadata = c22v32
+-        end
+-      end
+-      c22v32 = c22v1:EncodeAsString()
+-      c22v33 = print
+-      c22v34 = "Host loading "
+-      __renovice_for_1_1 = gMatchingService
+-      c22v35 = __renovice_for_1_1:GetSquadMission()
+-      c22v36 = " with MissionInfo: \n"
+-      __renovice_local_0 = c22v34 .. c22v35 .. c22v36 .. c22v32
+-      c22v33(__renovice_local_0)
+-      c22v29:AddContextTag(c22v32)
+-      c22v33 = c22v1.soloMode
+-      if c22v33 then
+-        c22v33 = true
+-        c22v29.isSoloMode = c22v33
++      c22v31 = _T.gDojoData.GuildId
++      c22v27:AddContextTag(c22v31)
++      c22v27:AddContextTag(__renovice_local_3:GetName())
++      c22v31 = tostring
++      c22v31 = c22v31(__renovice_local_3:GetTradeTax())
++      c22v27:AddContextTag(c22v31)
++      c22v31 = tostring
++      c22v31 = c22v31(__renovice_local_3:GetGuildClass())
++      c22v27:AddContextTag(c22v31)
++      c22v30 = __renovice_local_3:Name__d6fc9179()
++      __renovice_local_1 = -1
++      if __renovice_local_1 < c22v30 then
++        c22v32 = tostring
++        c22v32 = c22v32(c22v30)
++        c22v27:AddContextTag(c22v32)
++      end
++      __renovice_local_1 = __renovice_local_3:Name__397fa625()
++      c22v31 = __renovice_local_1:IsValid()
++      if c22v31 then
++        c22v33 = __renovice_local_1.sec
++        c22v27:AddContextTag(c22v33)
+       end
++    else
+       if c22v18 then
+-        c22v33 = _T.gDojoData.DryDockRequired
+-        if c22v33 then
+-          c22v33 = WeakResource
+-          __renovice_local_0 = "/Lotus/Levels/ClanDojo/DojoRailjackHangar.level"
+-          c22v36 = c22v33(__renovice_local_0)
+-          c22v34 = c22v31:GetLevelCount(c22v36)
+-          c22v35 = 0
+-          if c22v34 <= c22v35 then
+-            __renovice_local_0 = false
+-          else
+-            __renovice_local_0 = true
+-          end
+-          if not __renovice_local_0 then
+-            c22v34 = print
+-            c22v35 = "Dojo does not have a DryDock component, where would we park the Railjack?!"
+-            c22v34(c22v35)
+-            c22v34 = Engine.OpenLevelArgs
+-            __renovice_for_1_0 = c22v34()
+-            __renovice_for_1_1 = ""
+-            c22v23:SetReturnToLobbyLevelArgs(__renovice_for_1_0, __renovice_for_1_1)
+-            c22v35 = nil
+-            do return c22v35 end
+-          end
+-        end
+-        c22v34 = _T.gDojoData.GuildId
+-        c22v29:AddContextTag(c22v34)
+-        c22v29:AddContextTag(c22v31:GetName())
+-        c22v34 = tostring
+-        c22v34 = c22v34(c22v31:GetTradeTax())
+-        c22v29:AddContextTag(c22v34)
+-        c22v34 = tostring
+-        c22v34 = c22v34(c22v31:GetGuildClass())
+-        c22v29:AddContextTag(c22v34)
+-        c22v33 = c22v31:Name__d6fc9179()
+-        __renovice_local_0 = -1
+-        if __renovice_local_0 < c22v33 then
+-          c22v35 = tostring
+-          c22v35 = c22v35(c22v33)
+-          c22v29:AddContextTag(c22v35)
+-        end
+-        __renovice_local_0 = c22v31:Name__397fa625()
+-        c22v34 = __renovice_local_0:IsValid()
+-        if c22v34 then
+-          c22v36 = __renovice_local_0.sec
+-          c22v29:AddContextTag(c22v36)
+-        end
++        c22v31 = gGameRules
++        c22v27:AddContextTag(c22v31:GetGuildId())
++        c22v31 = gGameRules
++        c22v27:AddContextTag(c22v31:GetGuildName())
++        c22v31 = _T.gPendingDuel.RoomId
++        c22v27:AddContextTag(c22v31)
+       else
+         if c22v19 then
+-          c22v34 = gGameRules
+-          c22v29:AddContextTag(c22v34:GetGuildId())
+-          c22v34 = gGameRules
+-          c22v29:AddContextTag(c22v34:GetGuildName())
+-          c22v34 = _T.gPendingDuel.RoomId
+-          c22v29:AddContextTag(c22v34)
++          c22v30 = _T.ActivatedObstacleCourse.RoomID
++          _G.obstacleCourseRoomID = c22v30
++          c22v32 = gGameRules
++          c22v27:AddContextTag(c22v32:GetGuildId())
++          c22v32 = gGameRules
++          c22v27:AddContextTag(c22v32:GetGuildName())
++          c22v32 = _T.ActivatedObstacleCourse.RoomID
++          c22v27:AddContextTag(c22v32)
++          c22v31 = _T.ActivatedObstacleCourse.courseMode
++          __renovice_local_1 = tostring
++          c22v33 = __renovice_local_1(c22v31)
++          c22v27:AddContextTag(c22v33)
++        end
++      end
++    end
++    __renovice_local_1 = c22v1.loadingScreenOverride
++    c22v30 = IsNull
++    c22v30 = c22v30(__renovice_local_1)
++    if not c22v30 then
++      c22v31 = c22v1.loadingScreenOverride
++      c22v27:SetLoadingLevel(c22v31:GetFullName())
++    end
++    if c22v3 then
++      c22v27.gameRules = c22v4
++    end
++    if (__renovice_local_4 ~= nil and not c22v17) then
++      __renovice_state_0 = 208
++      c22v30 = gGameRules
++      c22v31 = gLotusAttractModeGameRulesType
++      c22v30 = c22v30:IsA(c22v31)
++      if c22v30 then
++        __renovice_state_0 = 210
++      else
++        __renovice_state_0 = 209
++      end
++      if __renovice_state_0 == 209 then
++        c22v30 = gGameRules
++        c22v31 = gLotusHubGameRulesType
++        c22v30 = c22v30:IsA(c22v31)
++        if not c22v30 then
+         else
+-          if c22v20 then
+-            c22v33 = _T.ActivatedObstacleCourse.RoomID
+-            _G.obstacleCourseRoomID = c22v33
+-            c22v35 = gGameRules
+-            c22v29:AddContextTag(c22v35:GetGuildId())
+-            c22v35 = gGameRules
+-            c22v29:AddContextTag(c22v35:GetGuildName())
+-            c22v35 = _T.ActivatedObstacleCourse.RoomID
+-            c22v29:AddContextTag(c22v35)
+-            c22v34 = _T.ActivatedObstacleCourse.courseMode
+-            __renovice_local_0 = tostring
+-            c22v36 = __renovice_local_0(c22v34)
+-            c22v29:AddContextTag(c22v36)
+-          end
++          __renovice_state_0 = 210
+         end
+       end
+-      __renovice_local_0 = c22v1.loadingScreenOverride
+-      c22v33 = IsNull
+-      c22v33 = c22v33(__renovice_local_0)
+-      if not c22v33 then
+-        c22v34 = c22v1.loadingScreenOverride
+-        c22v29:SetLoadingLevel(c22v34:GetFullName())
+-      end
+-      if c22v3 then
+-        c22v29.gameRules = c22v4
+-      end
+-      if (c22v15 ~= nil and not c22v18) then
+-        local __renovice_state_4 = 208
+-        c22v33 = gGameRules
+-        c22v34 = gLotusAttractModeGameRulesType
+-        c22v33 = c22v33:IsA(c22v34)
+-        if c22v33 then
+-          __renovice_state_4 = 210
+-        else
+-          __renovice_state_4 = 209
+-        end
+-        if __renovice_state_4 == 209 then
+-          c22v33 = gGameRules
+-          c22v34 = gLotusHubGameRulesType
+-          c22v33 = c22v33:IsA(c22v34)
+-          if not c22v33 then
+-          else
+-            __renovice_state_4 = 210
+-          end
+-        end
+-        if __renovice_state_4 == 210 then
+-          c22v29.gameRules = c22v5
+-          c22v33 = true
+-          c22v29.loadToLobby = c22v33
+-          c22v33 = true
+-          c22v29.isLobby = c22v33
+-          c22v33 = v1
+-          c22v33 = c22v33.ApplyPostNewWarHubLevelArgs
+-          c22v35 = _T.gSelectedNodeName
+-          c22v36 = 1
+-          __renovice_for_1_0 = c22v15 - 1
+-          c22v34 = string.sub
+-          c22v34 = c22v34(c22v35, c22v36, __renovice_for_1_0)
+-          c22v33(c22v29, c22v34)
+-        end
+-      end
+-      __renovice_local_0 = c22v29.gameRules
+-      c22v33 = IsNull
+-      c22v33 = c22v33(__renovice_local_0)
+-      if c22v33 then
+-        c22v33 = c22v1.gameRules
+-        c22v29.gameRules = c22v33
+-      end
+-      c22v33 = v17
+-      if c22v2 == c22v33 then
+-        c22v33 = gGameData
+-        c22v33 = c22v33:GetInventory()
+-        c22v35 = 0
+-        __renovice_for_1_1 = 0
+-        __renovice_local_0 = c22v33:GetPreset(c22v35, c22v33:Name__9adc88cf(__renovice_for_1_1))
+-        c22v34 = __renovice_local_0:Copy()
+-        __renovice_for_1_0 = 0
+-        c22v35 = __renovice_local_0:GetEntry(__renovice_for_1_0)
+-        c22v36 = c22v35.mItemId
+-        c22v39 = 3
+-        __renovice_for_1_0 = __renovice_local_0:GetEntry(c22v39)
+-        __renovice_for_1_1 = __renovice_for_1_0.mItemId
+-        c22v39 = c22v33:GetSuits()
+-        c22v40 = c22v33:GetMelee()
+-        c22v43 = 1
+-        c22v41 = #c22v39
+-        c22v42 = 1
+-        for __renovice_for_8_0 = c22v43, c22v41, c22v42 do
+-          c22v44 = c22v39[__renovice_for_8_0]
+-          c22v45 = c22v44.mItemType
+-          c22v46 = v18
+-          if c22v45 ~= c22v46 then
+-            continue
+-          end
+-          c22v45 = c22v44.mItemId
+-          c22v45 = c22v45.mId
+-          c22v46 = c22v36.mId
+-          if c22v45 == c22v46 then
+-            continue
+-          end
+-          c22v45 = Lotus_Game.PresetEntry
+-          c22v45 = c22v45()
+-          c22v46 = c22v44.mItemId
+-          c22v45.mItemId = c22v46
+-          c22v48 = 0
+-          __renovice_local_0:SetEntry(c22v48, c22v45)
+-        end
+-        c22v43 = 1
+-        c22v41 = #c22v40
+-        c22v42 = 1
+-        if not ((c22v42 > 0 and c22v43 > c22v41) or (c22v42 < 0 and c22v43 < c22v41)) then
+-          c22v44 = c22v40[c22v43]
+-          c22v45 = c22v44.mItemType
+-          c22v46 = v19
+-          if c22v45 == c22v46 then break end
+-          if c22v45 == c22v46 then
+-            c22v45 = c22v44.mItemId
+-            c22v45 = c22v45.mId
+-            c22v46 = __renovice_for_1_1.mId
+-            if c22v45 ~= c22v46 then
+-              c22v45 = Lotus_Game.PresetEntry
+-              c22v45 = c22v45()
+-              c22v46 = c22v44.mItemId
+-              c22v45.mItemId = c22v46
+-              c22v48 = 3
+-              __renovice_local_0:SetEntry(c22v48, c22v45)
+-            end
+-          end
+-        end
+-        c22v43 = 0
+-        c22v45 = false
+-        c22v33:SetLoadoutPreset(c22v43, __renovice_local_0, c22v45)
+-        c22v41 = gGameData
+-        c22v43 = 0
+-        c22v45 = true
+-        c22v46 = false
+-        c22v47 = false
+-        c22v41:ApplyLoadOutPreset(c22v43, __renovice_local_0, c22v45, c22v46, c22v47)
+-        c22v43 = 0
+-        c22v45 = false
+-        c22v33:SetLoadoutPreset(c22v43, c22v34, c22v45)
+-      end
+-      c22v33 = false
+-      __renovice_local_0 = c22v1.missionType
+-      c22v34 = 10
+-      if __renovice_local_0 == c22v34 then
+-        c22v33 = not c22v19
+-        if c22v33 then
+-          c22v33 = not c22v17
+-        end
+-      end
+-      __renovice_local_0 = SetContextObjectsFromSquadLoadOuts
+-      c22v36 = c22v1.archwingRequired
+-      __renovice_local_0(c22v29, c22v33, c22v36, c22v1)
+-      __renovice_local_0 = AddMissionContextObjects
+-      c22v36 = nil
+-      __renovice_local_0(c22v29, c22v1, c22v36, c22v2)
+-      if c22v8 then
+-        do return end
+-      end
+-      __renovice_local_0 = c22v1.goalTag
+-      c22v34 = v1
+-      c22v34 = c22v34.KUVA_TOWER_GOAL_TAG
+-      if __renovice_local_0 == c22v34 then
+-        c22v34 = v13
+-        __renovice_local_0 = IsNull
+-        __renovice_local_0 = __renovice_local_0(c22v34)
+-        if not __renovice_local_0 then
+-          __renovice_local_0 = AddEnemiesToContextObjects
+-          c22v34 = v13
+-          c22v34 = c22v34:GetEnemies()
+-          __renovice_local_0(c22v34, c22v29)
+-        end
+-        c22v34 = v31
+-        __renovice_local_0 = IsNull
+-        __renovice_local_0 = __renovice_local_0(c22v34)
+-        if not __renovice_local_0 then
+-          c22v35 = v31
+-          c22v29:AddContextObject(c22v35)
+-        end
+-      end
+-      __renovice_local_0 = c22v1.voidStorm
+-      if __renovice_local_0 then
+-        c22v34 = v32
+-        __renovice_local_0 = IsNull
+-        __renovice_local_0 = __renovice_local_0(c22v34)
+-        if not __renovice_local_0 then
+-          c22v35 = v32
+-          c22v29:AddContextObject(c22v35)
+-        end
++      if __renovice_state_0 == 210 then
++        c22v27.gameRules = c22v5
++        c22v30 = true
++        c22v27.loadToLobby = c22v30
++        c22v30 = true
++        c22v27.isLobby = c22v30
++        c22v30 = v1
++        c22v30 = c22v30.ApplyPostNewWarHubLevelArgs
++        c22v32 = _T.gSelectedNodeName
++        c22v33 = 1
++        c22v48 = __renovice_local_4 - 1
++        c22v31 = string.sub
++        c22v31 = c22v31(c22v32, c22v33, c22v48)
++        c22v30(c22v27, c22v31)
++      end
++    end
++    __renovice_local_1 = c22v27.gameRules
++    c22v30 = IsNull
++    c22v30 = c22v30(__renovice_local_1)
++    if c22v30 then
++      c22v30 = c22v1.gameRules
++      c22v27.gameRules = c22v30
++    end
++    c22v30 = v17
++    c22v32 = c22v1.periodicMissionTag
++    c22v33 = v1
++    c22v33 = c22v33.ELITE_ALERT_PERIODIC_MISSION_TAG_ALT
++    c22v34 = v30
++    c22v27 = nil
++    c22v27:AddContextObject(c22v34)
++    c22v32 = IsHostElectionAllowed
++    c22v32 = c22v32(c22v1)
++    c22v32 = true
++    c22v27.chooseBestHost = c22v32
++    c22v32 = false
++    c22v27.chooseBestHost = c22v32
++    c22v32 = print
++    c22v33 = "ContextObjects:"
++    c22v32(c22v33)
++    c22v32 = c22v27.contextObjects
++    c22v35 = 1
++    c22v33 = #c22v32
++    c22v34 = 1
++    for __renovice_for_6_0 = c22v35, c22v33, c22v34 do
++      c22v37 = c22v32[__renovice_for_6_0]
++      c22v36 = IsNull
++      c22v36 = c22v36(c22v37)
++      if c22v36 then
++        c22v37 = false
++        c22v39 = "null context object at index "
++        c22v41 = "! Check for broken types referenced by mission info enemySpec etc"
++        c22v38 = c22v39 .. __renovice_for_6_0 .. c22v41
++        c22v36 = assert
++        c22v36(c22v37, c22v38)
++        continue
+       end
+-      __renovice_local_0 = IsNull
+-      __renovice_local_0 = __renovice_local_0(c22v23)
+-    end
+-    c22v29:AddLevelTag(c22v1:GetMissionTypeTag())
+-    __renovice_local_0 = v1
+-    __renovice_local_0 = __renovice_local_0.HasRelayReconstructionEnemy
+-    __renovice_local_0, c22v34 = __renovice_local_0(c22v1)
+-    if __renovice_local_0 then
+-      c22v35 = gGameConfig
+-      c22v35 = c22v35:GetRelayReconstructionEventInfo()
+-      c22v38 = c22v35.enhancement
+-      c22v29:AddContextObject(c22v38)
+-      c22v38 = c22v35.item
+-      c22v29:AddContextObject(c22v38)
+-      c22v38 = c22v35.enemyMarkerType
+-      c22v29:AddContextObject(c22v38)
+-      c22v38 = c22v35.enemySpawnTransmission
+-      c22v29:AddContextObject(c22v38)
+-    end
+-    if (c22v26 and not c22v11) then
+-      c22v37 = v24
+-      c22v29:AddContextObject(c22v37)
+-    end
+-    c22v35 = c22v1.periodicMissionTag
+-    c22v36 = v1
+-    c22v36 = c22v36.ELITE_ALERT_PERIODIC_MISSION_TAG
++      c22v36 = print
++      c22v38 = "    "
++      c22v40 = c22v32[__renovice_for_6_0]
++      c22v39 = tostring
++      c22v39 = c22v39(c22v40:GetFullName())
++      c22v37 = c22v38 .. c22v39
++      c22v36(c22v37)
++    end
++    c22v26 = nil
++    c22v27.loadFromLobby = c22v26
++    c22v16 = nil
++    c22v27.isAutonomous = c22v16
++    c22v33 = c22v1.gameRules
++    c22v32 = IsNull
++    c22v32 = c22v32(c22v33)
++    if not c22v32 then
++      c22v32 = c22v1.gameRules
++      c22v34 = gLotusAttractModeGameRulesType
++      c22v32 = c22v32:IsA(c22v34)
++      if c22v32 then
++        c22v32 = gGameConfig
++        c22v32 = c22v32:Name__5a6733e0()
++        c22v27.menuMovie = c22v32
++      end
++    end
++    c22v32 = print
++    c22v34 = "Lobby::Host_StartMatch: launching level for "
++    c22v35 = _T.gSelectedNodeName
++    c22v36 = " ("
++    __renovice_local_0 = nil
++    c22v37 = __renovice_local_0:GetFullName()
++    c22v38 = ")"
++    c22v33 = c22v34 .. c22v35 .. c22v36 .. c22v37 .. c22v38
++    c22v32(c22v33)
++    c22v32 = c22v1.missionType
++    c22v33 = 28
++    c22v22 = nil
++    __renovice_local_1 = c22v22:GetWorldState()
++    c22v31 = ipairs
++    c22v32 = __renovice_local_1.mGoals
++    c22v31, c22v32, c22v33 = c22v31(c22v32)
++    c22v45 = c22v31
++    c22v46 = c22v32
++    c22v47 = c22v33
++    c22v27:AddLevelTag(c22v1:GetMissionTypeTag())
++    __renovice_local_1 = v1
++    __renovice_local_1 = __renovice_local_1.HasRelayReconstructionEnemy
++    __renovice_local_1, c22v31 = __renovice_local_1(c22v1)
++    if __renovice_local_1 then
++      c22v32 = gGameConfig
++      c22v32 = c22v32:GetRelayReconstructionEventInfo()
++      c22v35 = c22v32.enhancement
++      c22v27:AddContextObject(c22v35)
++      c22v35 = c22v32.item
++      c22v27:AddContextObject(c22v35)
++      c22v35 = c22v32.enemyMarkerType
++      c22v27:AddContextObject(c22v35)
++      c22v35 = c22v32.enemySpawnTransmission
++      c22v27:AddContextObject(c22v35)
++    end
++    if (c22v25 and not c22v11) then
++      c22v34 = v24
++      c22v27:AddContextObject(c22v34)
++    end
++    c22v32 = c22v1.periodicMissionTag
++    c22v33 = v1
++    c22v33 = c22v33.ELITE_ALERT_PERIODIC_MISSION_TAG
+     if c22v11 then
+-      c22v36 = gGameRules
+-      c22v35 = IsNull
+-      c22v35 = c22v35(c22v36)
+-      if not c22v35 then
+-        c22v35 = gGameRules
+-        c22v37 = gLotusAttractModeGameRulesType
+-        c22v35 = c22v35:IsA(c22v37)
+-        if c22v35 then
+-          c22v35 = gGameRules
+-          c22v35 = c22v35:Name__736fe82d()
+-          c22v36 = 2
+-          if c22v35 == c22v36 then
+-            c22v35 = _G
+-            c22v36 = true
+-            c22v35.ApartmentToDuviriSpawn = c22v36
+-            do return c22v29 end
++      c22v33 = gGameRules
++      c22v32 = IsNull
++      c22v32 = c22v32(c22v33)
++      if not c22v32 then
++        c22v32 = gGameRules
++        c22v34 = gLotusAttractModeGameRulesType
++        c22v32 = c22v32:IsA(c22v34)
++        if c22v32 then
++          c22v32 = gGameRules
++          c22v32 = c22v32:Name__736fe82d()
++          c22v33 = 2
++          if c22v32 == c22v33 then
++            c22v32 = _G
++            c22v33 = true
++            c22v32.ApartmentToDuviriSpawn = c22v33
++            do return c22v27 end
+           end
+         end
+       end
+     end
+-    c22v35 = _G
+-    c22v36 = nil
+-    c22v35.ApartmentToDuviriSpawn = c22v36
+-    do return c22v29 end
++    c22v32 = _G
++    c22v33 = nil
++    c22v32.ApartmentToDuviriSpawn = c22v33
++    do return c22v27 end
+   end
+   GetMissionOpenLevelArgs = v64
+   v64 = function(c23v0, c23v1, c23v2, c23v3, c23v4, c23v5, c23v6)

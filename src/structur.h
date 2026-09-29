@@ -205,7 +205,15 @@ inline std::vector<Loop> find_loops(const Graph& g) {
         // the reachable region tree.  Including them made 36 otherwise complete ability loops look
         // ownerless and encouraged later layers to resurrect unreachable code.  Authoritative loop
         // bodies contain reachable CFG nodes only.
-        for (int x = L.header; x >= 0 && x <= loopblk && x < N; ++x)
+        // Numeric loops enter their body directly from FORNPREP, so `header` is the first body
+        // block. Generic loops enter through FORGLOOP itself; its taken successor is the first
+        // body block and normally appears *before* the FORGLOOP instruction in bytecode layout.
+        // Starting the generic interval at `header == loopblk` collapsed every generic body to the
+        // latch alone, leaving nested branches and loops ownerless in the CFG renderer.
+        const int body_first = prep_gen ? g.n[loopblk].succ_true : L.header;
+        const int interval_first = std::min(body_first, loopblk);
+        const int interval_last = std::max(body_first, loopblk);
+        for (int x = interval_first; x >= 0 && x <= interval_last && x < N; ++x)
             if (g.n[x].reach) L.body.insert(x);
         if (loopblk >= 0 && loopblk < N && g.n[loopblk].reach) L.body.insert(loopblk);
         if (L.header >= 0) out.push_back(std::move(L));

@@ -1,0 +1,7 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=8EAA9E0C4501600F8FC3A480FC9B893A020CF3477AD5BBC03D5D0C98A246204F
+CYCLE2 files=2 passed=0 failed=2 errors=0
+  DRIFT Lotus_Interface_LoadOutSelect.lua_B                     bytes=+4 stack_sum=+0 stack_max=+0 protos=+0 ops=0x40:+1
+  DRIFT Lotus_Interface_LotusUtilities.lua_B                    bytes=+8 stack_sum=+0 stack_max=+0 protos=+0 ops=0x18:-1,0x29:+2,0x4b:+1
+CYCLE3 files=1 passed=0 failed=1 errors=0
+  DRIFT Lotus_Interface_LoadOutSelect.lua_B                     bytes=+4 stack_sum=+0 stack_max=+0 protos=+0 ops=0x40:+1
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\private-tail-strict-v3.json

@@ -31,13 +31,8 @@ import align  # reuses its skeleton extraction, normalisation and corpus guard
 
 
 def norm(lines):
-    """Same normalisation align.one() uses: drop BRANCH lines, collapse CLOSURE targets."""
-    out = []
-    for ln in lines:
-        if "\t" not in ln or ln.startswith("BRANCH\t"):
-            continue
-        out.append("CLOSURE" if ln.startswith("CLOSURE\t") else ln)
-    return out
+    """Use align's single access normalization, including fused GETIMPORT paths."""
+    return align.norm(lines)
 
 
 def one(f):
@@ -53,7 +48,7 @@ def one(f):
     a = align.skeleton(f, reachable=True)
     if a is None:
         return (f, {"ERROR"}, "decompile-fail")
-    src = align.run([align.DEC, "decompile-mod", f])
+    src = align.run([align.DEC, align.DECOMPILE_MODE, f])
     if src.returncode != 0:
         return (f, {"ERROR"}, "decompile-fail")
     fd, sp = tempfile.mkstemp(suffix=".luau"); os.close(fd)

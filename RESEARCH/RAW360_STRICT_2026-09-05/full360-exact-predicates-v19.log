@@ -1,0 +1,18 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=CAF261034B13BDF58ED3AC23E4BFA9D7125FFA7180336918A569E95CC612E495
+CYCLE2 files=360 passed=346 failed=14 errors=0
+  DRIFT Lotus_Interface_1999_RetroMessenger.lua_B               bytes=+16 stack_sum=+3 stack_max=+0 protos=+0 ops=0x0d:+3,0x40:+1
+  DRIFT Lotus_Interface_CardUtilitiesRedux.lua_B                bytes=+4 stack_sum=+1 stack_max=+0 protos=+0 ops=0x0d:+1
+  DRIFT Lotus_Interface_Clan.lua_B                              bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_ColorPicker.lua_B                       bytes=+4 stack_sum=+2 stack_max=+0 protos=+0 ops=0x0d:+1
+  DRIFT Lotus_Interface_DecoTemplate.lua_B                      bytes=+16 stack_sum=+3 stack_max=+0 protos=+0 ops=0x0d:+3,0x40:+1
+  DRIFT Lotus_Interface_DiegeticFoundry.lua_B                   bytes=+20 stack_sum=+3 stack_max=+0 protos=+0 ops=0x0d:+3,0x40:+2
+  DRIFT Lotus_Interface_EidolonJobBoard.lua_B                   bytes=+12 stack_sum=+2 stack_max=+0 protos=+0 ops=0x0d:+2,0x40:+1
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=+1556 stack_sum=+2 stack_max=+2 protos=+0 ops=0x0d:+2,0x12:+106,0x18:-4,0x1c:-1,0x20:+71,0x21:+1,0x23:+4,0x27:+1,0x33:-4,0x37:-1,0x38:+1,0x40:+22,0x49:-1,0x4b:+4
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+36 stack_sum=+4 stack_max=+0 protos=+0 ops=0x04:+2,0x0b:+1,0x0d:+4,0x14:+3,0x18:+1,0x1e:+1,0x27:-1,0x29:+1,0x40:-1,0x4b:-2
+  DRIFT Lotus_Interface_Libs_PreviewLinkUtilities.lua_B         bytes=+4 stack_sum=+1 stack_max=+0 protos=+0 ops=0x0d:+1
+  DRIFT Lotus_Interface_LoadOutRedux.lua_B                      bytes=+8 stack_sum=+2 stack_max=+1 protos=+0 ops=0x0d:+2
+  DRIFT Lotus_Interface_LotusUtilities.lua_B                    bytes=+4 stack_sum=+1 stack_max=+0 protos=+0 ops=0x0d:+1,0x27:-1,0x29:+1,0x37:+1,0x40:-1
+  DRIFT Lotus_Interface_MapRedux.lua_B                          bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_Minigames_NarmerHack.lua_B              bytes=+8 stack_sum=+0 stack_max=+0 protos=+0 ops=0x50:+2
+CYCLE10 files=5 passed=5 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\full360-exact-predicates-v19.json

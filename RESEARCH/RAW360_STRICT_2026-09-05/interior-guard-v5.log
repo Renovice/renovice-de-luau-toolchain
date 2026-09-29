@@ -1,0 +1,11 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=40DF9D5BA4F450D2F25553E68771A1DB1B1B251F2BFC217B56E0FDA2998E4B75
+CYCLE2 files=7 passed=1 failed=6 errors=0
+  DRIFT Lotus_Interface_CardUtilitiesRedux.lua_B                bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_Components_AbilityList.lua_B            bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_Components_AvatarDiorama.lua_B          bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_Components_ThemedCustomizationButton.lua_B bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_Libs_PreviewLinkUtilities.lua_B         bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_LotusUtilities.lua_B                    bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=0x18:-1,0x4b:+1
+CYCLE3 files=1 passed=0 failed=1 errors=0
+  DRIFT Lotus_Interface_LotusUtilities.lua_B                    bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=0x18:-1,0x4b:+1
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\interior-guard-v5.json

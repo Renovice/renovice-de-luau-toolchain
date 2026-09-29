@@ -1,0 +1,47 @@
+{
+  "binary_sha256": "1E8DE25C0689BA64E2D4184A32BEAD1E767418385DD51D7426F3DCAA55B196A8",
+  "corpus": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\shared\\corpus\\de-luau-stock",
+  "cycle10": [
+    {
+      "cycles_requested": 10,
+      "error": "cycle 4 recompile failed (1): [derecomp] luau compile failed: C:/Users/Bartek/AppData/Local/Temp/renovice-idempotence-lka3_j3x/04.luau(714,29138): SyntaxError: Exceeded allowed recursion depth; simplify your expression to make the code compile",
+      "file": "EE_Types_ScriptCommands_JSON.lua_B",
+      "passed": false
+    }
+  ],
+  "cycle10_summary": {
+    "byte_delta_total": 0,
+    "errors": 1,
+    "files": 1,
+    "maxstack_sum_delta_total": 0,
+    "opcode_delta_total": {},
+    "passed": 0,
+    "proto_delta_total": 0
+  },
+  "cycle2": [],
+  "cycle2_summary": {
+    "byte_delta_total": 0,
+    "errors": 0,
+    "files": 0,
+    "maxstack_sum_delta_total": 0,
+    "opcode_delta_total": {},
+    "passed": 0,
+    "proto_delta_total": 0
+  },
+  "environment": {
+    "RENOVICE_LIVERANGE": null,
+    "RENOVICE_NATIVE": "JUMPXEQKN,JUMPXEQKS,JUMPXEQKB,JUMPBACK,AND,OR,ANDK,ORK,SUBK,FORGPREP",
+    "RENOVICE_NATIVE_GLOBALS": "1",
+    "RENOVICE_NO_BOOLEAN_JOIN_RETURN": null,
+    "RENOVICE_NO_CALLCOALESCE": null,
+    "RENOVICE_NO_CANONICAL_FLAT_NAMES": null,
+    "RENOVICE_NO_DIRECT_SELECTOR": null,
+    "RENOVICE_NO_FORCOALESCE": null,
+    "RENOVICE_NO_PREDICATE_NNF": null,
+    "RENOVICE_NO_PROLOGUE_NIL": null,
+    "RENOVICE_NO_TERMINAL_GUARD": null
+  },
+  "long_cycle_depth": 10,
+  "passed": false,
+  "schema_version": 1
+}

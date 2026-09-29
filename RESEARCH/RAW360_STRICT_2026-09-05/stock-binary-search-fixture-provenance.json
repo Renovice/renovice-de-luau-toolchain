@@ -1,0 +1,10 @@
+{
+  "source": "RESEARCH/RAW360_STRICT_2026-09-05/artifacts/private-tail-v3/cycle2/Lotus_Interface_LotusUtilities.lua_B/01.luau",
+  "source_sha256": "7DEFF6FA7D4C51E791648E43A0D560839A5F07730B281FA1DEF517010544BC55",
+  "first_line": 8594,
+  "last_line": 8747,
+  "fixture": "RESEARCH/RAW360_STRICT_2026-09-05/tools/stock_binary_search_fixture.luau",
+  "fixture_sha256": "A2398BF23B3EEE2209286DAF2C5C75822597886AD330FB3710BA723C45B0078E",
+  "expected_cases": 12,
+  "expected_assertions": 36
+}

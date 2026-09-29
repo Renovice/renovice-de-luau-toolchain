@@ -1,0 +1,18 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=1E67FDC2244DC664BCFA5B93553B46F75358A5F965267FD80E8844A1A55C44C3
+CYCLE2 files=14 passed=0 failed=14 errors=0
+  DRIFT Lotus_Interface_1999_RetroMessenger.lua_B               bytes=+16 stack_sum=+3 stack_max=+0 protos=+0 ops=0x0d:+3,0x40:+1
+  DRIFT Lotus_Interface_CardUtilitiesRedux.lua_B                bytes=+4 stack_sum=+1 stack_max=+0 protos=+0 ops=0x0d:+1
+  DRIFT Lotus_Interface_Clan.lua_B                              bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_ColorPicker.lua_B                       bytes=+4 stack_sum=+2 stack_max=+0 protos=+0 ops=0x0d:+1
+  DRIFT Lotus_Interface_DecoTemplate.lua_B                      bytes=+16 stack_sum=+3 stack_max=+0 protos=+0 ops=0x0d:+3,0x40:+1
+  DRIFT Lotus_Interface_DiegeticFoundry.lua_B                   bytes=+20 stack_sum=+3 stack_max=+0 protos=+0 ops=0x0d:+3,0x40:+2
+  DRIFT Lotus_Interface_EidolonJobBoard.lua_B                   bytes=+12 stack_sum=+2 stack_max=+0 protos=+0 ops=0x0d:+2,0x40:+1
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=-12 stack_sum=+0 stack_max=+0 protos=+0 ops=0x40:-3
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+4 stack_sum=+0 stack_max=+0 protos=+0 ops=0x04:+2,0x40:-1
+  DRIFT Lotus_Interface_Libs_PreviewLinkUtilities.lua_B         bytes=+4 stack_sum=+1 stack_max=+0 protos=+0 ops=0x0d:+1
+  DRIFT Lotus_Interface_LoadOutRedux.lua_B                      bytes=+8 stack_sum=+2 stack_max=+1 protos=+0 ops=0x0d:+2
+  DRIFT Lotus_Interface_LotusUtilities.lua_B                    bytes=+4 stack_sum=+1 stack_max=+0 protos=+0 ops=0x0d:+1,0x27:-1,0x29:+1,0x37:+1,0x40:-1
+  DRIFT Lotus_Interface_MapRedux.lua_B                          bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_Minigames_NarmerHack.lua_B              bytes=+8 stack_sum=+0 stack_max=+0 protos=+0 ops=0x50:+2
+CYCLE2 files=1 passed=1 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\focused-exact-loop-joins-v20.json

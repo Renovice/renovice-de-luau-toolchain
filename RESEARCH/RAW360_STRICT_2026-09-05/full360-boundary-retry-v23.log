@@ -1,0 +1,10 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=A358FE1DBAC3E852FA08FF46C6909BD4467EEE525DDC283C287EE0F58632E140
+CYCLE2 files=360 passed=354 failed=6 errors=0
+  DRIFT Lotus_Interface_Components_AvatarDiorama.lua_B          bytes=-4 stack_sum=+0 stack_max=+0 protos=+0 ops=0x40:-1
+  DRIFT Lotus_Interface_EidolonJobBoard.lua_B                   bytes=+12 stack_sum=+2 stack_max=+0 protos=+0 ops=0x0d:+2,0x40:+1
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+4 stack_sum=+0 stack_max=+0 protos=+0 ops=0x04:+2,0x40:-1
+  DRIFT Lotus_Interface_LotusUtilities.lua_B                    bytes=+8 stack_sum=+0 stack_max=+0 protos=+0 ops=0x04:+1,0x18:-1,0x27:-1,0x29:+2,0x37:+1,0x40:-1,0x4b:+1
+  DRIFT Lotus_Interface_MapRedux.lua_B                          bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+CYCLE10 files=5 passed=5 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\full360-boundary-retry-v23.json

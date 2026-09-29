@@ -89,6 +89,17 @@ struct AuthoritativeLoop {
     std::set<Exit> exits;
 };
 
+// Numeric-for source form whose body has no reachable FORNLOOP because every
+// body path terminates or leaves through the range-exhausted continuation.
+// This is distinct from a natural loop: the compiler has removed the latch,
+// but FORNPREP and the manifest's closed region still prove the source owner.
+struct TerminalNumericFor {
+    BlockId prep;
+    BlockId body;
+    BlockId exit;
+    std::set<BlockId> region_blocks;
+};
+
 struct ValueOriginContract {
     int kind = 0; // 0 parameter, 1 entry register, 2 instruction definition
     int instruction = -1;
@@ -841,6 +852,7 @@ struct Model {
     std::vector<EffectId> authoritative_effect_order;
     std::vector<EffectId> semantic_effect_order;
     std::map<LoopId, AuthoritativeLoop> authoritative_loops;
+    std::map<BlockId, TerminalNumericFor> authoritative_terminal_numeric_fors;
     std::set<Edge> cfg_edges;
     std::set<PrototypeId> authoritative_prototypes;
     int authoritative_upvalue_count = 0;

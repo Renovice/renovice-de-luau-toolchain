@@ -217,6 +217,19 @@ inline std::string to_json(const Model& model) {
         out << ",\"latches\":"; json_ids(out, loop.latches);
         out << ",\"exits\":"; json_exits(out, loop.exits); out << '}';
     }
+    out << "],\"terminal_numeric_fors\":[";
+    bool first_terminal_for = true;
+    for (const auto& pair : model.authoritative_terminal_numeric_fors) {
+        if (!first_terminal_for) out << ',';
+        first_terminal_for = false;
+        const TerminalNumericFor& terminal = pair.second;
+        out << "{\"prep\":" << terminal.prep.value
+            << ",\"body\":" << terminal.body.value
+            << ",\"exit\":" << terminal.exit.value
+            << ",\"region_blocks\":";
+        json_ids(out, terminal.region_blocks);
+        out << '}';
+    }
     out << "],\"cfg_edges\":"; json_edges(out, model.cfg_edges);
     out << ",\"calls\":[";
     size_t call_index = 0;

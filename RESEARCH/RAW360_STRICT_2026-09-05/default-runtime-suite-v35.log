@@ -1,0 +1,20 @@
+PASS: 9 runtime assertions on source and each of two decompiled cycles (27 total).
+PASS: 24 runtime assertions on source and each of two decompiled cycles (72 total).
+PASS: 36 runtime assertions on source and each of two decompiled cycles (108 total).
+PASS: 56 runtime assertions on source and each of two decompiled cycles (168 total).
+PASS: 24 runtime assertions on source and each of two decompiled cycles (72 total).
+PASS: 33 runtime assertions on source and each of two decompiled cycles (99 total).
+PASS: 29 runtime assertions on source and each of two decompiled cycles (87 total).
+PASS: 16 runtime assertions on source and each of two decompiled cycles (48 total).
+PASS: 4 runtime assertions on source and each of two decompiled cycles (12 total).
+PASS: 29 runtime assertions on source and each of two decompiled cycles (87 total).
+PASS: 15 runtime assertions on source and each of two decompiled cycles (45 total).
+PASS: 12 runtime assertions on source and each of two decompiled cycles (36 total).
+PASS: 32 runtime assertions on source and each of two decompiled cycles (96 total).
+PASS: 121 runtime assertions on source and each of two decompiled cycles (363 total).
+PASS: 517 runtime assertions on source and each of two decompiled cycles (1551 total).
+PASS: 66 runtime assertions on source and each of two decompiled cycles (198 total).
+PASS: 8 runtime assertions on source and each of two decompiled cycles (24 total).
+PASS: 24 runtime assertions on source and each of two decompiled cycles (72 total).
+PASS: 16 runtime assertions on source and each of two decompiled cycles (48 total).
+SUITE PASS: 19 fixtures, 3213 case assertions across source and two recovered cycles.

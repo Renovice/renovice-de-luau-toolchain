@@ -1,0 +1,12 @@
+protos=59->59 shared=59
+pidx=21 code_bytes=10620->10592 (-28) instructions=2059->2059 (+0) maxstack=64->66 header=0 constants=350->350 equal=0 post=1 ops=0x0a:-1,0x0b:-1,0x0d:+9,0x14:+1,0x1c:-2,0x1e:-1,0x21:-2,0x27:-1,0x37:-1,0x47:-1
+pidx=22 code_bytes=136->136 (+0) instructions=30->30 (+0) maxstack=20->20 header=1 constants=6->6 equal=0 post=1 ops=none
+pidx=28 code_bytes=4680->4680 (+0) instructions=898->898 (+0) maxstack=40->40 header=1 constants=191->191 equal=0 post=1 ops=none
+pidx=39 code_bytes=3016->3016 (+0) instructions=570->570 (+0) maxstack=16->16 header=1 constants=162->162 equal=0 post=1 ops=none
+pidx=40 code_bytes=148->148 (+0) instructions=31->31 (+0) maxstack=5->5 header=1 constants=10->10 equal=0 post=1 ops=none
+pidx=42 code_bytes=1564->1564 (+0) instructions=295->295 (+0) maxstack=15->15 header=1 constants=83->83 equal=0 post=1 ops=none
+pidx=50 code_bytes=8824->8824 (+0) instructions=1697->1697 (+0) maxstack=37->37 header=1 constants=382->382 equal=0 post=1 ops=none
+pidx=52 code_bytes=860->860 (+0) instructions=161->161 (+0) maxstack=14->14 header=1 constants=50->50 equal=0 post=1 ops=none
+pidx=55 code_bytes=308->308 (+0) instructions=60->60 (+0) maxstack=16->16 header=1 constants=21->21 equal=0 post=1 ops=none
+pidx=56 code_bytes=1104->1104 (+0) instructions=211->211 (+0) maxstack=19->19 header=1 constants=53->53 equal=0 post=1 ops=none
+pidx=58 code_bytes=4536->4536 (+0) instructions=941->941 (+0) maxstack=75->75 header=1 constants=182->182 equal=0 post=1 ops=none

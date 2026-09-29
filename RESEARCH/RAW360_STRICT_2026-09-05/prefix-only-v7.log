@@ -1,0 +1,8 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=431984DD9009B823953F7BA3EDBBD5C2CA1BE889BA31D6E948DFB6014C5436F0
+CYCLE2 files=5 passed=1 failed=4 errors=0
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=+357 stack_sum=+6 stack_max=+4 protos=+0 ops=0x0b:+1,0x0d:+4,0x12:+38,0x14:+3,0x1e:+1,0x20:+19,0x27:+2,0x29:+1,0x33:-2,0x37:-3,0x38:+3,0x39:+1,0x3a:-1,0x40:+6,0x49:-3,0x4b:-1
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+530 stack_sum=+5 stack_max=+0 protos=+0 ops=0x04:+2,0x0b:+1,0x0d:+6,0x12:+34,0x14:+3,0x1e:+1,0x20:+21,0x27:-1,0x29:+1,0x40:+6,0x4b:-1
+  DRIFT Lotus_Interface_LoadOutRedux.lua_B                      bytes=+294 stack_sum=+3 stack_max=+0 protos=+0 ops=0x0d:+2,0x12:+24,0x18:+4,0x1c:-6,0x20:+14,0x21:-6,0x23:+6,0x27:-1,0x33:+6,0x37:+1,0x40:+6,0x4b:-4
+  DRIFT Lotus_Interface_MapRedux.lua_B                          bytes=+1527 stack_sum=+4 stack_max=+3 protos=+0 ops=0x09:-4,0x0a:-2,0x0b:+1,0x0d:+9,0x12:+100,0x14:+3,0x18:-4,0x1e:+1,0x20:+60,0x22:+4,0x27:-7,0x33:+2,0x37:+7,0x3a:-1,0x40:+25,0x47:-2,0x4b:+1,0x4e:+3
+CYCLE10 files=5 passed=5 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\prefix-only-v7.json

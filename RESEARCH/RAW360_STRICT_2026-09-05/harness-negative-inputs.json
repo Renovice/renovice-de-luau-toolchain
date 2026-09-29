@@ -1,0 +1,35 @@
+[
+  {
+    "arguments": [
+      "--two-file",
+      "EE_Interface_Utilities.lua_B",
+      "--two-file",
+      "EE_Interface_Utilities.lua_B"
+    ],
+    "exit": 2,
+    "diagnostic": "FATAL: duplicate two-cycle input names"
+  },
+  {
+    "arguments": [
+      "0"
+    ],
+    "exit": 2,
+    "diagnostic": "FATAL: corpus size and worker count must be positive"
+  },
+  {
+    "arguments": [
+      "--workers",
+      "0"
+    ],
+    "exit": 2,
+    "diagnostic": "FATAL: corpus size and worker count must be positive"
+  },
+  {
+    "arguments": [
+      "1"
+    ],
+    "environment": "RENOVICE_COMPILER_CANONICALIZE=1",
+    "exit": 2,
+    "diagnostic": "FATAL: raw mode cannot inherit RENOVICE_COMPILER_CANONICALIZE"
+  }
+]

@@ -853,8 +853,71 @@ static sem::Manifest build_manifest(const ir::IProto& ip, int prototype) {
         }
         manifest.loops[loop.header] = std::move(value);
     }
+    auto terminal_numeric_for = [&](int key, int region, sem::TerminalForPlan& value) {
+        auto reject = [&](const char* reason) {
+            if (std::getenv("RENOVICE_SEMANTIC_PLAN_TERMINAL_TRACE"))
+                std::fprintf(stderr,
+                    "TERMINAL_FOR_REJECT proto=%d key=%d region=%d reason=%s\n",
+                    prototype, key, region, reason);
+            return false;
+        };
+        if (!manifest.reducible || key < 0 || key >= (int)graph.n.size()
+            || region < 0 || region >= (int)analyzer.regions.size())
+            return reject("INVALID_INPUT_OR_IRREDUCIBLE");
+        const std::set<int> blocks = region_block_set(analyzer, region);
+        if (!blocks.count(key)) return reject("KEY_OUTSIDE_REGION");
+
+        int prep = -1;
+        for (int block : blocks) {
+            if (block < 0 || block >= (int)graph.n.size())
+                return reject("REGION_BLOCK_OUT_OF_RANGE");
+            const int last = graph.n[block].last;
+            if (last < 0 || last >= (int)ip.code.size() || ip.code[last].op != 0x47)
+                continue;
+            // Numeric FORNPREP falls through to the body and takes its branch when the range is
+            // empty. A terminal fragment has exactly one such prep, headed by the winning region.
+            if (graph.n[block].succ_false != key || prep >= 0)
+                return reject("FORNPREP_IDENTITY_AMBIGUOUS");
+            prep = block;
+        }
+        if (prep < 0) return reject("FORNPREP_MISSING");
+        if (planned.head_block(region) != prep) return reject("FORNPREP_NOT_REGION_HEAD");
+        const int exit = graph.n[prep].succ_true;
+        if (exit < 0 || blocks.count(exit)) return reject("RANGE_EXIT_NOT_EXTERNAL");
+
+        // A real natural loop must use LoopPlan. Test exact loop identity here: an unrelated
+        // enclosing dispatcher loop legitimately contains the terminal for's prep/body blocks.
+        // Body-set membership alone therefore cannot prove ownership. A discovered loop owns this
+        // source for only when it has the same prep or header. The closed-region test below still
+        // forbids any hidden edge back to the terminal prep/body entry.
+        for (const st::Loop& loop : loops)
+            if (loop.prep == prep || loop.header == key)
+                return reject("PREP_OR_BODY_OWNED_BY_NATURAL_LOOP");
+        for (int block : blocks) {
+            if (block == prep) continue;
+            for (int target : {graph.n[block].succ_true, graph.n[block].succ_false}) {
+                if (target == prep || target == key)
+                    return reject("HIDDEN_TERMINAL_FOR_RECURRENCE");
+                if (target >= 0 && !blocks.count(target) && target != exit)
+                    return reject("NON_RANGE_EXTERNAL_ESCAPE");
+            }
+        }
+
+        value.key = key;
+        value.prep = prep;
+        value.body = key;
+        value.exit = exit;
+        value.region = region;
+        value.region_blocks = blocks;
+        return true;
+    };
     for (const auto& winner : planned.plan_winner) {
         if (consumed_winner_keys.count(winner.first)) continue;
+        sem::TerminalForPlan terminal;
+        if (terminal_numeric_for(winner.first, winner.second, terminal)) {
+            manifest.terminal_fors[winner.first] = std::move(terminal);
+            continue;
+        }
         manifest.extra_loop_winners[winner.first] = winner.second;
         auto provenance = planned.plan_key_loops.find(winner.first);
         const std::string code = provenance == planned.plan_key_loops.end()
@@ -939,6 +1002,17 @@ static sem::Manifest build_manifest(const ir::IProto& ip, int prototype) {
                 manifest.loops[inner.header].shared_region_descendants.insert(outer.header);
                 continue;
             }
+            // A source `for` can lexically contain a dispatcher-style `while true`
+            // whose natural-loop parent chain does not cross the FORGLOOP header:
+            // the for iteration enters the while, while the while's backedge closes
+            // only over its own header.  Full natural-body containment plus header
+            // dominance is the direct CFG proof of that relationship.  Requiring
+            // both keeps partially overlapping cycles fail-closed.
+            if (inner_contains_outer
+                && st::dominates(graph, inner.header, outer.header)) {
+                manifest.loops[inner.header].shared_region_descendants.insert(outer.header);
+                continue;
+            }
             if (overlap == 0) {
                 manifest.loops[outer.header].shared_region_peers.insert(inner.header);
                 manifest.loops[inner.header].shared_region_peers.insert(outer.header);
@@ -1000,6 +1074,12 @@ static void print_manifest(const sem::Manifest& manifest) {
                     value.shared_region_descendants.size(),
                     value.shared_region_peers.size(),
                     value.planned_region_blocks.size());
+    }
+    for (const auto& item : manifest.terminal_fors) {
+        const sem::TerminalForPlan& value = item.second;
+        std::printf("TERMINAL_FOR key=%d prep=%d body=%d exit=%d region=%d blocks=%zu\n",
+                    value.key, value.prep, value.body, value.exit, value.region,
+                    value.region_blocks.size());
     }
     for (const sem::Failure& failure : manifest.failures)
         std::printf("FAIL %s %s\n", failure.code.c_str(), failure.detail.c_str());
@@ -1074,6 +1154,7 @@ static int cmd_plan_verify_corpus(int argc, char** argv) {
     std::sort(files.begin(), files.end());
     long long prototypes = 0, manifest_ok = 0, failed = 0, annotate_failed = 0;
     long long blocks = 0, edges = 0, predicates = 0, effects = 0, loops = 0;
+    long long terminal_for_fragments = 0;
     std::map<std::string, long long> categories;
     std::map<std::string, long long> files_by_category;
     std::vector<std::string> examples;
@@ -1100,6 +1181,7 @@ static int cmd_plan_verify_corpus(int argc, char** argv) {
             predicates += (long long)manifest.predicates.size();
             effects += (long long)manifest.effects.size();
             loops += (long long)manifest.loops.size();
+            terminal_for_fragments += (long long)manifest.terminal_fors.size();
             if (manifest.ok()) ++manifest_ok;
             else {
                 ++failed;
@@ -1120,6 +1202,7 @@ static int cmd_plan_verify_corpus(int argc, char** argv) {
                 files.size(), prototypes, manifest_ok, failed, annotate_failed);
     std::printf("reachable_blocks=%lld edges=%lld predicates=%lld obvious_effects=%lld loops=%lld\n",
                 blocks, edges, predicates, effects, loops);
+    std::printf("terminal_for_fragments=%lld\n", terminal_for_fragments);
     for (const auto& category : categories)
         std::printf("FAILURE %-28s occurrences=%lld files=%lld\n", category.first.c_str(),
                     category.second, files_by_category[category.first]);
@@ -1139,6 +1222,7 @@ static int cmd_plan_verify_corpus(int argc, char** argv) {
              << "  \"predicates\": " << predicates << ",\n"
              << "  \"obvious_effects\": " << effects << ",\n"
              << "  \"loops\": " << loops << ",\n"
+             << "  \"terminal_for_fragments\": " << terminal_for_fragments << ",\n"
              << "  \"failure_categories\": {";
         bool first = true;
         for (const auto& category : categories) {

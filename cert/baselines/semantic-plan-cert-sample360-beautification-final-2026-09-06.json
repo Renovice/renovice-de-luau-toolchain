@@ -1,0 +1,17 @@
+{
+  "scope": "abilities",
+  "directory": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\shared\\corpus\\de-luau-stock",
+  "files": 286,
+  "prototypes": 6035,
+  "manifest_ok": 6035,
+  "render_semantics_verified": false,
+  "failed": 0,
+  "reachable_blocks": 84237,
+  "edges": 129930,
+  "predicates": 45707,
+  "obvious_effects": 149925,
+  "loops": 3400,
+  "terminal_for_fragments": 0,
+  "failure_categories": {  },
+  "examples": [  ]
+}

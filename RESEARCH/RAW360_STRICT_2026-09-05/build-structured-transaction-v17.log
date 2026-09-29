@@ -1,0 +1,14 @@
+TRANSCODE_GLOBAL_SELFTEST PASS native_get=0x17 native_set=0x02 cache_slots=37,91 synthetic_cache_255=0 shared_import_field_string=1 dynamic_T_import_strings=1 library_import_hashes=1 hashed_global_metadata=1 hashed_field_metadata=1 dual_global_field_remap=1
+PASS NEWCLOSURE valid child index accepted
+PASS NEWCLOSURE labels child index and resolved global prototype separately
+PASS NEWCLOSURE out-of-range child index fails closed
+PASS NEWCLOSURE out-of-range diagnostic preserves operand and child count
+PASS DUPCLOSURE valid closure constant accepted
+PASS DUPCLOSURE labels constant index and resolved global prototype separately
+PASS DUPCLOSURE wrong constant type fails closed
+CLOSURE INDEX SELFTEST PASS checks=7 failures=0
+SEMANTIC_IR_SELFTEST assertions=140 passed=140 failed=0
+SEMANTIC_IR_LOWERING_SELFTEST assertions=22 passed=22 failed=0 runtime_exit=0
+SEMANTIC_IR_READABLE_SELFTEST assertions=10 passed=10 failed=0
+CLOSURE_MAP PASS protos=5 sites=4 captures=0 failures=0 output=cert\closure-map-smoke.tsv
+BUILD OK -> bin\derecomp.exe

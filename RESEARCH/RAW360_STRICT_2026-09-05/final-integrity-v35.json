@@ -1,0 +1,38 @@
+[
+  {
+    "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\bin\\derecomp.exe",
+    "expected_sha256": "40BC733B43E366A7E65CFB40BDFD13D3F71B268C65F3841155B593D3F3DBA5D3",
+    "current_sha256": "40BC733B43E366A7E65CFB40BDFD13D3F71B268C65F3841155B593D3F3DBA5D3",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\bin\\luau-compile.exe",
+    "expected_sha256": "6156A05D9CAF9FA84E58BAECA79A244F47D86B8982F5425F2CA3E23B976ED2A4",
+    "current_sha256": "6156A05D9CAF9FA84E58BAECA79A244F47D86B8982F5425F2CA3E23B976ED2A4",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\bin\\luau.exe",
+    "expected_sha256": "A0F4EDD1E80EF7D7AFD223C061E1F3B753398152CB732ABF57328A93B375053E",
+    "current_sha256": "A0F4EDD1E80EF7D7AFD223C061E1F3B753398152CB732ABF57328A93B375053E",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\src\\emit.h",
+    "expected_sha256": "D0E82F1CFEAFA838E440376A9A88A0813D5021F51B6131BD1A5C4D6BE771D25D",
+    "current_sha256": "D0E82F1CFEAFA838E440376A9A88A0813D5021F51B6131BD1A5C4D6BE771D25D",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\src\\main.cpp",
+    "expected_sha256": "30C4C2117BC46CB6CBB5073B2BA5E99A768EEB2115F2689C39DA59E994DCE646",
+    "current_sha256": "30C4C2117BC46CB6CBB5073B2BA5E99A768EEB2115F2689C39DA59E994DCE646",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\cert\\idempotence.py",
+    "expected_sha256": "D849E0ED5E3A5C8819588BFFCAA5EE697D46FF0E68D07C85A044AE9B0B9DE9F1",
+    "current_sha256": "D849E0ED5E3A5C8819588BFFCAA5EE697D46FF0E68D07C85A044AE9B0B9DE9F1",
+    "unchanged": true
+  }
+]

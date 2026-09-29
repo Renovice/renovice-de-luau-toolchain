@@ -14,7 +14,7 @@ enum class Invariant {
     ExitCoverage, PrototypeCapture, ScopeLifetime, LocalLifetime, ValueWeb,
     ExpressionSemantics, StatementSelection, CallArity,
     ReturnSemantics, TableSemantics, StoreSemantics, PredicateSemantics,
-    EvaluationOrder, RenderOwnership
+    EvaluationOrder, RenderOwnership, TerminalNumericFor
 };
 
 struct Issue { Invariant invariant; std::string code; std::string detail; };
@@ -87,6 +87,63 @@ inline Verification verify(const Model& model) {
     }
     if (!forest_ok) issue(out, Invariant::LoopForest, "SIR_LOOP_FOREST",
                           "semantic loop forest/body/latches differ from authoritative facts");
+
+    // A terminal numeric-for has no natural backedge, so validate its complete
+    // source ownership contract directly: one FORNPREP, exact body/exit arms,
+    // a closed reachable region, and no hidden recurrence.
+    bool terminal_fors_ok = true;
+    std::set<BlockId> terminal_region_owners;
+    for (const auto& item : model.authoritative_terminal_numeric_fors) {
+        const TerminalNumericFor& terminal = item.second;
+        if (item.first != terminal.prep || !terminal.prep.valid()
+            || !terminal.body.valid() || !terminal.exit.valid()
+            || !terminal.region_blocks.count(terminal.prep)
+            || !terminal.region_blocks.count(terminal.body)
+            || terminal.region_blocks.count(terminal.exit))
+            terminal_fors_ok = false;
+        for (const auto& loop : model.authoritative_loops)
+            if (loop.second.body.count(terminal.prep)
+                || loop.second.body.count(terminal.body))
+                terminal_fors_ok = false;
+        for (const BlockId block : terminal.region_blocks) {
+            if (!model.reachable_blocks.count(block)
+                || !terminal_region_owners.insert(block).second)
+                terminal_fors_ok = false;
+            if (block == terminal.prep) continue;
+            for (const Edge& edge : model.cfg_edges) {
+                if (edge.source != block) continue;
+                if (edge.target == terminal.prep || edge.target == terminal.body)
+                    terminal_fors_ok = false;
+                if (edge.target.valid() && !terminal.region_blocks.count(edge.target)
+                    && edge.target != terminal.exit)
+                    terminal_fors_ok = false;
+            }
+        }
+        bool exact_predicate = false;
+        for (const PredicateTestContract& test : model.authoritative_predicate_tests)
+            if (test.block == terminal.prep) {
+                if (exact_predicate
+                    || test.kind != PredicateTestKind::NumericForExhausted
+                    || test.operands.size() != 3)
+                    terminal_fors_ok = false;
+                exact_predicate = true;
+            }
+        bool body_edge = false, exit_edge = false;
+        for (const Edge& edge : model.cfg_edges) {
+            if (edge.source != terminal.prep) continue;
+            if (edge.target == terminal.body && edge.kind == EdgeKind::BranchFalse)
+                body_edge = true;
+            else if (edge.target == terminal.exit && edge.kind == EdgeKind::BranchTrue)
+                exit_edge = true;
+            else
+                terminal_fors_ok = false;
+        }
+        if (!exact_predicate || !body_edge || !exit_edge)
+            terminal_fors_ok = false;
+    }
+    if (!terminal_fors_ok)
+        issue(out, Invariant::TerminalNumericFor, "SIR_TERMINAL_NUMERIC_FOR",
+              "terminal numeric-for prep, closed body region, or exit contract differs");
 
     // 5. Every CFG edge is owned exactly once by a semantic control node. Derive the represented
     // set from nodes; never compare the authoritative set with an adapter-level copy of itself.

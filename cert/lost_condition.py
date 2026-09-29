@@ -22,12 +22,13 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
-from workspace_paths import corpus_cache
+from workspace_paths import corpus_cache, module_decompile_mode
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DEC = os.path.join(ROOT, "bin", "derecomp.exe")
+DECOMPILE_MODE = module_decompile_mode()
 CORPUS = corpus_cache(ROOT)
 
 ENV = dict(
@@ -42,7 +43,7 @@ def one(filename):
     path = os.path.join(CORPUS, filename)
     try:
         proc = subprocess.run(
-            [DEC, "decompile-mod", path],
+            [DEC, DECOMPILE_MODE, path],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
             text=True,

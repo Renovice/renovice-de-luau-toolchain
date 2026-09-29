@@ -4,10 +4,58 @@
 #include "fixtures.h"
 #include "lowering_oracle.h"
 #include "source_renderer.h"
+#include "readable_naming.h"
 #include "value_flow.h"
 #include "../liveness.h"
 #include <filesystem>
 #include <fstream>
+
+// Luau source has one visible spelling for both ordinary string-keyed fields/globals and DE's
+// hashed name slots.  A module can contain both classes under the same recovered spelling.  The
+// name-level RENOVICE_HASH_* directive cannot describe that collision by itself: marking the plain
+// spelling would convert both uses to hashes.  Give only the hashed occurrences a lossless source
+// alias carrying their exact hash.  resolve_name_hash() consumes the suffix during recompilation,
+// while the ordinary spelling remains an ordinary string constant.  This is presentation metadata;
+// it never guesses another name or changes the annotated instruction's operation.
+static void semantic_ir_disambiguate_mixed_name_metadata(
+    std::vector<ir::IProto>& annotated) {
+    using NameClass = std::pair<int, std::string>; // 0 = global, 1 = field read
+    std::set<NameClass> hashed;
+    std::set<NameClass> strings;
+    auto classify = [](const ir::IInsn& instruction) {
+        if (instruction.op == 0x17 || instruction.op == 0x02) return 0;
+        if (instruction.op == 0x3d) return 1;
+        return -1;
+    };
+    for (const ir::IProto& proto : annotated) {
+        for (const ir::IInsn& instruction : proto.code) {
+            const int category = classify(instruction);
+            if (category < 0) continue;
+            const uint32_t key = instruction.aux & 0xffffu;
+            if (key >= proto.consts.size()) continue;
+            const ir::KKind kind = proto.consts[key].kind;
+            if (kind == ir::KKind::NameHash)
+                hashed.emplace(category, instruction.note);
+            else if (kind == ir::KKind::Str)
+                strings.emplace(category, instruction.note);
+        }
+    }
+    for (ir::IProto& proto : annotated) {
+        for (ir::IInsn& instruction : proto.code) {
+            const int category = classify(instruction);
+            if (category < 0) continue;
+            const uint32_t key = instruction.aux & 0xffffu;
+            if (key >= proto.consts.size()) continue;
+            const ir::KVal& value = proto.consts[key];
+            if (value.kind != ir::KKind::NameHash
+                || !strings.count(NameClass{category, instruction.note})) continue;
+            char suffix[16];
+            std::snprintf(suffix, sizeof suffix, "__%08x", value.hash);
+            instruction.note = (ex::is_ident(instruction.note)
+                ? instruction.note : std::string("Name")) + suffix;
+        }
+    }
+}
 
 // Preserve DE's otherwise invisible distinction between hashed engine properties and ordinary
 // string-keyed module globals/fields at the editable-source boundary. The full 5,386-module corpus
@@ -63,6 +111,15 @@ static int cmd_semantic_ir_selftest(int argc, char** argv) {
     const bool print_json = argc >= 3 && std::string(argv[2]) == "--json";
     if (print_json) std::printf("%s\n", sir::to_json(sir::valid_fixture()).c_str());
     std::printf("SEMANTIC_IR_SELFTEST assertions=%d passed=%d failed=%zu\n",
+                result.assertions, result.passed, result.failures.size());
+    for (const std::string& failure : result.failures)
+        std::printf("FAIL %s\n", failure.c_str());
+    return result.failures.empty() ? 0 : 1;
+}
+
+static int cmd_semantic_ir_readable_selftest() {
+    const sir::readable::SelfTestResult result = sir::readable::run_selftest();
+    std::printf("SEMANTIC_IR_READABLE_SELFTEST assertions=%d passed=%d failed=%zu\n",
                 result.assertions, result.passed, result.failures.size());
     for (const std::string& failure : result.failures)
         std::printf("FAIL %s\n", failure.c_str());
@@ -279,6 +336,7 @@ static int cmd_semantic_ir_render_module(int argc, char** argv) {
     annotated.reserve(module.protos.size());
     for (size_t index = 0; index < module.protos.size(); ++index)
         annotated.push_back(ir_annotate(module.protos[index], (int)index, pool, g_nb));
+    semantic_ir_disambiguate_mixed_name_metadata(annotated);
     std::map<int, sir::Model> models;
     for (size_t index = 0; index < annotated.size(); ++index) {
         if (!annotated[index].ok) {
@@ -326,21 +384,215 @@ static int cmd_semantic_ir_render_module(int argc, char** argv) {
     return 0;
 }
 
+static int cmd_semantic_ir_render_module_readable(int argc, char** argv) {
+    ir_load_namebase();
+    const std::string input = argv[2];
+    const std::string fidelity_output = argv[3];
+    const std::string readable_output = argv[4];
+    const std::string mapping_output = argv[5];
+    std::string contracts_path = "api/warframe/contracts.tsv";
+    std::string catalog_path = "api/warframe/selected_catalog.tsv";
+    std::string semantic_sdk_path;
+    std::string failure_readable_output;
+    std::string callsite_output;
+    for (int argument = 6; argument < argc; ++argument) {
+        const std::string value = argv[argument];
+        if (value == "--contracts" && argument + 1 < argc)
+            contracts_path = argv[++argument];
+        else if (value == "--catalog" && argument + 1 < argc)
+            catalog_path = argv[++argument];
+        else if (value == "--semantic-sdk" && argument + 1 < argc)
+            semantic_sdk_path = argv[++argument];
+        else if (value == "--failure-readable" && argument + 1 < argc)
+            failure_readable_output = argv[++argument];
+        else if (value == "--call-map" && argument + 1 < argc)
+            callsite_output = argv[++argument];
+        else {
+            std::fprintf(stderr,
+                "semantic-ir-render-module-readable: unknown/incomplete option %s\n",
+                value.c_str());
+            return 2;
+        }
+    }
+
+    g_primary_ability_loop_scope = is_primary_ability_module_path(input);
+    de::Module module;
+    const std::string bytes = read_file(input);
+    try { module = de::walk(bytes); }
+    catch (const std::exception& error) {
+        std::fprintf(stderr,
+            "semantic-ir-render-module-readable: walk error: %s\n", error.what());
+        return 2;
+    }
+    const std::vector<std::string> pool = ir::parse_pool(bytes);
+    std::vector<ir::IProto> annotated;
+    annotated.reserve(module.protos.size());
+    for (size_t index = 0; index < module.protos.size(); ++index)
+        annotated.push_back(ir_annotate(module.protos[index], (int)index, pool, g_nb));
+    semantic_ir_disambiguate_mixed_name_metadata(annotated);
+    std::map<int, sir::Model> models;
+    for (size_t index = 0; index < annotated.size(); ++index) {
+        if (!annotated[index].ok) {
+            std::fprintf(stderr, "FAIL READABLE_MODULE_ANNOTATION proto=%zu %s\n",
+                         index, annotated[index].why.c_str());
+            return 1;
+        }
+        const sem::Manifest manifest = semcmd::build_manifest(annotated[index], (int)index);
+        const sir::Adaptation adaptation = sir::adapt_manifest(
+            annotated[index], manifest, annotated);
+        const sir::Verification verification = sir::verify(adaptation.model);
+        if (!adaptation.ok() || !verification.ok()) {
+            for (const std::string& failure : adaptation.failures)
+                std::fprintf(stderr, "FAIL proto=%zu %s\n", index, failure.c_str());
+            for (const sir::Issue& issue : verification.issues)
+                std::fprintf(stderr, "FAIL proto=%zu %s %s\n", index,
+                             issue.code.c_str(), issue.detail.c_str());
+            return 1;
+        }
+        models.emplace((int)index, adaptation.model);
+    }
+    size_t trailer_offset = 0;
+    int root = -1;
+    try { root = (int)de::rd_vi(module.trailer, trailer_offset); }
+    catch (...) {
+        std::fprintf(stderr, "FAIL READABLE_MODULE_ROOT_DECODE\n"); return 1;
+    }
+
+    sir::source::Result fidelity = sir::source::render_module(models, root);
+    if (!fidelity.ok) {
+        for (const std::string& failure : fidelity.failures)
+            std::fprintf(stderr, "FAIL FIDELITY_%s\n", failure.c_str());
+        return 1;
+    }
+    for (const int prototype : fidelity.omitted_orphan_prototypes)
+        std::fprintf(stderr,
+            "WARN FIDELITY_RENDER_ORPHAN_PROTOTYPE_OMITTED proto=%d\n", prototype);
+    const sir::readable::Plan naming = sir::readable::build_plan(
+        models, contracts_path, catalog_path, semantic_sdk_path);
+    if (naming.semantic_sdk_requested && !naming.semantic_sdk_loaded) {
+        for (const std::string& diagnostic : naming.diagnostics)
+            std::fprintf(stderr, "FAIL %s\n", diagnostic.c_str());
+        return 1;
+    }
+    sir::source::Result readable = sir::source::render_module(
+        models, root, &naming.naming);
+    if (!readable.ok) {
+        for (const std::string& failure : readable.failures)
+            std::fprintf(stderr, "FAIL READABLE_%s\n", failure.c_str());
+        return 1;
+    }
+    if (readable.omitted_orphan_prototypes != fidelity.omitted_orphan_prototypes) {
+        std::fprintf(stderr, "FAIL READABLE_ORPHAN_PROTOTYPE_SET_DRIFT\n");
+        return 1;
+    }
+    if (fidelity.used_dispatcher != readable.used_dispatcher
+        || fidelity.used_frame_storage != readable.used_frame_storage) {
+        std::fprintf(stderr, "FAIL READABLE_RENDER_STRATEGY_DRIFT\n");
+        return 1;
+    }
+
+    const std::string readable_preamble = "-- RENOVICE_READABLE_VIEW_V1\n"
+        "-- Identifier aliases are evidence-backed presentation only. "
+        "Use the fidelity twin and TSV sidecar for exact provenance.\n";
+    readable.source = readable_preamble + readable.source;
+    sir::source::shift_call_spans(readable, readable_preamble.size());
+    std::string metadata_failure;
+    const size_t fidelity_before_metadata = fidelity.source.size();
+    const size_t readable_before_metadata = readable.source.size();
+    if (!semantic_ir_add_global_metadata(annotated, fidelity.source, metadata_failure)
+        || !semantic_ir_add_global_metadata(annotated, readable.source,
+                                            metadata_failure)) {
+        std::fprintf(stderr, "FAIL %s\n", metadata_failure.c_str()); return 1;
+    }
+    sir::source::shift_call_spans(
+        fidelity, fidelity.source.size() - fidelity_before_metadata);
+    sir::source::shift_call_spans(
+        readable, readable.source.size() - readable_before_metadata);
+
+    // A readable view is only useful if its aliases remain valid Luau.  Gate
+    // this before publishing any of the three coordinated artifacts.
+    const std::string validation_source = "_readable_validate_"
+        + std::to_string((long long)GetCurrentProcessId()) + ".luau";
+    if (!write_file(validation_source, readable.source)) {
+        std::fprintf(stderr, "FAIL READABLE_VALIDATION_TEMP_WRITE\n"); return 2;
+    }
+    std::string compile_error;
+    const std::string compiled = compile_luau(validation_source, compile_error);
+    std::remove(validation_source.c_str());
+    if (compiled.empty()) {
+        if (!failure_readable_output.empty()) {
+            if (!write_file(failure_readable_output, readable.source)) {
+                std::fprintf(stderr,
+                    "FAIL READABLE_FAILURE_SOURCE_WRITE path=%s\n",
+                    failure_readable_output.c_str());
+                return 2;
+            }
+            std::fprintf(stderr, "INFO READABLE_FAILURE_SOURCE path=%s\n",
+                         failure_readable_output.c_str());
+        }
+        std::fprintf(stderr, "FAIL READABLE_SOURCE_COMPILE %s\n",
+                     compile_error.c_str());
+        return 1;
+    }
+
+    const std::string mapping = sir::readable::to_tsv(naming);
+    std::string callsite_failure;
+    const std::string callsites = callsite_output.empty() ? std::string()
+        : sir::readable::callsites_to_tsv(
+            models, naming, fidelity, readable, callsite_failure);
+    if (!callsite_output.empty() && callsites.empty()) {
+        std::fprintf(stderr, "FAIL %s\n", callsite_failure.c_str());
+        return 1;
+    }
+    if (!write_file(fidelity_output, fidelity.source)
+        || !write_file(readable_output, readable.source)
+        || !write_file(mapping_output, mapping)
+        || (!callsite_output.empty() && !write_file(callsite_output, callsites))) {
+        std::fprintf(stderr,
+            "semantic-ir-render-module-readable: cannot write coordinated outputs\n");
+        return 2;
+    }
+    for (const std::string& diagnostic : naming.diagnostics)
+        std::fprintf(stderr, "WARN %s\n", diagnostic.c_str());
+    std::printf("SEMANTIC_IR_RENDER_MODULE_READABLE root=%d prototypes=%zu "
+                "aliases=%zu types=%zu sdk=%s status=RENDERED "
+                "fidelity=%s readable=%s map=%s calls=%s\n",
+                root, models.size(), naming.aliases.size(), naming.types.size(),
+                naming.semantic_sdk_loaded ? "loaded" : "legacy-inputs",
+                fidelity_output.c_str(), readable_output.c_str(),
+                mapping_output.c_str(),
+                callsite_output.empty() ? "disabled" : callsite_output.c_str());
+    return 0;
+}
+
 static int cmd_semantic_ir_render_module_corpus(int argc, char** argv) {
     namespace fs2 = std::filesystem;
     ir_load_namebase();
     const fs2::path directory = argv[2];
-    bool abilities_only = false, compile_rendered = false;
+    bool abilities_only = false, compile_rendered = false, readable_views = false;
     int limit = -1;
+    int progress_every = 100;
     std::string json_path;
+    std::string semantic_sdk_path;
     for (int argument = 3; argument < argc; ++argument) {
         const std::string value = argv[argument];
         if (value == "--abilities") abilities_only = true;
         else if (value == "--compile-rendered") compile_rendered = true;
+        else if (value == "--readable") readable_views = true;
         else if (value == "--limit" && argument + 1 < argc)
             limit = std::atoi(argv[++argument]);
+        else if (value == "--progress-every" && argument + 1 < argc)
+            progress_every = std::max(1, std::atoi(argv[++argument]));
         else if (value == "--json-out" && argument + 1 < argc)
             json_path = argv[++argument];
+        else if (value == "--semantic-sdk" && argument + 1 < argc)
+            semantic_sdk_path = argv[++argument];
+        else {
+            std::fprintf(stderr,
+                "semantic-ir-render-module-corpus: unknown/incomplete option %s\n",
+                value.c_str());
+            return 2;
+        }
     }
     if (!fs2::is_directory(directory) || limit == 0) {
         std::fprintf(stderr, "semantic-ir-render-module-corpus: invalid directory or zero limit\n");
@@ -356,6 +608,11 @@ static int cmd_semantic_ir_render_module_corpus(int argc, char** argv) {
     long long attempted_modules = 0, accepted_modules = 0, rejected_modules = 0;
     long long attempted_prototypes = 0, accepted_prototypes = 0;
     long long compiled_modules = 0, compile_failed = 0, source_bytes = 0;
+    long long readable_attempted = 0, readable_rendered = 0;
+    long long readable_failed = 0, readable_compiled = 0;
+    long long readable_compile_failed = 0, readable_source_bytes = 0;
+    long long readable_aliases = 0, readable_diagnostics = 0;
+    long long readable_types = 0;
     long long semantic_failures = 0;
     long long contextual_attempted = 0, contextual_accepted = 0;
     long long contextual_rejected = 0, contextual_compiled = 0;
@@ -394,6 +651,13 @@ static int cmd_semantic_ir_render_module_corpus(int argc, char** argv) {
     for (const fs2::path& file : files) {
         if (limit > 0 && attempted_modules >= limit) break;
         ++attempted_modules;
+        if (attempted_modules == 1 || attempted_modules % progress_every == 0) {
+            std::fprintf(stderr,
+                "semantic-ir-render-module-corpus: progress=%lld/%zu file=%s\n",
+                attempted_modules, files.size(), file.filename().string().c_str());
+            std::fflush(stderr);
+        }
+        try {
         g_primary_ability_loop_scope = is_primary_ability_module_path(file.string());
         const std::string bytes = read_file(file.string());
         de::Module module;
@@ -1665,6 +1929,73 @@ static int cmd_semantic_ir_render_module_corpus(int argc, char** argv) {
                 examples.push_back(file.filename().string() + "\t" + metadata_failure);
             continue;
         }
+        if (readable_views) {
+            ++readable_attempted;
+            const sir::readable::Plan naming = sir::readable::build_plan(
+                models, "api/warframe/contracts.tsv",
+                "api/warframe/selected_catalog.tsv", semantic_sdk_path);
+            readable_aliases += (long long)naming.aliases.size();
+            readable_types += (long long)naming.types.size();
+            readable_diagnostics += (long long)naming.diagnostics.size();
+            if (naming.semantic_sdk_requested && !naming.semantic_sdk_loaded) {
+                ++readable_failed;
+                ++categories["READABLE_SEMANTIC_SDK_LOAD_FAILED"];
+                continue;
+            }
+            sir::source::Result readable = sir::source::render_module(
+                models, root, &naming.naming);
+            if (!readable.ok
+                || readable.used_dispatcher != rendered.used_dispatcher
+                || readable.used_frame_storage != rendered.used_frame_storage) {
+                ++readable_failed;
+                ++categories[!readable.ok
+                    ? "READABLE_MODULE_RENDER_FAILED"
+                    : "READABLE_MODULE_STRATEGY_DRIFT"];
+            } else {
+                readable.source = "-- RENOVICE_READABLE_VIEW_V1\n" + readable.source;
+                std::string readable_metadata_failure;
+                if (!semantic_ir_add_global_metadata(
+                        annotated, readable.source, readable_metadata_failure)) {
+                    ++readable_failed;
+                    ++categories[readable_metadata_failure];
+                } else {
+                    ++readable_rendered;
+                    readable_source_bytes += (long long)readable.source.size();
+                    if (compile_rendered) {
+                        const std::string temporary_source = "_sir_readable_"
+                            + std::to_string((long long)GetCurrentProcessId())
+                            + ".luau";
+                        std::string error;
+                        if (!write_file(temporary_source, readable.source)) {
+                            ++readable_compile_failed;
+                            ++categories["READABLE_MODULE_TEMP_WRITE_FAILED"];
+                        } else {
+                            const std::string bytecode = compile_luau(
+                                temporary_source, error);
+                            std::remove(temporary_source.c_str());
+                            if (bytecode.empty()) {
+                                ++readable_compile_failed;
+                                ++categories["READABLE_MODULE_COMPILE_FAILED"];
+                            } else {
+                                try {
+                                    const luau::Module compiled = luau::read(bytecode);
+                                    if (compiled.protos.size() != module.protos.size()
+                                        || compiled.mainid != (uint32_t)root) {
+                                        ++readable_compile_failed;
+                                        ++categories[
+                                            "READABLE_MODULE_PROTOTYPE_TREE_CHANGED"];
+                                    } else ++readable_compiled;
+                                } catch (...) {
+                                    ++readable_compile_failed;
+                                    ++categories[
+                                        "READABLE_MODULE_COMPILED_PARSE_FAILED"];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         ++accepted_modules;
         accepted_module_examples.push_back(file.filename().string());
         accepted_prototypes += (long long)module.protos.size();
@@ -1694,6 +2025,21 @@ static int cmd_semantic_ir_render_module_corpus(int argc, char** argv) {
                 }
             }
         }
+        } catch (const std::exception& exception) {
+            ++semantic_failures;
+            ++rejected_modules;
+            ++categories["RENDER_MODULE_UNHANDLED_EXCEPTION"];
+            if (examples.size() < 100)
+                examples.push_back(file.filename().string()
+                    + "\tRENDER_MODULE_UNHANDLED_EXCEPTION\t" + exception.what());
+        } catch (...) {
+            ++semantic_failures;
+            ++rejected_modules;
+            ++categories["RENDER_MODULE_UNHANDLED_NONSTANDARD_EXCEPTION"];
+            if (examples.size() < 100)
+                examples.push_back(file.filename().string()
+                    + "\tRENDER_MODULE_UNHANDLED_NONSTANDARD_EXCEPTION");
+        }
     }
     std::printf("== SEMANTIC IR MODULE RENDER CORPUS ==\n");
     std::printf("scope=%s modules=%lld accepted=%lld rejected=%lld semantic_failed=%lld\n",
@@ -1714,6 +2060,16 @@ static int cmd_semantic_ir_render_module_corpus(int argc, char** argv) {
     if (compile_rendered)
         std::printf("module_compile=passed:%lld,failed:%lld\n",
                     compiled_modules, compile_failed);
+    if (readable_views) {
+        std::printf("readable=attempted:%lld,rendered:%lld,failed:%lld,aliases:%lld,"
+                    "types:%lld,diagnostics:%lld,source_bytes:%lld\n",
+                    readable_attempted, readable_rendered, readable_failed,
+                    readable_aliases, readable_types, readable_diagnostics,
+                    readable_source_bytes);
+        if (compile_rendered)
+            std::printf("readable_compile=passed:%lld,failed:%lld\n",
+                        readable_compiled, readable_compile_failed);
+    }
     for (const auto& category : categories)
         std::printf("MODULE_REJECTION %-44s modules=%lld\n",
                     category.first.c_str(), category.second);
@@ -1955,6 +2311,16 @@ static int cmd_semantic_ir_render_module_corpus(int argc, char** argv) {
              << "  \"compile_requested\": " << (compile_rendered ? "true" : "false") << ",\n"
              << "  \"compiled_modules\": " << compiled_modules << ",\n"
              << "  \"compile_failed\": " << compile_failed << ",\n"
+             << "  \"readable_requested\": " << (readable_views ? "true" : "false") << ",\n"
+             << "  \"readable_attempted\": " << readable_attempted << ",\n"
+             << "  \"readable_rendered\": " << readable_rendered << ",\n"
+             << "  \"readable_failed\": " << readable_failed << ",\n"
+             << "  \"readable_aliases\": " << readable_aliases << ",\n"
+             << "  \"readable_types\": " << readable_types << ",\n"
+             << "  \"readable_diagnostics\": " << readable_diagnostics << ",\n"
+             << "  \"readable_source_bytes\": " << readable_source_bytes << ",\n"
+             << "  \"readable_compiled\": " << readable_compiled << ",\n"
+             << "  \"readable_compile_failed\": " << readable_compile_failed << ",\n"
              << "  \"rejection_categories\": {";
         bool first = true;
         for (const auto& category : categories) {
@@ -1988,7 +2354,8 @@ static int cmd_semantic_ir_render_module_corpus(int argc, char** argv) {
         std::printf("json=%s\n", json_path.c_str());
     }
     return attempted_modules > 0 && semantic_failures == 0 && compile_failed == 0
-        && contextual_compile_failed == 0 ? 0 : 1;
+        && contextual_compile_failed == 0 && readable_failed == 0
+        && readable_compile_failed == 0 ? 0 : 1;
 }
 
 static int cmd_semantic_ir_verify_corpus(int argc, char** argv) {

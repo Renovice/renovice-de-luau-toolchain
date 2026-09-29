@@ -21,12 +21,7 @@ def normalised_protos(path):
         raise RuntimeError("skeleton failed: %s" % path)
     result = []
     for header, lines in protos:
-        kept = []
-        for line in lines:
-            if "\t" not in line or line.startswith("BRANCH\t"):
-                continue
-            kept.append("CLOSURE" if line.startswith("CLOSURE\t") else line)
-        result.append((header, collections.Counter(kept)))
+        result.append((header, collections.Counter(align.norm(lines))))
     return result
 
 
@@ -86,7 +81,7 @@ def main():
     source = os.path.abspath(source)
 
     original = normalised_protos(source)
-    decompiled = align.run([align.DEC, "decompile-mod", source])
+    decompiled = align.run([align.DEC, align.DECOMPILE_MODE, source])
     if decompiled.returncode != 0:
         sys.stderr.write(decompiled.stderr)
         return 1

@@ -50,6 +50,35 @@ Port of the Python `offline_decompile` + `NativeDecompiler` (cfg/ir/expr/emit/cl
 incrementally; until parity the C++ CLI may `--decompile-via-python` (wrap the proven Python) so we always have a
 working decompile.
 
+The current Semantic IR pipeline has two source views sharing one verified
+control/value model:
+
+```text
+verified Semantic IR
+  +-- fidelity renderer naming: p12_0 / v12_8
+  +-- readable naming plan
+        +-- exact exported closure role
+        +-- confirmed api/warframe/contracts.tsv
+        +-- corpus-derived api/warframe/selected_catalog.tsv
+        +-- conservative structural getter/global hints
+        +-- confidence/evidence TSV
+      -> the same renderer with identifier lookup only
+```
+
+The readable layer cannot add, remove, reorder, or rewrite statements. Its only
+renderer input is a prototype/value-web-to-identifier table. Frame-backed
+dispatcher lowering keeps indexed canonical storage because replacing that
+lvalue shape would be a semantic transformation; friendly proposals remain in
+the sidecar. A conflict is logged and left canonical rather than guessed.
+
+The type sidecar also preserves ownership and lifetime boundaries. An
+engine-owned wrapper such as `UpgradedValue` is not converted into a numeric
+snapshot merely because `GetModifiedValue()` returns a number. Userdata or
+native-address equality is not promoted into logical transaction identity, and
+an instruction-addressed callsite is not promoted into proof that every hook
+layer observes the same nested execution. These restrictions come from the
+live Ice Wave alias and hook-visibility evidence recorded on 2026-09-14.
+
 ### CORPUS  (batch decompile + name maps)
 Batch decompile the game Cache → readable corpus, apply the name knowledge base. Replaces `dump_all_source_*` + the
 ~60 post-processing scripts with one reproducible command.
@@ -126,9 +155,16 @@ DeNativeRecompiler/
    The ~21% "recompile v13" figure is
    *decompiler output quality*, not an opcode gap: v13 text has `unk`/`UNNAMED_*` and mis-renderings
    (e.g. `unk[unk]` where the bytecode was `t[1]`), so it isn't valid Luau. Build on the 77-opcode decode
-   map. Suggested oracle: **round-trip idempotence** (decompile → recompile → decompile, require
-   source₁ == source₂) rather than byte-identity, which is unreachable because DE emits instrumentation
-   (`0x19`/`0x25`) and chooses its own register allocation / PIC cache slots.
+   map. The active oracle is **round-trip idempotence** (decompile → recompile → decompile, requiring
+   exact source, bytecode, frame, prototype, and opcode stability) rather than original-file
+   byte-identity, which is unreachable because DE emits instrumentation (`0x19`/`0x25`) and chooses
+   its own register allocation / PIC cache slots. The certified compiler-closed profile passes **360/360**
+   deterministic files, the focused opcode/control set passes **12/12**, and all five default large
+   specimens remain exact through ten cycles. The same 360-file sample has zero missing named
+   accesses, while the deliberately uncooked diagnostic view remains **345/360** with 15 first-pass
+   compiler-spelling drifts. The full 5,386-file corpus is not yet certified. See
+   `RESEARCH/COMPILER_AWARE_IDEMPOTENCE_2026-08-29.md` and
+   `RESEARCH/COMPILER_CLOSED_FIXEDPOINT_360_2026-09-05.md`.
 7. **[M7] consolidate data + retire Python** — ⬜ only after C++ parity is proven.
 
 > **Editing real scripts does NOT require byte-identity.** The VM executes whatever valid bytecode it is

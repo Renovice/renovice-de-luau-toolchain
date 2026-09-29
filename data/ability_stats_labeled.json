@@ -1077,33 +1077,33 @@
   "rank_param_meaning": "p5 is the ability rank (1..4) in the base setup @0x513; augment-derived stats use abilityAugmentLevel (1..4) instead. Deduped shard merges base-rank and augment-level tables.",
   "stats": [
    {
-    "label": "duration",
-    "unit": "seconds",
-    "confidence": "medium",
-    "evidence": "Reader @0x71f fetches this slot with GetUpgradeModifiedValue flag 3 (the duration modifier class); assigned to v24.duration in spawn proto @0x16c2 and pushed as PushFloatArg(abilityStat.duration). Integer 5/6/8/10s; PvP much lower (1/2/3/4).",
+    "label": "radius",
+    "unit": "meters",
+    "confidence": "high",
+    "evidence": "Corrected 2026-08-28 from exact body 08faf07b504d058f: v21_13 is 5/6/8/10 in PvE and flows through GetUpgradeModifiedValue(...,9,...), the proven Range selector. The previous AI label incorrectly called this Duration.",
     "pve_values": "5/6/8/10",
     "pvp_values": "1/2/3/4",
-    "example_var": "v_u_2",
+    "example_var": "v21_13",
     "scaled": true
    },
    {
-    "label": "radius",
-    "unit": "meters",
-    "confidence": "medium",
-    "evidence": "Not read via a mod flag in @0x71f; assigned to v24.radius in @0x16c2 and used in loop @0x2540 for SetMeshScale (range deco) and attach2:SetRadius. Mallet/Resonator-style AoE size 8-20m; PvP 14-20.",
+    "label": "duration",
+    "unit": "seconds",
+    "confidence": "high",
+    "evidence": "Corrected 2026-08-28 from exact body 08faf07b504d058f: v21_14 is 8/12/16/20 in PvE and flows through GetUpgradeModifiedValue(...,3,...), the proven Duration selector. The previous AI label incorrectly called this Radius.",
     "pve_values": "8/12/16/20",
     "pvp_values": "14/16/18/20",
-    "example_var": "v_u_4",
+    "example_var": "v21_14",
     "scaled": true
    },
    {
     "label": "damage_multiplier",
     "unit": "multiplier",
-    "confidence": "medium",
-    "evidence": "Reader @0x71f fetches this slot with flag 9 (strength/damage-scaling class); PvE 1/1.5/2/2.5 (classic multiplier ramp) vs tiny PvP 0.04-0.1 confirms damage. Feeds the radial-damage buildup in loop @0x2540.",
+    "confidence": "high",
+    "evidence": "Corrected 2026-08-28 from exact body 08faf07b504d058f: v21_12 is 1/1.5/2/2.5 in PvE, passes through Engine.UpgradedValue, and reaches ModifyValue(...,10,...), the proven Strength path. The previous AI evidence incorrectly attributed selector 9.",
     "pve_values": "1/1.5/2/2.5",
     "pvp_values": "0.04/0.06/0.08/0.1",
-    "example_var": "v_u_3",
+    "example_var": "v21_12",
     "scaled": true
    },
    {

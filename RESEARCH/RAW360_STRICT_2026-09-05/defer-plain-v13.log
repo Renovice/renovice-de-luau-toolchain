@@ -1,0 +1,7 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=4A92DC2BBF6AF158B2D5AB39664F2814FB08290DFA725FDA63046AC0A87B8B05
+CYCLE2 files=3 passed=0 failed=3 errors=0
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=-61 stack_sum=+5 stack_max=+4 protos=+0 ops=0x0b:+1,0x0d:+4,0x12:-3,0x14:+3,0x18:-1,0x1e:+1,0x20:-3,0x29:+1,0x33:-2,0x37:-1,0x38:+3,0x39:+1,0x3a:-1,0x40:-9,0x49:-3
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+36 stack_sum=+4 stack_max=+0 protos=+0 ops=0x04:+2,0x0b:+1,0x0d:+4,0x14:+3,0x18:+1,0x1e:+1,0x27:-1,0x29:+1,0x40:-1,0x4b:-2
+  DRIFT Lotus_Interface_LoadOutRedux.lua_B                      bytes=+4 stack_sum=+1 stack_max=+0 protos=+0 ops=0x0d:+1,0x1c:-4,0x21:-4,0x23:+4,0x33:+4
+CYCLE2 files=1 passed=1 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\defer-plain-v13.json

@@ -1,0 +1,6 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=CAF261034B13BDF58ED3AC23E4BFA9D7125FFA7180336918A569E95CC612E495
+CYCLE2 files=4 passed=2 failed=2 errors=0
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=+1556 stack_sum=+2 stack_max=+2 protos=+0 ops=0x0d:+2,0x12:+106,0x18:-4,0x1c:+3,0x20:+71,0x27:+1,0x33:-3,0x37:-1,0x38:+1,0x40:+22,0x49:-1,0x4b:+4
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+36 stack_sum=+4 stack_max=+0 protos=+0 ops=0x04:+2,0x0b:+1,0x0d:+4,0x14:+3,0x18:+1,0x1e:+1,0x27:-1,0x29:+1,0x40:-1,0x4b:-2
+CYCLE2 files=1 passed=1 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\focused-latch-store-v19.json

@@ -49,11 +49,12 @@ A non-zero exit from the decompiler is counted as a FAILURE, never as a clean fi
 import os, re, sys, subprocess
 from concurrent.futures import ThreadPoolExecutor
 
-from workspace_paths import corpus_cache
+from workspace_paths import corpus_cache, module_decompile_mode
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DEC = os.path.join(ROOT, "bin", "derecomp.exe")
+DECOMPILE_MODE = module_decompile_mode()
 
 # MUST match align.py / realtrip.py exactly. Two oracles running different compiler configurations
 # is how a real defect stayed invisible for the whole project (PITFALLS A7).
@@ -203,7 +204,7 @@ def scan_source(text):
 
 
 def one(fn):
-    p = subprocess.run([DEC, "decompile-mod", os.path.join(CACHE, fn)],
+    p = subprocess.run([DEC, DECOMPILE_MODE, os.path.join(CACHE, fn)],
                        capture_output=True, text=True, encoding="utf-8",
                        errors="replace", timeout=300, env=ENV, cwd=ROOT)
     if p.returncode != 0:

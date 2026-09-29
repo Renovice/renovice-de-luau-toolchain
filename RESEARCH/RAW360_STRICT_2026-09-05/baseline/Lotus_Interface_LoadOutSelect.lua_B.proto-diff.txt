@@ -1,0 +1,3 @@
+protos=111->111 shared=111
+pidx=42 code_bytes=3104->3108 (+4) instructions=600->601 (+1) maxstack=40->41 header=0 constants=66->66 equal=1 post=1 ops=0x0d:+2,0x1c:-5,0x21:-3,0x23:+4,0x33:+4,0x40:-1
+pidx=47 code_bytes=628->632 (+4) instructions=121->122 (+1) maxstack=22->22 header=0 constants=16->16 equal=1 post=1 ops=0x18:-1,0x29:+1,0x4b:+1

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renovice.local/schemas/ability-behavior-catalog-v1.json",
+  "title": "RENOVICE ability behavior catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema_version",
+    "status",
+    "evidence_boundary",
+    "inputs",
+    "counts",
+    "abilities",
+    "modules",
+    "api_usage_file",
+    "ability_index_file"
+  ],
+  "properties": {
+    "format": { "const": "RENOVICE_ABILITY_BEHAVIOR_CATALOG_V1" },
+    "schema_version": { "const": 1 },
+    "status": { "enum": ["VERIFIED", "REJECTED_INCOMPLETE"] },
+    "evidence_boundary": { "type": "string", "minLength": 1 },
+    "inputs": { "$ref": "#/$defs/inputs" },
+    "counts": { "type": "object" },
+    "abilities": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "modules": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "api_usage_file": { "type": "string", "minLength": 1 },
+    "ability_index_file": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "bytes", "sha256"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9A-F]{64}$" }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ability_catalog", "decompiler", "semantic_sdk"],
+      "properties": {
+        "ability_catalog": { "$ref": "#/$defs/artifact" },
+        "decompiler": { "$ref": "#/$defs/artifact" },
+        "semantic_sdk": { "$ref": "#/$defs/artifact" }
+      }
+    }
+  }
+}

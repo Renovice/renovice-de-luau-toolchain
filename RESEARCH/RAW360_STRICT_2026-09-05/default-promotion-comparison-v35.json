@@ -1,0 +1,2212 @@
+{
+  "passed": true,
+  "candidate_sha256": "BD90C62E07594D3F4BD0DD1BD950C8ED0FCA76DA89B1C2EB9CF15DFB3E923E52",
+  "default_sha256": "40BC733B43E366A7E65CFB40BDFD13D3F71B268C65F3841155B593D3F3DBA5D3",
+  "compared_files": 360,
+  "differences": 0,
+  "default_cycle2_summary": {
+    "byte_delta_total": 0,
+    "errors": 0,
+    "files": 360,
+    "maxstack_sum_delta_total": 0,
+    "opcode_delta_total": {},
+    "original_byte_identity": 0,
+    "passed": 360,
+    "proto_delta_total": 0
+  },
+  "default_cycle10_summary": {
+    "byte_delta_total": 0,
+    "errors": 0,
+    "files": 5,
+    "maxstack_sum_delta_total": 0,
+    "opcode_delta_total": {},
+    "original_byte_identity": 0,
+    "passed": 5,
+    "proto_delta_total": 0
+  },
+  "difficult_cycle10_summary": {
+    "byte_delta_total": 0,
+    "errors": 0,
+    "files": 6,
+    "maxstack_sum_delta_total": 0,
+    "opcode_delta_total": {},
+    "original_byte_identity": 0,
+    "passed": 6,
+    "proto_delta_total": 0
+  },
+  "unique_ten_cycle_files": [
+    "EE_Interface_Utilities.lua_B",
+    "EE_Types_ScriptCommands_JSON.lua_B",
+    "Lotus_Docs_Loadouts.lua_B",
+    "Lotus_Interface_BindingsUtil.lua_B",
+    "Lotus_Interface_DiegeticUpgradeCards.lua_B",
+    "Lotus_Interface_HudRedux.lua_B",
+    "Lotus_Interface_InventoryTest.lua_B",
+    "Lotus_Interface_LoadOutSelect.lua_B",
+    "Lotus_Interface_LotusUtilities.lua_B",
+    "Lotus_Interface_MapRedux.lua_B",
+    "Lotus_Upgrades_Stickers_Scripts_SporePrimer.lua_B"
+  ],
+  "rows": [
+    {
+      "file": "EE_Interface_AnchorMgr.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Components_DragScroll.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Components_DropDownMenu.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Components_Grid.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Components_ImageSlideShow.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Components_List.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Components_ListContainer.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Components_ScrollBar.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Editor_UiInspector_UiInspector.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Interface_Utilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Scripts_CommandExample.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Scripts_ImGuiCameraSettings.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Scripts_ImGuiCinematics.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Scripts_ImGuiEntityViewer.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Scripts_ImGuiScriptBlackboard.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Scripts_ImGuiSeasonOverride.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Scripts_PostConfig.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Types_ScriptCommands_JSON.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "EE_Types_ScriptCommands_SetVortexWindPerZone.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Characters_Tenno_Infestation_Cyst_InfestationCyst.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Docs_Loadouts.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_Enemies_Tau_Drone_TauDroneEffects.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_Gameplay_Nightwave_SeasonTwo_CarryLamp.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_Levels_1999Warframe_CableEnableElectricity.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_Levels_InfestedMicroplanet_HeartVault_HeartControl.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_ModQuest_DroneDamageAvatarScript.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_ModQuest_ModQuestPrecipitation.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_PowersuitAbilities_Decree_PushAbility.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_Weapons_Railjack_MegaLaser_MegaLaser.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Fx_Weapons_Tenno_Archwing_Primary_NokkoArchGun_NokkoArchGunRandomRotation.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_1999_DiegeticCalendar.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_1999_PasswordFloatingWords.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_1999_ProtoframeSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_1999_QuestPassword.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_1999_RetroMap.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_1999_RetroMessenger.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AbilityExtractPreview.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AbilityReplaceSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AcceptInvitePanel.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AddIngredientsScreen.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AlignmentDisplay.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AllianceView.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AnihilationCounter.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ApartmentCustomization.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AppearanceCustomization.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AppearancePreview.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ArcadeGameSelect.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ArchimedeaStickerReveal.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ArchonIntro.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ArcWingHud.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ArenaGambling.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_AttachMovie.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Background.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Baruuk_BaruukBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Conquera_ConqueraBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Corpus_CorpusBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Deadlock_DeadlockBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Fortuna_FortunaBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Grineer_GrineerBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Helminth_HelminthBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Legacy_LegacyBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Lotus_LotusBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Overlay_OverlayBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Retro_RetroBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_SpringFestival_SpringFestivalBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_Stalker_StalkerBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Backgrounds_ZephyrDeluxe_ZephyrDeluxeBackground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BadgeText.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BattleMap.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BeaconAccept.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BeaconAccepted.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BeaconInProgress.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BeaconSuccess.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BehaviourSettingsPanel.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BinaryChoice.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BindingsUtil.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BlessingSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Boardgame.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BoonNotification.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BoonsActive.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BoonSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_BootUpGlitch.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Bumper.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksArcadeFrame.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksCharacterSelect.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksControlsScreen.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksControlsScreenText.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksCreditsScreen.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksEndLevelResults.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksFinalResults.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksForeground.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksGameOver.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksHUD.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksInterfaceUtil.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksIntroCutscene.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksOutroCutscene.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksPauseMenu.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksScreenFade.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksTitleScreen.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CardUtilitiesRedux.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CaviaVitruvian.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CephalonFragmentMessage.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ChallengePopUp.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ChallengesProgress.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ChallengeUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CharacterIntro.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ChatFilterManager.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ChatRedux.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CheckpointSpinner.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ChooseMovementStylePanel.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Cinematic_Auction.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CinematicTransmission.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Cipher.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ClaimCompanion.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Clan.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ClanAdUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ClanAdvertisement.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ClanMemberRole.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ClanSearch.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ClanUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Codex.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CodexLite.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CodexUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CoHBuffSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CoHTitleCard.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CollectibleCard.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CollectorStatus.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ColorPicker.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ComboList.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CommanderMap.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CompanionAbilityProgression.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_AbilityList.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_AvatarDiorama.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_BgCameraSway.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_BoosterInfo.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_Button.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_CategoriesMenu.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_CategorizedGrid.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_CustomizationList.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_DecoPreview.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_DiegeticHelper.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_DottedCircle.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_DropDownMenu.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_EvolutionList.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_GearList.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_GearSpiral.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_HealthAndShieldDisplay.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_MasteryIcon.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_MissionPanel.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_MultiSizedElementCategorizedGrid.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_OmegaCompatibilityPanel.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_PlayerPanelRedux.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_PresenceHelper.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_RadialText.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_RailjackModeButton.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_RandomMovieClipGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ResourceLoaderQueue.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_RotationControl.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_SearchBox.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_StatCompare.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedButton.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedCategoriesMenu.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedCheckbox.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedCustomizationButton.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedCustomizationList.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedInputField.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedProgressBar.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedProgressInfo.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedProgressInfoGridItem.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedSlider.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedSpinner.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedSquadPanel.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedStats.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_ThemedToggle.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_TitleBar.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_UseCipherPanel.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Components_UserList.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ConclaveLite.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ConclaveModeSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ConnectionError.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ConquestSetup.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ConquestStickerSelect.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ConservationHud.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ConsumablesOverlay.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ContextAction.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ControllerLayout.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ControllerLayoutiOS.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CouponUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Credits.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CrossPlatformUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_CyTransmission.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DailyTribute.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DarvoDeal.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DecorationsHud.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DecoTemplate.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DefenseReward.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DeimosIntro.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DeimosVitruvian.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Demo1999ShipConsole.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DemoWhispersEndScreen.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dialog.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DialogWithCards.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DiegeticArtifactCards.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DiegeticFoundry.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DiegeticNews.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DiegeticUpgradeCards.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DioramaViewer.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_DojoColorResearchStatus.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_DojoMessage.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_DojoRoomConstructionStatus.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_DojoRoomSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_DojoRoomUpgradesAndDestruction.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_DojoScreenLauncher.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_InWorldTransmissionController.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_ResearchContribution.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_ResearchSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_ThemedDojoColorPicker.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_Trade.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_TradingPost.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_TradingPostScreenLauncher.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Dojo_VaultContribution.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DojoGate.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DrifterIntrinsics.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriBuildConfig.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriBuildSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriEndlessSetup.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriEquipmentPreview.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriMissionComplete.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriQuestEndChoice.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriTitleCard.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriWeaponControls.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_DuviriWeaponPurchase.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EidolonIntro.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EidolonJobBoard.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EidolonMissionComplete.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EidolonPoweredObject.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EmotionChoice.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EmplacementHud.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EndOfMatch.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EndOfMatchKahl.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EndOfMatchPvp.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EndOfQuest.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EndSynthesisTutorial.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EntratiVendorCust.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EntratiVoidVault.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EntratiVoidVaultsBurdenDiegetic.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EntratiVoidVaultsTarot.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EpisodeAnnouncement.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EpisodeChallenges.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EpisodeEvidencePopup.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_EpisodeStatus.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ExitGameSurvey.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FastTravelUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FighterSelect.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FishInfo.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FishingHud.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Flotilla.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FocusActivation.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FocusGainMessage.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FocusManager.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FocusUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FortressUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FortunaIntro.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Founders.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FoundryConfirmDialog.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Friends.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FullScreenQuad.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_FusionTreasureManager.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_GenericActionsMenu.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_GenericMenu.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_GenericNotification.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_GenericVendor.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_GeneticLab.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_GiftCelebration.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_GraphicManifest.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_GreedTokenSelect.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HackingUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HeroicMomentPortrait.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HorseCustomization.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Hub.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HudCustomization.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HudFighter.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HudLunaro.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HudMarginAdjustment.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HudRedux.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HudReplacement.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_HyperlinkSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ImeTip.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Inbox.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InfestedNemesisIntro.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InkPaint.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InlineLoadout.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InputBinding.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InputCountDialog.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InputDialog.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InspectIngredientsCard.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Intrinsics.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_IntroText.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InvasionSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InventoryTest.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InventoryUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InvitePanel.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InWorldLeaderboard.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_InWorldText.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ItemBrowsing.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_ItemInfoPopup.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_JordasTransmission.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_JS2TitleCard.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_JukeBox.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_KahlCampTransmissionController.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_KahlCustomization.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_KoumeiDivination.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_KubrowImprint.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LayoutEditor.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LibraryDailyTaskPreview.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LibraryScanMessage.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_ActionFigureLoadoutLoader.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_ActiveMissionGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_ConversationUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_DeepArchimedeaMissionGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_DioramaLoader.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_DojoMgr.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_DojoMgrHelper.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_DuviriResources.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_DuviriUtil.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_FlavorTextGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_HexConquestMissionGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_ImGuiLib.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_InvasionMissionGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_JukeBoxMgr.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_LabConquestMissionGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_MissionGeneratorUtil.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_PreviewLinkUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_SortieGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_StickerLib.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_SyndicateMissionGenerator.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Libs_TimerMgr.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LisetCustomization.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LoadOutRedux.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LoadOutSelect.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LoadoutSelection.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LoadoutUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LotusLoadOut.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LotusNetworkUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_LotusUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Map.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Map_MapLegend.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_MapNodeTipUtilities.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_MapRedux.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_MarketHighlight.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_MasteryBlessingPopUp.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_MasteryRankUp.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_MemoriesOfTau.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Minigames_DuviriHack.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Minigames_JadeShadowsMinigame.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Minigames_NarmerHack.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Minigames_OlliesCrashCourseTimer.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Minigames_RetroMinigame.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_Minigames_SnakeHack.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    },
+    {
+      "file": "Lotus_Interface_MinigameTitleScreen.lua_B",
+      "same_input": true,
+      "same_source": true,
+      "same_bytecode": true
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "binary_sha256_before": "C4A1355F8893C02A8B6C431DA7A9DC328491512545B8592ACE6149B98E5B196E",
+  "binary_sha256_after": "C4A1355F8893C02A8B6C431DA7A9DC328491512545B8592ACE6149B98E5B196E",
+  "binary_stable": true,
+  "exit_code": 0,
+  "error_category_present": false,
+  "access_loss_total": 0,
+  "log_sha256": "C7BDB472037A451C3C60B4CD066FE90E47A3582BC31F511074C9F4009F9AAF70"
+}

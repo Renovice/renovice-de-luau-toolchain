@@ -1,0 +1,9 @@
+== Lotus_Interface_DialogWithCards.lua_B ==
+original protos=62 accesses=913; rebuilt protos=62 accesses=913
+missing=0 extra=0
+-- MISSING --
+  (none)
+-- EXTRA --
+  (none)
+-- PER-INDEX DIAGNOSTIC (not lineage proof; same-signature closures may reorder) --
+  (none)

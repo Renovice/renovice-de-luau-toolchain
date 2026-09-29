@@ -90,6 +90,19 @@ struct LoopPlan {
     std::set<int> planned_region_blocks;
 };
 
+// Luau omits FORNLOOP when every reachable path in a numeric-for body exits before the latch.
+// There is still a source `for` owner (FORNPREP plus its terminal body), but no natural backedge from
+// which the ordinary LoopPlan can be built. Keep that compiler-elided-latch shape explicit instead
+// of reporting the renderer's valid plan winner as an orphan.
+struct TerminalForPlan {
+    int key = -1;
+    int prep = -1;
+    int body = -1;
+    int exit = -1;
+    int region = -1;
+    std::set<int> region_blocks;
+};
+
 struct Failure {
     std::string code;
     std::string detail;
@@ -110,6 +123,7 @@ struct Manifest {
     std::vector<PredicatePlan> predicates;
     std::vector<EffectPlan> effects;
     std::map<int, LoopPlan> loops;       // authoritative loop header -> plan
+    std::map<int, TerminalForPlan> terminal_fors; // body key -> compiler-elided-latch plan
     std::map<int, int> extra_loop_winners;
     std::vector<Failure> failures;
 

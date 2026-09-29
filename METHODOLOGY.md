@@ -135,7 +135,30 @@ kept being cited. Any change to `transcode.h` invalidates every previous cert ru
 
 ---
 
-## 8. Commands
+## 8. Native wrappers are not source-language values
+
+Correct bytecode can still express an incorrect lifetime assumption. In the
+Ice Wave investigation, `DamageData:GetBaseAmount()` returned an
+`UpgradedValue` userdata. Saving that userdata did not save its numeric value:
+after `SetBaseAmount()` changed the packet from 1771 to 5313, the retained
+wrapper also read 5313.
+
+When editing engine-facing scripts:
+
+* distinguish a wrapper from the number currently visible through it;
+* copy a numeric result before mutation if the old number must survive;
+* reconstruct a fresh wrapper from that number when the API requires one;
+* never use userdata equality or a native address as the sole transaction key;
+* scope cached state to the exact synchronous call and current target;
+* explicitly write the 1x/default case when a mutable packet may retain an
+  earlier target's value;
+* prove that the chosen Lua or native hook actually fires on the target path;
+* probe optional library fields and receiver methods independently.
+
+These are API/runtime verification rules. Do not patch the decompiler or opcode
+map to compensate for authored code that misunderstood an engine-owned value.
+
+## 9. Commands
 
 ```bash
 derecomp compile   <in.luau> <out.luaubc>    # Luau source -> Luau bytecode

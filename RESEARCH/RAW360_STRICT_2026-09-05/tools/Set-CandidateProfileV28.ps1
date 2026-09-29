@@ -1,0 +1,3 @@
+. (Join-Path $PSScriptRoot 'Set-CandidateProfileV27.ps1')
+$env:RENOVICE_CFG_EXPANDED_GUARD_EXIT_TAIL = '1'
+$env:RENOVICE_CFG_GUARD_PRIVATE_TERMINALS = '1'

@@ -1,0 +1,5647 @@
+{
+  "binary_sha256": "60872B2E351814182AF0FA9817C56D4253D04E1D12FD1002ED7F013E53AB7501",
+  "corpus": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\shared\\corpus\\de-luau-stock",
+  "cycle10": [
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 3,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 3,
+      "file": "EE_Interface_Utilities.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 3,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 3,
+      "file": "EE_Types_ScriptCommands_JSON.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 3,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 3,
+      "file": "Lotus_Docs_Loadouts.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 3,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 3,
+      "file": "Lotus_Interface_BindingsUtil.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 3,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 3,
+      "file": "Lotus_Upgrades_Stickers_Scripts_SporePrimer.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    }
+  ],
+  "cycle10_summary": {
+    "byte_delta_total": 0,
+    "errors": 0,
+    "files": 5,
+    "maxstack_sum_delta_total": 0,
+    "opcode_delta_total": {},
+    "passed": 5,
+    "proto_delta_total": 0
+  },
+  "cycle2": [
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_AnchorMgr.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Components_DragScroll.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Components_DropDownMenu.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Components_Grid.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Components_ImageSlideShow.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Components_List.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Components_ListContainer.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Components_ScrollBar.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Editor_UiInspector_UiInspector.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Interface_Utilities.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Scripts_CommandExample.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Scripts_ImGuiCameraSettings.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Scripts_ImGuiCinematics.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Scripts_ImGuiEntityViewer.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Scripts_ImGuiScriptBlackboard.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Scripts_ImGuiSeasonOverride.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Scripts_PostConfig.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Types_ScriptCommands_JSON.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "EE_Types_ScriptCommands_SetVortexWindPerZone.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Characters_Tenno_Infestation_Cyst_InfestationCyst.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Docs_Loadouts.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_Enemies_Tau_Drone_TauDroneEffects.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_Gameplay_Nightwave_SeasonTwo_CarryLamp.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_Levels_1999Warframe_CableEnableElectricity.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_Levels_InfestedMicroplanet_HeartVault_HeartControl.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_ModQuest_DroneDamageAvatarScript.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_ModQuest_ModQuestPrecipitation.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_PowersuitAbilities_Decree_PushAbility.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_Weapons_Railjack_MegaLaser_MegaLaser.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Fx_Weapons_Tenno_Archwing_Primary_NokkoArchGun_NokkoArchGunRandomRotation.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_1999_DiegeticCalendar.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_1999_PasswordFloatingWords.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_1999_ProtoframeSelection.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_1999_QuestPassword.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_1999_RetroMap.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_1999_RetroMessenger.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AbilityExtractPreview.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AbilityReplaceSelection.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AcceptInvitePanel.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AddIngredientsScreen.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AlignmentDisplay.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AllianceView.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AnihilationCounter.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_ApartmentCustomization.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AppearanceCustomization.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AppearancePreview.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_ArcadeGameSelect.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_ArchimedeaStickerReveal.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_ArchonIntro.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_ArcWingHud.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_ArenaGambling.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_AttachMovie.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Background.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Baruuk_BaruukBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Conquera_ConqueraBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Corpus_CorpusBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Deadlock_DeadlockBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Fortuna_FortunaBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Grineer_GrineerBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Helminth_HelminthBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Legacy_LegacyBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Lotus_LotusBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Overlay_OverlayBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Retro_RetroBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_SpringFestival_SpringFestivalBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_Stalker_StalkerBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Backgrounds_ZephyrDeluxe_ZephyrDeluxeBackground.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BadgeText.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BattleMap.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BeaconAccept.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BeaconAccepted.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BeaconInProgress.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BeaconSuccess.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BehaviourSettingsPanel.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BinaryChoice.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BindingsUtil.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BlessingSelection.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Boardgame.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BoonNotification.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BoonsActive.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BoonSelection.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_BootUpGlitch.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_Bumper.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksArcadeFrame.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksCharacterSelect.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksControlsScreen.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksControlsScreenText.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksCreditsScreen.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksEndLevelResults.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    },
+    {
+      "bytecode_fixed_at_cycle_1": true,
+      "cycle_1_to_2": {
+        "byte_delta": 0,
+        "instruction_delta": 0,
+        "maxstack_max_delta": 0,
+        "maxstack_sum_delta": 0,
+        "opcode_delta": {},
+        "proto_delta": 0,
+        "source_byte_delta": 0
+      },
+      "cycles": [
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 1,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        },
+        {
+          "bytecode_sha256": "1FA45A331A5501551A793CF4B4B909988A833B595CB5AA125D1B22FF7BCA108A",
+          "bytes": 27,
+          "code_bytes": 8,
+          "cycle": 2,
+          "instructions": 2,
+          "maxstack_max": 0,
+          "maxstack_sum": 0,
+          "maxstacks": [
+            0
+          ],
+          "opcodes": {
+            "0x11": 1,
+            "0x29": 1
+          },
+          "protos": 1,
+          "source_bytes": 17,
+          "source_sha256": "FA2492B4214567B2BB5144792D5A3CF51CDFD92FB0E53F48A0FB7DE88858CD96"
+        }
+      ],
+      "cycles_requested": 2,
+      "file": "Lotus_Interface_CaliberChicks_Minigames_CaliberChicksFinalResults.lua_B",
+      "passed": true,
+      "source_fixed_at_cycle_1": true,
+      "stable_through_requested_cycle": true,
+      "structural_fixed_at_cycle_1": true
+    }
+  ],
+  "cycle2_summary": {
+    "byte_delta_total": 0,
+    "errors": 0,
+    "files": 90,
+    "maxstack_sum_delta_total": 0,
+    "opcode_delta_total": {},
+    "passed": 90,
+    "proto_delta_total": 0
+  },
+  "environment": {
+    "RENOVICE_LIVERANGE": null,
+    "RENOVICE_NATIVE": "JUMPXEQKN,JUMPXEQKS,JUMPXEQKB,JUMPBACK,AND,OR,ANDK,ORK,SUBK,FORGPREP",
+    "RENOVICE_NATIVE_GLOBALS": "1",
+    "RENOVICE_NO_BOOLEAN_JOIN_RETURN": null,
+    "RENOVICE_NO_CALLCOALESCE": null,
+    "RENOVICE_NO_CANONICAL_FLAT_NAMES": null,
+    "RENOVICE_NO_DIRECT_SELECTOR": null,
+    "RENOVICE_NO_FORCOALESCE": null,
+    "RENOVICE_NO_PREDICATE_NNF": null,
+    "RENOVICE_NO_PROLOGUE_NIL": null,
+    "RENOVICE_NO_TERMINAL_GUARD": null
+  },
+  "long_cycle_depth": 3,
+  "passed": true,
+  "schema_version": 1
+}

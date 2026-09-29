@@ -1,0 +1,6 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=5E621731CCFCB8E93927C6889E7D0F7ED1B30147D4682D6697356DC6AECB6668
+CYCLE2 files=1 passed=0 failed=1 errors=0
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=+1556 stack_sum=+2 stack_max=+2 protos=+0 ops=0x0d:+2,0x12:+106,0x18:-4,0x1c:+3,0x20:+71,0x27:+1,0x33:-3,0x37:-1,0x38:+1,0x40:+22,0x49:-1,0x4b:+4
+CYCLE2 files=1 passed=0 failed=1 errors=0
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=+1556 stack_sum=+2 stack_max=+2 protos=+0 ops=0x0d:+2,0x12:+106,0x18:-4,0x1c:+3,0x20:+71,0x27:+1,0x33:-3,0x37:-1,0x38:+1,0x40:+22,0x49:-1,0x4b:+4
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\focused-hud-loop-dispatch-v18.json

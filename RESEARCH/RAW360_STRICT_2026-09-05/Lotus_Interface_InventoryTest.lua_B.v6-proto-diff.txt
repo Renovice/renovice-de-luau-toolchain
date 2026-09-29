@@ -1,0 +1,5 @@
+protos=224->224 shared=224
+pidx=139 code_bytes=3096->3436 (+340) instructions=625->689 (+64) maxstack=21->22 header=0 constants=121->138 equal=0 post=1 ops=0x0d:+2,0x12:+34,0x18:-1,0x20:+21,0x40:+7,0x4b:+1
+pidx=149 code_bytes=3016->3020 (+4) instructions=602->603 (+1) maxstack=30->30 header=0 constants=130->130 equal=1 post=1 ops=0x04:+2,0x40:-1
+pidx=154 code_bytes=2864->2896 (+32) instructions=578->586 (+8) maxstack=28->32 header=0 constants=103->103 equal=0 post=1 ops=0x0b:+1,0x0d:+4,0x14:+3,0x18:+1,0x1e:+1,0x27:-1,0x29:+1,0x4b:-2
+pidx=223 code_bytes=6676->6676 (+0) instructions=1498->1498 (+0) maxstack=188->188 header=1 constants=255->255 equal=1 post=1 ops=none

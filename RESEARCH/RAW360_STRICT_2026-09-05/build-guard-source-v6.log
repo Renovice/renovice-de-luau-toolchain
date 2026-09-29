@@ -1,0 +1,9 @@
+In file included from src\main.cpp:23:
+src\emit.h: In static member function 'static int em::Emitter::canonicalize_negated_ordered_if_guards(std::string&)':
+src\emit.h:11395:28: error: 'plain_identifier' was not declared in this scope
+11395 |                     if (!((plain_identifier(left) && right == "nil")
+      |                            ^~~~~~~~~~~~~~~~
+src\emit.h:11397:21: error: 'inverse' was not declared in this scope
+11397 |                     inverse = left + (relation == " == " ? " ~= " : " == ") + right;
+      |                     ^~~~~~~
+BUILD FAILED 

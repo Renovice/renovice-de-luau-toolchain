@@ -39,7 +39,8 @@ inline bool op_has_aux(uint8_t op) {
         for (const char* a : AUX) for (int i = 0; i < NOPS; ++i) if (std::strcmp(a, OPS[i]) == 0) { table[i] = true; break; }
         built = true;
     }
-    return op < 256 ? table[op] : false;
+    // `op` is uint8_t, so every possible value is already within this table.
+    return table[op];
 }
 
 // const tags (LBC_CONSTANT_*)

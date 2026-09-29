@@ -1,0 +1,3 @@
+. (Join-Path $PSScriptRoot 'Set-CandidateProfileV32.ps1')
+$env:RENOVICE_CANONICAL_ROOT_REPEAT_LITERAL_TAIL = '1'
+$env:RENOVICE_CFG_EARLY_GUARD_JOIN = '1'

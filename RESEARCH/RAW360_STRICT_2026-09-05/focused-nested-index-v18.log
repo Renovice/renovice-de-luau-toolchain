@@ -1,0 +1,7 @@
+== IDEMPOTENCE CERT == corpus=C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\shared\corpus\de-luau-stock binary=5E621731CCFCB8E93927C6889E7D0F7ED1B30147D4682D6697356DC6AECB6668
+CYCLE2 files=4 passed=1 failed=3 errors=0
+  DRIFT Lotus_Interface_HudRedux.lua_B                          bytes=-65 stack_sum=+4 stack_max=+4 protos=+0 ops=0x0b:+1,0x0d:+3,0x12:-3,0x14:+3,0x18:-1,0x1e:+1,0x20:-3,0x29:+1,0x33:-2,0x37:-1,0x38:+3,0x39:+1,0x3a:-1,0x40:-9,0x49:-3
+  DRIFT Lotus_Interface_InventoryTest.lua_B                     bytes=+36 stack_sum=+4 stack_max=+0 protos=+0 ops=0x04:+2,0x0b:+1,0x0d:+4,0x14:+3,0x18:+1,0x1e:+1,0x27:-1,0x29:+1,0x40:-1,0x4b:-2
+  DRIFT Lotus_Interface_LoadOutRedux.lua_B                      bytes=+0 stack_sum=+0 stack_max=+0 protos=+0 ops=none
+CYCLE2 files=1 passed=1 failed=0 errors=0
+machine-readable results: C:\Users\Bartek\OneDrive\Dokumenter\Warframe RE PROJECT RENOVICE\repos\toolchains\de-luau-toolchain\RESEARCH\RAW360_STRICT_2026-09-05\focused-nested-index-v18.json

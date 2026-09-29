@@ -114,6 +114,16 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
             st::Node& F = g.n[f];
             if (!F.is_branch || F.succ_true < 0 || F.succ_false < 0) continue;
             if (F.preds.size() != 1) { ++sc_blk_preds; continue; }  // F must be private to B
+            // A loop prep/latch is control structure, never the second leaf of `a and b`/`a or b`.
+            // Merging a comparison with an adjacent FORNLOOP erased the comparison's loop-exit edge
+            // and dropped source `break` on the next cycle (BattleMap). Preserve all verified loop
+            // controls as graph nodes before considering a short-circuit fold.
+            auto loop_control = [](uint8_t op) {
+                return op == 0x0a || op == 0x1e || op == 0x47
+                    || op == 0x30 || op == 0x1b || op == 0x0b;
+            };
+            if (loop_control(B.term) || loop_control(F.term))
+                continue;
             // F must be a PURE TEST. If it holds any statement before its terminator, that statement
             // is GUARDED by B's test — merging hoists it out of the guard and it runs unconditionally.
             // `t and t.x and t.x.y` became `v1 = v0.x` executed before the `t` check, so it indexed

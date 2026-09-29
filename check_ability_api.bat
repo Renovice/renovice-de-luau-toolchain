@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 if "%~1"=="" (
-  echo Usage: check_ability_api.bat source.luau [--show-unknown^|--strict-unknown]
+  echo Usage: check_ability_api.bat source.luau [--baseline stock.luau] [--show-unknown^|--strict-unknown]
   exit /b 2
 )
 if not exist "bin\wf_api_check.exe" (
@@ -23,7 +23,7 @@ if not "%WFAPI_COMPILE_RESULT%"=="0" (
   exit /b %WFAPI_COMPILE_RESULT%
 )
 echo [2/2] Focused Warframe API contract check
-"bin\wf_api_check.exe" "api\warframe\contracts.tsv" "%WFAPI_COMPILE_INPUT%" %2
+"bin\wf_api_check.exe" "api\warframe\contracts.tsv" "%WFAPI_COMPILE_INPUT%" %2 %3 %4
 set "WFAPI_CHECK_RESULT=%ERRORLEVEL%"
 del /q "%WFAPI_COMPILE_INPUT%" >nul 2>nul
 if not "%WFAPI_CHECK_RESULT%"=="0" exit /b %WFAPI_CHECK_RESULT%
