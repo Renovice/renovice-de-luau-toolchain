@@ -16,6 +16,29 @@ Decompiler fixes (structan.h / emit.h). For each fixture:
   import_chain                RENOVICE_NO_IMPORT_CHAIN_GUARD  (`_T[NAME]` read became a snapshot import;
                               the harness predefines _T before loading the chunk)
 
+  compound_exit_loop          RENOVICE_NO_LOOP_BODY_DAG       (`while IsNull(g) or not g:GameStarted()` before
+                              another loop: the IsNull branch was dropped, GameStarted ran on nil;
+                              the harness predefines IsNull/Sleep/gGameRules as globals)
+  compound_exit_namecall      RENOVICE_NO_LOOP_BODY_DAG       (the same shape with upvalue mocks)
+
+Loop-carried nil (emit.h implicit-nil canonicalizer, #41), fixture loop_carried_nil:
+  LOOP_CARRIED_NIL_RUNS / _DEFAULT_BEHAVIOR_SAME / _DEFAULT_CFG_IDENTITY
+  LOOP_CARRIED_NIL_LEGACY_BEHAVIOR_DIFFERS  RENOVICE_NO_LOOP_NIL_HOIST resets the variable per iteration
+  LOOP_CARRIED_NIL_LEGACY_CFG_BLIND         ... and cfg-identity still PASSes it (LOADNIL is epsilon):
+                              a recorded gate blind spot, not a requirement to keep
+
+Gate normalization S3 (cfg_identity_cmd.h), fixture truthy_noop:
+  TRUTHY_DEFAULT_BEHAVIOR_SAME / TRUTHY_DEFAULT_CFG_IDENTITY
+  TRUTHY_LEGACY_GATE_FAILS    RENOVICE_CFGID_LEGACY_TRUTHY_NOOP=1 reports the identical round trip as
+                              different (stock keeps the dead test of an empty `if a and b then end`)
+  TRUTHY_MUTATION_*_FAILS     a body in the empty if, or a real early return, must still FAIL
+
+Gate normalization S4 (cfg_identity_cmd.h), fixture loop_prep_slots:
+  LOOP_SLOT_DEFAULT_BEHAVIOR_SAME / LOOP_SLOT_DEFAULT_CFG_IDENTITY
+  LOOP_SLOT_LEGACY_GATE_FAILS RENOVICE_CFGID_LEGACY_LOOP_SLOT=1 reports the identical round trip as
+                              different (FORNPREP A+2 matched its jump offset B by coincidence)
+  LOOP_SLOT_MUTATION_BOUND_FAILS  a changed loop bound must still FAIL
+
 Gate normalization fix (cfg_identity_cmd.h S2), fixture tail_load_order:
   TAIL_DEFAULT_BEHAVIOR_SAME / TAIL_DEFAULT_CFG_IDENTITY
   TAIL_LEGACY_GATE_FAILS      RENOVICE_CFGID_LEGACY_TAIL=1 on the gate reports the identical
@@ -30,19 +53,43 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-DEC = os.path.join(ROOT, "bin", "derecomp.exe")
+DEC = os.path.join(ROOT, "bin", os.environ.get("RENOVICE_FIXTURE_EXE", "derecomp.exe"))
 LUAU = os.path.join(ROOT, "bin", "luau.exe")
 FIX = os.path.join(HERE, "fixtures", "cfg_class_2026_09_30")
 OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_IMPORT_CHAIN_GUARD", "RENOVICE_NO_ENTRY_CALLER_EDGE",
-            "RENOVICE_CFGID_LEGACY_TAIL")
+            "RENOVICE_CFGID_LEGACY_TAIL", "RENOVICE_NO_LOOP_BODY_DAG", "RENOVICE_NO_LOOP_NIL_HOIST",
+            "RENOVICE_CFGID_LEGACY_TRUTHY_NOOP", "RENOVICE_CFGID_LEGACY_LOOP_SLOT")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP",
     "entry_outer_loop": "RENOVICE_NO_ENTRY_CALLER_EDGE",
     "import_chain": "RENOVICE_NO_IMPORT_CHAIN_GUARD",
+    "compound_exit_loop": "RENOVICE_NO_LOOP_BODY_DAG",
+    "compound_exit_namecall": "RENOVICE_NO_LOOP_BODY_DAG",
 }
 IMPORT_PRELUDE = '_T = { RenoviceImportFixture = "stale", RenoviceOther = "other" }\n'
+# Globals for compound_exit_loop: gGameRules appears after the second Sleep, starts on its second
+# GameStarted() call and returns a crew-ship manager from the fifth Sleep on.
+GAME_RULES_PRELUDE = """polls = 0
+function IsNull(value) return value == nil end
+function Sleep(seconds)
+    polls = polls + 1
+    print("sleep", seconds, polls)
+    if polls == 2 then
+        gGameRules = { started = 0 }
+        function gGameRules:GameStarted() self.started = self.started + 1; return self.started >= 2 end
+        function gGameRules:GetCrewShipManager() if polls < 5 then return nil end return {} end
+    end
+    if polls >= 8 then error("stop", 0) end
+end
+"""
+PRELUDES = {"import_chain": IMPORT_PRELUDE, "compound_exit_loop": GAME_RULES_PRELUDE}
+TRUTHY_ANCHOR = "    if Ready() and IsNull(target) then\n    end\n"
+TRUTHY_MUTATIONS = {
+    "BODY": "    if Ready() and IsNull(target) then\n        print(\"body\")\n    end\n",
+    "EARLY_RETURN": "    if Ready() and IsNull(target) then\n        return 0\n    end\n",
+}
 TAIL_MUTATIONS = {
     "CONSTANT": ("    local t = 0\n", "    local t = 1\n"),
     "EFFECT_ORDER": ("        t = t + 0.5\n        info:SetFade(from + t)\n",
@@ -120,7 +167,7 @@ def main():
         with tempfile.TemporaryDirectory(prefix="renovice-cfg-class-") as temp:
             for name, opt_out in DECOMPILER_FIXTURES.items():
                 fixture = os.path.join(FIX, name + ".luau")
-                prelude = IMPORT_PRELUDE if name == "import_chain" else ""
+                prelude = PRELUDES.get(name, "")
                 expected = trace(fixture, temp, prelude)
                 checks[name.upper() + "_RUNS"] = expected.count("\n") >= 2
                 original = os.path.join(temp, name + ".original.lua_B")
@@ -133,6 +180,56 @@ def main():
                 legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
                 checks[name.upper() + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
                 checks[name.upper() + "_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp, prelude) != expected
+
+            fixture = os.path.join(FIX, "loop_carried_nil.luau")
+            expected = trace(fixture, temp)
+            checks["LOOP_CARRIED_NIL_RUNS"] = expected.count("\n") >= 2
+            original = os.path.join(temp, "loop_carried_nil.original.lua_B")
+            run([DEC, "recompile", fixture, original])
+            source, rebuilt = round_trip(original, temp, "loop_carried_nil.default")
+            checks["LOOP_CARRIED_NIL_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
+            checks["LOOP_CARRIED_NIL_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+            legacy_env = base_env()
+            legacy_env["RENOVICE_NO_LOOP_NIL_HOIST"] = "1"
+            legacy_source, legacy_rebuilt = round_trip(original, temp, "loop_carried_nil.legacy",
+                                                       legacy_env)
+            checks["LOOP_CARRIED_NIL_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp) != expected
+            checks["LOOP_CARRIED_NIL_LEGACY_CFG_BLIND"] = cfg_verdict(original, legacy_rebuilt) == "PASS"
+
+            fixture = os.path.join(FIX, "truthy_noop.luau")
+            text = open(fixture, encoding="utf-8").read()
+            expected = trace(fixture, temp)
+            original = os.path.join(temp, "truthy.original.lua_B")
+            run([DEC, "recompile", fixture, original])
+            source, rebuilt = round_trip(original, temp, "truthy.default")
+            checks["TRUTHY_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
+            checks["TRUTHY_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+            legacy_gate = base_env()
+            legacy_gate["RENOVICE_CFGID_LEGACY_TRUTHY_NOOP"] = "1"
+            checks["TRUTHY_LEGACY_GATE_FAILS"] = cfg_verdict(original, rebuilt, legacy_gate) == "FAIL"
+            if text.count(TRUTHY_ANCHOR) != 1:
+                raise RuntimeError("truthy mutation anchor not unique")
+            for label, new in TRUTHY_MUTATIONS.items():
+                mutant = compile_text(text.replace(TRUTHY_ANCHOR, new), temp,
+                                      "truthy.mutant_" + label.lower())
+                checks["TRUTHY_MUTATION_%s_FAILS" % label] = cfg_verdict(original, mutant) == "FAIL"
+
+            fixture = os.path.join(FIX, "loop_prep_slots.luau")
+            text = open(fixture, encoding="utf-8").read()
+            expected = trace(fixture, temp)
+            original = os.path.join(temp, "loop_slot.original.lua_B")
+            run([DEC, "recompile", fixture, original])
+            source, rebuilt = round_trip(original, temp, "loop_slot.default")
+            checks["LOOP_SLOT_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
+            checks["LOOP_SLOT_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+            legacy_gate = base_env()
+            legacy_gate["RENOVICE_CFGID_LEGACY_LOOP_SLOT"] = "1"
+            checks["LOOP_SLOT_LEGACY_GATE_FAILS"] = cfg_verdict(original, rebuilt, legacy_gate) == "FAIL"
+            if text.count("for i = 400, 415 do") != 1:
+                raise RuntimeError("loop-slot mutation anchor not unique")
+            mutant = compile_text(text.replace("for i = 400, 415 do", "for i = 400, 416 do"), temp,
+                                  "loop_slot.mutant_bound")
+            checks["LOOP_SLOT_MUTATION_BOUND_FAILS"] = cfg_verdict(original, mutant) == "FAIL"
 
             fixture = os.path.join(FIX, "tail_load_order.luau")
             text = open(fixture, encoding="utf-8").read()

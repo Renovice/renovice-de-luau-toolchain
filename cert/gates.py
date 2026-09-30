@@ -44,6 +44,10 @@ CORE GATES (a change ships only if ALL pass):
                           loop, entry-headed outer loop, `_T[NAME]` import-chain read (behavior +
                           CFG-ID; each fix's opt-out must FAIL both), and the gate's own S2 tail-sinking normalization (legacy rule must
                           FAIL an identical round trip; an equivalent reorder PASSes; mutations FAIL).
+                          Extended 2026-09-30 (multi-exit loops): two compound-exit loop fixtures
+                          (loop-body DAG, #40), the loop-carried nil fixture (#41, behavior only: the
+                          CFG gate is blind to it), the S3 truthy no-op and S4 loop-operand slot
+                          normalizations.
 
 Usage:
     python cert/gates.py                 # 300 files, baseline from BASELINE below
@@ -77,11 +81,22 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "LOST_CONDITION": 0, "SEMANTIC_BEHAVIOR_SAME": 150,
             "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
-            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 26,
+            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 50,
             "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 14,
             "U43_CLASS_SWAPS": 6590,
-            "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 76,
+            "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 79,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-09-30 (b) -- multi-exit loop bodies (RESEARCH/CFG_MULTI_EXIT_LOOPS_2026-09-30.md):
+#   Gate 14 26 -> 50 checks. Pre = a788f061 (HEAD b51d08a), post = d51d877e; the post gate adds the S3
+#   (truthy no-op) and S4 (loop-operand slot) normalizations, so Gate 13 gains mix gate and pipeline
+#   effects (the research note separates them on the full corpus).
+#     U43 first 300:  CONST-ID 18 -> 18, CFG-ID 14 -> 14, CFG protos equal 7,653 -> 7,667 of 10,925,
+#                     class swaps 6,590 -> 6,590.
+#     U44 1-in-50:    CONST-ID 107 -> 107, CFG-ID 76 -> 79, CFG protos equal 1,491 -> 1,494 of 1,701,
+#                     class swaps 0 -> 0.
+#   Back-edge MATCH 267 -> 268, LOST-LOOPS 21 -> 20, LOST-HEADERS 106 -> 105; align LOOP-DIFF 23 -> 22,
+#   ORDER-DIFF 43 -> 44 (one module moved between the two); all other gates unchanged.
 
 # BASELINE CHANGE OF 2026-09-30 -- CFG-ID class fixes (RESEARCH/CFG_CLASS_FIXES_2026-09-30.md):
 #   Gate 14 is new (26 checks). Pre = derecomp b4221c48 (HEAD 029ba1f), post = a788f061; the post
@@ -782,7 +797,8 @@ def main():
                      % (NL.get("passed", 0), BASELINE["NATURAL_LOOP_CHECKS"]))
 
     # ---- Gate 14: 2026-09-30 CFG-ID class fixtures
-    print("\n-- GATE 14: CFG-ID class fixtures (terminal self-loop, entry-headed loops, import chain, S2)")
+    print("\n-- GATE 14: CFG-ID class fixtures (terminal self-loop, entry-headed loops, import chain, S2,"
+          " compound-exit loops, loop-carried nil, S3, S4)")
     print("   checks=%d passed=%d verdict=%s" % (CC.get("checks", 0), CC.get("passed", 0),
                                                  CC.get("verdict", "?")))
     for check in CC.get("failed_checks", []):

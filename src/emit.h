@@ -12310,26 +12310,87 @@ emit_conditional_region:
                 }
         };
 
+        // LOOP-CARRIED NIL (2026-09-30, DEFECTS #41). "First textual read" is the first EXECUTED
+        // read only in straight-line code. Inside a loop, a definition printed LATER in the body runs
+        // before the read on every iteration after the first: `local owner = nil; while true do if
+        // IsNull(owner) then owner = Find() end ... end` lost its entry LOADNIL (a flat local is nil
+        // already), and the canonical `owner = nil` placed at the read reset the variable on every
+        // iteration. A first read inside a loop therefore gets its nil before the OUTERMOST enclosing
+        // loop -- the stock position of `local x = nil` before a polling loop. That is exact whether
+        // or not the loop assigns the register: nothing textually earlier mentions it, so it is nil
+        // on entry to the loop either way. Hoisting only loop-assigned registers was measured and
+        // rejected: a sibling nil left at the read (AddAscarisNegator `lastAvatar`) then compiled to
+        // `IF EQK nil` instead of the stock register compare. RENOVICE_NO_LOOP_NIL_HOIST=1 restores
+        // the previous placement.
+        const bool hoist_loop_nil = !std::getenv("RENOVICE_NO_LOOP_NIL_HOIST");
+        std::vector<std::set<int>> line_definitions(lines.size());
+        std::vector<std::vector<RegToken>> line_tokens(lines.size());
+        for (size_t i = 0; i < lines.size(); ++i) {
+            const size_t indent = indent_of(lines[i]);
+            line_tokens[i] = reg_tokens(lines[i]);
+            plain_register_lhs(lines[i], indent, lines[i].find(" = ", indent), line_tokens[i],
+                               line_definitions[i]);
+        }
+        auto trimmed_starts = [&](size_t i, const char* word) {
+            const size_t indent = indent_of(lines[i]);
+            return lines[i].compare(indent, std::strlen(word), word) == 0;
+        };
+        // Enclosing loop openers of line i, innermost first, with the line range of each loop.
+        auto enclosing_loops = [&](size_t i) {
+            std::vector<std::pair<size_t, size_t>> loops;
+            size_t limit = indent_of(lines[i]);
+            for (size_t j = i; j-- > 0;) {
+                if (lines[j].find_first_not_of(' ') == std::string::npos) continue;
+                const size_t indent = indent_of(lines[j]);
+                if (indent >= limit) continue;
+                const bool continues_if = trimmed_starts(j, "else") || trimmed_starts(j, "elseif ");
+                limit = continues_if ? indent + 1 : indent;
+                if (continues_if) continue;
+                if (!trimmed_starts(j, "while ") && !trimmed_starts(j, "for ")
+                    && !trimmed_starts(j, "repeat")) {
+                    if (indent == 0) break;
+                    continue;
+                }
+                size_t close = j + 1;
+                while (close < lines.size()
+                       && (lines[close].find_first_not_of(' ') == std::string::npos
+                           || indent_of(lines[close]) > indent))
+                    ++close;
+                loops.push_back({j, close});
+                if (indent == 0) break;
+            }
+            return loops;
+        };
         std::set<int> seen;
         std::vector<std::string> rewritten_lines;
+        std::vector<std::vector<std::string>> before(lines.size());
         int changed = 0;
-        for (const std::string& line : lines) {
+        for (size_t i = 0; i < lines.size(); ++i) {
+            const std::string& line = lines[i];
             const size_t indent = indent_of(line);
-            const std::vector<RegToken> tokens = reg_tokens(line);
-            const size_t assign = line.find(" = ", indent);
-            std::set<int> definitions;
-            plain_register_lhs(line, indent, assign, tokens, definitions);
+            const std::set<int>& definitions = line_definitions[i];
             std::set<int> materialize;
-            for (const RegToken& token : tokens) {
+            for (const RegToken& token : line_tokens[i]) {
                 if (!seen.insert(token.reg).second || token.reg < nparams) continue;
                 if (!definitions.count(token.reg)) materialize.insert(token.reg);
             }
             for (int reg : materialize) {
-                rewritten_lines.push_back(std::string(indent, ' ') + "v"
-                                          + std::to_string(reg) + " = nil");
+                size_t target = i, target_indent = indent;
+                if (hoist_loop_nil) {
+                    const auto loops = enclosing_loops(i);
+                    if (!loops.empty()) {
+                        target = loops.back().first;               // outermost enclosing loop
+                        target_indent = indent_of(lines[target]);
+                    }
+                }
+                before[target].push_back(std::string(target_indent, ' ') + "v"
+                                         + std::to_string(reg) + " = nil");
                 ++changed;
             }
-            rewritten_lines.push_back(line);
+        }
+        for (size_t i = 0; i < lines.size(); ++i) {
+            for (const std::string& extra : before[i]) rewritten_lines.push_back(extra);
+            rewritten_lines.push_back(lines[i]);
         }
         if (changed) {
             std::string rewritten;

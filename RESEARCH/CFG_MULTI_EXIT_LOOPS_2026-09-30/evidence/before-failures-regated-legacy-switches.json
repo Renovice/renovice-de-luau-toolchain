@@ -1,0 +1,6346 @@
+{
+"EE_Interface_Components_List": [
+"FAIL",
+85
+],
+"EE_Interface_Components_ListContainer": [
+"FAIL",
+20
+],
+"EE_Interface_Editor_UiInspector_UiInspector": [
+"FAIL",
+14
+],
+"EE_Interface_Utilities": [
+"FAIL",
+167
+],
+"Lotus_Characters_Tenno_Accessory_Ephemeras_QorvexDeluxeEphemera_QorvexDeluxeEphemeraBat": [
+"FAIL",
+15
+],
+"Lotus_Characters_Tenno_Infestation_Cyst_InfestationCyst": [
+"FAIL",
+6
+],
+"Lotus_Fx_ModQuest_ModQuestPrecipitation": [
+"FAIL",
+3
+],
+"Lotus_Interface_1999_DiegeticCalendar": [
+"FAIL",
+6
+],
+"Lotus_Interface_1999_RetroMap": [
+"FAIL",
+110
+],
+"Lotus_Interface_1999_RetroMessenger": [
+"FAIL",
+5
+],
+"Lotus_Interface_AddIngredientsScreen": [
+"FAIL",
+52
+],
+"Lotus_Interface_AlignmentDisplay": [
+"FAIL",
+24
+],
+"Lotus_Interface_AllPossibleEvolutions": [
+"FAIL",
+27
+],
+"Lotus_Interface_AppearancePreview": [
+"FAIL",
+49
+],
+"Lotus_Interface_ArenaGambling": [
+"FAIL",
+32
+],
+"Lotus_Interface_Background": [
+"FAIL",
+270
+],
+"Lotus_Interface_Backgrounds_Overlay_OverlayBackground": [
+"FAIL",
+18
+],
+"Lotus_Interface_Backgrounds_Stalker_StalkerBackground": [
+"FAIL",
+12
+],
+"Lotus_Interface_BeaconAccepted": [
+"FAIL",
+15
+],
+"Lotus_Interface_BeaconInProgress": [
+"FAIL",
+29
+],
+"Lotus_Interface_BindingsUtil": [
+"FAIL",
+18
+],
+"Lotus_Interface_BoonNotification": [
+"FAIL",
+8
+],
+"Lotus_Interface_BoonsActive": [
+"FAIL",
+32
+],
+"Lotus_Interface_BoonSelection": [
+"FAIL",
+6
+],
+"Lotus_Interface_CaliberChicks_Minigames_CaliberChicksControlsScreen": [
+"FAIL",
+28
+],
+"Lotus_Interface_CaliberChicks_Minigames_CaliberChicksControlsScreenText": [
+"FAIL",
+14
+],
+"Lotus_Interface_CaliberChicks_Minigames_CaliberChicksFinalResults": [
+"FAIL",
+16
+],
+"Lotus_Interface_CaliberChicks_Minigames_CaliberChicksHUD": [
+"FAIL",
+36
+],
+"Lotus_Interface_CardUtilitiesRedux": [
+"FAIL",
+118
+],
+"Lotus_Interface_CephalonFragmentMessage": [
+"FAIL",
+13
+],
+"Lotus_Interface_ChallengePopUp": [
+"FAIL",
+44
+],
+"Lotus_Interface_ChallengesProgress": [
+"FAIL",
+36
+],
+"Lotus_Interface_ChallengeUtilities": [
+"FAIL",
+11
+],
+"Lotus_Interface_ChatRedux": [
+"FAIL",
+308
+],
+"Lotus_Interface_Cipher": [
+"FAIL",
+58
+],
+"Lotus_Interface_Clan": [
+"FAIL",
+269
+],
+"Lotus_Interface_ClanMemberRole": [
+"FAIL",
+60
+],
+"Lotus_Interface_ClanSearch": [
+"FAIL",
+95
+],
+"Lotus_Interface_Codex": [
+"FAIL",
+14
+],
+"Lotus_Interface_CodexLite": [
+"FAIL",
+14
+],
+"Lotus_Interface_CodexUtilities": [
+"FAIL",
+12
+],
+"Lotus_Interface_CoHBuffSelection": [
+"FAIL",
+4
+],
+"Lotus_Interface_ColorPicker": [
+"FAIL",
+104
+],
+"Lotus_Interface_CommanderMap": [
+"FAIL",
+140
+],
+"Lotus_Interface_Components_AvatarDiorama": [
+"FAIL",
+88
+],
+"Lotus_Interface_Components_BoosterInfo": [
+"FAIL",
+4
+],
+"Lotus_Interface_Components_CategorizedGrid": [
+"FAIL",
+67
+],
+"Lotus_Interface_Components_CustomizationList": [
+"FAIL",
+129
+],
+"Lotus_Interface_Components_EvolutionList": [
+"FAIL",
+23
+],
+"Lotus_Interface_Components_GearList": [
+"FAIL",
+13
+],
+"Lotus_Interface_Components_GearSpiral": [
+"FAIL",
+27
+],
+"Lotus_Interface_Components_MissionPanel": [
+"FAIL",
+12
+],
+"Lotus_Interface_Components_PlayerPanelRedux": [
+"FAIL",
+37
+],
+"Lotus_Interface_Components_StatCompare": [
+"FAIL",
+52
+],
+"Lotus_Interface_Components_StatsUtil": [
+"FAIL",
+25
+],
+"Lotus_Interface_Components_ThemedButton": [
+"FAIL",
+61
+],
+"Lotus_Interface_Components_ThemedCategoriesMenu": [
+"FAIL",
+18
+],
+"Lotus_Interface_Components_ThemedCustomizationButton": [
+"FAIL",
+56
+],
+"Lotus_Interface_Components_ThemedCustomizationList": [
+"FAIL",
+114
+],
+"Lotus_Interface_Components_ThemedProgressInfo": [
+"FAIL",
+13
+],
+"Lotus_Interface_Components_ThemedSquadPanel": [
+"FAIL",
+67
+],
+"Lotus_Interface_Components_ThemedStats": [
+"FAIL",
+30
+],
+"Lotus_Interface_Components_UserList": [
+"FAIL",
+53
+],
+"Lotus_Interface_ConclaveModeSelection": [
+"FAIL",
+69
+],
+"Lotus_Interface_ConquestSetup": [
+"FAIL",
+9
+],
+"Lotus_Interface_ConquestStickerSelect": [
+"FAIL",
+76
+],
+"Lotus_Interface_ConservationHud": [
+"FAIL",
+23
+],
+"Lotus_Interface_ConsumablesOverlay": [
+"FAIL",
+144
+],
+"Lotus_Interface_ContextAction": [
+"FAIL",
+19
+],
+"Lotus_Interface_ControllerLayout": [
+"FAIL",
+58
+],
+"Lotus_Interface_CouponUtilities": [
+"FAIL",
+2
+],
+"Lotus_Interface_Credits": [
+"FAIL",
+9
+],
+"Lotus_Interface_DailyTribute": [
+"FAIL",
+88
+],
+"Lotus_Interface_DecorationsHud": [
+"FAIL",
+33
+],
+"Lotus_Interface_DecoTemplate": [
+"FAIL",
+71
+],
+"Lotus_Interface_DefenseReward": [
+"FAIL",
+57
+],
+"Lotus_Interface_Dialog": [
+"FAIL",
+83
+],
+"Lotus_Interface_DialogWithCards": [
+"FAIL",
+61
+],
+"Lotus_Interface_DiegeticArtifactCards": [
+"FAIL",
+233
+],
+"Lotus_Interface_DiegeticFoundry": [
+"FAIL",
+195
+],
+"Lotus_Interface_DiegeticUpgradeCards": [
+"FAIL",
+398
+],
+"Lotus_Interface_Dojo_DojoColorResearchStatus": [
+"FAIL",
+13
+],
+"Lotus_Interface_Dojo_DojoRoomConstructionStatus": [
+"FAIL",
+52
+],
+"Lotus_Interface_Dojo_DojoRoomSelection": [
+"FAIL",
+111
+],
+"Lotus_Interface_Dojo_ResearchContribution": [
+"FAIL",
+87
+],
+"Lotus_Interface_Dojo_ResearchSelection": [
+"FAIL",
+117
+],
+"Lotus_Interface_Dojo_Trade": [
+"FAIL",
+132
+],
+"Lotus_Interface_Dojo_TradingPost": [
+"FAIL",
+53
+],
+"Lotus_Interface_Dojo_TradingPostScreenLauncher": [
+"FAIL",
+4
+],
+"Lotus_Interface_Dojo_VaultContribution": [
+"FAIL",
+16
+],
+"Lotus_Interface_DrifterIntrinsics": [
+"FAIL",
+69
+],
+"Lotus_Interface_DuviriEndlessSetup": [
+"FAIL",
+23
+],
+"Lotus_Interface_DuviriMissionComplete": [
+"FAIL",
+9
+],
+"Lotus_Interface_DuviriTitleCard": [
+"FAIL",
+10
+],
+"Lotus_Interface_DuviriWeaponControls": [
+"FAIL",
+12
+],
+"Lotus_Interface_EidolonJobBoard": [
+"FAIL",
+92
+],
+"Lotus_Interface_EidolonMissionComplete": [
+"FAIL",
+21
+],
+"Lotus_Interface_EndOfMatch": [
+"FAIL",
+43
+],
+"Lotus_Interface_EndOfMatchKahl": [
+"FAIL",
+41
+],
+"Lotus_Interface_EndOfMatchPvp": [
+"FAIL",
+44
+],
+"Lotus_Interface_EndOfQuest": [
+"FAIL",
+22
+],
+"Lotus_Interface_EpisodeChallenges": [
+"FAIL",
+123
+],
+"Lotus_Interface_EpisodeStatus": [
+"FAIL",
+45
+],
+"Lotus_Interface_FastTravelUtilities": [
+"FAIL",
+32
+],
+"Lotus_Interface_FighterSelect": [
+"FAIL",
+28
+],
+"Lotus_Interface_FishInfo": [
+"FAIL",
+45
+],
+"Lotus_Interface_FishingHud": [
+"FAIL",
+9
+],
+"Lotus_Interface_FocusActivation": [
+"FAIL",
+43
+],
+"Lotus_Interface_FocusManager": [
+"FAIL",
+109
+],
+"Lotus_Interface_FortressUtilities": [
+"FAIL",
+4
+],
+"Lotus_Interface_Founders": [
+"FAIL",
+5
+],
+"Lotus_Interface_FoundryConfirmDialog": [
+"FAIL",
+79
+],
+"Lotus_Interface_Friends": [
+"FAIL",
+64
+],
+"Lotus_Interface_GenericMenu": [
+"FAIL",
+40
+],
+"Lotus_Interface_GenericNotification": [
+"FAIL",
+35
+],
+"Lotus_Interface_GenericVendor": [
+"FAIL",
+145
+],
+"Lotus_Interface_GeneticLab": [
+"FAIL",
+152
+],
+"Lotus_Interface_GiftCelebration": [
+"FAIL",
+22
+],
+"Lotus_Interface_HorseCustomization": [
+"FAIL",
+62
+],
+"Lotus_Interface_Hub": [
+"FAIL",
+60
+],
+"Lotus_Interface_HudCustomization": [
+"FAIL",
+30
+],
+"Lotus_Interface_HudFighter": [
+"FAIL",
+16
+],
+"Lotus_Interface_HudLunaro": [
+"FAIL",
+54
+],
+"Lotus_Interface_HudRedux": [
+"FAIL",
+56
+],
+"Lotus_Interface_Inbox": [
+"FAIL",
+139
+],
+"Lotus_Interface_InkPaint": [
+"FAIL",
+20
+],
+"Lotus_Interface_InlineLoadout": [
+"FAIL",
+87
+],
+"Lotus_Interface_InputCountDialog": [
+"FAIL",
+56
+],
+"Lotus_Interface_InputDialog": [
+"FAIL",
+55
+],
+"Lotus_Interface_Intrinsics": [
+"FAIL",
+63
+],
+"Lotus_Interface_InventoryTest": [
+"FAIL",
+215
+],
+"Lotus_Interface_InventoryUtilities": [
+"FAIL",
+58
+],
+"Lotus_Interface_ItemBrowsing": [
+"FAIL",
+133
+],
+"Lotus_Interface_ItemInfoPopup": [
+"FAIL",
+78
+],
+"Lotus_Interface_KahlCustomization": [
+"FAIL",
+75
+],
+"Lotus_Interface_Libs_ActiveMissionGenerator": [
+"FAIL",
+3
+],
+"Lotus_Interface_Libs_DeepArchimedeaMissionGenerator": [
+"FAIL",
+30
+],
+"Lotus_Interface_Libs_DojoMgr": [
+"FAIL",
+100
+],
+"Lotus_Interface_Libs_DuviriUtil": [
+"FAIL",
+77
+],
+"Lotus_Interface_Libs_ImGuiLib": [
+"FAIL",
+52
+],
+"Lotus_Interface_Libs_JukeBoxMgr": [
+"FAIL",
+47
+],
+"Lotus_Interface_Libs_PreviewLinkUtilities": [
+"FAIL",
+19
+],
+"Lotus_Interface_Libs_SortieGenerator": [
+"FAIL",
+10
+],
+"Lotus_Interface_Libs_SyndicateMissionGenerator": [
+"FAIL",
+9
+],
+"Lotus_Interface_LisetCustomization": [
+"FAIL",
+78
+],
+"Lotus_Interface_LoadOutRedux": [
+"FAIL",
+135
+],
+"Lotus_Interface_LoadOutSelect": [
+"FAIL",
+108
+],
+"Lotus_Interface_LoadoutUtilities": [
+"FAIL",
+91
+],
+"Lotus_Interface_LotusLoadOut": [
+"FAIL",
+43
+],
+"Lotus_Interface_LotusNetworkUtilities": [
+"FAIL",
+58
+],
+"Lotus_Interface_LotusUtilities": [
+"FAIL",
+556
+],
+"Lotus_Interface_Map_MapLegend": [
+"FAIL",
+32
+],
+"Lotus_Interface_MapNodeTipUtilities": [
+"FAIL",
+75
+],
+"Lotus_Interface_MapRedux": [
+"FAIL",
+108
+],
+"Lotus_Interface_Minigames_DuviriHack": [
+"FAIL",
+69
+],
+"Lotus_Interface_Minigames_NarmerHack": [
+"FAIL",
+45
+],
+"Lotus_Interface_Minigames_OlliesCrashCourseTimer": [
+"FAIL",
+3
+],
+"Lotus_Interface_Minigames_RetroMinigame": [
+"FAIL",
+13
+],
+"Lotus_Interface_Minigames_SnakeHack": [
+"FAIL",
+65
+],
+"Lotus_Interface_MissionRequirementUtilities": [
+"FAIL",
+27
+],
+"Lotus_Interface_MobileUtils": [
+"FAIL",
+16
+],
+"Lotus_Interface_ModFusion": [
+"FAIL",
+35
+],
+"Lotus_Interface_ModularWeaponCrafting": [
+"FAIL",
+123
+],
+"Lotus_Interface_ModularWeaponUtilities": [
+"FAIL",
+3
+],
+"Lotus_Interface_MotorcycleCustomization": [
+"FAIL",
+70
+],
+"Lotus_Interface_NecramechWireframe": [
+"FAIL",
+4
+],
+"Lotus_Interface_NemesisDamageTypePopUp": [
+"FAIL",
+37
+],
+"Lotus_Interface_NewWarQuiz": [
+"FAIL",
+31
+],
+"Lotus_Interface_Notifications": [
+"FAIL",
+109
+],
+"Lotus_Interface_OmegaRerollSelection": [
+"FAIL",
+76
+],
+"Lotus_Interface_OnslaughtWaveSummary": [
+"FAIL",
+5
+],
+"Lotus_Interface_OstronActions": [
+"FAIL",
+55
+],
+"Lotus_Interface_PhotoboothUtilities": [
+"FAIL",
+13
+],
+"Lotus_Interface_Polarize": [
+"FAIL",
+38
+],
+"Lotus_Interface_PostCameraUpdateHud": [
+"FAIL",
+65
+],
+"Lotus_Interface_PowerSuitCustomHuds_AlchemistCustomHud": [
+"FAIL",
+21
+],
+"Lotus_Interface_PowerSuitCustomHuds_AtlasCustomHud": [
+"FAIL",
+14
+],
+"Lotus_Interface_PowerSuitCustomHuds_BrokenFrameCustomHud": [
+"FAIL",
+16
+],
+"Lotus_Interface_PowerSuitCustomHuds_DevourerCustomHud": [
+"FAIL",
+13
+],
+"Lotus_Interface_PowerSuitCustomHuds_DragonCustomHud": [
+"FAIL",
+11
+],
+"Lotus_Interface_PowerSuitCustomHuds_FairyCustomHud": [
+"FAIL",
+15
+],
+"Lotus_Interface_PowerSuitCustomHuds_FocusSecondChanceMeter": [
+"FAIL",
+22
+],
+"Lotus_Interface_PowerSuitCustomHuds_GaraCustomHud": [
+"FAIL",
+15
+],
+"Lotus_Interface_PowerSuitCustomHuds_GarudaCustomHud": [
+"FAIL",
+19
+],
+"Lotus_Interface_PowerSuitCustomHuds_GeodeCustomHud": [
+"FAIL",
+11
+],
+"Lotus_Interface_PowerSuitCustomHuds_HydroidCustomHud": [
+"FAIL",
+15
+],
+"Lotus_Interface_PowerSuitCustomHuds_InarosCustomHud": [
+"FAIL",
+12
+],
+"Lotus_Interface_PowerSuitCustomHuds_InfestedCustomHud": [
+"FAIL",
+34
+],
+"Lotus_Interface_PowerSuitCustomHuds_JadeCustomHud": [
+"FAIL",
+14
+],
+"Lotus_Interface_PowerSuitCustomHuds_KhoraCustomHud": [
+"FAIL",
+12
+],
+"Lotus_Interface_PowerSuitCustomHuds_KoumeiCustomHud": [
+"FAIL",
+29
+],
+"Lotus_Interface_PowerSuitCustomHuds_NezhaCustomHud": [
+"FAIL",
+23
+],
+"Lotus_Interface_PowerSuitCustomHuds_OdaliskCustomHud": [
+"FAIL",
+23
+],
+"Lotus_Interface_PowerSuitCustomHuds_PagemasterCustomHud": [
+"FAIL",
+14
+],
+"Lotus_Interface_PowerSuitCustomHuds_PseudoExaltedHudUtilities": [
+"FAIL",
+6
+],
+"Lotus_Interface_PowerSuitCustomHuds_RangerCustomHud": [
+"FAIL",
+22
+],
+"Lotus_Interface_PowerSuitCustomHuds_RunnerCustomHud": [
+"FAIL",
+12
+],
+"Lotus_Interface_PowerSuitCustomHuds_SarynCustomHud": [
+"FAIL",
+19
+],
+"Lotus_Interface_PowerSuitCustomHuds_SiriusOrionCustomHud": [
+"FAIL",
+27
+],
+"Lotus_Interface_PowerSuitCustomHuds_WispCustomHud": [
+"FAIL",
+21
+],
+"Lotus_Interface_PowerSuitCustomHuds_WolfCustomHud": [
+"FAIL",
+25
+],
+"Lotus_Interface_PowerSuitCustomHuds_WukongCustomHud": [
+"FAIL",
+40
+],
+"Lotus_Interface_Profile": [
+"FAIL",
+38
+],
+"Lotus_Interface_ProfileRedux": [
+"FAIL",
+48
+],
+"Lotus_Interface_Progress": [
+"FAIL",
+32
+],
+"Lotus_Interface_ProjectionRewardChoice": [
+"FAIL",
+55
+],
+"Lotus_Interface_PurchaseCelebration": [
+"FAIL",
+14
+],
+"Lotus_Interface_PurgatoryReward": [
+"FAIL",
+5
+],
+"Lotus_Interface_PvpScoreboard": [
+"FAIL",
+24
+],
+"Lotus_Interface_PvpTeamSelect": [
+"FAIL",
+19
+],
+"Lotus_Interface_QuestPicker": [
+"FAIL",
+5
+],
+"Lotus_Interface_Quests_OrokinLock": [
+"FAIL",
+70
+],
+"Lotus_Interface_Quests_Vitruvian": [
+"FAIL",
+21
+],
+"Lotus_Interface_RadialText": [
+"FAIL",
+10
+],
+"Lotus_Interface_RailjackCrewMgr": [
+"FAIL",
+214
+],
+"Lotus_Interface_RailJackHud": [
+"FAIL",
+14
+],
+"Lotus_Interface_RailjackLoadOut": [
+"FAIL",
+267
+],
+"Lotus_Interface_RailjackRoleSelection": [
+"FAIL",
+17
+],
+"Lotus_Interface_ResourceConversion": [
+"FAIL",
+53
+],
+"Lotus_Interface_ResourceDrone": [
+"FAIL",
+88
+],
+"Lotus_Interface_SecurityCamera": [
+"FAIL",
+11
+],
+"Lotus_Interface_SequencerUtilities": [
+"FAIL",
+5
+],
+"Lotus_Interface_Settings": [
+"FAIL",
+1338
+],
+"Lotus_Interface_SixStackSetup": [
+"FAIL",
+1
+],
+"Lotus_Interface_SomaticBearer": [
+"FAIL",
+19
+],
+"Lotus_Interface_SpecialReticles_CrpGhostCatcherGlaiveReticle": [
+"FAIL",
+12
+],
+"Lotus_Interface_SpecialReticles_DuelistBowReticle": [
+"FAIL",
+19
+],
+"Lotus_Interface_SpecialReticles_OwlReconHud": [
+"FAIL",
+12
+],
+"Lotus_Interface_SpectatorHUD": [
+"FAIL",
+80
+],
+"Lotus_Interface_StoreItemUtilities": [
+"FAIL",
+116
+],
+"Lotus_Interface_StoreLandingPage": [
+"FAIL",
+10
+],
+"Lotus_Interface_StoreRedux": [
+"FAIL",
+214
+],
+"Lotus_Interface_StrugglePrompt": [
+"FAIL",
+16
+],
+"Lotus_Interface_StyleManager": [
+"FAIL",
+60
+],
+"Lotus_Interface_Subtitles": [
+"FAIL",
+15
+],
+"Lotus_Interface_TauHellTower": [
+"FAIL",
+97
+],
+"Lotus_Interface_TauMap12MinuteWar": [
+"FAIL",
+54
+],
+"Lotus_Interface_TennoHubScreenLauncher": [
+"FAIL",
+37
+],
+"Lotus_Interface_TennoWayTree": [
+"FAIL",
+133
+],
+"Lotus_Interface_Test_CompositionTool_CompositionDisk": [
+"FAIL",
+99
+],
+"Lotus_Interface_Test_CompositionTool_CompositionTool": [
+"FAIL",
+130
+],
+"Lotus_Interface_Test_CompositionTool_ThemedCompositionTool": [
+"FAIL",
+93
+],
+"Lotus_Interface_Test_NemesisTest": [
+"FAIL",
+88
+],
+"Lotus_Interface_Test_ShawzinTest": [
+"FAIL",
+203
+],
+"Lotus_Interface_TextSuggest": [
+"FAIL",
+25
+],
+"Lotus_Interface_ThemedAbilityProgression": [
+"FAIL",
+45
+],
+"Lotus_Interface_ThemedAmpCustomization": [
+"FAIL",
+84
+],
+"Lotus_Interface_ThemedArcaneManager": [
+"FAIL",
+103
+],
+"Lotus_Interface_ThemedButtonBar": [
+"FAIL",
+40
+],
+"Lotus_Interface_ThemedDetailedPurchaseDialog": [
+"FAIL",
+44
+],
+"Lotus_Interface_ThemedGenericSettings": [
+"FAIL",
+124
+],
+"Lotus_Interface_ThemedMainMenu": [
+"FAIL",
+239
+],
+"Lotus_Interface_ThemedOperatorLoadout": [
+"FAIL",
+109
+],
+"Lotus_Interface_ThemedPhotoboothControls": [
+"FAIL",
+65
+],
+"Lotus_Interface_ThemedProjectionManager": [
+"FAIL",
+130
+],
+"Lotus_Interface_ThemedSquadOverlay": [
+"FAIL",
+48
+],
+"Lotus_Interface_ThemedSyndicates": [
+"FAIL",
+22
+],
+"Lotus_Interface_ThemedTaskList": [
+"FAIL",
+31
+],
+"Lotus_Interface_ThemedTennoCustomization": [
+"FAIL",
+75
+],
+"Lotus_Interface_ThemedVignetteConsole": [
+"FAIL",
+57
+],
+"Lotus_Interface_TopMenu": [
+"FAIL",
+116
+],
+"Lotus_Interface_TouchControlsInterface": [
+"FAIL",
+144
+],
+"Lotus_Interface_TouchInterface_AimToggleButton": [
+"FAIL",
+12
+],
+"Lotus_Interface_TouchInterface_FlashMovie": [
+"FAIL",
+30
+],
+"Lotus_Interface_TouchInterface_FunctionsMenu": [
+"FAIL",
+14
+],
+"Lotus_Interface_TouchInterface_HUDLayoutManager": [
+"FAIL",
+25
+],
+"Lotus_Interface_TouchInterface_LookJoystick": [
+"FAIL",
+7
+],
+"Lotus_Interface_TouchInterface_MeleeAttackButton": [
+"FAIL",
+14
+],
+"Lotus_Interface_TouchInterface_MeleeModeButton": [
+"FAIL",
+10
+],
+"Lotus_Interface_TouchInterface_MoveJoystick": [
+"FAIL",
+24
+],
+"Lotus_Interface_TouchInterface_MovieClip": [
+"FAIL",
+46
+],
+"Lotus_Interface_TouchInterface_UseGroupButton": [
+"FAIL",
+30
+],
+"Lotus_Interface_TouchInterface_WeaponSlotButton": [
+"FAIL",
+37
+],
+"Lotus_Interface_TouchInterface_Window": [
+"FAIL",
+4
+],
+"Lotus_Interface_TransmissionUtilities": [
+"FAIL",
+13
+],
+"Lotus_Interface_TreasureBoxReveal": [
+"FAIL",
+44
+],
+"Lotus_Interface_UICommonResources": [
+"FAIL",
+4
+],
+"Lotus_Interface_UIStyleUtilities": [
+"FAIL",
+26
+],
+"Lotus_Interface_UIUtilities": [
+"FAIL",
+147
+],
+"Lotus_Interface_VeilbreakerMissionBrief": [
+"FAIL",
+14
+],
+"Lotus_Interface_WarframeSelect": [
+"FAIL",
+53
+],
+"Lotus_Interface_WorldStateWindow": [
+"FAIL",
+118
+],
+"Lotus_Interface_YareliComic_YareliComic": [
+"FAIL",
+114
+],
+"Lotus_Levels_Grineer_VorBossFight_VorHallwayPrototype": [
+"FAIL",
+12
+],
+"Lotus_Levels_GrineerOcean_GrineerOceanDefense_OceanDefenseRotation": [
+"FAIL",
+2
+],
+"Lotus_Levels_MiniGames_Sentinel_SentinelGame": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Alchemist_Abilities_AlchemistTransmute": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Alchemist_Abilities_AlchemistVial": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_AntiMatter_Abilities_NovaDrop": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_AntiMatter_Abilities_NullStar": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_AntiMatter_Abilities_WormHole": [
+"FAIL",
+27
+],
+"Lotus_Powersuits_Archwing_ArchwingAbilities_Cloaking": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Archwing_ArchwingAbilities_FlareCounterMeasure": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Archwing_ArchwingAbilities_MissileVolley": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Banshee_Abilities_SonicEarthQuake": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Bard_Abilities_BardAmplify": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Bard_Abilities_BardCharm": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_Bard_Abilities_BardJam": [
+"FAIL",
+34
+],
+"Lotus_Powersuits_Bard_Abilities_BardMusic": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Brawler_Abilities_BrawlerBarrier": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Brawler_Abilities_BrawlerSummon": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_BrokenFrame_Abilities_BrokenGrasp": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_BrokenFrame_BrokenFramePassive": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Choir_Abilities_ChoirChorus": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_ConcreteFrame_Abilities_ConcreteAura": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_ConcreteFrame_Abilities_ConcreteLaser": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_ConcreteFrame_Abilities_ConcretePillar": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Cowgirl_Abilities_GunFu": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_DemonFrame_Abilities_DemonFrameClone": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_DemonFrame_Abilities_DemonFrameFireBall": [
+"FAIL",
+37
+],
+"Lotus_Powersuits_Devourer_Abilities_DevourerBowl": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_Devourer_Abilities_DevourerDevour": [
+"FAIL",
+32
+],
+"Lotus_Powersuits_Dragon_Abilities_DragonBreath": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Dragon_Abilities_DragonLuck": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Dragon_Abilities_DragonPelt": [
+"FAIL",
+34
+],
+"Lotus_Powersuits_Duelist_Abilities_DuelistBladeDance": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Ember_Abilities_EmberInferno": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_EntratiMech_EntratiMechTurretModeAbility": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_EntratiMech_OilGrenadeAbility": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_EntratiMech_RiotShieldAbility": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_EntratiMech_Snake": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_EntratiMech_SwordAbility": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Excalibur_Abilities_RadialBlindAbility": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Excalibur_Abilities_SlashDashNew": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Fairy_Abilities_FairyDust": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Fairy_Abilities_FairyFlight": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Fairy_Abilities_FairySoul": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Frost_Abilities_IceShield": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Frumentarius_Abilities_FrumentariusAmmo": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Frumentarius_Abilities_FrumentariusScan": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Frumentarius_Abilities_FrumentariusSniper": [
+"FAIL",
+28
+],
+"Lotus_Powersuits_Garuda_Abilities_GarudaShield": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Garuda_Abilities_GarudaUnstoppable": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_Geode_Abilities_GeodeCrystal": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_Glass_Abilities_GlassRing": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Glass_Abilities_GlassShank": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Gyre_Abilities_GyreOvercharged": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Gyre_Abilities_GyreSphere": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_Harlequin_Abilities_HarlequinObjectChange": [
+"FAIL",
+66
+],
+"Lotus_Powersuits_Harlequin_Abilities_Illusion": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_Harlequin_Abilities_Prism": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Infestation_Abilities_InfestLink": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Infestation_Abilities_InfestRupture": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Infestation_Abilities_InfestTendrils": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Inkblot_Abilities_InkBalloon": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Inkblot_Abilities_InkField": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Inkblot_Abilities_InkSketch": [
+"FAIL",
+37
+],
+"Lotus_Powersuits_Inkblot_InkJumpPad": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_IronFrame_Abilities_IronFrameAura": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_IronFrame_Abilities_IronFrameBlast": [
+"FAIL",
+28
+],
+"Lotus_Powersuits_IronFrame_Abilities_IronFrameEruption": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_IronFrame_Abilities_IronFrameStrip": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Jade_Abilities_MindControl": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_Jade_Abilities_PsychicDagger": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Jade_Abilities_SelfBulletAttractor": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_Khora_Abilities_KhoraCage": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Khora_Abilities_KhoraCrack": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Khora_Kavat_KhorvatAura": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_Khora_Kavat_KhorvatDervish": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_Khora_KhoraPassive": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_Koumei_Abilities_KoumeiFortune": [
+"FAIL",
+41
+],
+"Lotus_Powersuits_Koumei_Abilities_KoumeiPuppets": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_Loki_Abilities_RadialDisarm": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Loki_Abilities_SwitchTeleportAbility": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Lotus_Abilities_LotusBlastAbility": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_Lotus_Abilities_LotusCableAbility": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_Mag_Abilities_BulletAttractor": [
+"FAIL",
+31
+],
+"Lotus_Powersuits_Mag_Abilities_Pull": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Magician_Abilities_Banish": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Magician_Abilities_TearInSpace": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Magician_Abilities_Volatile": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_MonkeyKing_Abilities_MonkeyCloud": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_MonkeyKing_Abilities_MonkeyPoke": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_Necro_Abilities_SearchTheDead": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Nezha_Abilities_NezhaRing": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Nezha_Abilities_NezhaSpear": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Nezha_Abilities_NezhaTrail": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Ninja_Abilities_NinjaStormNew": [
+"FAIL",
+52
+],
+"Lotus_Powersuits_Ninja_Abilities_SmokeScreen": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Ninja_Abilities_TeleportTo": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_Nokko_Abilities_NokkoPowerShroom": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Nokko_Abilities_NokkoToxicShroom": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Nokko_NokkoPassive": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_NpcPowersuits_ConservationAbilities_InfestedCreatureSpit": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_ConservationAbilities_LegendaryKubrowRoar": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_AllyBulletAttractor": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_AmalgamReincarnateAbility": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_AmbulasSweepBeam": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperBroodScript": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperHeatTerraScript": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperIcePassive": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperIndoorIceWave": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperQuickdraw": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidHungerDodgeFire": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidWraithElectroWeb": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidWraithSniperShot": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarCharge": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarFlameWall": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarHowl": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarHowl2": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarSummon": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarTargetTeleport": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_ArchonStruggleAbility": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_BorealBlastAbility": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_BorealParalyzingScreamPNW": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_NiraChaseRandomTargetsAttack": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_NiraChaseWaveAttack": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_NiraGazeAbility": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_AshenRollAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BlessingNpcAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BonebladeTeleportAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BossVorElectroBallTraps": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BossVorSweepBeam": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BulletAttractorReplicant": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BusterTrapAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_DeployDroneAbilityRandom": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_DeployGrinderAbility": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_AshigaruBuffAbility": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDaxFirePool": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDaxHeavyBlockAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDaxWaveAbility": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDragonBabyMineAbility": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDragonGroundFirebreathAbility": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriJackalUFOAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriMountedDaxLeapingChargeAbility": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_PaxDuviricusPainfulReprisalAbility": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_DuviriReviveStruggleAbility": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientRopalolystJavelin": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientRopalolystLaserBurst": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientSwarmalystEscape": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientTeralystRainGeyser": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientTeralystRainVoidSpire": [
+"FAIL",
+1
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_VomvalystRainBeam": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_EnergyLeechAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ExplosiveDissolveReplicantAbility": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_FireBlastReplicantAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_GhoulDevourerGrappleAbility": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_HealthLeechPatches": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_IceShieldSpecter": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ImpactInterrupter": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedAladBeamAbility": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedAladControlAbility": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedGraspAbility": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedJetpackSuicideAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_BulletAttractorReplicant": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_CRTShieldBurstAbility": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_HolographicIllusionRingAbility": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_InfestRupture": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_InfestTendrils": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_LaserDiscProjAbility": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_LichBrawlerBarrier": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_LichRhinoChargeAbility": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_MagneticManipulationAbility": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_MindhackMusicAbility": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InkBlobAbility": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_IronSkinRhinoReplicant": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_J3GolemSpaceMinionSwarmAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_J3GolemSpaceVolleyAbility": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_JackalUFOAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_JadeLightEximus": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_JadeShadows_FallingStar": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_JadeShadows_SonBossTeleport": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_JesterClingAttack": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_BarrierAbility": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_BFGAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_ChargeAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_DecoyAbility": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_ExplosiveDissolve": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_IronSkin": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_Liquify": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_NullStar": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_PetMegaLaserAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_PetPowerDenial": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_PetStealEximusAbility": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_PetStompAbility": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_Pull": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_RadialDisarm": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_Regeneration": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_StairwayToHeaven": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_StompAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_SwitchTeleportAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_TwirlAbility": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_LinkReplicantNpcAbility": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_MachetePull": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerStomp": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerTendrils": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerTetherJavelin": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerVoltaicDrop": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerWormholeMirror": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_MITWMouthCannon": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_MITWOctopedeUnhealingHands": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ModCrpRadialNullify": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_NoxChargeAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_NpcSwitchTeleportAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_NullStarReplicantAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_OraxiaAiStomp": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_OraxiaAIWeb": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_OraxiaWallToGround": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_OverLoadReplicant": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_PoisonReplicantAbility": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RadialBlindReplicantAbility": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RadialDisarmReplicantAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Railjack_CrewshipMedicBubbleAbility": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Railjack_RamSledBoarding": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Railjack_RamSledSpawnAbility": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Railjack_SpaceFighterSntHealBall": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RhinoChargeReplicantAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RiotBipedNetProjectile": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RiotBipedNeuralyzerAbility": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RoyalGuardChargeAbility": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RoyalGuardPassive": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RushersLatchAbility": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientClotholystSlamAbility": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientGodRays": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientPortalProjectileAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientScanAbility": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientStalkerSparkGrenade": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Shadowgrapher_InkSketchbook": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ShockVoltSpecter": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SlashDashNewReplicantAbility": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SmokeScreen": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SpaceTurretMissileAbility": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SuckAbility": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Lustratus_LustratusDaxWaveAbility": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_DaxMedicHealingWave": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_DaxMedicShieldDroneAbility": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_GrineerTrapperGrenadeAbility": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_TauDaxArcherCanisterAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_TauDaxHeavyBlockAbility": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_TrapperDroneBeamSweepAbility": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Sentient_SentientAerialLaserAbility": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Sentient_SentientDeathLaserAbility": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Sentient_SentientGiantAbilitiesUtil": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Sentient_SentientHazardChoralystSpawnAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_TNWJackalUFOAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Venus_VenusCommanderTripwireMinesAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorPushBeam": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorReworkOrbAbility": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorReworkStrikeAbility": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorTutorialBeamStrikeAbility": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorTutorialPushBeam": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WarriorChargeAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WeaveMutalistSpikeAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WellOfLifeReplicantAbility": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_InfestedPartyZoneAbility": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianDeployMedstationAbility": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianGoonadierGrenadeAbility": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankAirBurstAbility": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankEfervonSprayAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankInfestedMissileBarrage": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankInfestedSpikesAbility": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankJumpAbility": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WolfSpinAbility": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WormHoleReplicantAbility": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_YinYangAuraReplicantAbility": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_YinYangBurstReplicantAbility": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_YinYangSwitchReplicantAbility": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_YinYangTargetReplicantAbility": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Zariman_VoidAngelCorruptionAbility": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Zariman_VoidAngelGroundSpike": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Zariman_VoidAngelWingClipAbility": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Odalisk_Abilities_OdaliskAnchor": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Odalisk_Abilities_OdaliskDispensary": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Oraxia_Abilities_OraxiaClimb": [
+"FAIL",
+40
+],
+"Lotus_Powersuits_Pacifist_Abilities_PacifistDisarm": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_Pacifist_Abilities_PacifistWave": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Paladin_Abilities_Reckoning": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Paladin_Abilities_StairwayToHeaven": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Paladin_PaladinPassive": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_PaxDuviricus_Abilities_PaxBlades": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_PaxDuviricus_Abilities_PaxTeleport": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Pirate_Abilities_CannonBarrage": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Pirate_Abilities_Kraken": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Pirate_Abilities_TidalWaveNew": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_PowersuitAbilities_AbilityAuraLib": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_PowersuitAbilities_AWGrappleHookPower": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_PowersuitAbilities_BrawlerPunch": [
+"FAIL",
+27
+],
+"Lotus_Powersuits_PowersuitAbilities_DropRepeater": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_PowersuitAbilities_Liquify": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_PowersuitAbilities_NiraWhipHook": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_PowersuitAbilities_OperatorAttackUltimateAbility": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_PowersuitAbilities_OperatorPowerUltimateAbility": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_PowersuitAbilities_OperatorTacticUltimateAbility": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_PowersuitAbilities_OperatorTransference": [
+"FAIL",
+60
+],
+"Lotus_Powersuits_PowersuitAbilities_PVPLib": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_PowersuitAbilities_Vortex": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_PowersuitAbilities_VythelasRuneAbility": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Priest_Abilities_PriestCondemn": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_Priest_Abilities_PriestPact": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Priest_Abilities_PriestRavage": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Ranger_Abilities_RangerControl": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Ranger_Abilities_RangerQuiver": [
+"FAIL",
+40
+],
+"Lotus_Powersuits_Ranger_Abilities_RangerSteal": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Revenant_Abilities_RevenantMark": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_Revenant_Abilities_RevenantReborn": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_Rhino_Abilities_IronSkin": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Rhino_Abilities_RhinoChargeAbility": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Runner_Abilities_RunnerPlating": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_Runner_Abilities_RunnerRush": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Runner_Abilities_RunnerTransfer": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Runner_RunnerPassive": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Sandman_Abilities_SandmanArmor": [
+"FAIL",
+31
+],
+"Lotus_Powersuits_Sandman_Abilities_SandmanDevour": [
+"FAIL",
+32
+],
+"Lotus_Powersuits_Sandman_Abilities_SandmanSwarm": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_Saryn_Abilities_ExplosiveDissolve": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_Saryn_Abilities_Poison": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Sentient_Abilities_SentientSummon": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Sentient_Abilities_SentientWhirlwind": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_SiriusOrion_Abilities_SiriusOrionUltimate": [
+"FAIL",
+53
+],
+"Lotus_Powersuits_Temple_Abilities_TempleShred": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Trapper_Abilities_StasisProbe": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Trapper_Abilities_TrapperMultinade": [
+"FAIL",
+34
+],
+"Lotus_Powersuits_Trapper_Abilities_ZapProbe": [
+"FAIL",
+31
+],
+"Lotus_Powersuits_Trinity_Abilities_BlessingAbility": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Trinity_Abilities_LinkAbility": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_Volt_Abilities_OverLoad": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Volt_Abilities_Shield": [
+"FAIL",
+29
+],
+"Lotus_Powersuits_Volt_Abilities_Shock": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Volt_Abilities_Speed": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Werewolf_Abilities_WerewolfShroud": [
+"FAIL",
+32
+],
+"Lotus_Powersuits_Wisp_Abilities_WispHarness": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Wisp_Abilities_WispReservoir": [
+"FAIL",
+36
+],
+"Lotus_Powersuits_Wisp_Abilities_WispSun": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Wisp_WispPassive": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_Wraith_Abilities_ReaperHarvest": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_Wraith_Abilities_WraithGloom": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Yareli_Abilities_YareliBoard": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_YinYang_Abilities_YinYangAura": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_YinYang_Abilities_YinYangBurst": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_YinYang_Abilities_YinYangSwitch": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_YinYang_Abilities_YinYangTarget": [
+"FAIL",
+34
+],
+"Lotus_Scripts_1999_APCReinforcements": [
+"FAIL",
+7
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_CaliberChicks": [
+"FAIL",
+80
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_CaliberChicksGlitch": [
+"FAIL",
+15
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameBossI": [
+"FAIL",
+6
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameBossII": [
+"FAIL",
+5
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameBossIII": [
+"FAIL",
+4
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameTestV2": [
+"FAIL",
+6
+],
+"Lotus_Scripts_1999_BalloonConsoleControl": [
+"FAIL",
+10
+],
+"Lotus_Scripts_1999_BalloonDropdown": [
+"FAIL",
+14
+],
+"Lotus_Scripts_1999_CaptureDoppelgangerAvatarScript": [
+"FAIL",
+14
+],
+"Lotus_Scripts_1999_GroupIdleBarkMonitor": [
+"FAIL",
+1
+],
+"Lotus_Scripts_1999_HexSyndicateDialog": [
+"FAIL",
+157
+],
+"Lotus_Scripts_1999_LasriaLift": [
+"FAIL",
+2
+],
+"Lotus_Scripts_1999_MotorcycleStream": [
+"FAIL",
+51
+],
+"Lotus_Scripts_1999_PagerDeco": [
+"FAIL",
+5
+],
+"Lotus_Scripts_1999_ParachuteAirplaneImgui": [
+"FAIL",
+6
+],
+"Lotus_Scripts_1999_RomanceCheckBoolean": [
+"FAIL",
+4
+],
+"Lotus_Scripts_1999_TailorShop": [
+"FAIL",
+31
+],
+"Lotus_Scripts_1999_VaniaBountyMgr": [
+"FAIL",
+12
+],
+"Lotus_Scripts_1999_VehicleEncounter": [
+"FAIL",
+9
+],
+"Lotus_Scripts_1999_VoltFnFTableTeleport": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Accessibility": [
+"FAIL",
+8
+],
+"Lotus_Scripts_AcidDart": [
+"FAIL",
+1
+],
+"Lotus_Scripts_ActivateAPCEncounter": [
+"FAIL",
+2
+],
+"Lotus_Scripts_AdBot": [
+"FAIL",
+11
+],
+"Lotus_Scripts_AimGravityFX": [
+"FAIL",
+2
+],
+"Lotus_Scripts_AmbientConversation": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Animation": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Animation_ApproachAnim": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Animation_CreateLoadoutDeco": [
+"FAIL",
+4
+],
+"Lotus_Scripts_ApplyOperatorCustomization": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Arbitration": [
+"FAIL",
+32
+],
+"Lotus_Scripts_ArchwingPursuitShip": [
+"FAIL",
+13
+],
+"Lotus_Scripts_AttachToPlayer": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Audio_PlaySound": [
+"FAIL",
+5
+],
+"Lotus_Scripts_BeamTurret": [
+"FAIL",
+9
+],
+"Lotus_Scripts_CacheHuntPickup": [
+"FAIL",
+19
+],
+"Lotus_Scripts_CaptureNew": [
+"FAIL",
+42
+],
+"Lotus_Scripts_ChallengeRooms_ArchwingTimedExterminateChallenge": [
+"FAIL",
+8
+],
+"Lotus_Scripts_ChallengeRooms_ArenaChallenge": [
+"FAIL",
+16
+],
+"Lotus_Scripts_ChallengeRooms_BaseChallengeRoom": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ChallengeRooms_ChamberSurvivalChallenge": [
+"FAIL",
+14
+],
+"Lotus_Scripts_ChallengeRooms_ChaseChallenge": [
+"FAIL",
+5
+],
+"Lotus_Scripts_ChallengeRooms_ComboChallenge": [
+"FAIL",
+11
+],
+"Lotus_Scripts_ChallengeRooms_DefenseChallenge": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ChallengeRooms_InterceptionChallenge": [
+"FAIL",
+19
+],
+"Lotus_Scripts_ChallengeRooms_OperatorChallenge": [
+"FAIL",
+10
+],
+"Lotus_Scripts_ChallengeRooms_PlatformChallenge": [
+"FAIL",
+9
+],
+"Lotus_Scripts_ChallengeRooms_SurvivalChallenge": [
+"FAIL",
+10
+],
+"Lotus_Scripts_ChallengeRooms_TargetChallenge": [
+"FAIL",
+10
+],
+"Lotus_Scripts_ChallengeRooms_TimeAttackChallenge": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ChallengeRooms_WaveChallenge": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Challenges_MatchTagAndSourceType": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Challenges_PvpChallenges_Timed_TimedChallengeOtherChallengeComplete": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Challenges_WeaponSwapChallenge": [
+"FAIL",
+15
+],
+"Lotus_Scripts_CheckLevelTag": [
+"FAIL",
+3
+],
+"Lotus_Scripts_CinematicFunctions": [
+"FAIL",
+75
+],
+"Lotus_Scripts_Cmds_CmdAutoMove": [
+"FAIL",
+25
+],
+"Lotus_Scripts_CrewShip_ActivateAllCrewShips": [
+"FAIL",
+3
+],
+"Lotus_Scripts_CrewShip_ArchwingCanon": [
+"FAIL",
+22
+],
+"Lotus_Scripts_CrewShip_CapitalShipWeakPoints": [
+"FAIL",
+7
+],
+"Lotus_Scripts_CrewShip_CommanderTrap": [
+"FAIL",
+3
+],
+"Lotus_Scripts_CrewShip_CorpusCrewShip": [
+"FAIL",
+14
+],
+"Lotus_Scripts_CrewShip_CorpusPOIUtilities": [
+"FAIL",
+31
+],
+"Lotus_Scripts_CrewShip_CrewShip": [
+"FAIL",
+59
+],
+"Lotus_Scripts_CrewShip_CrewShipPartsMission": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_CrewShipScanPoint": [
+"FAIL",
+18
+],
+"Lotus_Scripts_CrewShip_Encounters_BasicRailJackPatrol": [
+"FAIL",
+19
+],
+"Lotus_Scripts_CrewShip_Encounters_BoardingPartyEncounter": [
+"FAIL",
+17
+],
+"Lotus_Scripts_CrewShip_Encounters_CapitalShipStateEncounter": [
+"FAIL",
+10
+],
+"Lotus_Scripts_CrewShip_Encounters_CorpusCrewShipEncounter": [
+"FAIL",
+32
+],
+"Lotus_Scripts_CrewShip_Encounters_CorpusFrozenHullEncounter": [
+"FAIL",
+20
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpCargoTrainEncounter": [
+"FAIL",
+15
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpCometShredderEncounter": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpRefuelingStationEncounter": [
+"FAIL",
+20
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpRoboticsFactoryEncounter": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpTetherPowerplantEncounter": [
+"FAIL",
+14
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpVolatileDeliveryMainEncounter": [
+"FAIL",
+13
+],
+"Lotus_Scripts_CrewShip_Encounters_DeepSpaceNavBeaconObjective": [
+"FAIL",
+12
+],
+"Lotus_Scripts_CrewShip_Encounters_DeepSpaceNavConsoleObjective": [
+"FAIL",
+21
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerAsteroidHangarEncounter": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerCrewShipEncounter": [
+"FAIL",
+33
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerGalleonEncounter": [
+"FAIL",
+7
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerMissilePlatformEncounter": [
+"FAIL",
+2
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerRadarTowerEncounter": [
+"FAIL",
+6
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerSuperWeaponEncounter": [
+"FAIL",
+7
+],
+"Lotus_Scripts_CrewShip_Encounters_InvestigateDerelictShipEncounter": [
+"FAIL",
+10
+],
+"Lotus_Scripts_CrewShip_Encounters_KillCapitalShipCaptainEncounter": [
+"FAIL",
+28
+],
+"Lotus_Scripts_CrewShip_Encounters_KillCrewShipsExterminateObjective": [
+"FAIL",
+10
+],
+"Lotus_Scripts_CrewShip_Encounters_LasXStadiumEncounter": [
+"FAIL",
+39
+],
+"Lotus_Scripts_CrewShip_Encounters_NemesisAssassinate": [
+"FAIL",
+19
+],
+"Lotus_Scripts_CrewShip_Encounters_OverrideObjective": [
+"FAIL",
+38
+],
+"Lotus_Scripts_CrewShip_Encounters_RailjackPatrol": [
+"FAIL",
+16
+],
+"Lotus_Scripts_CrewShip_Encounters_RJCorpusCapitalShipEncounter": [
+"FAIL",
+23
+],
+"Lotus_Scripts_CrewShip_Encounters_SentientFragmentExterminate": [
+"FAIL",
+9
+],
+"Lotus_Scripts_CrewShip_Encounters_SentientFragmentInterception": [
+"FAIL",
+11
+],
+"Lotus_Scripts_CrewShip_Encounters_SentientFragmentLinkObjective": [
+"FAIL",
+31
+],
+"Lotus_Scripts_CrewShip_Encounters_StealDataObjective": [
+"FAIL",
+21
+],
+"Lotus_Scripts_CrewShip_GrineerCommander": [
+"FAIL",
+12
+],
+"Lotus_Scripts_CrewShip_GrineerCrewShip": [
+"FAIL",
+10
+],
+"Lotus_Scripts_CrewShip_HyperSpace": [
+"FAIL",
+25
+],
+"Lotus_Scripts_CrewShip_Malfunctions_ElectricalMalfunction": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_RailjackConstruction": [
+"FAIL",
+28
+],
+"Lotus_Scripts_CrewShip_RailjackHudTrackers": [
+"FAIL",
+3
+],
+"Lotus_Scripts_CrewShip_RailjackMissionManager": [
+"FAIL",
+23
+],
+"Lotus_Scripts_CrewShip_RailJackPreDeath": [
+"FAIL",
+15
+],
+"Lotus_Scripts_CrewShip_RailJackShip": [
+"FAIL",
+30
+],
+"Lotus_Scripts_CrewShip_StreamMission": [
+"FAIL",
+45
+],
+"Lotus_Scripts_CrewShip_VoidEffects": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Dailies_HardModeDaily": [
+"FAIL",
+20
+],
+"Lotus_Scripts_DarkKuvaEximusShootAbilitySimple": [
+"FAIL",
+14
+],
+"Lotus_Scripts_DarkKuvaEximusShootPatternsLib": [
+"FAIL",
+1
+],
+"Lotus_Scripts_DayNight": [
+"FAIL",
+17
+],
+"Lotus_Scripts_DayNightTestB": [
+"FAIL",
+5
+],
+"Lotus_Scripts_DeathSquadFlak": [
+"FAIL",
+1
+],
+"Lotus_Scripts_DedicatedServerInit": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Dialog_Conversation": [
+"FAIL",
+55
+],
+"Lotus_Scripts_Dialog_PlayTransmissionAnims": [
+"FAIL",
+6
+],
+"Lotus_Scripts_DialogTree": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Dojo": [
+"FAIL",
+17
+],
+"Lotus_Scripts_DojoDuel": [
+"FAIL",
+19
+],
+"Lotus_Scripts_DoorAnim": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Duviri_ArchivistEmpathyChallenges": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Duviri_ArenaLobby": [
+"FAIL",
+87
+],
+"Lotus_Scripts_Duviri_DuviriMissions": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Duviri_DuviriMissionSetup": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Duviri_DuviriNpcCower": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Duviri_DuviriPortal": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Duviri_DuviriPortalEffects": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Duviri_Encounters_CaveEncounter": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Duviri_Encounters_CombatTarget": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Duviri_Encounters_CourierEncounter": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Duviri_Encounters_Discs": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Duviri_Encounters_DrifterPuzzleEncounter": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriCombatTrappedChestEncounter": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriDefendPrisonerEncounter": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriGlypthPuzzles": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriKomiGame": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriKullervoBossEncounter": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriLift": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriPatrol": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriPortalEncounter": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriSentry": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Duviri_Encounters_GhostMirrorEncounter": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Duviri_Encounters_MazePowerLockEncounter": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Encounters_MITWAmbush": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Duviri_Encounters_MountedDaxMinibossEncounter": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Duviri_Encounters_NpcActivityBaseEncounter": [
+"FAIL",
+37
+],
+"Lotus_Scripts_Duviri_Encounters_OwlRecon": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Duviri_Encounters_PowerGridEncounter": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Duviri_Encounters_Shepherding": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Encounters_ShrineAssembleEncounter": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Encounters_SideActivitiesCheat": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Encounters_Thicket": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Duviri_Encounters_TownExecutionEncounter": [
+"FAIL",
+40
+],
+"Lotus_Scripts_Duviri_Gameplay_DuviriChest": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Gameplay_DuviriChestSpawn": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Duviri_Gateways": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Duviri_LotusHandCompass": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Duviri_MawFishing": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Duviri_MoodController": [
+"FAIL",
+13
+],
+"Lotus_Scripts_DuviriMITW_DualOctopedeBoss": [
+"FAIL",
+8
+],
+"Lotus_Scripts_DuviriMITW_OctopedeSummonEncounter": [
+"FAIL",
+17
+],
+"Lotus_Scripts_DuviriMITW_OraxiaBossEncounter": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Effects_ArmorChanneling": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Effects_BaruukEphemera": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Effects_CreditPickups": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Effects_DuviriQuestEffects": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Effects_EmoteEffects": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Effects_EphemeraPrimeA": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Effects_HelminthEffects": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Effects_LavosDeluxeEphemeraSnakes": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Effects_LevelWideFog": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Effects_LightFadeTargeted": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Effects_NewWar2021CinEffects": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Effects_NewWarCinEffects": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Effects_NokkoEphemeraMushrooms": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Effects_Polarity": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Effects_PrimeScarfV": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Effects_ProjectionMasking": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Effects_RailJackEffects": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Effects_RailJackEnemyEffects": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Effects_RandomRaycastBeamSpawn": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Effects_RandomSleepAndJitter": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Effects_SabotageEffects": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Effects_SabotageOrokinEffects": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Effects_ScenarioBeaconEffects": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Effects_SentientRegrowth": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Effects_SentientRevealCinematics": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Effects_SkyboxEffects": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Effects_SpeedballEffects": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Effects_SyndicateHubEffects": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Effects_TauQuestEffects": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Effects_TC19GrnGalleonListing": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Effects_TransmissionEffects": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Effects_ValaArena": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Effects_VoidEclipsePocketTrigger": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Effects_VoidStorm": [
+"FAIL",
+34
+],
+"Lotus_Scripts_Effects_WallLatch": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Effects_WarpGateFX": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Effects_WF1999QuestEffects": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Effects_WraitheQuestEffects": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Eidolon_AlarmSystem": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Eidolon_BirdOfPrey": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Eidolon_Bomber": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Eidolon_BomberAbilities": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Eidolon_Dropship": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Eidolon_EidolonMissions": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Eidolon_EidolonMP": [
+"FAIL",
+133
+],
+"Lotus_Scripts_Eidolon_EidolonResourceContainers": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Eidolon_Encounters_AnimalSpawns": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Eidolon_Encounters_BaseGeoAnimalEncounter": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Eidolon_Encounters_ConservationEncounter2": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicAssassinate": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicExterminate": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicGhoulExterminate": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicGhoulHunt": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicHijack": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicRescue": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Eidolon_Encounters_EidolonHunt": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Eidolon_Encounters_EventDefendMixer": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Eidolon_Encounters_EventInfestedPoison": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Eidolon_Encounters_GlassFrameQuest": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Eidolon_Encounters_GrineerCamp": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Eidolon_Encounters_GrineerGhoulGraveyard": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Eidolon_Encounters_InfestedSpawnPod": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Eidolon_Encounters_Patrol": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Eidolon_Encounters_ResourceCaches": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Eidolon_Encounters_SentientCondrixSpawner": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Eidolon_OstronDialog": [
+"FAIL",
+96
+],
+"Lotus_Scripts_Eidolon_TownNpcs_JobNpc": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Events_CaptureRelayEventEnemy": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Events_CephalonMaze": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Events_EventVendor": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Events_EventVendorPlatformDisplay": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Events_HalloweenSalvage": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Events_InfestedPlainsEvent": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Events_MechSurvivalEvent": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Events_NidusReleaseAlchemyChair": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Events_NW3Investigation": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Events_RelayVendorEntity": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Events_SentientScenario": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ExtractionTimer": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Flappy": [
+"FAIL",
+8
+],
+"Lotus_Scripts_FocusBoost": [
+"FAIL",
+15
+],
+"Lotus_Scripts_FortressAsteroid": [
+"FAIL",
+29
+],
+"Lotus_Scripts_FreeAbilities_FreeAbilitiesCleaner": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Fx": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Gameplay_AbilityLockout": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Gameplay_Complications_Juggernauts": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_Complications_KuvaSaturation": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Gameplay_Complications_LanternInTheDark": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_Complications_ThinBoundary": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Gameplay_Complications_ToxinInoculation": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_Complications_VolatileAtmosphere": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Gameplay_ElementalLayerSetup": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Gameplay_EntityScaling": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Gameplay_EntratiDoppelgangerSpawner": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Gameplay_Fishing": [
+"FAIL",
+69
+],
+"Lotus_Scripts_Gameplay_FishingSpearProjectile": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Gameplay_GasCityAudioLogPuzzle": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Gameplay_GenericInfestedSpawnPods": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Gameplay_GhoulSpawner": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Gameplay_HeroicMomentManager": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_HexConquest": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Gameplay_HexConquestReviveMechanic": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Gameplay_LabConquest": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Gameplay_NoVehicles": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Gameplay_ObjectivePickupScripts": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Gameplay_SentientGooSpawn": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Gameplay_ShowImpactMessageLocal": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Gameplay_UniversalMissionHub": [
+"FAIL",
+50
+],
+"Lotus_Scripts_Gameplay_VoidAberrationAura": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_VoidSink": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Gameplay_VoidTear": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Gameplay_ZarimanHandleVoidAngelSpawns": [
+"FAIL",
+13
+],
+"Lotus_Scripts_GasVariableLaserGrid": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Generators_BandNameGenerator": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Generators_CorpusNameTables": [
+"FAIL",
+0
+],
+"Lotus_Scripts_Generators_GenericMarkovName": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Generators_GrineerNameTables": [
+"FAIL",
+0
+],
+"Lotus_Scripts_Generators_MarkovNameGenerator": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Generators_TitleNameGenerator": [
+"FAIL",
+18
+],
+"Lotus_Scripts_GenericSpawnSentinel": [
+"FAIL",
+4
+],
+"Lotus_Scripts_GhostTower": [
+"FAIL",
+27
+],
+"Lotus_Scripts_GrineerDeathSquad": [
+"FAIL",
+4
+],
+"Lotus_Scripts_GrineerDeathSquadRaid": [
+"FAIL",
+3
+],
+"Lotus_Scripts_GrineerGameplay": [
+"FAIL",
+10
+],
+"Lotus_Scripts_GrineerTrap": [
+"FAIL",
+10
+],
+"Lotus_Scripts_GrnFortressTraps": [
+"FAIL",
+5
+],
+"Lotus_Scripts_GrnHarpoonGrapple": [
+"FAIL",
+7
+],
+"Lotus_Scripts_HelminthTransmissions": [
+"FAIL",
+3
+],
+"Lotus_Scripts_HubNpc": [
+"FAIL",
+11
+],
+"Lotus_Scripts_HudTrackers": [
+"FAIL",
+273
+],
+"Lotus_Scripts_IceZone": [
+"FAIL",
+10
+],
+"Lotus_Scripts_IdleBarkMonitor": [
+"FAIL",
+2
+],
+"Lotus_Scripts_InfestedMicroplanet_DeimosDayNight": [
+"FAIL",
+30
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_ChamberDoorKeyEncounter": [
+"FAIL",
+37
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicEscort": [
+"FAIL",
+26
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicExcavation": [
+"FAIL",
+66
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicExterminate": [
+"FAIL",
+16
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicFluidSac": [
+"FAIL",
+62
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicGrineerSurvivors": [
+"FAIL",
+15
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicPurify": [
+"FAIL",
+36
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicRecipe": [
+"FAIL",
+31
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicSurvivors": [
+"FAIL",
+21
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_FaceHuggerEncounter": [
+"FAIL",
+3
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_InfestedMistEncounter": [
+"FAIL",
+43
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_InfestedPodReinforcements": [
+"FAIL",
+6
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_KeyPiecesEncounter": [
+"FAIL",
+50
+],
+"Lotus_Scripts_InfestedMicroplanet_WyrmPuddle": [
+"FAIL",
+9
+],
+"Lotus_Scripts_InfestedMicroplanetCrowdControl": [
+"FAIL",
+44
+],
+"Lotus_Scripts_InfestedMicroplanetPitBoss": [
+"FAIL",
+33
+],
+"Lotus_Scripts_InfQuantaGrapple": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Intel": [
+"FAIL",
+58
+],
+"Lotus_Scripts_JackalArena": [
+"FAIL",
+19
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageB": [
+"FAIL",
+9
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageC": [
+"FAIL",
+8
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageCPOI": [
+"FAIL",
+6
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageE": [
+"FAIL",
+9
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageEPOI": [
+"FAIL",
+24
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_AshBossAvatarScript": [
+"FAIL",
+1
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshLib": [
+"FAIL",
+5
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshNinjaStorm": [
+"FAIL",
+20
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshSmokeScreen": [
+"FAIL",
+10
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshTeleportAttack": [
+"FAIL",
+3
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Garuda_GarudaBossArena": [
+"FAIL",
+30
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_GarudaBossBloodAltar": [
+"FAIL",
+12
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_JS2MInfestedJetpackSuicideAbility": [
+"FAIL",
+1
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_GarudaMissionStageC": [
+"FAIL",
+9
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_GarudaMissionStageCPOI": [
+"FAIL",
+30
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_GarudaMissionStageE": [
+"FAIL",
+9
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_GarudaMissionStageEPOI": [
+"FAIL",
+27
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_MissionEncounters_AS1Space": [
+"FAIL",
+21
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_MissionEncounters_GS2Space": [
+"FAIL",
+7
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_MissionObjectiveManager": [
+"FAIL",
+13
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_RailjackHub": [
+"FAIL",
+13
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_RailjackTransitionHelper": [
+"FAIL",
+11
+],
+"Lotus_Scripts_JamNearbyEnemies": [
+"FAIL",
+6
+],
+"Lotus_Scripts_KahlMissions_KahlChallenges": [
+"FAIL",
+47
+],
+"Lotus_Scripts_KahlMissions_KahlMissionMurexRescue": [
+"FAIL",
+79
+],
+"Lotus_Scripts_KahlMissions_KahlMissionThumper": [
+"FAIL",
+40
+],
+"Lotus_Scripts_KahlMissions_KahlMissionVeilFactory": [
+"FAIL",
+50
+],
+"Lotus_Scripts_KahlMissions_KahlOrders": [
+"FAIL",
+45
+],
+"Lotus_Scripts_KelaInWorldTransmissions": [
+"FAIL",
+14
+],
+"Lotus_Scripts_KuvaLich_KuvaEximus": [
+"FAIL",
+12
+],
+"Lotus_Scripts_KuvaLich_KuvaLichFinisher": [
+"FAIL",
+18
+],
+"Lotus_Scripts_KuvaPath_AntiVoidSurgeEvent": [
+"FAIL",
+28
+],
+"Lotus_Scripts_KuvaPath_KuvaKeysLib": [
+"FAIL",
+52
+],
+"Lotus_Scripts_KuvaPath_KuvaPath": [
+"FAIL",
+60
+],
+"Lotus_Scripts_KuvaPath_KuvaPathAcquire": [
+"FAIL",
+13
+],
+"Lotus_Scripts_KuvaPath_KuvaPathBackgroundHub": [
+"FAIL",
+11
+],
+"Lotus_Scripts_KuvaPath_KuvaPathLauncher": [
+"FAIL",
+16
+],
+"Lotus_Scripts_KuvaPath_LockedCrateEvent": [
+"FAIL",
+25
+],
+"Lotus_Scripts_KuvaPath_RegenCrystalEvent": [
+"FAIL",
+28
+],
+"Lotus_Scripts_KuvaPath_SignalBridgeEvent": [
+"FAIL",
+28
+],
+"Lotus_Scripts_LeechProjectile": [
+"FAIL",
+1
+],
+"Lotus_Scripts_LevelIncreasingFissures": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Levels_1999Defense": [
+"FAIL",
+43
+],
+"Lotus_Scripts_Levels_GasCityFireJets": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Levels_GasCityLaserDoor": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Levels_GasCitySecurity": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Levels_OrokinGoldenMawNavChecker": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Levels_RandomObjectTimer": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Levels_ToggleEntities": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Libs_AbilitiesLib": [
+"FAIL",
+136
+],
+"Lotus_Scripts_Libs_AudioLib": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Libs_CanvasMaterialLib": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Libs_ChallengeLib": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Libs_CloningLib": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Libs_CommonGamemodeFunctions": [
+"FAIL",
+105
+],
+"Lotus_Scripts_Libs_ConquestLib": [
+"FAIL",
+42
+],
+"Lotus_Scripts_Libs_DuviriActivityLib": [
+"FAIL",
+115
+],
+"Lotus_Scripts_Libs_EasingLib": [
+"FAIL",
+60
+],
+"Lotus_Scripts_Libs_ElementalLayers": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Libs_EncounterLib": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Libs_EndlessSpawnLib": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Libs_FishingLib": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Libs_GearLib": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Libs_InkblotUtilsLib": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Libs_ItemLib": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Libs_LandscapeLib": [
+"FAIL",
+54
+],
+"Lotus_Scripts_Libs_ObjectiveText": [
+"FAIL",
+79
+],
+"Lotus_Scripts_Libs_OcclusionLib": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Libs_PlayerShipUtilities": [
+"FAIL",
+65
+],
+"Lotus_Scripts_Libs_QuestMissionLib": [
+"FAIL",
+81
+],
+"Lotus_Scripts_Libs_RailjackObjectiveUI": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Libs_RailjackUtilities": [
+"FAIL",
+93
+],
+"Lotus_Scripts_Libs_ReplayLib": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Libs_SiriusOrionUtilsLib": [
+"FAIL",
+61
+],
+"Lotus_Scripts_Libs_SquadLib": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Libs_StatsLib": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Libs_StoryLib": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Libs_TableLib": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Libs_TransmissionSet": [
+"FAIL",
+27
+],
+"Lotus_Scripts_LoopDefend": [
+"FAIL",
+61
+],
+"Lotus_Scripts_LotusDuelObject": [
+"FAIL",
+13
+],
+"Lotus_Scripts_LotusDuviriGameRules": [
+"FAIL",
+58
+],
+"Lotus_Scripts_LotusGameRules": [
+"FAIL",
+52
+],
+"Lotus_Scripts_LotusPveDMGameRules": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Minigames_GoLib": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Minigames_Investigation": [
+"FAIL",
+28
+],
+"Lotus_Scripts_MissilePlatformDamageResponse": [
+"FAIL",
+1
+],
+"Lotus_Scripts_MissionScripts_JackalBossStunControl": [
+"FAIL",
+4
+],
+"Lotus_Scripts_MissionScripts_NarmerSortieArchonMission": [
+"FAIL",
+58
+],
+"Lotus_Scripts_MissionScripts_VorReworkArena": [
+"FAIL",
+27
+],
+"Lotus_Scripts_MissionWrinkles": [
+"FAIL",
+11
+],
+"Lotus_Scripts_MobileDefense": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Modes_ArchWingMissionScript": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Modes_ArchwingPursuitMode": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Modes_AscensionMission": [
+"FAIL",
+84
+],
+"Lotus_Scripts_Modes_AssassinateTankMission": [
+"FAIL",
+92
+],
+"Lotus_Scripts_Modes_ColonistDoorDefenseMission": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Modes_ColonistRescueMission": [
+"FAIL",
+55
+],
+"Lotus_Scripts_Modes_ComplicationsMgr_ComplicationsData": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Modes_EntratiBurdenAuras": [
+"FAIL",
+41
+],
+"Lotus_Scripts_Modes_EntratiLabAlchemy": [
+"FAIL",
+50
+],
+"Lotus_Scripts_Modes_EntratiSwarmMission": [
+"FAIL",
+55
+],
+"Lotus_Scripts_Modes_EntratiSwarmScannerPickup": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Modes_EntratiVoidVaults": [
+"FAIL",
+51
+],
+"Lotus_Scripts_Modes_EscalationExtermination": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Modes_ExcavationMission": [
+"FAIL",
+45
+],
+"Lotus_Scripts_Modes_GasCitySabotage": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Modes_HalloweenLanternEndless": [
+"FAIL",
+37
+],
+"Lotus_Scripts_Modes_HiveMission": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Modes_InfestedCapture": [
+"FAIL",
+46
+],
+"Lotus_Scripts_Modes_JunctionMission": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Modes_MechSurvivalMission": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Modes_MeltdownMode": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Modes_OpLinkFragmentGroundTeam": [
+"FAIL",
+44
+],
+"Lotus_Scripts_Modes_Purgatory": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Modes_PveDeathMatch": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Modes_SentientArtifactMission": [
+"FAIL",
+90
+],
+"Lotus_Scripts_Modes_SentientArtifactMissionEnvironment": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Modes_SentientCapture": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Modes_SentientMobileDefense": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Modes_ShadowGraphModeUtility": [
+"FAIL",
+113
+],
+"Lotus_Scripts_Modes_SurvivalMission": [
+"FAIL",
+60
+],
+"Lotus_Scripts_Modes_SurvivalPickups": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Modes_TerritoryMission": [
+"FAIL",
+45
+],
+"Lotus_Scripts_Modes_WeaveMutalistBossMission": [
+"FAIL",
+41
+],
+"Lotus_Scripts_Modes_WF99PvPvEMission": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Modes_WF99PvPvEStoreManager": [
+"FAIL",
+54
+],
+"Lotus_Scripts_Modes_ZarimanCorruptionFractures": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Modes_ZarimanCorruptionMission": [
+"FAIL",
+80
+],
+"Lotus_Scripts_Modes_ZarimanSurvivalMission": [
+"FAIL",
+95
+],
+"Lotus_Scripts_Modes_ZarimanSurvivalWraithSpawner": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Mods_BattacorAltFire": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Mods_OnSelectiveSlotEquipped": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Mods_ParisHealOnStatus": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Mods_StrengthForOneCast": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ModularArloAvatarRandomizer": [
+"FAIL",
+8
+],
+"Lotus_Scripts_ModularCorpusAvatarRandomizer": [
+"FAIL",
+7
+],
+"Lotus_Scripts_MultiDefend": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Museum_Museum": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Mutators": [
+"FAIL",
+31
+],
+"Lotus_Scripts_NaniteCloud": [
+"FAIL",
+7
+],
+"Lotus_Scripts_NecramechSummonConsole": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Nemesis_NemesisGenerator": [
+"FAIL",
+73
+],
+"Lotus_Scripts_Nemesis_NemesisMission": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Nemesis_SetupHenchman": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Nemesis_SetupNemesis": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Nightwave_GlassMakerBoss": [
+"FAIL",
+37
+],
+"Lotus_Scripts_NPC_AmalgamNullifyDome": [
+"FAIL",
+7
+],
+"Lotus_Scripts_NPC_AristocratHunterMonitor": [
+"FAIL",
+1
+],
+"Lotus_Scripts_NPC_CreateFabricator": [
+"FAIL",
+4
+],
+"Lotus_Scripts_NPC_J3GolemSpace": [
+"FAIL",
+14
+],
+"Lotus_Scripts_NPC_NokkoBaby": [
+"FAIL",
+18
+],
+"Lotus_Scripts_NPC_NullifyDome": [
+"FAIL",
+13
+],
+"Lotus_Scripts_NPC_NullifySound": [
+"FAIL",
+17
+],
+"Lotus_Scripts_NPC_OrdisShip": [
+"FAIL",
+2
+],
+"Lotus_Scripts_NPC_PlayerDoppelgangerAbility": [
+"FAIL",
+4
+],
+"Lotus_Scripts_NPC_RareSpawnScript": [
+"FAIL",
+14
+],
+"Lotus_Scripts_NPC_TeshinShadowRemnants": [
+"FAIL",
+5
+],
+"Lotus_Scripts_NPC_TreasureBoxDespawn": [
+"FAIL",
+1
+],
+"Lotus_Scripts_OperatorGameplay": [
+"FAIL",
+15
+],
+"Lotus_Scripts_OperatorVoidMode": [
+"FAIL",
+34
+],
+"Lotus_Scripts_OrokinGlyphScript": [
+"FAIL",
+14
+],
+"Lotus_Scripts_OrokinTrialPower": [
+"FAIL",
+3
+],
+"Lotus_Scripts_PaintBot": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Platform": [
+"FAIL",
+3
+],
+"Lotus_Scripts_PlayerShip": [
+"FAIL",
+43
+],
+"Lotus_Scripts_PlayerShipMachineState": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Precipitation": [
+"FAIL",
+3
+],
+"Lotus_Scripts_PrimeVaultTrader": [
+"FAIL",
+31
+],
+"Lotus_Scripts_ProceduralLevel": [
+"FAIL",
+63
+],
+"Lotus_Scripts_PveCTFTransmissions": [
+"FAIL",
+17
+],
+"Lotus_Scripts_PveTDMTransmissions": [
+"FAIL",
+11
+],
+"Lotus_Scripts_PVP_DamageTracking": [
+"FAIL",
+3
+],
+"Lotus_Scripts_PVP_FightingGameRules": [
+"FAIL",
+30
+],
+"Lotus_Scripts_PVP_PVPCommon": [
+"FAIL",
+84
+],
+"Lotus_Scripts_PVP_PVPDeathMatch": [
+"FAIL",
+32
+],
+"Lotus_Scripts_PVP_PVPHelper": [
+"FAIL",
+13
+],
+"Lotus_Scripts_PVP_PVPTeamDeathMatch": [
+"FAIL",
+11
+],
+"Lotus_Scripts_QuestMissionSetup": [
+"FAIL",
+52
+],
+"Lotus_Scripts_Quests_1999_ConvoyMission": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Quests_1999_ConvoyScript": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Quests_1999_HubMissions": [
+"FAIL",
+53
+],
+"Lotus_Scripts_Quests_1999_LasriaStreets": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Quests_1999_PartyOfALifeTime": [
+"FAIL",
+35
+],
+"Lotus_Scripts_Quests_1999_PartyPals": [
+"FAIL",
+60
+],
+"Lotus_Scripts_Quests_1999_Prologue_LotusEaterMission": [
+"FAIL",
+65
+],
+"Lotus_Scripts_Quests_1999_ZooMission": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Quests_Apostasy": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Quests_BardQuest": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Quests_BardQuestFinalFight": [
+"FAIL",
+48
+],
+"Lotus_Scripts_Quests_Chimera": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_ChimeraBallas": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Quests_ChimeraChase": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_ChimeraPlayerShip": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_DuviriQuest_AngryEncounter": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Quests_DuviriQuest_UndercroftEncounter": [
+"FAIL",
+34
+],
+"Lotus_Scripts_Quests_EntratiLab_BackToTheFuture": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Quests_EntratiLab_DefendLab": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Quests_EntratiLab_EntratiQuestCalmLikeABomb": [
+"FAIL",
+56
+],
+"Lotus_Scripts_Quests_EntratiLab_EntratiQuestNecraliskIntro": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Quests_EntratiLab_EntratiQuestSearchForLoid": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Quests_EntratiLab_EntratiQuestUtil": [
+"FAIL",
+66
+],
+"Lotus_Scripts_Quests_EntratiLab_ExamineAnimals": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Quests_EntratiLab_HubBlairWitch": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_EntratiLab_HubFindVoice": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_EntratiLab_HubFulfillSequence": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Quests_EntratiLab_NecramechControl": [
+"FAIL",
+46
+],
+"Lotus_Scripts_Quests_EntratiLab_SandSpawner": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Quests_GlassQuest": [
+"FAIL",
+51
+],
+"Lotus_Scripts_Quests_InfestedMicroPlanetM4": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Quests_InfestedMicroplanetM6": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Quests_InfestedMicroplanetQuest": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Quests_InfestedMicroplanetQuestTown": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Quests_JadeShadow_JadeShadowsStage4": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Quests_JadeShadow_JadeShadowsStage6": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Quests_JadeShadow_JadeShadowsStage7": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_GarudaSpy_JadeShadowsPart2VenaBossBloodAltar": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2QuestKeyChain": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2Stage12FamilyUnited": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2Stage1Headhunting": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2Stage4StalkingTheUnknown": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2StageInterludes": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2StageSidekicksAshCapture": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2StageSidekicksGarudaSpy": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2Util": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Quests_JordasPodTestMission": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Quests_KubrowQuestMissionTwo": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Quests_MawBugsBunny": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Quests_ModQuest_ModQuestCorpusShip": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Quests_ModQuest_ModQuestForest": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Quests_ModQuest_ModQuestTeshinDojo": [
+"FAIL",
+53
+],
+"Lotus_Scripts_Quests_ModQuest_TheOldWays": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Quests_NewWar_NewWarIntro": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Quests_NewWarQuest_MedusaGates": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarLotusStruggle": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart1KahlMission": [
+"FAIL",
+42
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart1TeshinMission": [
+"FAIL",
+92
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart1VesoBetrayerMission": [
+"FAIL",
+62
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart2LotusAttacks": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart2RiseOfNarmerMission": [
+"FAIL",
+40
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart2ZarimanHighschoolMusical": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart2ZarimanLockdown": [
+"FAIL",
+41
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3AlmostSevenSamurai": [
+"FAIL",
+58
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3Beanstalks": [
+"FAIL",
+61
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3Epilogue": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3Erra": [
+"FAIL",
+35
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3HotMess": [
+"FAIL",
+49
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3Liset": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3SunKiller": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3TableForTwo": [
+"FAIL",
+53
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarQuestKeychain": [
+"FAIL",
+37
+],
+"Lotus_Scripts_Quests_NewWarQuest_SntGrnPrisonerSpawner": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Quests_NewWarQuest_ZarimanStudentCustomization": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Quests_OrokinMoonQuest": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Quests_PriestQuestFight": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Quests_ProteaQuestLib": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Quests_ProteaQuestM2": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Quests_QueensFight": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Quests_RailjackKeyMission": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Quests_RevenantMask": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Quests_RevenantMaskCanUseShrine": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Quests_RevenantMaskTown": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Quests_RevenantQuest": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Quests_SacrificeQuest": [
+"FAIL",
+42
+],
+"Lotus_Scripts_Quests_SacrificeQuestChaseUmbra": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Quests_SacrificeQuestMemoryGame": [
+"FAIL",
+35
+],
+"Lotus_Scripts_Quests_SacrificeQuestPlayerShip": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Quests_SolarisQuestBombEncounter": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Quests_SolarisQuestMission": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Quests_StreamShipQuestLayers": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Quests_TauPrequel_ADISPlayFightScript": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Quests_TauPrequel_BattleStationMission": [
+"FAIL",
+36
+],
+"Lotus_Scripts_Quests_TauPrequel_EdensUltimatum": [
+"FAIL",
+56
+],
+"Lotus_Scripts_Quests_TauPrequel_EscortMission": [
+"FAIL",
+65
+],
+"Lotus_Scripts_Quests_TauPrequel_FuneralForAFriend": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Quests_TauPrequel_InterrogationMission": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Quests_TauPrequel_KillBetrayerMission": [
+"FAIL",
+36
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceAdisUtil": [
+"FAIL",
+48
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceBackToTheFront": [
+"FAIL",
+61
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceCinematics": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceGiantKiller": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceSpawnerUtil": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Quests_TauPrequel_SomaticBearer": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Quests_TauPrequel_SomaticBearerEffects": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_TauPrequel_TauronAcademy": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Quests_TauPrequel_TooFarMission": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Quests_TauPrologue_VesselMission": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Quests_TitaniaQuest": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Quests_WarWithinQuest": [
+"FAIL",
+54
+],
+"Lotus_Scripts_Quests_WraitheQuestM3": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Quests_WraithQuestM1": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Quests_WraithQuestM2": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Quests_YareliQuest": [
+"FAIL",
+36
+],
+"Lotus_Scripts_Quests_ZarimanQuest_ZarimanQuest": [
+"FAIL",
+13
+],
+"Lotus_Scripts_RadioChatter": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Raids_GolemTrial_Purifier": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Raids_J3GolemRaid_J3Golem": [
+"FAIL",
+23
+],
+"Lotus_Scripts_RailjackStrike": [
+"FAIL",
+17
+],
+"Lotus_Scripts_RandomHangingBlocks": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Restoratives_AnimalLure": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Restoratives_FireWorks": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Restoratives_HealAvatar": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Restoratives_HeavyWeaponSummon": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Restoratives_HuntingGear": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Restoratives_LibraryScanner": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Restoratives_LisetAirSupport": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Restoratives_LisetAirSupportSwitches": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Restoratives_MiningLaser": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Restoratives_OpenArchwingSummon": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Restoratives_RemoteCamera": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Restoratives_RepairTool": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Restoratives_Scanner": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Restoratives_ScenarioBeacon": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Restoratives_SpawnEntratiTech": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Restoratives_SpearFishing": [
+"FAIL",
+45
+],
+"Lotus_Scripts_Restoratives_SpearFishingStart": [
+"FAIL",
+19
+],
+"Lotus_Scripts_RiftStatusFromCreator": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Sabotage": [
+"FAIL",
+15
+],
+"Lotus_Scripts_SabotageForest": [
+"FAIL",
+13
+],
+"Lotus_Scripts_SabotageOrokin": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Sandstorm": [
+"FAIL",
+5
+],
+"Lotus_Scripts_SeedEmittingPlant": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Sentient_SentientArena": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Sentient_SentientBeacon": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Sentient_SentientLevel": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Sentient_SentientMutators": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Sigil": [
+"FAIL",
+15
+],
+"Lotus_Scripts_SigilCustom": [
+"FAIL",
+9
+],
+"Lotus_Scripts_SkateSpawner": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Space": [
+"FAIL",
+14
+],
+"Lotus_Scripts_SpaceFomorianStrike": [
+"FAIL",
+17
+],
+"Lotus_Scripts_SpaceMineElectricalField": [
+"FAIL",
+10
+],
+"Lotus_Scripts_SpacePrefabs": [
+"FAIL",
+8
+],
+"Lotus_Scripts_SpawnAmbusher": [
+"FAIL",
+6
+],
+"Lotus_Scripts_SpawnCleanDrone": [
+"FAIL",
+8
+],
+"Lotus_Scripts_SpawnSpectres": [
+"FAIL",
+2
+],
+"Lotus_Scripts_SpookyEyeball": [
+"FAIL",
+1
+],
+"Lotus_Scripts_SquadInSky": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Stalker": [
+"FAIL",
+60
+],
+"Lotus_Scripts_StalkerSuit": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Swim": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Syndicates_CheckSyndicateRank": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Syndicates_SyndicatePickupImpactMsg": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Syndicates_SyndicatePowers": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Tau_AssassinateObjective": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Tau_CannonSabotageObjective": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Tau_CasesObjective": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Tau_ConvoyController": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Tau_ConvoyObjective": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Tau_DefenseObjective": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Tau_DescendiaUpgrades_StealEximusAura": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Tau_DirectionalArtilleryObjective": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Tau_DropshipObjective": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Tau_EggMine": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Tau_ExterminateObjective": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Tau_FrontLineObjective": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Tau_HiddenSabotageObjective": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Tau_MineDisarmObjective": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Tau_SabotageObjective": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Tau_ShieldsObjective": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Tau_ShuttleDefenseMission": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Tau_SquadObjective": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Tau_StealthRescueObjective": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Tau_SupplyBeaconObjective": [
+"FAIL",
+35
+],
+"Lotus_Scripts_Tau_TauBattleMission": [
+"FAIL",
+138
+],
+"Lotus_Scripts_Tau_TauDebugCmd": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Tau_TauDropshipAvatar": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Tau_TauLib": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Tau_WaterWalking": [
+"FAIL",
+5
+],
+"Lotus_Scripts_TauPrequel_TauPrequelDestructibles": [
+"FAIL",
+12
+],
+"Lotus_Scripts_TeleportAndFade": [
+"FAIL",
+13
+],
+"Lotus_Scripts_TeleportPlayer": [
+"FAIL",
+6
+],
+"Lotus_Scripts_TennoHubHangar": [
+"FAIL",
+3
+],
+"Lotus_Scripts_TransitionalEvents": [
+"FAIL",
+9
+],
+"Lotus_Scripts_TriggerAlarm": [
+"FAIL",
+40
+],
+"Lotus_Scripts_Tutorials_NewPlayerTutorial": [
+"FAIL",
+71
+],
+"Lotus_Scripts_Tutorials_NewPlayerTutorialFoundry": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Tutorials_NewPlayerTutorialRemaster": [
+"FAIL",
+81
+],
+"Lotus_Scripts_Tutorials_NewPlayerWeaponSetup": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Tutorials_SynthesisTutorial": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Vault": [
+"FAIL",
+5
+],
+"Lotus_Scripts_VayHekLandslide": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Venus_Encounters_CorpusAssassinate": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Venus_Encounters_CorpusBase": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Venus_Encounters_CorpusSpy": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Venus_Encounters_CorpusTurretTower": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Venus_Encounters_DynamicAmbush": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Venus_Encounters_DynamicDroneDefense": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Venus_Encounters_DynamicExcavation": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Venus_Encounters_DynamicRace": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Venus_Encounters_DynamicRecovery": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Venus_Encounters_DynamicResourceCapture": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Venus_Encounters_SolarisCapture": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Venus_Encounters_SolarisQuestCoolantSabotage": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Venus_Encounters_VehicleReinforcements": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Venus_EncounterScheduler": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Venus_HeatFissure": [
+"FAIL",
+37
+],
+"Lotus_Scripts_Venus_Heists_CamperHeistCapture": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Venus_Heists_CamperHeistOrbFight": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Venus_Heists_CamperHeistShields": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Venus_Heists_StealingTech": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Venus_Hub_FortunaHubNpcs": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Venus_Hub_SolarisEmissives": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Venus_Hub_VentKidsBand": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_Assassinate": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_DroneDefense": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_FindNokkoBabies": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_MushroomHunting": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_Rescue": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Venus_NokkoColony_MushroomPatchMarker": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Venus_NokkoColony_NokkoLib": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Venus_NokkoColony_NokkoMushroomEffectsLib": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Venus_RaceScheduler": [
+"FAIL",
+1
+],
+"Lotus_Scripts_WaterDroneProximityMine": [
+"FAIL",
+5
+],
+"Lotus_Scripts_WaveDefend": [
+"FAIL",
+59
+],
+"Lotus_Scripts_WeaponAttachments_ApplyEmissiveFromElements": [
+"FAIL",
+1
+],
+"Lotus_Scripts_WeaponAttachments_BaruukDeluxeIIMaceAndShield": [
+"FAIL",
+2
+],
+"Lotus_Scripts_WeaponAttachments_BountyHunterBadge": [
+"FAIL",
+2
+],
+"Lotus_Scripts_WeaponAttachments_CorpusBow": [
+"FAIL",
+3
+],
+"Lotus_Scripts_WeaponAttachments_CrpBfg": [
+"FAIL",
+1
+],
+"Lotus_Scripts_WeaponAttachments_CrpTonfa": [
+"FAIL",
+3
+],
+"Lotus_Scripts_WeaponAttachments_DaxDuviriAsymLongBow": [
+"FAIL",
+4
+],
+"Lotus_Scripts_WeaponAttachments_DeimosSupporterSkin": [
+"FAIL",
+9
+],
+"Lotus_Scripts_WeaponAttachments_ElevatingGlow": [
+"FAIL",
+4
+],
+"Lotus_Scripts_WeaponAttachments_EvolvingArmour": [
+"FAIL",
+9
+],
+"Lotus_Scripts_WeaponAttachments_GrineerWhip": [
+"FAIL",
+11
+],
+"Lotus_Scripts_WeaponAttachments_GrnHeatGun": [
+"FAIL",
+2
+],
+"Lotus_Scripts_WeaponAttachments_GrnMortiforShieldAndSword": [
+"FAIL",
+6
+],
+"Lotus_Scripts_WeaponAttachments_InfCrpShockSwarm": [
+"FAIL",
+4
+],
+"Lotus_Scripts_WeaponAttachments_LasrianNoxWeapon": [
+"FAIL",
+5
+],
+"Lotus_Scripts_WeaponAttachments_LoopingFireAnimation": [
+"FAIL",
+2
+],
+"Lotus_Scripts_WeaponAttachments_MegaBeamDeco": [
+"FAIL",
+1
+],
+"Lotus_Scripts_WeaponAttachments_NWOrokinSword": [
+"FAIL",
+23
+],
+"Lotus_Scripts_WeaponAttachments_SMSydon": [
+"FAIL",
+6
+],
+"Lotus_Scripts_WeaponAttachments_TennoUzi": [
+"FAIL",
+8
+],
+"Lotus_Scripts_WeaponAttachments_ThanotechArchgun": [
+"FAIL",
+4
+],
+"Lotus_Scripts_WeaponAttachments_TnChiselKanabo": [
+"FAIL",
+6
+],
+"Lotus_Scripts_WeaponAttachments_TnDagathBladeWhip": [
+"FAIL",
+11
+],
+"Lotus_Scripts_WeaponAttachments_TnHeavyShotgun": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Zariman_Apartment": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Zariman_Encounters_DynamicAssassinateEndless": [
+"FAIL",
+99
+],
+"Lotus_Scripts_Zariman_Gardening": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Zariman_TeleportToElevator": [
+"FAIL",
+4
+],
+"Lotus_Types_Challenges_FullZarimanSet": [
+"FAIL",
+5
+],
+"Lotus_Types_Enemies_AdvancedSpawners_AmalgamSpawnScript": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_AdvancedSpawners_BursaSpawnScript": [
+"FAIL",
+9
+],
+"Lotus_Types_Enemies_AdvancedSpawners_ColonistRescueSyndicateAssassins": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_AdvancedSpawners_CorpusModularSpawnerScript": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_AdvancedSpawners_ErrantSpecterInvasion": [
+"FAIL",
+4
+],
+"Lotus_Types_Enemies_AdvancedSpawners_GruzlingAdvancedSpawnScript": [
+"FAIL",
+5
+],
+"Lotus_Types_Enemies_AdvancedSpawners_JuggernautSpawnScript": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_AdvancedSpawners_ManicGrineerSpawnScript": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_AdvancedSpawners_MobDefGenericMinibossSpawnScript": [
+"FAIL",
+1
+],
+"Lotus_Types_Enemies_AdvancedSpawners_SentientScoutScanEventSpawnScript": [
+"FAIL",
+19
+],
+"Lotus_Types_Enemies_AdvancedSpawners_SentientTrooperSpawnScript": [
+"FAIL",
+17
+],
+"Lotus_Types_Enemies_AdvancedSpawners_SurvivalGenericMinibossSpawnScript": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_AdvancedSpawners_VialDroneSpawnScript": [
+"FAIL",
+1
+],
+"Lotus_Types_Enemies_AdvancedSpawners_WolfGangsterSpawnScript": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Corpus_Drones_Vip_RaptorTwo": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Corpus_Vip_Ambulas_AmbulasOrbitalLaser": [
+"FAIL",
+4
+],
+"Lotus_Types_Enemies_Duviri_Dragon_Flying_DragonBoss": [
+"FAIL",
+20
+],
+"Lotus_Types_Enemies_Duviri_Dragon_Flying_DragonTransference": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Duviri_Dragon_Ground_DragonGroundBoss": [
+"FAIL",
+40
+],
+"Lotus_Types_Enemies_Duviri_Jackal_DuviriJackalArenaScript": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Duviri_Jackal_DuviriJackalBossStunControl": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_Duviri_PaxDuviricus_PaxDuviricusDungeonEncounterAvatarScript": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_Enhancements_Nightwave_GlassMakerInvulnerability": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_Entrati_Doppelganger_EntratiDoppelgangerAvatarScript": [
+"FAIL",
+15
+],
+"Lotus_Types_Enemies_Grineer_Eidolon_Vip_TeralystAvatarScript": [
+"FAIL",
+19
+],
+"Lotus_Types_Enemies_Grineer_Eidolon_VomvalystLure_AbsorbVomEnergyAbility": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Grineer_Narmer_ApcDropshipVehicle": [
+"FAIL",
+5
+],
+"Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_JetpackScriptUtility": [
+"FAIL",
+30
+],
+"Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_SpragBossArena": [
+"FAIL",
+21
+],
+"Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_VenkraBossArena": [
+"FAIL",
+23
+],
+"Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_VenkraSniperTrack": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Grineer_Vip_VorTutorial_VorTutorial": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Grineer_Vip_VorTwo_VorInTheVoid": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Infested_AiWeek_Emissary_ShellAncientGoo": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Infested_SpecialEvents_ArloZealots": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_Infested_Vip_GolemMinionSpawning": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Infested_Vip_J3Golem_GolemAssassinate": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Infested_Vip_J3Golem_SpaceGolem": [
+"FAIL",
+38
+],
+"Lotus_Types_Enemies_InfestedLich_Base_InfestedLichPreDeath": [
+"FAIL",
+2
+],
+"Lotus_Types_Enemies_InfestedLich_InfestedLichBoss": [
+"FAIL",
+82
+],
+"Lotus_Types_Enemies_InfestedLich_InfestedLichBossStageSequence": [
+"FAIL",
+133
+],
+"Lotus_Types_Enemies_ManInTheWall_NecramechRanged_NecramechRangedArmDestruction": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_ManInTheWall_Octopede_MITWOctopedeBoss": [
+"FAIL",
+45
+],
+"Lotus_Types_Enemies_Narmer_NarmerOstron": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Narmer_NarmerVeil": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_NewWar_Archons_ArchonAvatarScript": [
+"FAIL",
+15
+],
+"Lotus_Types_Enemies_Orokin_Entrati_EntratiTech_NechroTech_NechroTechAvatarScript": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Sentients_Scripts_SentientPassiveImmunity": [
+"FAIL",
+1
+],
+"Lotus_Types_Enemies_SpaceBattles_Corpus_Ships_CorpusFighterScripts": [
+"FAIL",
+11
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_DactolystArenaScript": [
+"FAIL",
+18
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_DactolystHardModeArenaScript": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_DactolystLaserWallAbility": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_DactolystSummonAdds": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_LiminalBossArenaScript": [
+"FAIL",
+11
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_SentientGuiltBossLaserHandsAbility": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_Tau_Monolyst_ChoralystAvatar": [
+"FAIL",
+1
+],
+"Lotus_Types_Enemies_Tau_Monolyst_SentientArenaScript": [
+"FAIL",
+31
+],
+"Lotus_Types_Enemies_Tau_Monolyst_SentientGiantAvatar": [
+"FAIL",
+9
+],
+"Lotus_Types_Enemies_Tau_Monolyst_SentientProjectiles": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Tau_Primes_Ash_AshPrimeLib": [
+"FAIL",
+4
+],
+"Lotus_Types_Enemies_Tau_Primes_Ash_NinjaStorm": [
+"FAIL",
+20
+],
+"Lotus_Types_Enemies_Tau_Primes_Ash_SmokeScreen": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Tau_Primes_Ash_TeleportAttack": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Tau_Primes_Caliban_SentientSummon": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Tau_Primes_Caliban_SentientWhirlwind": [
+"FAIL",
+11
+],
+"Lotus_Types_Enemies_Tau_Primes_Ember_EmberBossInferno": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Tau_Primes_Mesa_PeaceMaker": [
+"FAIL",
+13
+],
+"Lotus_Types_Enemies_Tau_Primes_PrimeWarframeArenaScript": [
+"FAIL",
+22
+],
+"Lotus_Types_Enemies_Tau_Primes_Trinity_TrinityBossBlessingAbility": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Tau_Primes_Trinity_TrinityBossLinkAbility": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Tau_Primes_Trinity_TrinityBossWellOfLifeAbility": [
+"FAIL",
+22
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_LightningStrikes": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_OverLoad": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_Shield": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_Shock": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_Speed": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_SpeedEximus": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Tau_Uriel_UrielBossBrimstoneAbility": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Tau_Uriel_UrielBossEncounter": [
+"FAIL",
+15
+],
+"Lotus_Types_Enemies_TennoReplicants_OraxiaEnemy_OraxiaBossUtility": [
+"FAIL",
+23
+],
+"Lotus_Types_Enemies_TennoReplicants_OraxiaEnemy_OraxiaEnemyArenaScript": [
+"FAIL",
+15
+],
+"Lotus_Types_Enemies_TennoReplicants_OraxiaEnemy_OraxiaEnemySpiderlings": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_WF1999Lasrian_LasrianTank_LasrianTankArenaScript": [
+"FAIL",
+42
+],
+"Lotus_Types_Enemies_WF1999Lasrian_LasrianTank_LasrianTankAvatarScript": [
+"FAIL",
+16
+],
+"Lotus_Types_Enemies_WF1999Lasrian_LasrianTank_LasrianTankGooScript": [
+"FAIL",
+16
+],
+"Lotus_Types_Enemies_Zariman_VoidAngel": [
+"FAIL",
+20
+],
+"Lotus_Types_Friendly_Pets_CatbrowPetBehaviors_CatbrowDistractAbility": [
+"FAIL",
+9
+],
+"Lotus_Types_Friendly_Pets_CatbrowPetBehaviors_CatbrowLuckAbility": [
+"FAIL",
+14
+],
+"Lotus_Types_Friendly_Pets_CatbrowPetBehaviors_CatbrowShredAbility": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedCatbrowEvasionBuff": [
+"FAIL",
+9
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedCatbrowGoreToss": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedCatbrowVampireShield": [
+"FAIL",
+8
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedPredatorFinisherSpores": [
+"FAIL",
+5
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedPredatorHealingSpores": [
+"FAIL",
+9
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedPredatorMaggotSummoner": [
+"FAIL",
+15
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_SpawnSpore": [
+"FAIL",
+12
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowChargerStrainAbility": [
+"FAIL",
+15
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowFearAbility": [
+"FAIL",
+10
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowFerocityAbility": [
+"FAIL",
+6
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowGrabAbility": [
+"FAIL",
+11
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowLootAbility": [
+"FAIL",
+21
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowMarkMechaAbility": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowSavageryAbility": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowVipChaseAbility": [
+"FAIL",
+6
+],
+"Lotus_Types_Friendly_Pets_MoaPets_MoaPetComponents_MoaStasisField": [
+"FAIL",
+16
+],
+"Lotus_Types_Friendly_PlayerControllable_Abilities_TeshinStanceChange": [
+"FAIL",
+8
+],
+"Lotus_Types_Friendly_PlayerControllable_Scripts_DrifterGrappleAbility": [
+"FAIL",
+11
+],
+"Lotus_Types_Friendly_PlayerControllable_Scripts_DrifterHorseAbility": [
+"FAIL",
+9
+],
+"Lotus_Types_Friendly_PlayerControllable_Scripts_DrifterRadarAbility": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_PlayerControllable_Scripts_VesoCommandMoaAbility": [
+"FAIL",
+18
+],
+"Lotus_Types_Friendly_PlayerControllable_Weapons_DuviriWeapons_Scripts_DuviriNikanaSlamsScript": [
+"FAIL",
+8
+],
+"Lotus_Types_Friendly_PlayerControllable_Weapons_DuviriWeapons_Scripts_DuviriWeaponSlamUtil": [
+"FAIL",
+27
+],
+"Lotus_Types_Game_CrewShip_Ships_Abilities_CrewShipEMPAbility": [
+"FAIL",
+13
+],
+"Lotus_Types_Gameplay_1999Wf_HexConquest_MissionConditions_ConquestHostileOvergrowth": [
+"FAIL",
+6
+],
+"Lotus_Types_Gameplay_1999Wf_HexConquest_MissionConditions_PvPvESpilloverAuraScript": [
+"FAIL",
+16
+],
+"Lotus_Types_Gameplay_DevilTower_LiteGameModes_CoHDestroyTargets": [
+"FAIL",
+11
+],
+"Lotus_Types_Gameplay_DevilTower_LiteGameModes_CoHExcavationLite": [
+"FAIL",
+23
+],
+"Lotus_Types_Gameplay_DevilTower_LiteGameModes_CoHHiveLite": [
+"FAIL",
+9
+],
+"Lotus_Types_Gameplay_DevilTower_LiteGameModes_CoHShrineDefenseLite": [
+"FAIL",
+76
+],
+"Lotus_Types_Gameplay_DevilTower_Objects_CoHUFO": [
+"FAIL",
+10
+],
+"Lotus_Types_Gameplay_DevilTower_Objects_Sunlight": [
+"FAIL",
+3
+],
+"Lotus_Types_Gameplay_DevilTower_Upgrades_HarrowHeatInBubbles": [
+"FAIL",
+4
+],
+"Lotus_Types_Gameplay_DevilTower_Upgrades_WispBreachSurge": [
+"FAIL",
+1
+],
+"Lotus_Types_Gameplay_Events_KuvaIceBlade_NarinBlessing": [
+"FAIL",
+17
+],
+"Lotus_Types_Gameplay_GasCity_Ropalolyst_GasCityRopalolyst": [
+"FAIL",
+33
+],
+"Lotus_Types_Gameplay_Shadowgrapher_Curse_GraspingInk_GraspingInk": [
+"FAIL",
+6
+],
+"Lotus_Types_NeutralCreatures_ErsatzHorse_ErsatzWings": [
+"FAIL",
+6
+],
+"Lotus_Types_Player_ErisMortemGiantVessel_GiantVessel": [
+"FAIL",
+7
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHBossMonitor": [
+"FAIL",
+44
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHInterception": [
+"FAIL",
+20
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHLootRoom": [
+"FAIL",
+25
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHMission": [
+"FAIL",
+84
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHProtoframe": [
+"FAIL",
+29
+],
+"Lotus_Types_Scripts_Tau_CoH_CohProtoframeDialogue": [
+"FAIL",
+17
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHUnique": [
+"FAIL",
+22
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHUpgrades": [
+"FAIL",
+29
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHUrielFightMonitor": [
+"FAIL",
+9
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHUtilityLib": [
+"FAIL",
+55
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHFieryTrailAura": [
+"FAIL",
+5
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHHeavyWeaponsOnly": [
+"FAIL",
+11
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHNarmerPhobiaAura": [
+"FAIL",
+11
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHRaptorTwo": [
+"FAIL",
+16
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHSpicyKnife": [
+"FAIL",
+4
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHSummonHorse": [
+"FAIL",
+6
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHSummonVehicle": [
+"FAIL",
+16
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHUnseenFoes": [
+"FAIL",
+2
+],
+"Lotus_Types_Scripts_Tau_GrappleLookTriggerScript": [
+"FAIL",
+5
+],
+"Lotus_Types_Sentinels_SentinelAbilities_AlacrityField": [
+"FAIL",
+10
+],
+"Lotus_Types_Sentinels_SentinelAbilities_Bait": [
+"FAIL",
+9
+],
+"Lotus_Types_Sentinels_SentinelAbilities_BondedExaltation": [
+"FAIL",
+14
+],
+"Lotus_Types_Sentinels_SentinelAbilities_CodexScannerAbility": [
+"FAIL",
+6
+],
+"Lotus_Types_Sentinels_SentinelAbilities_Looter": [
+"FAIL",
+6
+],
+"Lotus_Types_Sentinels_SentinelAbilities_PlantScannerAbility": [
+"FAIL",
+4
+],
+"Lotus_Types_Sentinels_SentinelAbilities_ProcAbsorb": [
+"FAIL",
+7
+],
+"Lotus_Types_Sentinels_SentinelAbilities_RevengeAbility": [
+"FAIL",
+6
+],
+"Lotus_Types_Sentinels_SentinelAbilities_SentinelRevivePlayer": [
+"FAIL",
+9
+],
+"Lotus_Types_Sentinels_SentinelAbilities_SwiftDethAbility": [
+"FAIL",
+9
+],
+"Lotus_Types_Sentinels_SentinelAbilities_SynthDeconstruct": [
+"FAIL",
+5
+],
+"Lotus_Types_Sentinels_SentinelAbilities_VoidClone": [
+"FAIL",
+11
+],
+"Lotus_Types_Sentinels_SentinelAbilities_WarframeSuckAbility": [
+"FAIL",
+7
+],
+"Lotus_Types_Sentinels_SentinelAbilities_WarriorAbility": [
+"FAIL",
+8
+],
+"Lotus_Types_Vehicles_Hoverboard_HoverboardAbility_HBGrindElecArea": [
+"FAIL",
+9
+],
+"Lotus_Types_Vehicles_Hoverboard_HoverboardAbility_HBTrickExplosions": [
+"FAIL",
+9
+],
+"Lotus_Upgrades_Boons_Offensive_ElectricFieldOnWeakPointKill": [
+"FAIL",
+10
+],
+"Lotus_Upgrades_CosmeticEnhancers_Defensive_InvulnerabilityOnDeathOnCondition": [
+"FAIL",
+8
+],
+"Lotus_Upgrades_CosmeticEnhancers_Offensive_GiveStatForDamageType": [
+"FAIL",
+8
+],
+"Lotus_Upgrades_CosmeticEnhancers_Offensive_GiveStatForStat": [
+"FAIL",
+6
+],
+"Lotus_Upgrades_CosmeticEnhancers_Offensive_OnSummonHitCondition": [
+"FAIL",
+1
+],
+"Lotus_Upgrades_CosmeticEnhancers_OperatorArmour_TransferenceHeal": [
+"FAIL",
+4
+],
+"Lotus_Upgrades_CosmeticEnhancers_Utility_ConvergeRadialAttackOnAim": [
+"FAIL",
+12
+],
+"Lotus_Upgrades_CosmeticEnhancers_Utility_GiveStatsForUniqueStatusProcsFromAbilities": [
+"FAIL",
+7
+],
+"Lotus_Upgrades_CosmeticEnhancers_Utility_ResidualTrigger": [
+"FAIL",
+16
+],
+"Lotus_Upgrades_Intrinsics_InvulnerabilityOnFatalDamage": [
+"FAIL",
+8
+],
+"Lotus_Upgrades_Mods_DataSpike_Potency_GainAntivirusEffect": [
+"FAIL",
+6
+],
+"Lotus_Upgrades_Mods_ModOnAimGlideOrSlide": [
+"FAIL",
+2
+],
+"Lotus_Upgrades_Mods_Railjack_Gunnery_OffensiveMatrix": [
+"FAIL",
+9
+],
+"Lotus_Upgrades_Mods_Railjack_Piloting_NonCombatSpeed": [
+"FAIL",
+4
+],
+"Lotus_Upgrades_Mods_Railjack_Subroutines_RailjackSubroutines": [
+"FAIL",
+61
+],
+"Lotus_Upgrades_Mods_Rifle_Event_Amalgam_PickUpArrows": [
+"FAIL",
+3
+],
+"Lotus_Upgrades_Mods_Sets_Ashen_AshenModSetBonusAbility": [
+"FAIL",
+5
+],
+"Lotus_Upgrades_Mods_Sets_Boneblade_BonebladeModTentacleAbility": [
+"FAIL",
+10
+],
+"Lotus_Upgrades_Stickers_Scripts_CreateShieldOnHeavySlam": [
+"FAIL",
+7
+],
+"Lotus_Upgrades_Stickers_Scripts_EjectButton": [
+"FAIL",
+5
+],
+"Lotus_Upgrades_Stickers_Scripts_EmergencyRescue": [
+"FAIL",
+3
+],
+"Lotus_Upgrades_Stickers_Scripts_SporePrimer": [
+"FAIL",
+15
+],
+"Lotus_Weapons_Corpus_Melee_KickAndPunch_ObexIncarnonEvolutions_ObexIncarnon": [
+"FAIL",
+9
+],
+"Lotus_Weapons_Corpus_Pistols_CorpusMinigun_IncarnonCestra_CestraIncarnon": [
+"FAIL",
+4
+],
+"Lotus_Weapons_Sentients_SentRifleNewWar_SentRifleNewWar": [
+"FAIL",
+5
+],
+"Lotus_Weapons_Tenno_Bayonet_TnBayonet": [
+"FAIL",
+9
+],
+"Lotus_Weapons_Tenno_LongGuns_PrimeLightningGun_PrimeLightningGun": [
+"FAIL",
+9
+],
+"Lotus_Weapons_Tenno_LongGuns_TnInkRifle_TnInkRifle": [
+"FAIL",
+11
+],
+"Lotus_Weapons_Tenno_Melee_Gunblade_RedeemerPrime_Disarm": [
+"FAIL",
+15
+],
+"Lotus_Weapons_Tenno_Melee_Swords_TennoSai_Incarnon_OkinaIncarnon": [
+"FAIL",
+18
+],
+"Lotus_Weapons_Tenno_Pistols_DuelistPistols_DuelistPistolsPassive": [
+"FAIL",
+5
+],
+"Tests_CombatSoak_CombatSoak": [
+"FAIL",
+3
+]
+}

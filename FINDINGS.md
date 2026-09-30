@@ -6328,3 +6328,26 @@ and every decompiler fix has a behavior-differing negative control.
 
 Next step: IF TRUTHY -> GETIMPORT / NAMECALL (multi-exit loop bodies whose interior branch is dropped;
 repro in `RESEARCH/CFG_CLASS_FIXES_2026-09-30/repro/`). Details: `RESEARCH/CFG_CLASS_FIXES_2026-09-30.md`.
+
+---
+
+## 2026-09-30 — #109 MULTI-EXIT LOOP BODIES (IF TRUTHY -> GETIMPORT / NAMECALL), LOOP-CARRIED NIL, GATE S3/S4
+
+Hypothesis: the IF TRUTHY -> GETIMPORT / NAMECALL classes are loops whose short-circuit continuation
+test (with a statement operand) leaves the body unreduced, so NaturalLoop collapses it and the emitter
+drops the interior branch.
+
+Finding: TRUE, plus one more real defect and two gate gaps. #40: reduce the loop body as a DAG with
+back edges and exits cut (exits print as `if c then break end`). #41: the implicit-nil canonicalizer
+reset loop-carried variables every iteration (invisible to cfg-identity; AddAscarisNegator re-applied
+its skins forever) — nil now goes before the outermost enclosing loop. S3: dead truthiness tests; S4:
+loop-op operand slots. Each has an opt-out; the legacy gate switches reproduce the old verdicts.
+
+Evidence: full 44.0.2 corpus (denominator 5,459), a788f061 -> d51d877e: CFG-ID 3,873/1,586 ->
+4,017/1,442 (+144, 0 PASS→FAIL), CONST-ID 5,338 -> 5,339, prototypes 70,603 -> 70,873 / 74,339 (0
+modules lose one), class swaps 0. 114 of the 144 are gate-only (S3 97), 30 need the pipeline.
+Regression: 15 modules no longer compiler-close within 5 passes (closed CONST-ID 5,263 -> 5,252,
+none PASS→FAIL), attributed to #40. Gates ALL PASS (Gate 14 50/50). SyndicateScarves byte-identical.
+
+Next step: numeric-for defects (body part order, lost nested break, FOR flattened in Proper), then
+the escape-selector growth behind the closure loss. Details: `RESEARCH/CFG_MULTI_EXIT_LOOPS_2026-09-30.md`.

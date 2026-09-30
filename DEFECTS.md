@@ -231,3 +231,16 @@ Details: `RESEARCH/CFG_IDENTITY_GATE_2026-09-29.md`.
 
 All five are covered by `cert/cfg_class_fixtures.py` (gates.py Gate 14): each opt-out must fail CFG-ID
 (and behavior for #35–#38). Details: `RESEARCH/CFG_CLASS_FIXES_2026-09-30.md`.
+
+## 2026-09-30 — multi-exit loop bodies, loop-carried nil, gate S3/S4
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 40 | inside a cycle every node "is a loop header", so no acyclic rule reduced a loop body whose continuation test is a short-circuit chain with a statement operand (`H -> {C, L}`, `C -> {L, exit}`); NaturalLoop collapsed it unreduced and the emitter can only fall through between parts | `while IsNull(g) or not g:GameStarted() do Sleep(1) end` rebuilt as `IsNull(g)` (result discarded) then `g:GameStarted()` on nil (RailjackHudTrackers p2); exitless polling loops lost every interior branch | cfg-identity class `IF TRUTHY -> GETIMPORT / NAMECALL`; luau.exe `attempt to index nil with 'GameStarted'` | reduce the loop body as the DAG it is once its back edge and exits are cut (one latch, ≤1 exit target, every loop-leaving edge a conditional arm outside nested loops/Proper, latch kept out of Proper); exits print as `if c then break end` (`RENOVICE_NO_LOOP_BODY_DAG`) |
+| 41 | the implicit-nil canonicalizer put `vN = nil` before the first TEXTUAL read; inside a loop a later-printed definition runs before that read on every later iteration | `local owner = nil; while true do if IsNull(owner) then owner = Find() end ... end` reset `owner` every iteration (AddAscarisNegator re-applied its skins every 0.1 s) — invisible to cfg-identity (LOADNIL is epsilon) | luau.exe behavior of the #40 fixture | a first read inside a loop gets its nil before the outermost enclosing loop, the stock `local x = nil` position (`RENOVICE_NO_LOOP_NIL_HOIST`) |
+| 42 | GATE normalization gap: a truthiness test whose two successors reach the same node is unobservable, but stock keeps it for an empty `if a and b then end` and the decompiler prints only the operand calls | identical programs reported `IF TRUTHY -> <next op>` (TradingPostScreenLauncher) | minimal fixture; legacy gate FAILs the identical round trip | S3 in `cfg_identity_cmd.h`; comparisons (EQ/LT/LE, metamethods) are not folded (`RENOVICE_CFGID_LEGACY_TRUTHY_NOOP`) |
+| 43 | GATE normalization gap: a value read by a loop op (range A..A+2) was slotted by matching A+1/A+2 against B/C, which are not registers (B is a jump offset) | the unobservable order of `for i = 400, 415` bound loads depended on register allocation: `LOAD -> LOAD` (StreamShipQuestLayers p3) | same | S4: slot = offset from A for FOR*PREP/FOR*LOOP (`RENOVICE_CFGID_LEGACY_LOOP_SLOT`) |
+
+Covered by `cert/cfg_class_fixtures.py` (Gate 14, now 50 checks). #41's fixture records that the
+legacy output PASSes cfg-identity while its behavior differs. Details:
+`RESEARCH/CFG_MULTI_EXIT_LOOPS_2026-09-30.md`.

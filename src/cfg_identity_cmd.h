@@ -30,6 +30,10 @@
 //   S2  (2026-09-30) unread ones go to the block end unless the terminator transfers control, and
 //       a repositioned node never prunes the dispatch environment (RENOVICE_CFGID_LEGACY_TAIL=1
 //       restores the pre-S2 rule for A/B)
+//   S3  (2026-09-30) a truthiness test whose two successors resolve to the same node and dispatch
+//       state is bypassed: it has no observable effect (RENOVICE_CFGID_LEGACY_TRUTHY_NOOP=1)
+//   S4  (2026-09-30) a value read by a loop op (FOR*PREP / FOR*LOOP, range A..A+2) is slotted by its
+//       offset from A, not by a coincidental B/C match (RENOVICE_CFGID_LEGACY_LOOP_SLOT=1)
 // Limitations (measured separately, never claimed by this gate): register dataflow is not compared
 // (a read of the wrong register, e.g. the SetVortexWindPerZone `Normalize(nil)` class, is invisible);
 // operand order of reg-reg comparisons is not compared; LOADNIL/MOVE-only effects are invisible.
@@ -481,6 +485,7 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
         for (int i = 0; i < n; ++i) for (int t : raw_succ[(size_t)i]) ++pred_count[(size_t)t];
         // RENOVICE_CFGID_LEGACY_TAIL=1 restores the pre-S2 sinking exactly (tail placement and pruning).
         const bool legacy_tail = std::getenv("RENOVICE_CFGID_LEGACY_TAIL") != nullptr;
+        const bool legacy_loop_slot = std::getenv("RENOVICE_CFGID_LEGACY_LOOP_SLOT") != nullptr;
         std::map<int, int> redirect;               // old block start -> new first node
         std::vector<bool> chained((size_t)n + 1, false);   // edges rewritten inside a block
         for (int s = 0; s < n;) {
@@ -512,6 +517,15 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
                             // order stays visible after sinking (a swap is still a mismatch).
                             const ir::IInsn& reader = proto.code[(size_t)k];
                             if (reader.op == 0x54 || reader.op == 0x29) slot[i] = read - reader.A;
+                            // S4 (2026-09-30): loop ops read the register RANGE A..A+2 (limit,
+                            // step, index / generator, state, control); B and C are not registers.
+                            // Matching A+1/A+2 against B/C gave coincidental slots that depended on
+                            // register allocation, so identical `for i = 400, 415` preps compared
+                            // as LOAD -> LOAD. RENOVICE_CFGID_LEGACY_LOOP_SLOT=1 restores it.
+                            else if (!legacy_loop_slot
+                                     && (reader.op == 0x47 || reader.op == 0x0b || reader.op == 0x30
+                                         || reader.op == 0x1b || reader.op == 0x0a || reader.op == 0x1e))
+                                slot[i] = read - reader.A;
                             else if (reader.op == 0x3f || reader.op == 0x28) slot[i] = read - reader.B;
                             else if (read == reader.A) slot[i] = 0;
                             else if (read == reader.B) slot[i] = 1;
@@ -627,7 +641,8 @@ static std::string cfg_identity_env_key(const CfgIdentityEnv& env) {
 // Follow epsilon, dispatch definitions and statically decided dispatch tests from `i` to the next
 // observable node. Returns -1 for "falls off the end", SPIN (= nodes.size()-1) for a cycle that
 // performs no observable operation.
-static int cfg_identity_resolve(const CfgIdentityProto& proto, int i, CfgIdentityEnv& env) {
+static int cfg_identity_resolve(const CfgIdentityProto& proto, int i, CfgIdentityEnv& env, int nesting = 0) {
+    static const bool legacy_truthy = std::getenv("RENOVICE_CFGID_LEGACY_TRUTHY_NOOP") != nullptr;
     const int spin = (int)proto.nodes.size() - 1;
     std::set<std::string> walked;
     while (true) {
@@ -670,6 +685,20 @@ static int cfg_identity_resolve(const CfgIdentityProto& proto, int i, CfgIdentit
         if (node.epsilon) {
             i = node.succ.empty() ? -1 : node.succ[0];
             continue;
+        }
+        // S3 (2026-09-30): a truthiness test whose two successors reach the same observable node in
+        // the same dispatch state is a no-op -- reading a register's truthiness runs no metamethod.
+        // Stock keeps such a test for an empty-bodied `if a and b then end`; the decompiler prints
+        // the operand evaluation without the dead test. Comparisons (EQ/LT/LE) are NOT folded:
+        // they can invoke __eq/__lt/__le. RENOVICE_CFGID_LEGACY_TRUTHY_NOOP=1 disables S3 for A/B.
+        if (!legacy_truthy && nesting < 4 && node.label == "IF TRUTHY" && node.succ.size() == 2) {
+            CfgIdentityEnv taken = env, fallthrough = env;
+            const int a = cfg_identity_resolve(proto, node.succ[0], taken, nesting + 1);
+            const int b = cfg_identity_resolve(proto, node.succ[1], fallthrough, nesting + 1);
+            if (a == b && cfg_identity_env_key(taken) == cfg_identity_env_key(fallthrough)) {
+                env = taken;
+                return a;
+            }
         }
         return i;
     }

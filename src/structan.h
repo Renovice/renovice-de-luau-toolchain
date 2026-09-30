@@ -45,13 +45,20 @@ struct Analyzer {
     // Original-CFG loops (st::find_loops): header block -> body blocks. Read-only after build();
     // used to recognise the true head of a cycle when an impossible candidate is skipped.
     std::map<int, std::set<int>> original_loop_bodies;
+    // Per-block branch facts copied from the CFG in build(): the loop-body DAG repair below must
+    // know, at BLOCK level, whether an edge that leaves a loop is a conditional two-way branch.
+    struct BlockEdges { int t = -1, f = -1; bool branch = false; int term = 0; };
+    std::vector<BlockEdges> block_edges;
     int entry = 0;
 
     void build(const st::Graph& g) {
         regions.clear(); succ.clear(); pred.clear(); live.clear();
         for_latches.clear(); nested_for_latches.clear(); nested_for_preps.clear();
         multi_latch_for_headers.clear(); original_loop_bodies.clear();
+        block_edges.assign(g.n.size(), BlockEdges());
         for (size_t i = 0; i < g.n.size(); ++i) {
+            block_edges[i].t = g.n[i].succ_true; block_edges[i].f = g.n[i].succ_false;
+            block_edges[i].branch = g.n[i].is_branch; block_edges[i].term = g.n[i].term;
             Region r; r.kind = RK::Basic; r.block = (int)i;
             regions.push_back(r);
             if (g.n[i].reach) live.insert((int)i);
@@ -188,6 +195,145 @@ struct Analyzer {
         for (int p : it->second) if (p == n || reaches(n, p)) return true;
         return false;
     }
+    void region_block_set(int r, std::set<int>& out) const {
+        if (r < 0 || r >= (int)regions.size()) return;
+        if (regions[r].kind == RK::Basic) { out.insert(regions[r].block); return; }
+        for (int part : regions[r].parts) region_block_set(part, out);
+    }
+    bool region_has_loop(int r) const {
+        if (r < 0 || r >= (int)regions.size()) return false;
+        const RK k = regions[r].kind;
+        if (k == RK::SelfLoop || k == RK::While || k == RK::NaturalLoop) return true;
+        for (int part : regions[r].parts) if (region_has_loop(part)) return true;
+        return false;
+    }
+
+    // LOOP-BODY DAG (2026-09-30, 44.0.2 RailjackHudTrackers p2 class, DEFECTS #40). Inside a cycle
+    // every node "is a loop header" (is_loop_header: a predecessor is reachable from it), so the
+    // generalised if-then never fires there, and the two-successor rules need a private arm that
+    // joins or terminates. A loop whose continuation test is a short-circuit chain with a statement
+    // operand -- `while IsNull(g) or not g:GameStarted() do Sleep(1) end` -- has the shape
+    //     H -> {C, L}   C -> {L, exit}   L -> H
+    // where C's `exit` edge is a break. No rule matches, NaturalLoop collapses {H, C, L} with its
+    // interior UNREDUCED, and the emitter, which can only fall through between unreduced parts and
+    // turn a single loop-leaving arm into `if c then break end`, dropped H's branch: the rebuild
+    // called GameStarted() on a nil gGameRules.
+    //
+    // Repair: reduce the loop body as the acyclic graph it is once its back edge and its exits are
+    // cut. The exit edges stay in the CFG, so the emitter's loop-exit check still prints each one
+    // as `if c then break end` inside the structured body. Admitted only where that rendering is
+    // exact, otherwise the established collapse is kept unchanged:
+    //   - at most one exit target; exactly one latch part, whose only successor is the header;
+    //   - some body part has two in-body successors (the branch the old emission drops);
+    //   - every loop-leaving block edge is one arm of a conditional two-way branch that is not a
+    //     FOR prep/latch and not inside a nested loop (a `break` there would leave the inner loop);
+    //   - the cut body reduces to ONE region, and no loop-leaving edge ends up inside a nested
+    //     loop or Proper region of it.
+    // With a single latch that every body node reaches, the latch is the DAG's only sink, so no
+    // terminal-arm rule can mistake the latch (a `continue`) for a `return`.
+    // RENOVICE_NO_LOOP_BODY_DAG=1 restores the previous collapse for A/B.
+    const bool loop_body_dag = !std::getenv("RENOVICE_NO_LOOP_BODY_DAG");
+    int loop_body_dag_depth = 0;
+    // While a cut body is reduced: the header's blocks. The Proper dispatcher follows REAL CFG
+    // edges, so a Proper region holding the latch would see the cut back edge as an internal
+    // cycle and loop inside the region. The latch (any region with an edge into the header)
+    // therefore stays outside every Proper region of the cut body, as the loop-body Proper rule
+    // already keeps latches outside (#32).
+    std::set<int> dag_header_blocks;
+    bool cut_latch_region(int r) const {
+        if (dag_header_blocks.empty()) return false;
+        std::set<int> blocks; region_block_set(r, blocks);
+        for (int b : blocks) {
+            if (b < 0 || b >= (int)block_edges.size()) return true;
+            if ((block_edges[b].t >= 0 && dag_header_blocks.count(block_edges[b].t) && !blocks.count(block_edges[b].t))
+                || (block_edges[b].f >= 0 && dag_header_blocks.count(block_edges[b].f) && !blocks.count(block_edges[b].f)))
+                return true;
+        }
+        return false;
+    }
+    int dag_reject(int n, int reason) const {
+        if (std::getenv("RENOVICE_SASTEPS"))
+            std::fprintf(stderr, "SA_LOOP_BODY_DAG_REJECT head=%d reason=%d\n", n, reason);
+        return -1;
+    }
+    // Returns the root region of the reduced body, or -1 with the graph state unchanged.
+    int reduce_loop_body_dag(int n, const std::set<int>& body, const std::set<int>& outs) {
+        if (!loop_body_dag || loop_body_dag_depth > 0 || outs.size() > 1 || body.size() < 3) return dag_reject(n, 1);
+        if (succ[n].count(n)) return dag_reject(n, 2);
+        std::vector<int> latches;
+        for (int x : body) if (x != n && succ[x].count(n)) latches.push_back(x);
+        if (latches.size() != 1 || nsucc(latches[0]) != 1) return dag_reject(n, 3);
+        bool dropped_branch = false;
+        for (int x : body) {
+            int inner = 0;
+            for (int s : succ[x]) if (s != n && body.count(s)) ++inner;
+            if (inner >= 2) { dropped_branch = true; break; }
+        }
+        if (!dropped_branch) return dag_reject(n, 4);
+        std::set<int> body_blocks;
+        for (int x : body) region_block_set(x, body_blocks);
+        for (int x : body) {
+            std::set<int> xb; region_block_set(x, xb);
+            const bool nested_loop = region_has_loop(x);
+            for (int b : xb) {
+                if (b < 0 || b >= (int)block_edges.size()) return dag_reject(n, 5);
+                const BlockEdges& e = block_edges[b];
+                const bool t_out = e.t >= 0 && !body_blocks.count(e.t);
+                const bool f_out = e.f >= 0 && !body_blocks.count(e.f);
+                if (!t_out && !f_out) continue;
+                if (nested_loop || t_out == f_out || !e.branch || e.t < 0 || e.f < 0 || e.t == e.f)
+                    return dag_reject(n, 6);
+                switch (e.term) {
+                    case 0x0a: case 0x1e: case 0x47: case 0x0b: case 0x30: case 0x1b: return dag_reject(n, 7);
+                    default: break;
+                }
+            }
+        }
+        const auto saved_succ = succ; const auto saved_pred = pred; const auto saved_live = live;
+        const int saved_entry = entry;
+        const size_t saved_regions = regions.size();
+        std::map<int, std::set<int>> cut_succ, cut_pred;
+        for (int x : body) { cut_succ[x]; cut_pred[x]; }
+        for (int x : body)
+            for (int s : succ[x])
+                if (s != n && body.count(s)) { cut_succ[x].insert(s); cut_pred[s].insert(x); }
+        succ.swap(cut_succ); pred.swap(cut_pred); live = body;
+        ++loop_body_dag_depth;
+        region_block_set(n, dag_header_blocks);
+        int guard = 0;
+        while (live.size() > 1 && guard++ < 100000) if (!step()) break;
+        dag_header_blocks.clear();
+        --loop_body_dag_depth;
+        const size_t live_left = live.size();
+        int root = live.size() == 1 ? *live.begin() : -1;
+        if (root >= 0 && root < (int)saved_regions) root = -1;
+        // Nested loops of the body may reduce here (their back edges are not cut), and so may
+        // Proper regions (acyclic compound conditions whose operands need statements). No
+        // loop-leaving edge may sit inside either: a `break` inside a nested loop leaves only that
+        // loop, and the Proper dispatcher can wrap a multi-exit child in `repeat ... until true`.
+        int fail_kind = -1;
+        std::function<bool(int, bool)> exit_in_nested_loop = [&](int r, bool inside) -> bool {
+            if (r < 0 || r >= (int)regions.size()) return true;
+            const Region& region = regions[r];
+            if (region.kind == RK::Basic) {
+                if (!inside) return false;
+                const BlockEdges& e = block_edges[region.block];
+                return (e.t >= 0 && !body_blocks.count(e.t)) || (e.f >= 0 && !body_blocks.count(e.f));
+            }
+            const bool loop = region.kind == RK::SelfLoop || region.kind == RK::While
+                || region.kind == RK::NaturalLoop || region.kind == RK::Proper;
+            for (int part : region.parts) if (exit_in_nested_loop(part, inside || loop)) return true;
+            return false;
+        };
+        if (root >= 0 && exit_in_nested_loop(root, false)) { root = -1; fail_kind = 100; }
+        succ = saved_succ; pred = saved_pred; live = saved_live; entry = saved_entry;
+        if (root < 0) regions.resize(saved_regions);
+        if (std::getenv("RENOVICE_SASTEPS"))
+            std::fprintf(stderr, "SA_LOOP_BODY_DAG head=%d body=%zu root=%d fail_kind=%d live_left=%zu\n",
+                         n, body.size(), root, fail_kind, live_left);
+        return root;
+    }
+
     // One reduction pass. Returns true if anything collapsed.
     bool step() {
         std::vector<int> order(live.begin(), live.end());
@@ -403,6 +549,7 @@ struct Analyzer {
                     for (int q : pred[c]) if (!S.count(q)) { all_in = false; break; }
                     if (!all_in) continue;
                     if (returns_to_n(c)) { all_in = false; }      // cyclic: not an acyclic region
+                    if (all_in && cut_latch_region(c)) all_in = false;  // DEFECTS #40, below
                     if (all_in) { S.insert(c); grew = true; }
                 }
             }
@@ -523,6 +670,8 @@ struct Analyzer {
         auto collapse_loop = [&](const LoopCandidate& c) {
             std::vector<int> parts(c.body.begin(), c.body.end());
             Region r; r.kind = RK::NaturalLoop; r.head = c.n; r.parts = parts;
+            const int body_root = reduce_loop_body_dag(c.n, c.body, c.outs);   // DEFECTS #40
+            if (body_root >= 0) r.parts = {body_root};
             int id = add(r); collapse(parts, id, c.outs);
         };
         for (int n : order) {
