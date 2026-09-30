@@ -10413,6 +10413,54 @@ emit_conditional_region:
         return changed;
     }
 
+    // IMPORT-CHAIN GUARD (2026-09-30). The two base folds below turn `v2 = _T; v1 = v2.Name`
+    // (bytecode GETIMPORT _T + GETFIELD "Name") into `v1 = _T.Name`. Luau compiles that spelling to
+    // ONE two-part GETIMPORT `_T.Name`: a load-time snapshot when the environment is safe, not a
+    // live read of a field. Stock kept the separate GETFIELD because its source indexed with a
+    // string (`_T[SCRIPT_NAME]`, a constant local), and those scripts assign `_T[SCRIPT_NAME] = {}`
+    // and read it back (44.0.2: weapon-attachment state tables such as TnChiselKanabo).
+    // For a READ whose base is a global root, spell the first field `["Name"]`: Luau never
+    // extends an import through an index expression, and the DE key class is decided by name
+    // (transcode.h GETTABLEKS), so the constant is unchanged. A root this body assigns is never
+    // imported by Luau and keeps the dotted spelling. RENOVICE_NO_IMPORT_CHAIN_GUARD restores the
+    // dotted fold for A/B.
+    static bool importable_global_root(const std::vector<std::string>& lines, const std::string& base) {
+        if (std::getenv("RENOVICE_NO_IMPORT_CHAIN_GUARD")) return false;
+        if (base.empty() || !reg_tokens(base).empty() || base.compare(0, 10, "__renovice") == 0)
+            return false;
+        if (base.size() >= 2 && base[0] == 'u') {             // upvalue placeholder u<N>
+            bool digits = true;
+            for (size_t k = 1; k < base.size(); ++k)
+                if (!std::isdigit((unsigned char)base[k])) { digits = false; break; }
+            if (digits) return false;
+        }
+        for (const std::string& line : lines) {                // `root = ...` makes it Written
+            size_t at = 0;
+            while (at < line.size() && line[at] == ' ') ++at;
+            if (line.compare(at, base.size() + 3, base + " = ") == 0) return false;
+        }
+        return true;
+    }
+    // Length of the leading `.name` component of a fold suffix (0 when it is not a field).
+    static size_t leading_field_length(const std::string& suffix) {
+        if (suffix.size() < 2 || suffix[0] != '.') return 0;
+        size_t at = 1;
+        while (at < suffix.size() && (std::isalnum((unsigned char)suffix[at]) || suffix[at] == '_')) ++at;
+        return at > 1 ? at : 0;
+    }
+    // Replace the folded register token with its base. `guard_read` is true when the token is the
+    // whole right-hand side's base (a read); stores keep the dotted spelling.
+    static void replace_folded_base(std::string& line, const RegToken& token, const std::string& base,
+                                    bool guard_read, const std::vector<std::string>& lines) {
+        const size_t field = guard_read ? leading_field_length(line.substr(token.last)) : 0;
+        if (field && importable_global_root(lines, base)) {
+            line.replace(token.first, token.last - token.first + field,
+                         base + "[\"" + line.substr(token.last + 1, field - 1) + "\"]");
+            return;
+        }
+        line.replace(token.first, token.last - token.first, base);
+    }
+
     // Fold one proven physical-register lifetime of a captured table base even when that slot is
     // reused later for a different purpose.  The older all-lifetimes pass below intentionally
     // rejects a register when any one pair has another shape; that leaves compiler GETUPVAL
@@ -10498,6 +10546,7 @@ emit_conditional_region:
             size_t use = 0;
             RegToken use_token;
             std::string base;
+            bool read = false;          // the token is the base of the right-hand side
         };
         std::vector<Pair> accepted;
         std::set<size_t> occupied_lines;
@@ -10607,7 +10656,8 @@ emit_conditional_region:
                     // their one index use, with the next occurrence a fresh write.
                     if (captured || !fresh_result || !constant_key || !exact_rhs) continue;
                 }
-                accepted.push_back({definition.line, use.line, use.token, base});
+                accepted.push_back({definition.line, use.line, use.token, base,
+                                    use.token.first == assignment + 3});
                 occupied_lines.insert(definition.line);
                 occupied_lines.insert(use.line);
                 ++q;
@@ -10618,9 +10668,7 @@ emit_conditional_region:
             return left.definition > right.definition;
         });
         for (const Pair& pair : accepted) {
-            lines[pair.use].replace(pair.use_token.first,
-                                    pair.use_token.last - pair.use_token.first,
-                                    pair.base);
+            replace_folded_base(lines[pair.use], pair.use_token, pair.base, pair.read, lines);
             lines.erase(lines.begin() + (std::ptrdiff_t)pair.definition);
         }
         if (!accepted.empty()) {
@@ -10714,6 +10762,7 @@ emit_conditional_region:
             size_t use = 0;
             RegToken use_token;
             std::string base;
+            bool read = false;          // the token is the base of the right-hand side
         };
         std::vector<Pair> accepted;
         for (const auto& item : mentions) {
@@ -10756,7 +10805,8 @@ emit_conditional_region:
                     index_pair = !suffix.empty() && literal_suffix(suffix);
                 }
                 if (index_pair) {
-                    candidate.push_back({definition.line, use.line, use.token, base});
+                    candidate.push_back({definition.line, use.line, use.token, base,
+                                         use.token.first == assignment + 3});
                     continue;
                 }
 
@@ -10793,9 +10843,7 @@ emit_conditional_region:
         });
         int changed = 0;
         for (const Pair& pair : accepted) {
-            lines[pair.use].replace(pair.use_token.first,
-                                    pair.use_token.last - pair.use_token.first,
-                                    pair.base);
+            replace_folded_base(lines[pair.use], pair.use_token, pair.base, pair.read, lines);
             lines.erase(lines.begin() + (std::ptrdiff_t)pair.definition);
             ++changed;
         }

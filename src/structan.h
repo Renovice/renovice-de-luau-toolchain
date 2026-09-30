@@ -141,7 +141,20 @@ struct Analyzer {
         if (it == succ.end() || it->second.size() != 1) return false;
         s = *it->second.begin(); return true;
     }
-    size_t npred(int n) const { auto it = pred.find(n); return it==pred.end()?0:it->second.size(); }
+    // THE FUNCTION ENTRY HAS ONE MORE PREDECESSOR: THE CALL (2026-09-30). Every acyclic rule admits
+    // a node as a sequence successor, if-arm or while body only when it is PRIVATE (npred == 1).
+    // The entry's only graph predecessors are loop latches, so when the whole function body is
+    // an outer loop, `latch -> entry` looked private and Seq[latch, entry] was formed: the region
+    // then started at the latch and the emitter rotated the loop (44.0.2 FlickerOnOff:
+    // `if loop == false then return end` printed before `t = 0` and the inner loop, whose
+    // counter then read nil). Counting the call edge keeps the entry a region head.
+    // RENOVICE_NO_ENTRY_CALLER_EDGE restores the previous count for A/B.
+    const bool entry_caller_edge = !std::getenv("RENOVICE_NO_ENTRY_CALLER_EDGE");
+    size_t npred(int n) const {
+        auto it = pred.find(n);
+        const size_t count = it == pred.end() ? 0 : it->second.size();
+        return count + (entry_caller_edge && n == entry ? 1 : 0);
+    }
     size_t nsucc(int n) const { auto it = succ.find(n); return it==succ.end()?0:it->second.size(); }
 
     bool reaches(int f, int t) { return reaches_impl(f, t); }
@@ -518,13 +531,20 @@ struct Analyzer {
                 LoopCandidate first;
                 if (!natural_candidate(n, p, first)) continue;
                 if (n != entry && first.body.count(entry) && !std::getenv("RENOVICE_LEGACY_ENTRY_IN_LOOP")) {
+                    // The entry itself may be the clean head (2026-09-30): a function whose body
+                    // starts with the loop, `while true do if c then ... end Sleep(0) end`. Region
+                    // order tried the latch (Sleep) first, headed the loop there, and the emitter
+                    // printed `Sleep(0)` before the first test. An entry-headed candidate is clean
+                    // when the entry region holds the original-CFG header of that cycle
+                    // (heads_cycle); RENOVICE_NO_ENTRY_HEADED_LOOP restores the entry exclusion.
+                    const bool entry_may_head = !std::getenv("RENOVICE_NO_ENTRY_HEADED_LOOP");
                     bool clean_exists = false;
                     for (int n2 : order) {
                         if (clean_exists) break;
-                        if (!live.count(n2) || n2 == entry || !first.body.count(n2)) continue;
+                        if (!live.count(n2) || (n2 == entry && !entry_may_head) || !first.body.count(n2)) continue;
                         for (int p2 : pred[n2]) {
                             LoopCandidate clean;
-                            if (!natural_candidate(n2, p2, clean) || clean.body.count(entry)
+                            if (!natural_candidate(n2, p2, clean) || (n2 != entry && clean.body.count(entry))
                                 || !clean.body.count(n) || !clean.body.count(p)
                                 || !heads_cycle(n2, p2)) continue;
                             clean_exists = true;
@@ -588,7 +608,19 @@ struct Analyzer {
     // Returns true if the graph fully reduced to a single region.
     bool reduce(int& steps) {
         steps = 0;
-        while (live.size() > 1 && steps < 100000) { if (!step()) break; ++steps; }
+        // A single remaining node can still carry a back edge to itself: a function whose whole
+        // reachable body is one exitless loop (`while true do Sleep(0) end`; the compiler's final
+        // RETURN is unreachable). Stopping at one live node dropped that edge and the loop was
+        // emitted as straight-line code that runs once and returns (2026-09-30, 44.0.2 corpus:
+        // SpawnCleanDrone WaitRepair, the Sentinel ability pumps). One more step reduces it as the
+        // SelfLoop it is. RENOVICE_NO_TERMINAL_SELF_LOOP restores the previous stop for A/B.
+        const bool terminal_self_loop = !std::getenv("RENOVICE_NO_TERMINAL_SELF_LOOP");
+        auto pending_self_loop = [&]() {
+            if (!terminal_self_loop || live.size() != 1) return false;
+            auto it = succ.find(*live.begin());
+            return it != succ.end() && it->second.count(*live.begin()) > 0;
+        };
+        while ((live.size() > 1 || pending_self_loop()) && steps < 100000) { if (!step()) break; ++steps; }
         return live.size() == 1;
     }
 };

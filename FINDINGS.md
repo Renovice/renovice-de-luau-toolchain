@@ -6300,3 +6300,31 @@ Also found (unchanged, needs authorization): the U43 standard path has the same 
 3,240 / 5,385 modules carry 39,749 hash/string class swaps after `decompile-mod` → `recompile`.
 
 Next step: authorize the U43 metadata repair, then add CONST-ID to `cert/gates.py`.
+
+---
+
+## 2026-09-30 — #108 CFG-ID CLASSES: FOUR STRUCTURING/EMISSION DEFECTS AND ONE GATE NORMALIZATION GAP
+
+Hypothesis: the largest first-mismatch family (LOAD -> GETIMPORT / LOAD -> CALL / LOAD -> LOAD, 516
+modules) is mostly a gate normalization gap (unobservable load placement), with real ordering defects
+behind the rest.
+
+Finding: PARTIALLY TRUE. LOAD -> CALL and most LOAD -> GETIMPORT were the gate (S2: unread pure loads
+placed relative to a fall-through terminator; repositioned nodes pruned dispatch state with the wrong
+liveness). Minimal fixtures exposed four real decompiler defects, each confirmed by behavior under
+luau.exe: exitless terminal loop emitted as run-once (#35), loop headed by the entry rotated to its
+latch (#36), `Seq[latch, entry]` rotating an outer loop (#37), and `_T[NAME]` reads folded into a
+snapshot GETIMPORT `_T.NAME` (#38). All fixed generically, each with an opt-out.
+
+Evidence: full 44.0.2 corpus (denominator 5,459), b4221c48 → a788f061: CFG-ID 3,577/1,882 →
+3,873/1,586 PASS/FAIL (+296, 0 PASS→FAIL), CONST-ID 5,336 → 5,338 (0 regressions), prototypes
+70,020 → 70,603 / 74,339 (0 modules lose one), closed CFG-ID 3,533 → 3,818, class swaps 0.
+Attribution: 249 of the 296 are gate-only (old rebuild already equivalent), 47 need the new
+pipeline. `cert/gates.py 300 150`: ALL PASS (Gate 14 new, 26/26).
+
+Reason: the gate must not manufacture differences, and it must not hide real ones: the legacy gate
+reproduces its old verdicts exactly under `RENOVICE_CFGID_LEGACY_TAIL`, mutation controls still fail,
+and every decompiler fix has a behavior-differing negative control.
+
+Next step: IF TRUTHY -> GETIMPORT / NAMECALL (multi-exit loop bodies whose interior branch is dropped;
+repro in `RESEARCH/CFG_CLASS_FIXES_2026-09-30/repro/`). Details: `RESEARCH/CFG_CLASS_FIXES_2026-09-30.md`.

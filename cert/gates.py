@@ -40,6 +40,10 @@ CORE GATES (a change ships only if ALL pass):
                           stock extraction (RENOVICE_U44_STOCK, default work/u44-rawhash-2026-09-29/stock).
                           Ratchets: PASS counts never fall, U44 hash/string class swaps stay 0, U43
                           swaps (known pending U43 metadata defect) never rise.
+ 14. CFG CLASS FIXTURES  - cert/cfg_class_fixtures.py (2026-09-30): exitless terminal loop, entry-headed
+                          loop, entry-headed outer loop, `_T[NAME]` import-chain read (behavior +
+                          CFG-ID; each fix's opt-out must FAIL both), and the gate's own S2 tail-sinking normalization (legacy rule must
+                          FAIL an identical round trip; an equivalent reorder PASSes; mutations FAIL).
 
 Usage:
     python cert/gates.py                 # 300 files, baseline from BASELINE below
@@ -73,11 +77,21 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "LOST_CONDITION": 0, "SEMANTIC_BEHAVIOR_SAME": 150,
             "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
-            "NATURAL_LOOP_CHECKS": 8,
-            "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 12,
+            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 26,
+            "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 14,
             "U43_CLASS_SWAPS": 6590,
-            "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 72,
+            "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 76,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-09-30 -- CFG-ID class fixes (RESEARCH/CFG_CLASS_FIXES_2026-09-30.md):
+#   Gate 14 is new (26 checks). Pre = derecomp b4221c48 (HEAD 029ba1f), post = a788f061; the post
+#   gate includes the S2 normalization fix, so Gate 13 gains mix gate and pipeline effects (the
+#   research note separates them on the full corpus).
+#     U43 first 300:  CONST-ID 18 -> 18, CFG-ID 12 -> 14, CFG protos equal 7,639 -> 7,653 of 10,925,
+#                     class swaps 6,590 -> 6,590.
+#     U44 1-in-50:    CONST-ID 107 -> 107, CFG-ID 72 -> 76, CFG protos equal 1,483 -> 1,491 of 1,701,
+#                     class swaps 0 -> 0.
+#   Back-edge MATCH 266 -> 267, LOST-LOOPS 22 -> 21, LOST-HEADERS 107 -> 106; all other gates unchanged.
 
 # BASELINE ADDITION OF 2026-09-29 -- stock control-flow identity and the natural-loop fixture:
 #   Gates 12 and 13 are new. Pre/post measurement with the same gate binary on the same samples
@@ -500,6 +514,17 @@ def run_native_namecall_preservation():
         }
 
 
+def run_cfg_class_fixtures():
+    """Gate 14: 2026-09-30 CFG-ID class fixtures, behavior + CFG-ID + negative/mutation controls."""
+    p = sh([PY, os.path.join("cert", "cfg_class_fixtures.py")], timeout=900)
+    match = re.search(r"^CFG_CLASS_FIXTURES checks=(\d+) passed=(\d+) verdict=(\w+)$", p.stdout, re.M)
+    if not match:
+        return {"FATAL": "cfg-class fixtures did not report a parseable summary: "
+                + ((p.stdout or "") + (p.stderr or ""))[-1000:]}
+    return {"checks": int(match.group(1)), "passed": int(match.group(2)), "verdict": match.group(3),
+            "failed_checks": re.findall(r"^(\S+)\s+FAIL$", p.stdout, re.M)}
+
+
 def run_natural_loop_fixture():
     """Gate 12: SyndicateScarves NewLokaScarfUpdate shape, behavior + CFG-ID + negative controls."""
     p = sh([PY, os.path.join("cert", "natural_loop_nested_for.py")], timeout=900)
@@ -631,6 +656,7 @@ def main():
     WF = run_warframe_api_trace()
     NC = run_native_namecall_preservation()
     NL = run_natural_loop_fixture()
+    CC = run_cfg_class_fixtures()
     SI43 = run_stock_identity("u43", n_align)
     SI44 = run_stock_identity("u44", n_align)
 
@@ -754,6 +780,19 @@ def main():
             or NL.get("passed", 0) != BASELINE["NATURAL_LOOP_CHECKS"]):
         fails.append("GATE 12: natural-loop fixture %d/%d"
                      % (NL.get("passed", 0), BASELINE["NATURAL_LOOP_CHECKS"]))
+
+    # ---- Gate 14: 2026-09-30 CFG-ID class fixtures
+    print("\n-- GATE 14: CFG-ID class fixtures (terminal self-loop, entry-headed loops, import chain, S2)")
+    print("   checks=%d passed=%d verdict=%s" % (CC.get("checks", 0), CC.get("passed", 0),
+                                                 CC.get("verdict", "?")))
+    for check in CC.get("failed_checks", []):
+        print("     !! %s" % check)
+    if "FATAL" in CC:
+        print("     !! %s" % CC["FATAL"])
+    if (CC.get("checks", 0) != BASELINE["CFG_CLASS_CHECKS"]
+            or CC.get("passed", 0) != BASELINE["CFG_CLASS_CHECKS"]):
+        fails.append("GATE 14: cfg-class fixtures %d/%d"
+                     % (CC.get("passed", 0), BASELINE["CFG_CLASS_CHECKS"]))
 
     # ---- Gate 13: CONST-ID + CFG-ID against the ORIGINAL bytecode
     for tag, SI in (("U43", SI43), ("U44", SI44)):
@@ -936,6 +975,7 @@ def main():
             "warframe_api_trace": dict(sorted(WF.items())),
             "native_namecall": dict(sorted(NC.items())),
             "natural_loop_fixture": dict(sorted(NL.items())),
+            "cfg_class_fixtures": dict(sorted(CC.items())),
             "stock_identity_u43": dict(sorted(SI43.items())),
             "stock_identity_u44": dict(sorted(SI44.items())),
         },

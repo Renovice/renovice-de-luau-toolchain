@@ -218,3 +218,16 @@ Result: 82,042 clean, 0 missing, 0 duplicated, deterministic across runs.
 
 Caught by the new `cfg-identity` gate and `cert/natural_loop_nested_for.py` (gates.py 12/13).
 Details: `RESEARCH/CFG_IDENTITY_GATE_2026-09-29.md`.
+
+## 2026-09-30 — cfg-identity class fixes (exitless loops, entry-headed loops, import chains, gate S2)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 35 | region reduction stopped at one live node even when that node kept a self edge | a function whose whole body is an exitless loop (`while true do Sleep(0) end`) was emitted as straight-line code that ran once and returned | cfg-identity class `GETIMPORT -> RETURN` (SpawnCleanDrone WaitRepair) | reduce a remaining self edge as SelfLoop (`RENOVICE_NO_TERMINAL_SELF_LOOP`) |
+| 36 | entry-in-loop repair (#31) never accepted the ENTRY as the clean head | `while true do if c then ... end Sleep(0) end` at function start headed at the latch: `Sleep(0)` printed before the first test | class `GETIMPORT -> GETIMPORT` at depth 0 | the entry region may be the clean head when it holds the original-CFG header (`RENOVICE_NO_ENTRY_HEADED_LOOP`) |
+| 37 | the entry's only graph predecessor is the outer latch, so `latch -> entry` looked private | `Seq[latch, entry]` rotated an outer loop; the exit test ran before `t = 0` and the inner counter read nil (FlickerOnOff) | class `LOAD -> LOAD` at depth 0 | `npred(entry)` counts the call edge (`RENOVICE_NO_ENTRY_CALLER_EDGE`) |
+| 38 | base-temporary folds turned `v2 = _T; v1 = v2.Name` into `_T.Name` | Luau compiles that to ONE two-part GETIMPORT: a load-time snapshot, not a live read of a field the script assigns (`_T[NAME] = ...`) | class `GETIMPORT -> GETIMPORT` (`_T` vs `_T."Name"`); luau.exe prints "stale" instead of "fresh" | reads on a global root keep `root["Name"]` (`RENOVICE_NO_IMPORT_CHAIN_GUARD`) |
+| 39 | GATE normalization gap: unread pure loads were placed before a fall-through terminator in one block shape and after it in another; repositioned nodes pruned dispatch state with the wrong liveness | identical programs reported `LOAD -> CALL` / `LOAD -> GETIMPORT` | minimal PostFade shape; legacy gate FAILs an identical round trip | S2 in `cfg_identity_cmd.h` (`RENOVICE_CFGID_LEGACY_TAIL`) |
+
+All five are covered by `cert/cfg_class_fixtures.py` (gates.py Gate 14): each opt-out must fail CFG-ID
+(and behavior for #35–#38). Details: `RESEARCH/CFG_CLASS_FIXES_2026-09-30.md`.

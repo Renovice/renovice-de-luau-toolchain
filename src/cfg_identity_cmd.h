@@ -26,6 +26,10 @@
 //   N1  FORGPREP/FORGPREP_INEXT/0x0b -> FORGPREP; FORGLOOP ipairs bit dropped (generic for)
 //   N2  NEWCLOSURE/DUPCLOSURE -> CLOSURE <flat proto>; CAPTURE mode is not compared
 //   N3  LOADN and LOADK of a number are the same LOAD
+//   S1  pure materializations are sunk within a block to their first reader (operand slot kept)
+//   S2  (2026-09-30) unread ones go to the block end unless the terminator transfers control, and
+//       a repositioned node never prunes the dispatch environment (RENOVICE_CFGID_LEGACY_TAIL=1
+//       restores the pre-S2 rule for A/B)
 // Limitations (measured separately, never claimed by this gate): register dataflow is not compared
 // (a read of the wrong register, e.g. the SetVortexWindPerZone `Normalize(nil)` class, is invisible);
 // operand order of reg-reg comparisons is not compared; LOADNIL/MOVE-only effects are invisible.
@@ -47,6 +51,9 @@ struct CfgIdentityNode {
     // Dispatch-state resolution (N4): a constant definition of, or a test on, a dispatch-only web.
     int state_web = -1;
     bool state_def = false, state_test = false;
+    // A pure materialization repositioned by S1: its original instruction's liveness does not
+    // describe the point where it now sits, so it must not prune the dispatch environment.
+    bool floating = false;
     std::string def_value;
 };
 
@@ -472,6 +479,8 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
         };
         std::vector<int> pred_count((size_t)n, 0);
         for (int i = 0; i < n; ++i) for (int t : raw_succ[(size_t)i]) ++pred_count[(size_t)t];
+        // RENOVICE_CFGID_LEGACY_TAIL=1 restores the pre-S2 sinking exactly (tail placement and pruning).
+        const bool legacy_tail = std::getenv("RENOVICE_CFGID_LEGACY_TAIL") != nullptr;
         std::map<int, int> redirect;               // old block start -> new first node
         std::vector<bool> chained((size_t)n + 1, false);   // edges rewritten inside a block
         for (int s = 0; s < n;) {
@@ -516,6 +525,7 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
                     // The block terminator keeps its position; a pure terminator anchors at itself.
                     if (i == e) anchor = e + 1;
                     before[anchor].push_back(i);
+                    out.nodes[(size_t)i].floating = !legacy_tail;
                 }
                 auto by_label = [&](int a, int b) {
                     const int sa = slot.count(a) ? slot[a] : -1, sb = slot.count(b) ? slot[b] : -1;
@@ -524,10 +534,19 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
                         return out.nodes[(size_t)a].label < out.nodes[(size_t)b].label;
                     return a < b;
                 };
-                // Pure nodes with no reader in the block go just before a fixed terminator (it may
-                // branch or return), or to the very end when the block ends in a pure node.
+                // Pure nodes with no reader in the block go just before a terminator that transfers
+                // control (a branch, loop op or return: its model successors are not just the next
+                // instruction), and otherwise to the very end of the block. S2 (2026-09-30): a
+                // fall-through terminator (CALL, SETFIELD, ...) or an epsilon one (the MOVE result copy
+                // the emitter adds after a CALL) no longer decides the position. Before, the same
+                // stock `local t = 0; x:A(); y:B()` block placed the load before the last CALL
+                // when the block ended in that CALL and after it when a MOVE followed, which
+                // manufactured LOAD -> CALL / LOAD -> GETIMPORT mismatches for identical programs.
+                const CfgIdentityNode& last = out.nodes[(size_t)e];
+                const bool transfers = !last.epsilon
+                    && (last.succ.size() != 1 || last.succ[0] != e + 1 || proto.code[(size_t)e].op == 0x29);
                 auto tail = before.find(e + 1);
-                if (tail != before.end() && !fixed.empty() && fixed.back() == e) {
+                if (tail != before.end() && !fixed.empty() && fixed.back() == e && (legacy_tail || transfers)) {
                     before[e].insert(before[e].end(), tail->second.begin(), tail->second.end());
                     before.erase(e + 1);
                 }
@@ -617,7 +636,10 @@ static int cfg_identity_resolve(const CfgIdentityProto& proto, int i, CfgIdentit
             return i == spin ? spin : -1;
         }
         const CfgIdentityNode& node = proto.nodes[(size_t)i];
-        if (!proto.live_in.empty()) {
+        // A floating (S1-repositioned) node is skipped: pruning there would use the liveness of a
+        // different program point and could forget a state defined just before it (S2, 2026-09-30).
+        // Keeping an entry longer never changes a decision: a web's tests read only its own defs.
+        if (!proto.live_in.empty() && !node.floating) {
             for (auto it = env.begin(); it != env.end();) {
                 auto reg = proto.web_register.find(it->first);
                 // The lowering copies the state into a scratch one instruction before the test,
