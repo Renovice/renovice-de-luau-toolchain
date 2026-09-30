@@ -1,0 +1,285 @@
+{
+  "baselines": {
+    "ACCESS_LOSS": 0,
+    "ACCESS_LOSS_TOTAL": 0,
+    "ALIGNED": 123,
+    "CFG_CLASS_CHECKS": 91,
+    "CMPK_SAME": 8,
+    "DROPPED": 0,
+    "EXTRA_HEADERS": 40,
+    "EXTRA_LOOPS": 25,
+    "LATCH_DIFF": 30,
+    "LOOP_MATCH": 163,
+    "LOST_CONDITION": 0,
+    "LOST_HEADERS": 359,
+    "LOST_LOOPS": 82,
+    "NAME-DIFF": 0,
+    "NATURAL_LOOP_CHECKS": 8,
+    "ORDER_DIFF_ALL": 149,
+    "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
+    "SEMANTIC_BEHAVIOR_SAME": 150,
+    "U43_CFG_ID_PASS": 14,
+    "U43_CLASS_SWAPS": 6590,
+    "U43_CONST_ID_PASS": 18,
+    "U43_STOCK_MODULES": 300,
+    "U44_CFG_ID_PASS": 79,
+    "U44_CLASS_SWAPS": 0,
+    "U44_CONST_ID_PASS": 107,
+    "U44_STOCK_MODULES": 110,
+    "WARFRAME_API_DIFFERENT": 0,
+    "WARFRAME_API_SAME": 10,
+    "realtrip_same": 150
+  },
+  "failures": [],
+  "inputs": {
+    "align_count": 300,
+    "corpus": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\shared\\corpus\\de-luau-stock",
+    "corpus_file_count": 5386,
+    "decompile_mode": "decompile-mod",
+    "environment": {
+      "RENOVICE_NATIVE": "JUMPXEQKN,JUMPXEQKS,JUMPXEQKB,JUMPBACK,AND,OR,ANDK,ORK,SUBK,FORGPREP",
+      "RENOVICE_NATIVE_GLOBALS": "1"
+    },
+    "realtrip_count": 150,
+    "tools": {
+      "derecomp": {
+        "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\bin\\derecomp.exe",
+        "sha256": "65C4657239EEBC194F8AA9C62CB919153449EC05A163E88086DECF5C990ECF1C"
+      },
+      "luau_compile": {
+        "path": "C:\\Users\\Bartek\\OneDrive\\Dokumenter\\Warframe RE PROJECT RENOVICE\\repos\\toolchains\\de-luau-toolchain\\bin\\luau-compile.exe",
+        "sha256": "6156A05D9CAF9FA84E58BAECA79A244F47D86B8982F5425F2CA3E23B976ED2A4"
+      }
+    }
+  },
+  "metrics": {
+    "access": [
+      {
+        "name": "EE_Interface_Components_Grid",
+        "note": "",
+        "original": 672,
+        "passed": true,
+        "recompiled": 672
+      },
+      {
+        "name": "EE_Interface_Utilities",
+        "note": "",
+        "original": 784,
+        "passed": true,
+        "recompiled": 784
+      },
+      {
+        "name": "EE_Types_ScriptCommands_JSON",
+        "note": "",
+        "original": 176,
+        "passed": true,
+        "recompiled": 176
+      },
+      {
+        "name": "EE_Types_ScriptCommands_SetVortexWindPerZone",
+        "note": "",
+        "original": 30,
+        "passed": true,
+        "recompiled": 30
+      },
+      {
+        "name": "Lotus_Characters_Tenno_Infestation_Cyst_InfestationCyst",
+        "note": "",
+        "original": 127,
+        "passed": true,
+        "recompiled": 127
+      },
+      {
+        "name": "Lotus_Interface_AllianceView",
+        "note": "",
+        "original": 987,
+        "passed": true,
+        "recompiled": 987
+      },
+      {
+        "name": "Lotus_Interface_Backgrounds_Lotus_LotusBackground",
+        "note": "",
+        "original": 190,
+        "passed": true,
+        "recompiled": 190
+      },
+      {
+        "name": "Lotus_Interface_BeaconInProgress",
+        "note": "",
+        "original": 525,
+        "passed": true,
+        "recompiled": 525
+      },
+      {
+        "name": "Lotus_Interface_BootUpGlitch",
+        "note": "",
+        "original": 45,
+        "passed": true,
+        "recompiled": 45
+      }
+    ],
+    "access_normalization": {
+      "assertions": 5,
+      "failed": 0,
+      "passed": 5
+    },
+    "alignment": {
+      "ALIGNED": 219,
+      "LOOP-DIFF": 14,
+      "ORDER-DIFF": 47,
+      "PROTO-DUP": 8
+    },
+    "backedge": {
+      "EXTRA-HEADERS": 21,
+      "EXTRA-LOOPS": 9,
+      "LATCH-DIFF": 9,
+      "LOST-HEADERS": 35,
+      "LOST-LOOPS": 7,
+      "MATCH": 275
+    },
+    "behaviour": {
+      "different": 0,
+      "different_files": [],
+      "same": 150,
+      "timeout": 0
+    },
+    "categories": {
+      "ACCESS-DIFF": 8,
+      "ACCESS-GAIN": 8,
+      "ACCESS-LOSS-TOTAL": 0,
+      "CLEAN": 226,
+      "LOOP-DIFF": 18,
+      "ORDER-DIFF": 63,
+      "PROTO-COUNT-DIFF": 8
+    },
+    "cfg_class_fixtures": {
+      "checks": 91,
+      "failed_checks": [],
+      "passed": 91,
+      "verdict": "PASS"
+    },
+    "constant_comparison": {
+      "DIFFERENT": 0,
+      "SAME": 8
+    },
+    "dropped": {
+      "backward": 0,
+      "self": 0,
+      "total": 0
+    },
+    "lost_condition": {
+      "sites": 0
+    },
+    "native_namecall": {
+      "module": "Lotus_Scripts_Effects_HarnessEffects.lua_B",
+      "original_count": 11,
+      "original_methods": [
+        "GetAvatarOwner",
+        "InventoryControl",
+        "GetActivePowerSuit",
+        "GetCrewShipManager",
+        "GetPlayerShip",
+        "GetAvatarOwner",
+        "GetCustomization",
+        "GetCustomization",
+        "GetColors",
+        "SetColors",
+        "SetCustomization"
+      ],
+      "rebuilt_count": 11,
+      "rebuilt_methods": [
+        "GetAvatarOwner",
+        "InventoryControl",
+        "GetActivePowerSuit",
+        "GetCrewShipManager",
+        "GetPlayerShip",
+        "GetAvatarOwner",
+        "GetCustomization",
+        "GetCustomization",
+        "GetColors",
+        "SetColors",
+        "SetCustomization"
+      ],
+      "rebuilt_sha256": "AC33420E270B0FAD0C053BF88DE81940560DE185776C048E6E0B53A682203A23",
+      "same": true
+    },
+    "natural_loop_fixture": {
+      "checks": 8,
+      "failed_checks": [],
+      "passed": 8,
+      "verdict": "PASS"
+    },
+    "semantic_behavior": {
+      "different": 0,
+      "different_cases": [],
+      "same": 150,
+      "vacuous": 0
+    },
+    "semantic_lowering": {
+      "assertions": 22,
+      "failed": 0,
+      "passed": 22,
+      "runtime_exit": 0
+    },
+    "stock_identity_u43": {
+      "cfgFailureClassesByProto": {
+        "LABEL CALL -> GETTABLEN": 53,
+        "LABEL GETFIELD -> GETFIELD": 3321,
+        "LABEL GETFIELD -> GETTABLEN": 104,
+        "LABEL GETFIELD -> GETUPVAL": 57,
+        "LABEL GETIMPORT -> GETIMPORT": 161,
+        "LABEL GETIMPORT -> GETUPVAL": 141,
+        "LABEL GETUPVAL -> GETFIELD": 67,
+        "LABEL GETUPVAL -> GETIMPORT": 121,
+        "LABEL GETUPVAL -> GETTABLEN": 43,
+        "LABEL GETUPVAL -> LOAD": 48,
+        "LABEL LOAD -> GETUPVAL": 38,
+        "LABEL NAMECALL -> NAMECALL": 71
+      },
+      "cfgIdentityFirstPass": 16,
+      "cfgModulesProtoAligned": 280,
+      "cfgProtosCompared": 10925,
+      "cfgProtosEqual": 7687,
+      "classSwapsFirstPass": 6590,
+      "constIdentityFirstPass": 18,
+      "decompile": 300,
+      "deterministic": 300,
+      "modules": 300,
+      "recompile": 300
+    },
+    "stock_identity_u44": {
+      "cfgFailureClassesByProto": {
+        "LABEL CALL -> GETTABLEN": 14,
+        "LABEL GETFIELD -> GETTABLEN": 82,
+        "LABEL GETIMPORT -> GETTABLEN": 20,
+        "LABEL GETIMPORT -> GETUPVAL": 6,
+        "LABEL GETUPVAL -> GETIMPORT": 4,
+        "LABEL GETUPVAL -> GETTABLEN": 4,
+        "LABEL IF EQK -> GETTABLEN": 4,
+        "LABEL IF TRUTHY -> GETTABLEN": 4,
+        "LABEL IF TRUTHY -> GETUPVAL": 4,
+        "LABEL IF TRUTHY -> NAMECALL": 3,
+        "LABEL LOAD -> GETTABLEN": 8,
+        "LABEL SETUPVAL -> GETUPVAL": 4
+      },
+      "cfgIdentityFirstPass": 82,
+      "cfgModulesProtoAligned": 109,
+      "cfgProtosCompared": 1701,
+      "cfgProtosEqual": 1498,
+      "classSwapsFirstPass": 0,
+      "constIdentityFirstPass": 107,
+      "decompile": 110,
+      "deterministic": 110,
+      "modules": 110,
+      "recompile": 110
+    },
+    "warframe_api_trace": {
+      "different": 0,
+      "different_cases": [],
+      "same": 11,
+      "vacuous": 0
+    }
+  },
+  "passed": true,
+  "schema_version": 1
+}

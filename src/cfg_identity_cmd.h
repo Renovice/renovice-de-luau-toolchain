@@ -34,6 +34,8 @@
 //       state is bypassed: it has no observable effect (RENOVICE_CFGID_LEGACY_TRUTHY_NOOP=1)
 //   S4  (2026-09-30) a value read by a loop op (FOR*PREP / FOR*LOOP, range A..A+2) is slotted by its
 //       offset from A, not by a coincidental B/C match (RENOVICE_CFGID_LEGACY_LOOP_SLOT=1)
+//   S5  (2026-09-30) a folded F3 (OR/AND) does not end the straight-line block for S1/S2, so a
+//       pure load before it sinks as it does before stock's native ORK (RENOVICE_CFGID_LEGACY_OR_BLOCK=1)
 // Limitations (measured separately, never claimed by this gate): register dataflow is not compared
 // (a read of the wrong register, e.g. the SetVortexWindPerZone `Normalize(nil)` class, is invisible);
 // operand order of reg-reg comparisons is not compared; LOADNIL/MOVE-only effects are invisible.
@@ -258,6 +260,7 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
     }
     auto private_to_fallthrough = [&](int j) { return j >= 0 && j < n && preds[(size_t)j] == 1; };
     // Pass 2: fold the documented lowerings back to their stock form.
+    std::vector<char> f3_branch((size_t)n, 0);      // S5: the JUMPIF/JUMPIFNOT of a folded F3
     for (int i = 0; i + 1 < n; ++i) {
         const ir::IInsn& a = proto.code[(size_t)i];
         // F3: MOVE A<-B ; JUMPIF/JUMPIFNOT A -> i+3 ; MOVE A<-C | LOAD A
@@ -273,6 +276,7 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
                 CfgIdentityNode& node = out.nodes[(size_t)i + 1];
                 node.label = label; node.succ = {i + 3 < n ? i + 3 : -1};
                 out.nodes[(size_t)i + 2].epsilon = true;
+                f3_branch[(size_t)i + 1] = 1;
                 i += 2;
                 continue;
             }
@@ -488,11 +492,27 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
         const bool legacy_loop_slot = std::getenv("RENOVICE_CFGID_LEGACY_LOOP_SLOT") != nullptr;
         std::map<int, int> redirect;               // old block start -> new first node
         std::vector<bool> chained((size_t)n + 1, false);   // edges rewritten inside a block
+        // S5 (2026-09-30): a folded F3 is ONE operation (stock DE emits native OR/AND[K]), but its
+        // lowering is three instructions with a branch, so it split the straight-line block and a
+        // pure load before it could not sink past it. `_T.X = _T.X or 0` then compared as
+        // GETIMPORT _T -> GETIMPORT _T.X (44.0.2 DialogTree). The branch -> alternative -> join
+        // triple is treated as straight-line for block segmentation; the alternative is epsilon.
+        // RENOVICE_CFGID_LEGACY_OR_BLOCK=1 restores the split.
+        const bool or_block = std::getenv("RENOVICE_CFGID_LEGACY_OR_BLOCK") == nullptr;
+        auto straight = [&](int e) {
+            if (raw_succ[(size_t)e].size() == 1 && raw_succ[(size_t)e][0] == e + 1
+                && pred_count[(size_t)e + 1] == 1 && out.nodes[(size_t)e].succ.size() == 1
+                && out.nodes[(size_t)e].succ[0] == e + 1)
+                return true;
+            if (!or_block) return false;
+            if (f3_branch[(size_t)e] && pred_count[(size_t)e + 1] == 1 && e + 2 < n)
+                return true;                                             // branch -> alternative
+            return e >= 1 && f3_branch[(size_t)e - 1] && pred_count[(size_t)e + 1] == 2
+                && raw_succ[(size_t)e].size() == 1 && raw_succ[(size_t)e][0] == e + 1;   // -> join
+        };
         for (int s = 0; s < n;) {
             int e = s;
-            while (e + 1 < n && raw_succ[(size_t)e].size() == 1 && raw_succ[(size_t)e][0] == e + 1
-                   && pred_count[(size_t)e + 1] == 1 && out.nodes[(size_t)e].succ.size() == 1
-                   && out.nodes[(size_t)e].succ[0] == e + 1)
+            while (e + 1 < n && straight(e))
                 ++e;
             bool any = false;
             for (int i = s; i <= e; ++i) if (pure(i)) { any = true; break; }
@@ -508,6 +528,14 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
                     int anchor = e + 1;
                     for (int k = i + 1; k <= e && !holders.empty(); ++k) {
                         const ir::IInsn& in = proto.code[(size_t)k];
+                        // S5: the alternative MOVE of a folded F3 is the OR/AND's second operand,
+                        // read by the folded node itself (stock: native OR A B C reads C there).
+                        if (or_block && k >= 1 && f3_branch[(size_t)k - 1] && in.op == 0x14
+                            && holders.count(in.B) && k - 1 > i) {
+                            anchor = k - 1;
+                            slot[i] = 2;
+                            break;
+                        }
                         if (in.op == 0x14 && holders.count(in.B)) { holders.insert(in.A); continue; }
                         int read = -1;
                         for (int r : uses[(size_t)k]) if (holders.count(r)) { read = r; break; }
@@ -516,7 +544,8 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
                             // Operand slot of the value at its reader, so argument/element/operand
                             // order stays visible after sinking (a swap is still a mismatch).
                             const ir::IInsn& reader = proto.code[(size_t)k];
-                            if (reader.op == 0x54 || reader.op == 0x29) slot[i] = read - reader.A;
+                            if (or_block && f3_branch[(size_t)k]) slot[i] = 1;   // S5: OR's first operand
+                            else if (reader.op == 0x54 || reader.op == 0x29) slot[i] = read - reader.A;
                             // S4 (2026-09-30): loop ops read the register RANGE A..A+2 (limit,
                             // step, index / generator, state, control); B and C are not registers.
                             // Matching A+1/A+2 against B/C gave coincidental slots that depended on

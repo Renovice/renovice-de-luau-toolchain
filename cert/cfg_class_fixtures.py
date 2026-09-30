@@ -21,11 +21,45 @@ Decompiler fixes (structan.h / emit.h). For each fixture:
                               the harness predefines IsNull/Sleep/gGameRules as globals)
   compound_exit_namecall      RENOVICE_NO_LOOP_BODY_DAG       (the same shape with upvalue mocks)
 
+Numeric-for fixes (2026-09-30, RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md):
+  for_body_order              RENOVICE_NO_FOR_BODY_PART_ORDER (#45: print(i) ran before the inner loop)
+  nested_for_break            RENOVICE_NO_PREP_HEADED_WHILE   (#44: the outer `while true` was deleted)
+    + NESTED_FOR_BREAK_LEGACY_BREAK_ARM_{CFG_FAILS,BEHAVIOR_DIFFERS}   RENOVICE_NO_FOR_BREAK_ARM (#46)
+    + NESTED_FOR_BREAK_LEGACY_ENTRY_NIL_BEHAVIOR_DIFFERS             RENOVICE_NO_LOOP_ENTRY_NIL (#47)
+    + NESTED_FOR_BREAK_LEGACY_ENTRY_NIL_CFG_BLIND   cfg-identity still PASSes #47 (LOADNIL is epsilon)
+  proper_prep_for             RENOVICE_NO_PROPER_PREP_FOR     (#48; compiled at -O2 so the helper loops
+                              inline into two-exit loops inside a Proper region; the harness compiles it
+                              with luau-compile -O2 + transcode)
+    + PROPER_PREP_FOR_LEGACY_NESTED_{CFG_FAILS,BEHAVIOR_DIFFERS}  RENOVICE_NO_PROPER_NESTED_LOOP_PARTS
+
+Compiler-closure fix (#49), fixture selector_residue:
+  SELECTOR_RESIDUE_RUNS / _DEFAULT_BEHAVIOR_SAME / _DEFAULT_CFG_IDENTITY
+  SELECTOR_RESIDUE_DEFAULT_CLOSES     the decompile->recompile source repeats within 3 rounds
+  SELECTOR_RESIDUE_LEGACY_NOT_CLOSED  RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE: no repeat within 5 rounds
+  SELECTOR_RESIDUE_LEGACY_CFG_FAILS   ... and the first pass fails cfg-identity (the residue compare)
+
 Loop-carried nil (emit.h implicit-nil canonicalizer, #41), fixture loop_carried_nil:
   LOOP_CARRIED_NIL_RUNS / _DEFAULT_BEHAVIOR_SAME / _DEFAULT_CFG_IDENTITY
   LOOP_CARRIED_NIL_LEGACY_BEHAVIOR_DIFFERS  RENOVICE_NO_LOOP_NIL_HOIST resets the variable per iteration
   LOOP_CARRIED_NIL_LEGACY_CFG_BLIND         ... and cfg-identity still PASSes it (LOADNIL is epsilon):
                               a recorded gate blind spot, not a requirement to keep
+
+Behavior fixes the gate cannot see or cannot yet match (#51, #52):
+  setlist_existing   RENOVICE_NO_SETLIST_EXISTING_TABLE  (`{ k = v, (f()) }`: the SETLIST rebuilt a fresh
+                     table and lost the fields). SETLIST_EXISTING_{RUNS,DEFAULT_BEHAVIOR_SAME,
+                     LEGACY_BEHAVIOR_DIFFERS}; no CFG-ID check: the exact output stores `t[1] = v`
+                     (SETTABLEN), stock uses SETLIST, so the prototype still differs (recorded).
+  capture_snapshot   RENOVICE_NO_CAPTURE_SNAPSHOT  (a by-value capture of a loop-rewritten register saw
+                     the last element). CAPTURE_SNAPSHOT_{RUNS,DEFAULT_BEHAVIOR_SAME,
+                     DEFAULT_CFG_IDENTITY,DEFAULT_CLOSES,LEGACY_BEHAVIOR_DIFFERS,LEGACY_CFG_BLIND}:
+                     cfg-identity does not compare MOVE/CAPTURE dataflow, so the legacy output PASSes
+                     (blind spot); DEFAULT_CLOSES = the source repeats within 3 rounds.
+
+Gate normalization S5 (cfg_identity_cmd.h, #50), fixture or_block (original built with native ORK):
+  OR_BLOCK_DEFAULT_BEHAVIOR_SAME / OR_BLOCK_DEFAULT_CFG_IDENTITY
+  OR_BLOCK_LEGACY_GATE_FAILS  RENOVICE_CFGID_LEGACY_OR_BLOCK=1 reports the identical round trip as
+                              different (a pure GETIMPORT could not sink past the lowered ORK)
+  OR_BLOCK_MUTATION_*_FAILS   a changed `or` constant and `or` -> `and` must still FAIL
 
 Gate normalization S3 (cfg_identity_cmd.h), fixture truthy_noop:
   TRUTHY_DEFAULT_BEHAVIOR_SAME / TRUTHY_DEFAULT_CFG_IDENTITY
@@ -59,7 +93,12 @@ FIX = os.path.join(HERE, "fixtures", "cfg_class_2026_09_30")
 OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_IMPORT_CHAIN_GUARD", "RENOVICE_NO_ENTRY_CALLER_EDGE",
             "RENOVICE_CFGID_LEGACY_TAIL", "RENOVICE_NO_LOOP_BODY_DAG", "RENOVICE_NO_LOOP_NIL_HOIST",
-            "RENOVICE_CFGID_LEGACY_TRUTHY_NOOP", "RENOVICE_CFGID_LEGACY_LOOP_SLOT")
+            "RENOVICE_CFGID_LEGACY_TRUTHY_NOOP", "RENOVICE_CFGID_LEGACY_LOOP_SLOT",
+            "RENOVICE_NO_FOR_BODY_PART_ORDER", "RENOVICE_NO_PREP_HEADED_WHILE",
+            "RENOVICE_NO_FOR_BREAK_ARM", "RENOVICE_NO_LOOP_ENTRY_NIL", "RENOVICE_NO_PROPER_PREP_FOR",
+            "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS", "RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE",
+            "RENOVICE_CFGID_LEGACY_OR_BLOCK", "RENOVICE_NATIVE",
+            "RENOVICE_NO_SETLIST_EXISTING_TABLE", "RENOVICE_NO_CAPTURE_SNAPSHOT")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP",
@@ -67,7 +106,19 @@ DECOMPILER_FIXTURES = {
     "import_chain": "RENOVICE_NO_IMPORT_CHAIN_GUARD",
     "compound_exit_loop": "RENOVICE_NO_LOOP_BODY_DAG",
     "compound_exit_namecall": "RENOVICE_NO_LOOP_BODY_DAG",
+    "for_body_order": "RENOVICE_NO_FOR_BODY_PART_ORDER",
+    "nested_for_break": "RENOVICE_NO_PREP_HEADED_WHILE",
+    "proper_prep_for": "RENOVICE_NO_PROPER_PREP_FOR",
 }
+# Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation).
+# cfg expectation "FAIL" = the gate must catch it; "PASS" = a recorded gate blind spot.
+EXTRA_LEGACY = (
+    ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM", "FAIL"),
+    ("nested_for_break", "ENTRY_NIL", "RENOVICE_NO_LOOP_ENTRY_NIL", "PASS"),
+    ("proper_prep_for", "NESTED", "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS", "FAIL"),
+)
+O2_FIXTURES = {"proper_prep_for"}          # compiled with inlining, like the shipped modules
+LUAU_COMPILE = os.path.join(ROOT, "bin", "luau-compile.exe")
 IMPORT_PRELUDE = '_T = { RenoviceImportFixture = "stale", RenoviceOther = "other" }\n'
 # Globals for compound_exit_loop: gGameRules appears after the second Sleep, starts on its second
 # GameStarted() call and returns a crew-ship manager from the fifth Sleep on.
@@ -84,7 +135,24 @@ function Sleep(seconds)
     if polls >= 8 then error("stop", 0) end
 end
 """
-PRELUDES = {"import_chain": IMPORT_PRELUDE, "compound_exit_loop": GAME_RULES_PRELUDE}
+# Globals for for_body_order: gGameRules appears on every second Sleep.
+FOR_BODY_PRELUDE = """polls = 0
+function IsNull(value) return value == nil end
+function Sleep(seconds)
+    polls = polls + 1
+    print("sleep", seconds, polls)
+    if polls % 2 == 0 then gGameRules = {} end
+    if polls > 20 then error("runaway", 0) end
+end
+"""
+PRELUDES = {"import_chain": IMPORT_PRELUDE, "compound_exit_loop": GAME_RULES_PRELUDE,
+            "for_body_order": FOR_BODY_PRELUDE}
+OR_BLOCK_PRELUDE = "_T = {}\n"
+OR_BLOCK_ANCHOR = "    _T.Timer = _T.Timer or 0\n"
+OR_BLOCK_MUTATIONS = {
+    "CONSTANT": "    _T.Timer = _T.Timer or 1\n",
+    "AND": "    _T.Timer = _T.Timer and 0\n",
+}
 TRUTHY_ANCHOR = "    if Ready() and IsNull(target) then\n    end\n"
 TRUTHY_MUTATIONS = {
     "BODY": "    if Ready() and IsNull(target) then\n        print(\"body\")\n    end\n",
@@ -152,6 +220,34 @@ def round_trip(bytecode, temp, tag, env=None):
     return source, rebuilt
 
 
+def compile_fixture(fixture, name, out):
+    """Luau source -> DE bytecode. -O2 fixtures go through luau-compile -O2 + transcode so the
+    compiler inlines local functions exactly as the shipped modules were built."""
+    if name not in O2_FIXTURES:
+        run([DEC, "recompile", fixture, out])
+        return
+    proc = subprocess.run([LUAU_COMPILE, "--binary", "-O2", fixture], cwd=ROOT, capture_output=True,
+                          timeout=300)
+    if proc.returncode != 0:
+        raise RuntimeError("luau-compile -O2 failed: %s" % proc.stderr[-400:])
+    luaubc = out + ".luaubc"
+    with open(luaubc, "wb") as stream:
+        stream.write(proc.stdout)
+    run([DEC, "transcode", luaubc, out])
+
+
+def closes_within(bytecode, temp, tag, rounds, env=None):
+    """decompile -> recompile repeatedly; True when the source repeats within `rounds` rounds."""
+    previous_source, current = None, bytecode
+    for index in range(1, rounds + 1):
+        source, rebuilt = round_trip(current, temp, "%s.r%d" % (tag, index), env)
+        text = open(source, "rb").read()
+        if text == previous_source:
+            return True
+        previous_source, current = text, rebuilt
+    return False
+
+
 def compile_text(text, temp, tag):
     path = os.path.join(temp, tag + ".luau")
     with open(path, "w", encoding="utf-8", newline="\n") as stream:
@@ -171,7 +267,7 @@ def main():
                 expected = trace(fixture, temp, prelude)
                 checks[name.upper() + "_RUNS"] = expected.count("\n") >= 2
                 original = os.path.join(temp, name + ".original.lua_B")
-                run([DEC, "recompile", fixture, original])
+                compile_fixture(fixture, name, original)
                 source, rebuilt = round_trip(original, temp, name + ".default")
                 checks[name.upper() + "_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp, prelude) == expected
                 checks[name.upper() + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
@@ -180,6 +276,38 @@ def main():
                 legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
                 checks[name.upper() + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
                 checks[name.upper() + "_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp, prelude) != expected
+                for extra_name, label, switch, cfg_expect in EXTRA_LEGACY:
+                    if extra_name != name:
+                        continue
+                    extra_env = base_env()
+                    extra_env[switch] = "1"
+                    extra_source, extra_rebuilt = round_trip(original, temp,
+                                                             "%s.legacy_%s" % (name, label.lower()),
+                                                             extra_env)
+                    key = "%s_LEGACY_%s" % (name.upper(), label)
+                    if cfg_expect == "FAIL":
+                        checks[key + "_CFG_FAILS"] = cfg_verdict(original, extra_rebuilt) == "FAIL"
+                    else:
+                        checks[key + "_CFG_BLIND"] = cfg_verdict(original, extra_rebuilt) == "PASS"
+                    checks[key + "_BEHAVIOR_DIFFERS"] = trace(extra_source, temp, prelude) != expected
+
+            fixture = os.path.join(FIX, "selector_residue.luau")
+            expected = trace(fixture, temp)
+            checks["SELECTOR_RESIDUE_RUNS"] = expected.count("\n") >= 2
+            original = os.path.join(temp, "selector_residue.original.lua_B")
+            run([DEC, "recompile", fixture, original])
+            source, rebuilt = round_trip(original, temp, "selector_residue.default")
+            checks["SELECTOR_RESIDUE_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
+            checks["SELECTOR_RESIDUE_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+            checks["SELECTOR_RESIDUE_DEFAULT_CLOSES"] = closes_within(original, temp,
+                                                                      "selector_residue.close", 3)
+            legacy_env = base_env()
+            legacy_env["RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE"] = "1"
+            checks["SELECTOR_RESIDUE_LEGACY_NOT_CLOSED"] = not closes_within(
+                original, temp, "selector_residue.legacy_close", 5, legacy_env)
+            legacy_source, legacy_rebuilt = round_trip(original, temp, "selector_residue.legacy",
+                                                       legacy_env)
+            checks["SELECTOR_RESIDUE_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
 
             fixture = os.path.join(FIX, "loop_carried_nil.luau")
             expected = trace(fixture, temp)
@@ -195,6 +323,46 @@ def main():
                                                        legacy_env)
             checks["LOOP_CARRIED_NIL_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp) != expected
             checks["LOOP_CARRIED_NIL_LEGACY_CFG_BLIND"] = cfg_verdict(original, legacy_rebuilt) == "PASS"
+
+            for name, switch, cfg_checks in (("setlist_existing", "RENOVICE_NO_SETLIST_EXISTING_TABLE", False),
+                                              ("capture_snapshot", "RENOVICE_NO_CAPTURE_SNAPSHOT", True)):
+                fixture = os.path.join(FIX, name + ".luau")
+                expected = trace(fixture, temp)
+                key = name.upper()
+                checks[key + "_RUNS"] = expected.count("\n") >= 2
+                original = os.path.join(temp, name + ".original.lua_B")
+                run([DEC, "recompile", fixture, original])
+                source, rebuilt = round_trip(original, temp, name + ".default")
+                checks[key + "_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
+                legacy_env = base_env()
+                legacy_env[switch] = "1"
+                legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
+                checks[key + "_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp) != expected
+                if cfg_checks:
+                    checks[key + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+                    checks[key + "_LEGACY_CFG_BLIND"] = cfg_verdict(original, legacy_rebuilt) == "PASS"
+                    # the snapshot must re-decompile to itself (no new local per round)
+                    checks[key + "_DEFAULT_CLOSES"] = closes_within(original, temp, name + ".close", 3)
+
+            fixture = os.path.join(FIX, "or_block.luau")
+            text = open(fixture, encoding="utf-8").read()
+            expected = trace(fixture, temp, OR_BLOCK_PRELUDE)
+            original = os.path.join(temp, "or_block.original.lua_B")
+            native_env = base_env()
+            native_env["RENOVICE_NATIVE"] = "ORK"
+            run([DEC, "recompile", fixture, original], env=native_env)
+            source, rebuilt = round_trip(original, temp, "or_block.default")
+            checks["OR_BLOCK_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp, OR_BLOCK_PRELUDE) == expected
+            checks["OR_BLOCK_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+            legacy_gate = base_env()
+            legacy_gate["RENOVICE_CFGID_LEGACY_OR_BLOCK"] = "1"
+            checks["OR_BLOCK_LEGACY_GATE_FAILS"] = cfg_verdict(original, rebuilt, legacy_gate) == "FAIL"
+            if text.count(OR_BLOCK_ANCHOR) != 1:
+                raise RuntimeError("or_block mutation anchor not unique")
+            for label, new in OR_BLOCK_MUTATIONS.items():
+                mutant = compile_text(text.replace(OR_BLOCK_ANCHOR, new), temp,
+                                      "or_block.mutant_" + label.lower())
+                checks["OR_BLOCK_MUTATION_%s_FAILS" % label] = cfg_verdict(original, mutant) == "FAIL"
 
             fixture = os.path.join(FIX, "truthy_noop.luau")
             text = open(fixture, encoding="utf-8").read()

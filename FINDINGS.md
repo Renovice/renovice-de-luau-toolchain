@@ -6351,3 +6351,28 @@ none PASS→FAIL), attributed to #40. Gates ALL PASS (Gate 14 50/50). SyndicateS
 
 Next step: numeric-for defects (body part order, lost nested break, FOR flattened in Proper), then
 the escape-selector growth behind the closure loss. Details: `RESEARCH/CFG_MULTI_EXIT_LOOPS_2026-09-30.md`.
+
+---
+
+## 2026-09-30 — #110 NUMERIC-FOR STRUCTURING, SELECTOR RESIDUE, GATE S5, SETLIST INTO AN EXISTING TABLE, BY-VALUE CAPTURES
+
+Hypothesis: the three diagnosed LOAD -> LOAD numeric-for defects are separate ownership gaps; the
+#40 closure loss is a per-round selector residue; DialogTree's GETIMPORT -> GETIMPORT is a gate gap;
+the two coordinator-reported List defects (SETLIST, captures) are real.
+
+Finding: TRUE for all, with limits. #44 prep-headed outer while (the `while` was deleted), #45
+for-body part order, #46 break arm of a for body (narrowed to exactly-emitted bodies), #47 loop-header
+LOADNIL kept, #48 Proper-dispatched loops keep their `for` (prep coalesced, nested loop children
+offered), #49 generated-selector guard residue dropped, #50 gate S5 (folded OR/AND does not split the
+S1 block), #51 SETLIST into an observed table stores `t[k] = v`, #52 by-value captures of a rewritten
+register get a per-creation snapshot (re-decompiles to itself). Every fix has an opt-out.
+
+Evidence: full 44.0.2 corpus (denominator 5,459), d51d877e -> 65c46572: CFG-ID 4,017/1,442 ->
+4,171/1,288 (+154, 0 PASS->FAIL; 52 are S5 gate-only), CONST-ID 5,339 -> 5,339, prototypes
+70,873 -> 71,189 / 74,339 (0 aligned modules lose one), class swaps 0, compiler-closed 5,375 -> 5,418
+(55 newly close incl. 7 of the 15 #40 losses; 12 no longer close), closed CONST-ID 5,252 -> 5,297
+with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gates ALL PASS (Gate 14
+91/91). SyndicateScarves byte-identical.
+
+Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
+compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.

@@ -970,9 +970,20 @@ struct Emitter {
             loop = &candidate;
         }
         if (!loop || loop->body.empty() || is_for_latch(H)) return false;
+        // PREP-HEADED OUTER LOOP (2026-09-30, DEFECTS #44). The header block of a source
+        // while/repeat may END in the FORNPREP/FORGPREP of a `for` nested in its body:
+        //     while true do local idx = nil; for i = 1, #t do ... end ... end
+        // The prep is that inner loop's preheader, not its header, so it does not make H a `for`.
+        // Rejecting it left the outer NaturalLoop to the interior-PREP scan; it lost the loop claim
+        // to the region owning the prep and was flattened, deleting the outer `while` (luau.exe:
+        // the body ran once). Admitted only when that for's latch lies inside H's loop body and
+        // does not branch back to H. RENOVICE_NO_PREP_HEADED_WHILE restores the rejection.
+        static const bool prep_headed_while = !std::getenv("RENOVICE_NO_PREP_HEADED_WHILE");
         for (const auto& prep_latch : prep2latch) {
             const int latch = prep_latch.second;
-            if (prep_latch.first == H || latch == H) return false;
+            const bool nested_prep_header = prep_headed_while && prep_latch.first == H
+                && latch >= 0 && latch != H && loop->body.count(latch);
+            if ((prep_latch.first == H && !nested_prep_header) || latch == H) return false;
             if (latch >= 0 && latch < (int)g->n.size()
                 && (g->n[latch].succ_true == H || g->n[latch].succ_false == H))
                 return false;
@@ -1063,6 +1074,32 @@ struct Emitter {
                 if (--indegree[next] == 0) ready.push_back(next);
         }
         return ordered.size() == r.parts.size();
+    }
+
+    // FOR-BODY PART ORDER (2026-09-30, DEFECTS #45). A NaturalLoop emitted WITHOUT its own wrapper
+    // (it is the iteration of a `for` another region opened, or it lost the loop claim) printed its
+    // parts in set (region-id) order. `for i = 1, 3 do while c do ... end; print(i) end`: the inner
+    // While was collapsed after the latch block that holds print(i), so print ran BEFORE the inner
+    // loop on every iteration. Return the parts in control-flow order from the region's own head
+    // (the for-body start; the FOR latch then comes last). Refused, so the caller keeps set order,
+    // when the head is itself a FOR latch (a generic loop headed at its FORGLOOP executes the latch
+    // last, not first) or the part graph is not a single-entry DAG once edges into the head part
+    // are cut. RENOVICE_NO_FOR_BODY_PART_ORDER restores set order.
+    // `latch_headed`: the caller has already opened this loop's generic `for`, so a region headed
+    // at its FORGLOOP latch is ordered from the latch's back-edge target (the body start) instead.
+    std::vector<int> unwrapped_loop_parts(int id, bool latch_headed = false) const {
+        const sa::Region& r = A->regions[id];
+        static const bool part_order = !std::getenv("RENOVICE_NO_FOR_BODY_PART_ORDER");
+        if ((!part_order && !latch_headed) || r.kind != sa::RK::NaturalLoop || r.parts.size() < 2)
+            return r.parts;
+        int body_head = semantic_head_block(id);
+        if (latch_headed && is_for_latch(body_head)) body_head = g->n[body_head].succ_true;
+        if (body_head < 0 || body_head >= (int)g->n.size() || is_for_latch(body_head)) return r.parts;
+        std::vector<int> ordered;
+        if (!order_loop_parts_from_header(id, body_head, ordered)) return r.parts;
+        if (std::getenv("RENOVICE_LOOPTRACE") && ordered != r.parts)
+            std::fprintf(stderr, "FOR_BODY_PART_ORDER pidx=%d rgn=%d head=%d\n", pidx, id, body_head);
+        return ordered;
     }
 
     void dump_region_tree(int id, int tree_depth) const {
@@ -1366,9 +1403,36 @@ struct Emitter {
         // the emitter can express it: SK::Branch is dropped on the assumption that a region template
         // owns the control flow, which is false for a block sitting directly inside a loop body.
         // Without this, `for i=1,n do if i>3 then break end ... end` emits an INFINITE loop.
+        // BREAK ARM OF A FOR BODY (2026-09-30, DEFECTS #46). `if c then idx = i; break end` inside a
+        // numeric for: the arm block (`idx = i; JUMP exit`) cannot reach the latch, so it is not in
+        // the natural-loop body `loop_blocks`, yet the structurer's IfThen(for-body loop, arm) puts
+        // it lexically inside the `for`. Its jump to the loop's normal exit was then dropped and
+        // the loop kept iterating (at top level the CFG renderer hid this; nested in `while true`
+        // the region path printed it). Admitted only for a block whose every predecessor is in the
+        // current loop body and whose jump is that for's canonical normal exit (checked below).
+        // RENOVICE_NO_FOR_BREAK_ARM restores the loop_blocks-only test.
+        static const bool for_break_arm = !std::getenv("RENOVICE_NO_FOR_BREAK_ARM");
+        bool break_arm_of_loop = false;
+        if (for_break_arm && loop_depth > 0 && !loop_blocks.empty() && !loop_blocks.count(blk)
+            && !n.preds.empty()) {
+            break_arm_of_loop = true;
+            for (int p : n.preds) if (!loop_blocks.count(p)) { break_arm_of_loop = false; break; }
+            // Only for a body whose flat emission is exact: no body block may branch to two
+            // different body blocks. An unreduced multi-exit body (`if not IsNull(x) and
+            // x:D() <= r then found = true; break end`, the #40 signature) already prints a wrong
+            // condition; adding the break there changed nothing on the first pass and stopped 18
+            // modules from converging (NonCombatSpeed p2), so it is left as before.
+            for (int b : loop_blocks) {
+                if (!break_arm_of_loop) break;
+                if (b < 0 || b >= (int)g->n.size()) continue;
+                const int t = g->n[b].succ_true, f = g->n[b].succ_false;
+                if (t >= 0 && f >= 0 && t != f && loop_blocks.count(t) && loop_blocks.count(f))
+                    break_arm_of_loop = false;
+            }
+        }
         if (std::getenv("RENOVICE_LEGACY_UNCONDITIONAL_FOR_BREAK")
             && !cfg_domain_controls_owned && !emitted_region_escape && !emitted_loop_continue
-            && loop_depth > 0 && loop_blocks.count(blk) && n.is_uncond
+            && loop_depth > 0 && (loop_blocks.count(blk) || break_arm_of_loop) && n.is_uncond
             && n.term == 0x40) {
             const int target = n.succ_true >= 0 ? n.succ_true : n.succ_false;
             bool canonical_exit = false;
@@ -2296,7 +2360,7 @@ struct Emitter {
                                                  });
                                 for (int part : ordered) emit_region(part, depth);
                             } else {
-                                for (int part : r.parts) emit_region(part, depth);
+                                for (int part : unwrapped_loop_parts(id)) emit_region(part, depth);   // #45
                             }
                             break;
                         }
@@ -2311,7 +2375,8 @@ struct Emitter {
                         // than wrapping the same body in a second, identical `for`.
                         // (A loop-kind guard was tried here too and REVERTED — see the note on the
                         // plan_winner branch above and FINDINGS #102.)
-                        flatmark(2, id, r.kind, isfor?1:0); for (int p : r.parts) emit_region(p, depth);
+                        flatmark(2, id, r.kind, isfor?1:0);
+                        for (int p : unwrapped_loop_parts(id)) emit_region(p, depth);   // #45
                         break;
                     }
                     // SIMPLE NESTED OUTER-LOOP REPAIR. A NaturalLoop can be the authoritative wrapper for
@@ -4334,7 +4399,7 @@ emit_conditional_region:
                         loop_blocks = partition_emitted_body;
                     }
                     if (is_for_body) {
-                        for (int p : r.parts) emit_region(p, depth);
+                        for (int p : unwrapped_loop_parts(id)) emit_region(p, depth);   // #45
                     } else if (emit_exact_nested_two_exit) {
                         out += ind(depth) + "while true do\n";
                         ++loop_depth;
@@ -4489,11 +4554,27 @@ emit_conditional_region:
                 std::map<int, std::set<int>> part_exit;    // part id -> its out-of-part successors
                 std::map<int, int> part_entry;             // part id -> its DERIVED entry block
                 std::map<int, int> part_default_exit;      // normal completion when exits are plural
+                std::map<int, int> proper_prep_owned_for;  // part id -> raw FORNPREP state it owns (#48)
                 const int region_entry = head_block(r.head >= 0 ? r.head : id);
-                for (int p : r.parts) {
+                // NESTED LOOP CHILDREN (2026-09-30, DEFECTS #48). A cyclic child that is not kept
+                // whole is dissolved into raw states, and so is every loop nested inside it: an
+                // IfThen/Seq/IfThenElse child holding `for ... end` plus a return had its FORGLOOP
+                // back edge turned into a fall-through (44.0.2 MatchTagAndSourceType p2: the second
+                // inlined loop ran its body at most once). When such an ACYCLIC-KIND child (its
+                // cycles all belong to nested loops) is rejected, its own children are offered to
+                // the same promotion rules, so a nested loop can still be one whole state. Loop
+                // kinds are never split. RENOVICE_NO_PROPER_NESTED_LOOP_PARTS restores dissolution.
+                static const bool nested_loop_parts = !std::getenv("RENOVICE_NO_PROPER_NESTED_LOOP_PARTS");
+                std::vector<int> whole_candidates(r.parts.begin(), r.parts.end());
+                for (size_t candidate_index = 0; candidate_index < whole_candidates.size(); ++candidate_index) {
+                    const int p = whole_candidates[candidate_index];
                     if (A->regions[p].kind == sa::RK::Basic) continue;
                     std::vector<int> pb; collect_blocks(p, pb);
-                    if (pb.size() < 2) continue;
+                    // A one-block `for` (body and FORNLOOP/FORGLOOP latch in one block) is a SelfLoop
+                    // the raw dispatcher cannot spell either: its latch "falls through" (#48).
+                    const bool for_self_loop = nested_loop_parts && pb.size() == 1
+                        && A->regions[p].kind == sa::RK::SelfLoop && is_for_latch(pb[0]);
+                    if (pb.size() < 2 && !for_self_loop) continue;
                     std::set<int> ps(pb.begin(), pb.end());
                     bool cyc = false; std::set<int> ex;
                     for (int b2 : pb)
@@ -4503,6 +4584,29 @@ emit_conditional_region:
                             else ex.insert(s2);
                         }
                     if (!cyc) continue;                    // acyclic: flattening is already correct
+                    // Runs on every exit from this iteration (each `continue` below included).
+                    struct OfferNestedLoopChildren {
+                        bool enabled; int part; const std::set<int>& kept;
+                        std::vector<int>& queue; const sa::Analyzer* analyzer;
+                        ~OfferNestedLoopChildren() {
+                            if (!enabled || kept.count(part)) return;
+                            const sa::RK kind = analyzer->regions[part].kind;
+                            if (kind == sa::RK::NaturalLoop || kind == sa::RK::While
+                                || kind == sa::RK::SelfLoop || kind == sa::RK::Basic) return;
+                            for (int child : analyzer->regions[part].parts) queue.push_back(child);
+                        }
+                    } offer_nested{nested_loop_parts, p, whole, whole_candidates, A};
+                    // An offered descendant is itself promoted only when it IS a loop; composite
+                    // descendants (IfThenElse over a multi-exit loop, ...) are only searched further.
+                    if (candidate_index >= r.parts.size()) {
+                        if (std::getenv("RENOVICE_LOOPTRACE"))
+                            std::fprintf(stderr, "WHOLE_NESTED_CANDIDATE pidx=%d proper=%d part=%d kind=%s "
+                                         "blocks=%d exits=%d\n", pidx, id, p, rk_name(A->regions[p].kind),
+                                         (int)pb.size(), (int)ex.size());
+                        const sa::RK kind = A->regions[p].kind;
+                        if (kind != sa::RK::NaturalLoop && kind != sa::RK::While
+                            && kind != sa::RK::SelfLoop) continue;
+                    }
                     // Counterfactual for the residual large-Proper family. The dispatcher below
                     // now computes exact SCCs for every raw state, so retaining a cyclic child as
                     // one repeat-wrapped state may no longer be necessary. Those generated
@@ -4528,7 +4632,113 @@ emit_conditional_region:
                         }
                         for_latch_cycle_whole = latch_closes_cycle && !has_terminal;
                     }
-                    if (std::getenv("RENOVICE_NO_PROPER_WHOLE_PROMOTION") && !for_latch_cycle_whole)
+                    // PREP-OWNED NUMERIC FOR (2026-09-30, DEFECTS #48; 44.0.2 MatchTagAndSourceType
+                    // p2). An inlined `for i = 1, #t do if t[i] == x then r = true; goto join end
+                    // end; r = false` has two loop exits (the break arm and normal exhaustion), so
+                    // the loop and its FORNPREP end up as separate children of a Proper region. The
+                    // multi-exit child was rejected above and dissolved into raw states; the raw
+                    // FORNPREP became `<` comparisons and the FORNLOOP back edge fell through, so the
+                    // body ran at most once. The FocusUtilities nested-shell repair already renders
+                    // exactly this child (prep coalesced into the child's state, `for` header, the
+                    // escape selector for the break arm, the latch's normal exit as default) but
+                    // required the prep to be in a loop-nesting pair. Admit the same rendering for a
+                    // FORNPREP that is a raw state of this region when the child holds that for's
+                    // whole authoritative body and latch, the prep falls through into the child, and
+                    // the prep's zero-trip exit equals the latch's normal exit (so "no iterations"
+                    // and "exhausted" are one default destination). The same holds for a single-exit
+                    // child and for one whose break arm returns (AcidDart p0: `for i = 1, #t do if
+                    // o:IsA(t[i]) then return end end`): the `for` header plus the selector is exact
+                    // there too, and without the coalesced prep the child had no header at all.
+                    // A generic FORGPREP (it jumps to its FORGLOOP latch) is admitted the same way.
+                    // RENOVICE_NO_PROPER_PREP_FOR restores the rejection.
+                    // Decided before the certified profile's promotion gate (like the single-exit FOR
+                    // exception above) from the same exit facts the later checks use.
+                    bool prep_owned_for_whole = false;
+                    int prep_default_exit = -1;
+                    bool prep_exits_explicit = true;
+                    if (!std::getenv("RENOVICE_NO_PROPER_PREP_FOR") && !ex.empty()) {
+                        std::set<int> prep_normal;
+                        for (int b2 : pb) {
+                            const st::Node& bn = g->n[b2];
+                            bool has_external = false;
+                            for (int s2 : {bn.succ_true, bn.succ_false})
+                                if (s2 >= 0 && !ps.count(s2)) has_external = true;
+                            if (has_external && !renderable_cond(b2) && !bn.is_uncond && !is_for_latch(b2))
+                                prep_exits_explicit = false;
+                            if (is_for_latch(b2) && bn.succ_false >= 0 && !ps.count(bn.succ_false))
+                                prep_normal.insert(bn.succ_false);
+                            if (bn.is_uncond)
+                                for (int s2 : {bn.succ_true, bn.succ_false})
+                                    if (s2 >= 0 && !ps.count(s2)) prep_normal.insert(s2);
+                        }
+                        if (ex.size() == 1) prep_default_exit = *ex.begin();
+                        else if (prep_normal.size() == 1) prep_default_exit = *prep_normal.begin();
+                    }
+                    if (!std::getenv("RENOVICE_NO_PROPER_PREP_FOR") && !ex.empty()
+                        && prep_exits_explicit && prep_default_exit >= 0) {
+                        const int default_exit = prep_default_exit;
+                        for (const auto& prep_latch : prep2latch) {
+                            const int prep = prep_latch.first, latch = prep_latch.second;
+                            if (prep < 0 || prep >= (int)g->n.size() || latch < 0
+                                || latch >= (int)g->n.size()) continue;
+                            if (!inreg.count(prep) || ps.count(prep) || !ps.count(latch)) continue;
+                            const int prep_insn = g->n[prep].last;
+                            if (prep_insn < 0 || prep_insn >= (int)ip->code.size()
+                                || !is_for_latch(latch)) continue;
+                            const int prep_op = ip->code[prep_insn].op;
+                            const bool numeric = prep_op == 0x47;
+                            const bool generic = prep_op == 0x0b || prep_op == 0x30 || prep_op == 0x1b;
+                            if (!numeric && !generic) continue;
+                            if (g->n[latch].succ_false != default_exit) continue;
+                            // FORNPREP falls into the body and its zero-trip exit must be the latch's
+                            // normal exit; FORGPREP jumps straight to its FORGLOOP latch.
+                            // The zero-trip target may also be reached through the latch exit when
+                            // that exit block is nothing but an unconditional JUMP to it.
+                            auto zero_trip_matches = [&](int zero_trip, int normal_exit) {
+                                if (zero_trip == normal_exit) return true;
+                                if (normal_exit < 0 || normal_exit >= (int)g->n.size()) return false;
+                                const st::Node& relay = g->n[normal_exit];
+                                return relay.is_uncond && relay.first == relay.last
+                                    && relay.first >= 0 && relay.first < (int)ip->code.size()
+                                    && ip->code[relay.first].op == 0x40
+                                    && (relay.succ_true >= 0 ? relay.succ_true : relay.succ_false) == zero_trip;
+                            };
+                            if (numeric && (!ps.count(g->n[prep].succ_false)
+                                            || !zero_trip_matches(g->n[prep].succ_true,
+                                                                  g->n[latch].succ_false))) continue;
+                            if (generic && (g->n[prep].succ_true != latch || g->n[prep].succ_false >= 0))
+                                continue;
+                            // Keyed by the LATCH: a prep block that also heads an enclosing loop
+                            // (#44 shape) maps to that outer loop in block2loop.
+                            auto identity = block2loop.find(latch);
+                            if (identity == block2loop.end()) continue;
+                            auto body = authoritative_loop_bodies.find(identity->second);
+                            if (body == authoritative_loop_bodies.end() || body->second.empty()) continue;
+                            // The lexical for body may also hold break arms (they cannot reach the
+                            // latch, so the cyclic child excludes them). Every body block outside the
+                            // child must be one of its exits that never re-enters it.
+                            bool complete_body = true;
+                            for (int block : body->second) {
+                                if (ps.count(block)) continue;
+                                if (!ex.count(block) || block < 0 || block >= (int)g->n.size()
+                                    || (g->n[block].succ_true >= 0 && ps.count(g->n[block].succ_true))
+                                    || (g->n[block].succ_false >= 0 && ps.count(g->n[block].succ_false))) {
+                                    complete_body = false; break;
+                                }
+                            }
+                            if (!complete_body) continue;
+                            proper_prep_owned_for[p] = prep;
+                            prep_owned_for_whole = true;
+                            if (std::getenv("RENOVICE_LOOPTRACE"))
+                                std::fprintf(stderr, "WHOLE_APPROVE_PREP_FOR pidx=%d proper=%d part=%d "
+                                             "prep=%d latch=%d exits=%zu default=%d\n",
+                                             pidx, id, p, prep, latch, ex.size(), default_exit);
+                            break;
+                        }
+                    }
+                    if (for_self_loop && !prep_owned_for_whole) continue;   // only as a #48 child
+                    if (std::getenv("RENOVICE_NO_PROPER_WHOLE_PROMOTION") && !for_latch_cycle_whole
+                        && !prep_owned_for_whole)
                         continue;
                     // Identify the normal fallthrough of a multi-exit loop. Conditional non-local
                     // exits are recorded at their source block; FOR latches are not boolean branches,
@@ -4569,7 +4779,7 @@ emit_conditional_region:
                     int terminals = 0;
                     for (int b2 : pb)
                         if (g->n[b2].succ_true < 0 && g->n[b2].succ_false < 0) ++terminals;
-                    if (terminals > 0 && ex.size() <= 1) {
+                    if (terminals > 0 && ex.size() <= 1 && !prep_owned_for_whole) {
                         if (std::getenv("RENOVICE_LOOPTRACE"))
                             std::fprintf(stderr,
                                          "WHOLE_REJECT pidx=%d proper=%d part=%d reason=terminal_single_exit "
@@ -4581,7 +4791,7 @@ emit_conditional_region:
                     // when the selector records its conditional side exit and the for-latch gives one
                     // unambiguous normal-completion exit. FocusUtilities p6 is exactly this shape.
                     // Keep the production boundary until the focused and corpus A/B gates prove it.
-                    bool approved_nested_shell = false;
+                    bool approved_nested_shell = prep_owned_for_whole;   // #48 renders as this shell
                     if (!std::getenv("RENOVICE_NO_NESTED_FOR_PROMOTION")) {
                         for (int prep : A->nested_for_preps) {
                             if (!inreg.count(prep) || prep < 0 || prep >= (int)g->n.size()) continue;
@@ -4599,7 +4809,7 @@ emit_conditional_region:
                     // Keep this flag-only until focused identity and complete-corpus Pareto gates
                     // prove that promoting the whole child is safe.
                     bool approved_generic_two_exit = false;
-                    if (enable_proper_generic_two_exit
+                    if (enable_proper_generic_two_exit && !prep_owned_for_whole
                         && header_of_loop.size() == 1
                         && terminals == 0 && ex.size() == 2 && all_exits_explicit) {
                         int authoritative_headers = 0;
@@ -4640,7 +4850,7 @@ emit_conditional_region:
                     // partial bodies remain rejected.
                     bool approved_split_for_shell = false;
                     int split_for_prep = -1;
-                    if (enable_split_for_whole_part) {
+                    if (enable_split_for_whole_part && !prep_owned_for_whole) {
                         std::set<int> external_entries;
                         for (int outside : bl) {
                             if (ps.count(outside)) continue;
@@ -4691,7 +4901,7 @@ emit_conditional_region:
                     // The enclosing child must be safe for the existing escape selector. Record the
                     // LoopId here so the nested Seq emitter cannot activate independently elsewhere.
                     bool approved_seq_generic_split = false;
-                    if (enable_seq_generic_for_coalesce) {
+                    if (enable_seq_generic_for_coalesce && !prep_owned_for_whole) {
                         std::set<int> split_headers;
                         std::function<void(int)> find_split = [&](int region) {
                             if (region < 0 || region >= (int)A->regions.size()) return;
@@ -4819,6 +5029,17 @@ emit_conditional_region:
                 // covered by one. Sorted ascending, so the ordering argument is unchanged.
                 std::set<int> covered;
                 for (int p : whole) { std::vector<int> pb; collect_blocks(p, pb); covered.insert(pb.begin(), pb.end()); }
+                // A #48 child is exact only with its FORNPREP coalesced into its state. If another
+                // whole part took the prep block, fall back to dissolving the child.
+                for (const auto& owned : proper_prep_owned_for) {
+                    if (!whole.count(owned.first) || !covered.count(owned.second)) continue;
+                    if (std::getenv("RENOVICE_LOOPTRACE"))
+                        std::fprintf(stderr, "WHOLE_DROP_PREP_FOR pidx=%d proper=%d part=%d prep=%d\n",
+                                     pidx, id, owned.first, owned.second);
+                    whole.erase(owned.first);
+                    covered.clear();
+                    for (int p : whole) { std::vector<int> pb; collect_blocks(p, pb); covered.insert(pb.begin(), pb.end()); }
+                }
                 std::map<int, int> state_part;             // state key (block id) -> part id, if whole
                 std::map<int, int> state_prep;             // coalesced numeric prep -> cyclic shell
                 std::map<int, int> part_state_key;
@@ -4831,10 +5052,18 @@ emit_conditional_region:
                             if (covered.count(candidate) || candidate < 0
                                 || candidate >= (int)g->n.size()) continue;
                             int li = g->n[candidate].last;
-                            if (li < 0 || li >= (int)ip->code.size()
-                                || ip->code[li].op != 0x47) continue;
-                            if (!A->nested_for_preps.count(candidate)) continue;
-                            if (g->n[candidate].succ_false != part_entry[p]) continue;
+                            if (li < 0 || li >= (int)ip->code.size()) continue;
+                            auto owned = proper_prep_owned_for.find(p);
+                            const bool owned_prep = owned != proper_prep_owned_for.end()
+                                && owned->second == candidate;                         // #48
+                            const int prep_op = ip->code[li].op;
+                            // A #48 generic prep enters its child at the FORGLOOP latch.
+                            const bool owned_generic = owned_prep
+                                && (prep_op == 0x0b || prep_op == 0x30 || prep_op == 0x1b)
+                                && g->n[candidate].succ_true == part_entry[p];
+                            if (prep_op != 0x47 && !owned_generic) continue;
+                            if (!A->nested_for_preps.count(candidate) && !owned_prep) continue;
+                            if (!owned_generic && g->n[candidate].succ_false != part_entry[p]) continue;
                             auto loop = prep2latch.find(candidate);
                             if (loop == prep2latch.end() || !ps.count(loop->second)) continue;
                             part_state_key[p] = candidate;
@@ -4998,7 +5227,30 @@ emit_conditional_region:
                             std::set<int> saved_blocks = loop_blocks;
                             loop_blocks.clear(); loop_blocks.insert(pb.begin(), pb.end());
                             ++loop_depth; escape_stack.push_back(ec);
-                            emit_region(p, d2 + 1);
+                            auto owned_child = proper_prep_owned_for.find(p);
+                            const sa::Region& loop_child = A->regions[p];
+                            if (owned_child != proper_prep_owned_for.end()
+                                && owned_child->second == state_prep[b2]
+                                && (loop_child.kind == sa::RK::NaturalLoop
+                                    || loop_child.kind == sa::RK::While
+                                    || loop_child.kind == sa::RK::SelfLoop)) {
+                                // #48 child: the header above IS its loop. emit_region would
+                                // reopen it wherever a FOR latch is the region's first part or head
+                                // (a second `for` nested in the first). Emit only the body, from
+                                // the body start, with the latch last.
+                                std::vector<int> body_parts;
+                                if (loop_child.kind == sa::RK::NaturalLoop) {
+                                    body_parts = unwrapped_loop_parts(p, true);
+                                } else {
+                                    body_parts = loop_child.parts;
+                                    if (body_parts.size() == 2
+                                        && is_for_latch(semantic_head_block(body_parts[0])))
+                                        std::swap(body_parts[0], body_parts[1]);
+                                }
+                                for (int part : body_parts) emit_region(part, d2 + 1);
+                            } else {
+                                emit_region(p, d2 + 1);
+                            }
                             escape_stack.pop_back(); --loop_depth; loop_blocks = saved_blocks;
                             out += ind(d2) + "end\n";
                             if (default_exit >= 0)
@@ -13316,9 +13568,39 @@ emit_conditional_region:
                     }
                     std::vector<std::string> flattened = deindent_two(
                         i + 2, close - 2, {});
-                    flattened.push_back(std::string(indent, ' ') + "if "
-                                        + inverted_condition + " then");
-                    flattened.push_back(std::string(indent, ' ') + "end");
+                    // SELECTOR GUARD RESIDUE (2026-09-30, DEFECTS #49). When the tail compares a
+                    // generated selector with an integer literal, the "metamethod semantics"
+                    // argument does not apply: the selector is a reserved name the emitter only
+                    // ever assigns integer literals, so `sel == K` cannot call anything. Keeping the
+                    // empty guard compiled a real compare (`do local unused = sel == -1 end`). The
+                    // next decompile printed that compare with its constant in a fresh register,
+                    // AND the re-derived selector shell of the same two-exit loop left a new
+                    // residue, so every round added one exit-tracking variable and 15 44.0.2
+                    // modules (AlchemistVial p7 ...) never reached a fixed point after #40. Drop
+                    // the guard for exactly that shape. RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE
+                    // restores it.
+                    bool pure_selector_compare = false;
+                    if (!std::getenv("RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE")) {
+                        const std::string selector_prefix = "__renovice_state_";
+                        const size_t space = inverted_condition.find(' ');
+                        if (space != std::string::npos
+                            && inverted_condition.compare(0, selector_prefix.size(), selector_prefix) == 0
+                            && space + 4 <= inverted_condition.size()) {
+                            const std::string name = inverted_condition.substr(0, space);
+                            const std::string op = inverted_condition.substr(space, 4);
+                            const std::string literal = inverted_condition.substr(space + 4);
+                            bool digits = name.size() > selector_prefix.size();
+                            for (size_t q = selector_prefix.size(); q < name.size() && digits; ++q)
+                                digits = std::isdigit((unsigned char)name[q]) != 0;
+                            pure_selector_compare = digits && (op == " == " || op == " ~= ")
+                                && integer_literal(literal);
+                        }
+                    }
+                    if (!pure_selector_compare) {
+                        flattened.push_back(std::string(indent, ' ') + "if "
+                                            + inverted_condition + " then");
+                        flattened.push_back(std::string(indent, ' ') + "end");
+                    }
                     lines.erase(lines.begin() + (std::ptrdiff_t)(i + 1),
                                 lines.begin() + (std::ptrdiff_t)(close + 1));
                     lines.insert(lines.begin() + (std::ptrdiff_t)(i + 1),

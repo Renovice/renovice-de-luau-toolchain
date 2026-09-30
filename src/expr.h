@@ -21,6 +21,7 @@
 #include <map>
 #include <set>
 #include "ir.h"
+#include "liveness.h"
 
 namespace ex {
 
@@ -286,6 +287,21 @@ inline const char* binop_for(uint8_t op) {
     }
 }
 
+// DEFECTS #51: does anything read table register `reg` between its latest NEWTABLE/DUPTABLE
+// creation (scanning back in instruction order) and instruction `at`? Any other definition, an
+// unknown effect model or a read on any intervening path answers yes (fail safe: the caller then
+// stores into the existing table, which is exact either way).
+inline bool setlist_table_observed(const ir::IProto& ip, int at, int reg) {
+    for (int q = at - 1; q >= 0 && q < (int)ip.code.size(); --q) {
+        const ir::IInsn& in = ip.code[q];
+        std::set<int> uses, defs;
+        if (!lv::register_effects(ip, in, uses, defs)) return true;
+        if (uses.count(reg)) return true;
+        if (defs.count(reg)) return !(in.op == 0x2c || in.op == 0x4f);
+    }
+    return true;
+}
+
 inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                               ProtoOut& out, BlockOut& bo) {
     RegEnv env;
@@ -324,6 +340,16 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                              && in.A >= ip.nparams;
             for (int q = 0; prologue_nil && q < i; ++q)
                 if (ip.code[q].op != 0x0d && ip.code[q].op != 0x11) prologue_nil = false;
+            // LOOP-HEADED ENTRY (2026-09-30, DEFECTS #47). When the function body IS a loop whose
+            // first statement is `local x = nil` (`while true do local idx = nil; for ... end end`),
+            // instruction 0 is also the loop header: a back edge targets it and the LOADNIL resets
+            // x on EVERY iteration. Suppressing it as prologue carried the previous iteration's
+            // value forward (cfg-identity cannot see it: LOADNIL is epsilon). Keep it as `x = nil`
+            // when any branch targets the entry block. RENOVICE_NO_LOOP_ENTRY_NIL restores the old
+            // suppression.
+            static const bool loop_entry_nil = !std::getenv("RENOVICE_NO_LOOP_ENTRY_NIL");
+            for (size_t q = 0; prologue_nil && loop_entry_nil && q < ip.code.size(); ++q)
+                if (ip.code[q].target == 0) prologue_nil = false;
             if (prologue_nil) env.set(in.A, mkreg(in.A));
             else def_(in.A, mkconst("nil"));
             d = Disp::Expr;
@@ -440,9 +466,104 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                 e->idx = (int)ip.kids[in.Bx];                // NEWCLOSURE: CHILD index -> proto index
             else
                 e->idx = in.Bx;
+            // BY-VALUE CAPTURE SNAPSHOT (2026-09-30, DEFECTS #52). `CAPTURE 0 R` copies R's value
+            // into the closure at creation. The source local it names is flat here (`vR`, one
+            // variable per register for the whole function), so when anything else in the function
+            // also writes R -- the next iteration of a loop, or a later local reusing the register
+            // -- a closure capturing `vR` by name saw the LAST value instead of its own
+            // (EE_Interface_Components_List Redraw p54 pc 308: per-element transition callbacks
+            // all targeted the last element). Snapshot such a register into a fresh block local
+            // just before the closure and capture that. RENOVICE_NO_CAPTURE_SNAPSHOT restores the
+            // shared name.
+            static const bool capture_snapshot = !std::getenv("RENOVICE_NO_CAPTURE_SNAPSHOT");
+            // Is `reg` written by an instruction reachable from the closure (loop back edges
+            // included)? Only such a write can change what a by-name capture would read later.
+            auto register_written_elsewhere = [&](int reg) {
+                const int n = (int)ip.code.size();
+                std::vector<char> seen((size_t)n, 0);
+                std::vector<int> todo{i + 1};
+                while (!todo.empty()) {
+                    const int pc = todo.back(); todo.pop_back();
+                    if (pc < 0 || pc >= n || seen[(size_t)pc]) continue;
+                    seen[(size_t)pc] = 1;
+                    const ir::IInsn& other = ip.code[(size_t)pc];
+                    std::set<int> uses, defs;
+                    if (!lv::register_effects(ip, other, uses, defs)) return true;   // fail safe
+                    if (defs.count(reg) && other.op != 0x35) return true;
+                    const int op2 = other.op;
+                    if (op2 == 0x29) continue;                                        // RETURN
+                    if (op2 == 0x40 || op2 == 0x25 || op2 == 0x30 || op2 == 0x1b || op2 == 0x0b) {
+                        todo.push_back(other.target); continue;                        // jumps / FORGPREP
+                    }
+                    if (other.branch) todo.push_back(other.target);
+                    if (op2 == 0x04 && other.C) { todo.push_back(pc + 1 + other.C); continue; }
+                    todo.push_back(pc + 1);
+                }
+                return false;
+            };
             for (int q = i + 1; q < (int)ip.code.size() && ip.code[q].op == 0x35; ++q) {
                 if (!e->text.empty()) e->text += ",";
                 const ir::IInsn& c = ip.code[q];
+                if (capture_snapshot && c.A == 0 && register_written_elsewhere((int)c.B)) {
+                    // Name = prototype + ordinal of this CAPTURE among the prototype's CAPTUREs,
+                    // so a re-decompile of our own output reproduces the same name.
+                    int capture_ordinal = 0;
+                    for (int k = 0; k < q; ++k) if (ip.code[(size_t)k].op == 0x35) ++capture_ordinal;
+                    const std::string snapshot = "__renovice_capture_" + std::to_string(ip.index)
+                                               + "_" + std::to_string(capture_ordinal);
+                    // Compiler closure: our own snapshot `local s = vX` compiles to MOVE R <- X with
+                    // R read only by CAPTUREs. Re-snapshotting R added `vR = vX` plus a new local on
+                    // every round. When R is read by nothing but captures and its latest definition
+                    // in this block is that copy, turn the copy itself back into the snapshot.
+                    // The value a copy at `from` writes into R is read only by CAPTUREs: follow
+                    // every path from `from` until R is written again.
+                    auto copy_only_captured = [&](int from) {
+                        const int n = (int)ip.code.size();
+                        std::vector<char> seen((size_t)n, 0);
+                        std::vector<int> todo{from + 1};
+                        while (!todo.empty()) {
+                            const int pc = todo.back(); todo.pop_back();
+                            if (pc < 0 || pc >= n || seen[(size_t)pc]) continue;
+                            seen[(size_t)pc] = 1;
+                            const ir::IInsn& other = ip.code[(size_t)pc];
+                            std::set<int> uses, defs;
+                            if (!lv::register_effects(ip, other, uses, defs)) return false;
+                            if (uses.count((int)c.B) && other.op != 0x35) return false;
+                            if (defs.count((int)c.B)) continue;
+                            const int op2 = other.op;
+                            if (op2 == 0x29) continue;
+                            if (op2 == 0x40 || op2 == 0x25 || op2 == 0x30 || op2 == 0x1b || op2 == 0x0b) {
+                                todo.push_back(other.target); continue;
+                            }
+                            if (other.branch) todo.push_back(other.target);
+                            if (op2 == 0x04 && other.C) { todo.push_back(pc + 1 + other.C); continue; }
+                            todo.push_back(pc + 1);
+                        }
+                        return true;
+                    };
+                    bool reused_copy = false;
+                    for (int k = (int)bo.stmts.size() - 1; k >= 0; --k) {
+                        Stmt& prior = bo.stmts[(size_t)k];
+                        if (prior.k == SK::Assign && prior.lhs && prior.lhs->k == EK::Reg
+                            && prior.lhs->reg == (int)c.B && prior.rhs
+                            && prior.insn >= 0 && prior.insn < (int)ip.code.size()
+                            && ip.code[(size_t)prior.insn].op == 0x14
+                            && !expr_uses_reg(prior.rhs, (int)c.B)
+                            && copy_only_captured(prior.insn)) {
+                            prior.lhs = mkconst("local " + snapshot);
+                            reused_copy = true;
+                            break;
+                        }
+                        if (stmt_uses_reg(prior, (int)c.B)) break;
+                    }
+                    if (!reused_copy) {
+                        Stmt s; s.k = SK::Assign; s.lhs = mkconst("local " + snapshot);
+                        s.rhs = mkreg((int)c.B); s.insn = i;
+                        bo.stmts.push_back(s);
+                    }
+                    e->text += snapshot;
+                    continue;
+                }
                 e->text += (c.A == 2 ? "u" : "v") + std::to_string((int)c.B);
             }
             def_(in.A, e); d = Disp::Expr;
@@ -597,8 +718,31 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                     if (stmt_uses_reg(bo.stmts[q], in.A)) safe_merge = false;
                 for (const EP& item : tbl->list)
                     if (safe_merge && expr_uses_reg(item, in.A)) safe_merge = false;
-                if (safe_merge) bo.stmts.erase(bo.stmts.begin() + empty_def);
-                def_(in.A, tbl);
+                // SETLIST INTO AN EXISTING TABLE (2026-09-30, DEFECTS #51). `{ a = 1, b = 2, f(x) }`
+                // compiles to NEWTABLE, SETFIELD a, SETFIELD b, then SETLIST into the SAME table.
+                // When the table was already observed or filled (no empty NEWTABLE is its latest
+                // definition, or something reads it before the SETLIST), rebuilding it as
+                // `vA = {values}` REPLACED the table and lost every field (44.0.2
+                // EE_Interface_Components_List CreateList p86: the list object lost all its fields).
+                // Store the values into the existing table instead (`vA[k] = value`).
+                // RENOVICE_NO_SETLIST_EXISTING_TABLE restores the rebuild.
+                static const bool existing_table_setlist = !std::getenv("RENOVICE_NO_SETLIST_EXISTING_TABLE");
+                // A multret tail (C == 0) has no exact index-store spelling without a temporary;
+                // it does not occur on 44.0.2 (0 of 23 observed-table sites) and keeps the rebuild.
+                if (existing_table_setlist && cnt >= 0 && setlist_table_observed(ip, i, in.A)) {
+                    if (std::getenv("RENOVICE_SETLIST_TRACE"))
+                        std::fprintf(stderr, "SETLIST_EXISTING pc=%d A=%d count=%d\n", i, (int)in.A, cnt);
+                    for (int r = in.B; r < vend; ++r) {
+                        auto ix = mk(EK::Index);
+                        ix->a = mkreg(in.A);
+                        ix->b = mkconst(std::to_string((in.aux ? (int)in.aux : 1) + (r - in.B)));
+                        Stmt s; s.k = SK::Assign; s.lhs = ix; s.rhs = env.get(r); s.insn = i;
+                        bo.stmts.push_back(s);
+                    }
+                } else {
+                    if (safe_merge) bo.stmts.erase(bo.stmts.begin() + empty_def);
+                    def_(in.A, tbl);
+                }
             } else {
                 for (int r = in.B; r < vend; ++r) {
                     auto ix = mk(EK::Index);

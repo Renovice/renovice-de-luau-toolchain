@@ -1,0 +1,173 @@
+{
+ "summary": {
+  "exeSha256": [
+   "d51d877e042353d852916c67a572a74a40201f5e57aeb412cfd86bcd68716d69",
+   "65c4657239eebc194f8aa9c62cb919153449ec05a163e88086decf5c990ecf1c"
+  ],
+  "modules": [
+   5473,
+   5473
+  ],
+  "decompile": [
+   5459,
+   5459
+  ],
+  "recompile": [
+   5459,
+   5459
+  ],
+  "deterministic": [
+   5459,
+   5459
+  ],
+  "cfgIdentityFirstPass": [
+   4017,
+   4171
+  ],
+  "constIdentityFirstPass": [
+   5339,
+   5339
+  ],
+  "constAndCfgIdentityFirstPass": [
+   4010,
+   4164
+  ],
+  "cfgProtosEqual": [
+   70873,
+   71189
+  ],
+  "cfgProtosCompared": [
+   74339,
+   74339
+  ],
+  "cfgModulesProtoAligned": [
+   5388,
+   5388
+  ],
+  "protoCountMismatch": [
+   71,
+   71
+  ],
+  "classSwapsFirstPass": [
+   0,
+   0
+  ],
+  "compilerClosed": [
+   5375,
+   5418
+  ],
+  "cfgIdentityClosed": [
+   3966,
+   4082
+  ],
+  "constIdentityClosed": [
+   5252,
+   5297
+  ],
+  "sourceFixedPoint": [
+   2036,
+   2038
+  ],
+  "bytecodeFixedPoint": [
+   2048,
+   2050
+  ],
+  "seconds": [
+   1288.2,
+   1555.8
+  ]
+ },
+ "transitions": {
+  "cfgIdentity FAIL->PASS": 154,
+  "closedConstIdentity None->PASS": 56,
+  "closedConstIdentity PASS->None": 12,
+  "closedConstIdentity FAIL->None": 3,
+  "closedConstIdentity PASS->FAIL": 1,
+  "closedCfgIdentity FAIL->PASS": 96,
+  "closedCfgIdentity None->FAIL": 42,
+  "closedCfgIdentity FAIL->None": 15,
+  "closedCfgIdentity None->PASS": 14
+ },
+ "protoGainModules": 283,
+ "protoLossModules": [
+  [
+   "Lotus_Interface_WorldStateWindow.lua_B",
+   118,
+   117,
+   false
+  ]
+ ],
+ "closure": {
+  "openToClosed": [
+   "Lotus_Interface_ChatRedux.lua_B",
+   "Lotus_Powersuits_Alchemist_Abilities_AlchemistVial.lua_B",
+   "Lotus_Powersuits_Brawler_Abilities_BrawlerSummon.lua_B",
+   "Lotus_Powersuits_Devourer_Abilities_DevourerBowl.lua_B",
+   "Lotus_Powersuits_Dragon_Abilities_DragonLuck.lua_B",
+   "Lotus_Powersuits_Fairy_Abilities_FairyDust.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidWraithSniperShot.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BonebladeTeleportAbility.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_DeployGrinderAbility.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedAladControlAbility.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedJetpackSuicideAbility.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RhinoChargeReplicantAbility.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RiotBipedNeuralyzerAbility.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorTutorialPushBeam.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankAirBurstAbility.lua_B",
+   "Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Zariman_VoidAngelGroundSpike.lua_B",
+   "Lotus_Powersuits_PowersuitAbilities_NiraWhipHook.lua_B",
+   "Lotus_Powersuits_PowersuitAbilities_OperatorPowerUltimateAbility.lua_B",
+   "Lotus_Powersuits_Priest_Abilities_PriestCondemn.lua_B",
+   "Lotus_Powersuits_Revenant_Abilities_RevenantMark.lua_B",
+   "Lotus_Powersuits_Rhino_Abilities_RhinoChargeAbility.lua_B",
+   "Lotus_Scripts_1999_VoltFnFTableTeleport.lua_B",
+   "Lotus_Scripts_CaptureNew.lua_B",
+   "Lotus_Scripts_CrewShip_CorpusPOIUtilities.lua_B",
+   "Lotus_Scripts_CrewShip_RailJackShip.lua_B",
+   "Lotus_Scripts_CrewShip_StreamMission.lua_B",
+   "Lotus_Scripts_Effects_SpeedballEffects.lua_B",
+   "Lotus_Scripts_Eidolon_EidolonMP.lua_B",
+   "Lotus_Scripts_Gameplay_ZarimanHandleVoidAngelSpawns.lua_B",
+   "Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshLib.lua_B",
+   "Lotus_Scripts_JadeShadowsPart2Mission_Enemies_GarudaBossBloodAltar.lua_B",
+   "Lotus_Scripts_JadeShadowsPart2Mission_Enemies_JS2MInfestedJetpackSuicideAbility.lua_B",
+   "Lotus_Scripts_KuvaPath_SignalBridgeEvent.lua_B",
+   "Lotus_Scripts_Modes_ColonistDoorDefenseMission.lua_B",
+   "Lotus_Scripts_Modes_HiveMission.lua_B",
+   "Lotus_Scripts_Modes_ShadowGraphModeUtility.lua_B",
+   "Lotus_Scripts_Nemesis_NemesisMission.lua_B",
+   "Lotus_Scripts_NPC_RareSpawnScript.lua_B",
+   "Lotus_Scripts_Quests_JadeShadowsPart2Quest_GarudaSpy_JadeShadowsPart2VenaBossBloodAltar.lua_B",
+   "Lotus_Scripts_Quests_PriestQuestFight.lua_B",
+   "Lotus_Scripts_Restoratives_FireWorks.lua_B",
+   "Lotus_Scripts_Tau_ShuttleDefenseMission.lua_B",
+   "Lotus_Scripts_Venus_NokkoColony_Encounters_Assassinate.lua_B",
+   "Lotus_Scripts_WeaponAttachments_DeimosSupporterSkin.lua_B",
+   "Lotus_Types_Enemies_Duviri_Dragon_Ground_DragonGroundBoss.lua_B",
+   "Lotus_Types_Enemies_Entrati_Doppelganger_EntratiDoppelgangerAvatarScript.lua_B",
+   "Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_SpragBossArena.lua_B",
+   "Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_VenkraSniperTrack.lua_B",
+   "Lotus_Types_Enemies_SpaceBattles_Corpus_Ships_CorpusFighterScripts.lua_B",
+   "Lotus_Types_Enemies_Tau_Primes_Ash_AshPrimeLib.lua_B",
+   "Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedCatbrowEvasionBuff.lua_B",
+   "Lotus_Types_Game_CrewShip_Ships_Abilities_CrewShipEMPAbility.lua_B",
+   "Lotus_Types_Scripts_Tau_CoH_Complications_CoHHeavyWeaponsOnly.lua_B",
+   "Lotus_Types_Scripts_Tau_GrappleLookTriggerScript.lua_B",
+   "Lotus_Upgrades_Stickers_Scripts_EmergencyRescue.lua_B"
+  ],
+  "closedToOpen": [
+   "Lotus_Powersuits_EntratiMech_Snake.lua_B",
+   "Lotus_Scripts_Duviri_DuviriMissions.lua_B",
+   "Lotus_Scripts_Eidolon_EidolonMissions.lua_B",
+   "Lotus_Scripts_Gameplay_Complications_VolatileAtmosphere.lua_B",
+   "Lotus_Scripts_Gameplay_HexConquestReviveMechanic.lua_B",
+   "Lotus_Scripts_HelminthTransmissions.lua_B",
+   "Lotus_Scripts_Modes_WeaveMutalistBossMission.lua_B",
+   "Lotus_Scripts_Quests_EntratiLab_NecramechControl.lua_B",
+   "Lotus_Scripts_Quests_TitaniaQuest.lua_B",
+   "Lotus_Scripts_TransitionalEvents.lua_B",
+   "Lotus_Types_Enemies_AdvancedSpawners_BursaSpawnScript.lua_B",
+   "Lotus_Types_Friendly_Pets_MoaPets_MoaPetComponents_MoaStasisField.lua_B"
+  ]
+ }
+}

@@ -1,0 +1,5854 @@
+{
+"EE_Interface_Components_List.lua_B": [
+"FAIL",
+85
+],
+"EE_Interface_Editor_UiInspector_UiInspector.lua_B": [
+"FAIL",
+14
+],
+"EE_Interface_Utilities.lua_B": [
+"FAIL",
+167
+],
+"EE_Scripts_CommandExample.lua_B": [
+null,
+null
+],
+"EE_Scripts_ImGuiCameraSettings.lua_B": [
+null,
+null
+],
+"EE_Scripts_ImGuiCinematics.lua_B": [
+null,
+null
+],
+"EE_Scripts_ImGuiEntityViewer.lua_B": [
+null,
+null
+],
+"EE_Scripts_ImGuiScriptBlackboard.lua_B": [
+null,
+null
+],
+"EE_Scripts_ImGuiSeasonOverride.lua_B": [
+null,
+null
+],
+"EE_Types_ScriptCommands_SetVortexWindPerZone.lua_B": [
+null,
+null
+],
+"Lotus_Characters_Tenno_Accessory_Ephemeras_QorvexDeluxeEphemera_QorvexDeluxeEphemeraBat.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Characters_Tenno_Infestation_Cyst_InfestationCyst.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Fx_ModQuest_ModQuestPrecipitation.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Interface_1999_DiegeticCalendar.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Interface_1999_RetroMap.lua_B": [
+"FAIL",
+110
+],
+"Lotus_Interface_1999_RetroMessenger.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Interface_AddIngredientsScreen.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Interface_AlignmentDisplay.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Interface_AllPossibleEvolutions.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Interface_AppearancePreview.lua_B": [
+"FAIL",
+49
+],
+"Lotus_Interface_ArenaGambling.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Interface_Background.lua_B": [
+"FAIL",
+271
+],
+"Lotus_Interface_Backgrounds_Overlay_OverlayBackground.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Interface_Backgrounds_Stalker_StalkerBackground.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Interface_BeaconAccepted.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Interface_BeaconInProgress.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Interface_BindingsUtil.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Interface_BoonNotification.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Interface_BoonsActive.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Interface_BoonSelection.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Interface_CaliberChicks_Minigames_CaliberChicksControlsScreen.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Interface_CaliberChicks_Minigames_CaliberChicksControlsScreenText.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_CaliberChicks_Minigames_CaliberChicksFinalResults.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Interface_CaliberChicks_Minigames_CaliberChicksHUD.lua_B": [
+"FAIL",
+36
+],
+"Lotus_Interface_CardUtilitiesRedux.lua_B": [
+"FAIL",
+118
+],
+"Lotus_Interface_CephalonFragmentMessage.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Interface_ChallengePopUp.lua_B": [
+"FAIL",
+44
+],
+"Lotus_Interface_ChallengesProgress.lua_B": [
+"FAIL",
+36
+],
+"Lotus_Interface_ChallengeUtilities.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Interface_ChatRedux.lua_B": [
+"FAIL",
+309
+],
+"Lotus_Interface_Clan.lua_B": [
+"FAIL",
+269
+],
+"Lotus_Interface_ClanMemberRole.lua_B": [
+"FAIL",
+62
+],
+"Lotus_Interface_ClanSearch.lua_B": [
+"FAIL",
+95
+],
+"Lotus_Interface_Codex.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_CodexLite.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_CodexUtilities.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Interface_CoHBuffSelection.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Interface_ColorPicker.lua_B": [
+"FAIL",
+105
+],
+"Lotus_Interface_CommanderMap.lua_B": [
+"FAIL",
+140
+],
+"Lotus_Interface_Components_AvatarDiorama.lua_B": [
+"FAIL",
+88
+],
+"Lotus_Interface_Components_BoosterInfo.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Interface_Components_CustomizationList.lua_B": [
+"FAIL",
+129
+],
+"Lotus_Interface_Components_EvolutionList.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Interface_Components_GearList.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Interface_Components_GearSpiral.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Interface_Components_MissionPanel.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Interface_Components_PlayerPanelRedux.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Interface_Components_StatCompare.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Interface_Components_StatsUtil.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Interface_Components_ThemedButton.lua_B": [
+"FAIL",
+61
+],
+"Lotus_Interface_Components_ThemedCategoriesMenu.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Interface_Components_ThemedCustomizationButton.lua_B": [
+"FAIL",
+56
+],
+"Lotus_Interface_Components_ThemedCustomizationList.lua_B": [
+"FAIL",
+116
+],
+"Lotus_Interface_Components_ThemedProgressInfo.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Interface_Components_ThemedSquadPanel.lua_B": [
+"FAIL",
+67
+],
+"Lotus_Interface_Components_ThemedStats.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Interface_Components_UserList.lua_B": [
+"FAIL",
+53
+],
+"Lotus_Interface_ConquestSetup.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Interface_ConquestStickerSelect.lua_B": [
+"FAIL",
+76
+],
+"Lotus_Interface_ConservationHud.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Interface_ConsumablesOverlay.lua_B": [
+"FAIL",
+144
+],
+"Lotus_Interface_ContextAction.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Interface_ControllerLayout.lua_B": [
+"FAIL",
+58
+],
+"Lotus_Interface_CouponUtilities.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Interface_Credits.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Interface_DailyTribute.lua_B": [
+"FAIL",
+88
+],
+"Lotus_Interface_DecorationsHud.lua_B": [
+"FAIL",
+33
+],
+"Lotus_Interface_DecoTemplate.lua_B": [
+"FAIL",
+71
+],
+"Lotus_Interface_DefenseReward.lua_B": [
+"FAIL",
+57
+],
+"Lotus_Interface_Dialog.lua_B": [
+"FAIL",
+83
+],
+"Lotus_Interface_DialogWithCards.lua_B": [
+"FAIL",
+61
+],
+"Lotus_Interface_DiegeticArtifactCards.lua_B": [
+"FAIL",
+233
+],
+"Lotus_Interface_DiegeticFoundry.lua_B": [
+"FAIL",
+196
+],
+"Lotus_Interface_DiegeticUpgradeCards.lua_B": [
+"FAIL",
+401
+],
+"Lotus_Interface_Dojo_DojoColorResearchStatus.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Interface_Dojo_DojoRoomConstructionStatus.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Interface_Dojo_DojoRoomSelection.lua_B": [
+"FAIL",
+113
+],
+"Lotus_Interface_Dojo_ResearchContribution.lua_B": [
+"FAIL",
+87
+],
+"Lotus_Interface_Dojo_ResearchSelection.lua_B": [
+"FAIL",
+117
+],
+"Lotus_Interface_Dojo_Trade.lua_B": [
+"FAIL",
+132
+],
+"Lotus_Interface_Dojo_TradingPost.lua_B": [
+"FAIL",
+53
+],
+"Lotus_Interface_Dojo_VaultContribution.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Interface_DuviriEndlessSetup.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Interface_DuviriMissionComplete.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Interface_DuviriTitleCard.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Interface_DuviriWeaponControls.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Interface_EidolonJobBoard.lua_B": [
+"FAIL",
+92
+],
+"Lotus_Interface_EidolonMissionComplete.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Interface_EndOfMatch.lua_B": [
+"FAIL",
+43
+],
+"Lotus_Interface_EndOfMatchKahl.lua_B": [
+"FAIL",
+41
+],
+"Lotus_Interface_EndOfMatchPvp.lua_B": [
+"FAIL",
+44
+],
+"Lotus_Interface_EndOfQuest.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Interface_EpisodeChallenges.lua_B": [
+"FAIL",
+123
+],
+"Lotus_Interface_EpisodeStatus.lua_B": [
+"FAIL",
+45
+],
+"Lotus_Interface_FastTravelUtilities.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Interface_FighterSelect.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Interface_FishInfo.lua_B": [
+"FAIL",
+45
+],
+"Lotus_Interface_FishingHud.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Interface_FocusActivation.lua_B": [
+"FAIL",
+43
+],
+"Lotus_Interface_FocusManager.lua_B": [
+"FAIL",
+109
+],
+"Lotus_Interface_FortressUtilities.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Interface_Founders.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Interface_FoundryConfirmDialog.lua_B": [
+"FAIL",
+79
+],
+"Lotus_Interface_Friends.lua_B": [
+"FAIL",
+64
+],
+"Lotus_Interface_GenericMenu.lua_B": [
+"FAIL",
+40
+],
+"Lotus_Interface_GenericNotification.lua_B": [
+"FAIL",
+35
+],
+"Lotus_Interface_GenericVendor.lua_B": [
+"FAIL",
+145
+],
+"Lotus_Interface_GeneticLab.lua_B": [
+"FAIL",
+152
+],
+"Lotus_Interface_GiftCelebration.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Interface_HorseCustomization.lua_B": [
+"FAIL",
+62
+],
+"Lotus_Interface_Hub.lua_B": [
+"FAIL",
+60
+],
+"Lotus_Interface_HudCustomization.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Interface_HudFighter.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Interface_HudLunaro.lua_B": [
+"FAIL",
+54
+],
+"Lotus_Interface_HudRedux.lua_B": [
+"FAIL",
+56
+],
+"Lotus_Interface_Inbox.lua_B": [
+"FAIL",
+139
+],
+"Lotus_Interface_InkPaint.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Interface_InlineLoadout.lua_B": [
+"FAIL",
+87
+],
+"Lotus_Interface_InputDialog.lua_B": [
+"FAIL",
+55
+],
+"Lotus_Interface_InventoryTest.lua_B": [
+"FAIL",
+215
+],
+"Lotus_Interface_InventoryUtilities.lua_B": [
+"FAIL",
+58
+],
+"Lotus_Interface_ItemBrowsing.lua_B": [
+"FAIL",
+133
+],
+"Lotus_Interface_ItemInfoPopup.lua_B": [
+"FAIL",
+78
+],
+"Lotus_Interface_KahlCustomization.lua_B": [
+"FAIL",
+75
+],
+"Lotus_Interface_Libs_ActiveMissionGenerator.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Interface_Libs_DeepArchimedeaMissionGenerator.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Interface_Libs_DojoMgr.lua_B": [
+"FAIL",
+100
+],
+"Lotus_Interface_Libs_DuviriUtil.lua_B": [
+"FAIL",
+78
+],
+"Lotus_Interface_Libs_ImGuiLib.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Interface_Libs_PreviewLinkUtilities.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Interface_Libs_SortieGenerator.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Interface_Libs_SyndicateMissionGenerator.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Interface_LisetCustomization.lua_B": [
+"FAIL",
+78
+],
+"Lotus_Interface_LoadOutRedux.lua_B": [
+"FAIL",
+135
+],
+"Lotus_Interface_LoadOutSelect.lua_B": [
+"FAIL",
+108
+],
+"Lotus_Interface_LoadoutUtilities.lua_B": [
+"FAIL",
+91
+],
+"Lotus_Interface_LotusNetworkUtilities.lua_B": [
+"FAIL",
+58
+],
+"Lotus_Interface_LotusUtilities.lua_B": [
+"FAIL",
+556
+],
+"Lotus_Interface_Map_MapLegend.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Interface_MapNodeTipUtilities.lua_B": [
+"FAIL",
+75
+],
+"Lotus_Interface_MapRedux.lua_B": [
+"FAIL",
+108
+],
+"Lotus_Interface_Minigames_DuviriHack.lua_B": [
+"FAIL",
+69
+],
+"Lotus_Interface_Minigames_NarmerHack.lua_B": [
+"FAIL",
+45
+],
+"Lotus_Interface_Minigames_OlliesCrashCourseTimer.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Interface_Minigames_RetroMinigame.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Interface_Minigames_SnakeHack.lua_B": [
+"FAIL",
+65
+],
+"Lotus_Interface_MissionRequirementUtilities.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Interface_MobileUtils.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Interface_ModFusion.lua_B": [
+"FAIL",
+35
+],
+"Lotus_Interface_ModularWeaponCrafting.lua_B": [
+"FAIL",
+123
+],
+"Lotus_Interface_ModularWeaponUtilities.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Interface_MotorcycleCustomization.lua_B": [
+"FAIL",
+70
+],
+"Lotus_Interface_NemesisDamageTypePopUp.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Interface_NewWarQuiz.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Interface_Notifications.lua_B": [
+"FAIL",
+109
+],
+"Lotus_Interface_OmegaRerollSelection.lua_B": [
+"FAIL",
+76
+],
+"Lotus_Interface_OnslaughtWaveSummary.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Interface_OstronActions.lua_B": [
+"FAIL",
+55
+],
+"Lotus_Interface_PostCameraUpdateHud.lua_B": [
+"FAIL",
+65
+],
+"Lotus_Interface_PowerSuitCustomHuds_AlchemistCustomHud.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Interface_PowerSuitCustomHuds_AtlasCustomHud.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_PowerSuitCustomHuds_BrokenFrameCustomHud.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Interface_PowerSuitCustomHuds_DevourerCustomHud.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Interface_PowerSuitCustomHuds_DragonCustomHud.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Interface_PowerSuitCustomHuds_FairyCustomHud.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Interface_PowerSuitCustomHuds_FocusSecondChanceMeter.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Interface_PowerSuitCustomHuds_GaraCustomHud.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Interface_PowerSuitCustomHuds_GarudaCustomHud.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Interface_PowerSuitCustomHuds_GeodeCustomHud.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Interface_PowerSuitCustomHuds_HydroidCustomHud.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Interface_PowerSuitCustomHuds_InarosCustomHud.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Interface_PowerSuitCustomHuds_InfestedCustomHud.lua_B": [
+"FAIL",
+34
+],
+"Lotus_Interface_PowerSuitCustomHuds_JadeCustomHud.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_PowerSuitCustomHuds_KhoraCustomHud.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Interface_PowerSuitCustomHuds_KoumeiCustomHud.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Interface_PowerSuitCustomHuds_NezhaCustomHud.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Interface_PowerSuitCustomHuds_OdaliskCustomHud.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Interface_PowerSuitCustomHuds_PagemasterCustomHud.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_PowerSuitCustomHuds_PseudoExaltedHudUtilities.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Interface_PowerSuitCustomHuds_RangerCustomHud.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Interface_PowerSuitCustomHuds_SarynCustomHud.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Interface_PowerSuitCustomHuds_SiriusOrionCustomHud.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Interface_PowerSuitCustomHuds_WispCustomHud.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Interface_PowerSuitCustomHuds_WolfCustomHud.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Interface_PowerSuitCustomHuds_WukongCustomHud.lua_B": [
+"FAIL",
+40
+],
+"Lotus_Interface_Profile.lua_B": [
+"FAIL",
+38
+],
+"Lotus_Interface_ProfileRedux.lua_B": [
+"FAIL",
+48
+],
+"Lotus_Interface_Progress.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Interface_ProjectionRewardChoice.lua_B": [
+"FAIL",
+55
+],
+"Lotus_Interface_PurgatoryReward.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Interface_PvpScoreboard.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Interface_PvpTeamSelect.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Interface_QuestPicker.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Interface_Quests_OrokinLock.lua_B": [
+"FAIL",
+70
+],
+"Lotus_Interface_Quests_Vitruvian.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Interface_RadialText.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Interface_RailjackCrewMgr.lua_B": [
+"FAIL",
+214
+],
+"Lotus_Interface_RailJackHud.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_RailjackLoadOut.lua_B": [
+"FAIL",
+269
+],
+"Lotus_Interface_ResourceConversion.lua_B": [
+"FAIL",
+53
+],
+"Lotus_Interface_ResourceDrone.lua_B": [
+"FAIL",
+88
+],
+"Lotus_Interface_SecurityCamera.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Interface_Settings.lua_B": [
+"FAIL",
+1338
+],
+"Lotus_Interface_SixStackSetup.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Interface_SomaticBearer.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Interface_SpecialReticles_DuelistBowReticle.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Interface_SpecialReticles_OwlReconHud.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Interface_SpectatorHUD.lua_B": [
+"FAIL",
+80
+],
+"Lotus_Interface_StoreItemUtilities.lua_B": [
+"FAIL",
+117
+],
+"Lotus_Interface_StoreLandingPage.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Interface_StoreRedux.lua_B": [
+"FAIL",
+216
+],
+"Lotus_Interface_StrugglePrompt.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Interface_StyleManager.lua_B": [
+"FAIL",
+60
+],
+"Lotus_Interface_Subtitles.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Interface_TauHellTower.lua_B": [
+"FAIL",
+97
+],
+"Lotus_Interface_TauMap12MinuteWar.lua_B": [
+"FAIL",
+54
+],
+"Lotus_Interface_TennoHubScreenLauncher.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Interface_TennoWayTree.lua_B": [
+"FAIL",
+134
+],
+"Lotus_Interface_Test_CompositionTool_CompositionTool.lua_B": [
+"FAIL",
+133
+],
+"Lotus_Interface_Test_CompositionTool_ThemedCompositionTool.lua_B": [
+"FAIL",
+96
+],
+"Lotus_Interface_Test_NemesisTest.lua_B": [
+"FAIL",
+88
+],
+"Lotus_Interface_Test_ShawzinTest.lua_B": [
+"FAIL",
+203
+],
+"Lotus_Interface_TextSuggest.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Interface_ThemedAbilityProgression.lua_B": [
+"FAIL",
+45
+],
+"Lotus_Interface_ThemedAmpCustomization.lua_B": [
+"FAIL",
+84
+],
+"Lotus_Interface_ThemedArcaneManager.lua_B": [
+"FAIL",
+103
+],
+"Lotus_Interface_ThemedButtonBar.lua_B": [
+"FAIL",
+40
+],
+"Lotus_Interface_ThemedDetailedPurchaseDialog.lua_B": [
+"FAIL",
+44
+],
+"Lotus_Interface_ThemedGenericSettings.lua_B": [
+"FAIL",
+124
+],
+"Lotus_Interface_ThemedMainMenu.lua_B": [
+"FAIL",
+239
+],
+"Lotus_Interface_ThemedOperatorLoadout.lua_B": [
+"FAIL",
+109
+],
+"Lotus_Interface_ThemedPhotoboothControls.lua_B": [
+"FAIL",
+65
+],
+"Lotus_Interface_ThemedProjectionManager.lua_B": [
+"FAIL",
+130
+],
+"Lotus_Interface_ThemedSquadOverlay.lua_B": [
+"FAIL",
+48
+],
+"Lotus_Interface_ThemedSyndicates.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Interface_ThemedTaskList.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Interface_ThemedTennoCustomization.lua_B": [
+"FAIL",
+75
+],
+"Lotus_Interface_ThemedVignetteConsole.lua_B": [
+"FAIL",
+57
+],
+"Lotus_Interface_TopMenu.lua_B": [
+"FAIL",
+116
+],
+"Lotus_Interface_TouchControlsInterface.lua_B": [
+"FAIL",
+144
+],
+"Lotus_Interface_TouchInterface_AimToggleButton.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Interface_TouchInterface_FunctionsMenu.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_TouchInterface_HUDLayoutManager.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Interface_TouchInterface_LookJoystick.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Interface_TouchInterface_MeleeAttackButton.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_TouchInterface_MeleeModeButton.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Interface_TouchInterface_MoveJoystick.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Interface_TouchInterface_MovieClip.lua_B": [
+"FAIL",
+46
+],
+"Lotus_Interface_TouchInterface_UseGroupButton.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Interface_TouchInterface_WeaponSlotButton.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Interface_TouchInterface_Window.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Interface_TransmissionUtilities.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Interface_TreasureBoxReveal.lua_B": [
+"FAIL",
+44
+],
+"Lotus_Interface_UICommonResources.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Interface_UIStyleUtilities.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Interface_UIUtilities.lua_B": [
+"FAIL",
+148
+],
+"Lotus_Interface_VeilbreakerMissionBrief.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Interface_WarframeSelect.lua_B": [
+"FAIL",
+53
+],
+"Lotus_Interface_WorldStateWindow.lua_B": [
+"FAIL",
+118
+],
+"Lotus_Interface_YareliComic_YareliComic.lua_B": [
+"FAIL",
+114
+],
+"Lotus_Levels_1999_AA1999CarGym_PatrolScript.lua_B": [
+"PASS",
+12
+],
+"Lotus_Levels_Grineer_VorBossFight_VorHallwayPrototype.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Levels_GrineerOcean_GrineerOceanDefense_OceanDefenseRotation.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Levels_MiniGames_Sentinel_SentinelGame.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Alchemist_Abilities_AlchemistTransmute.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Alchemist_Abilities_AlchemistVial.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_AntiMatter_Abilities_NovaDrop.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_AntiMatter_Abilities_NullStar.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_AntiMatter_Abilities_WormHole.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Powersuits_Archwing_ArchwingAbilities_Cloaking.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Archwing_ArchwingAbilities_FlareCounterMeasure.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Archwing_ArchwingAbilities_MissileVolley.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Banshee_Abilities_SonicEarthQuake.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Bard_Abilities_BardAmplify.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Bard_Abilities_BardCharm.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_Bard_Abilities_BardJam.lua_B": [
+"FAIL",
+34
+],
+"Lotus_Powersuits_Bard_Abilities_BardMusic.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Brawler_Abilities_BrawlerBarrier.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Brawler_Abilities_BrawlerSummon.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_BrokenFrame_Abilities_BrokenGrasp.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_BrokenFrame_BrokenFramePassive.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Choir_Abilities_ChoirChorus.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_ConcreteFrame_Abilities_ConcreteAura.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_ConcreteFrame_Abilities_ConcreteLaser.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_ConcreteFrame_Abilities_ConcretePillar.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Cowgirl_Abilities_GunFu.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_DemonFrame_Abilities_DemonFrameClone.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_DemonFrame_Abilities_DemonFrameFireBall.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Powersuits_Devourer_Abilities_DevourerBowl.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_Devourer_Abilities_DevourerDevour.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Powersuits_Dragon_Abilities_DragonBreath.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Dragon_Abilities_DragonLuck.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Duelist_Abilities_DuelistBladeDance.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Ember_Abilities_EmberInferno.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_EntratiMech_EntratiMechTurretModeAbility.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_EntratiMech_OilGrenadeAbility.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_EntratiMech_RiotShieldAbility.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_EntratiMech_Snake.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_EntratiMech_SwordAbility.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Excalibur_Abilities_RadialBlindAbility.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Excalibur_Abilities_SlashDashNew.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Fairy_Abilities_FairyDust.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Fairy_Abilities_FairyFlight.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Fairy_Abilities_FairySoul.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Frost_Abilities_IceShield.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Frumentarius_Abilities_FrumentariusAmmo.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Frumentarius_Abilities_FrumentariusScan.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Frumentarius_Abilities_FrumentariusSniper.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Powersuits_Garuda_Abilities_GarudaShield.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Garuda_Abilities_GarudaUnstoppable.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_Geode_Abilities_GeodeCrystal.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_Glass_Abilities_GlassRing.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Glass_Abilities_GlassShank.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Gyre_Abilities_GyreOvercharged.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Gyre_Abilities_GyreSphere.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_Harlequin_Abilities_HarlequinObjectChange.lua_B": [
+"FAIL",
+66
+],
+"Lotus_Powersuits_Harlequin_Abilities_Illusion.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_Infestation_Abilities_InfestLink.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Infestation_Abilities_InfestRupture.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Infestation_Abilities_InfestTendrils.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Inkblot_Abilities_InkBalloon.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Inkblot_Abilities_InkField.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Inkblot_Abilities_InkSketch.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Powersuits_Inkblot_InkJumpPad.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_IronFrame_Abilities_IronFrameAura.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_IronFrame_Abilities_IronFrameBlast.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Powersuits_IronFrame_Abilities_IronFrameEruption.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_IronFrame_Abilities_IronFrameStrip.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Jade_Abilities_Chaos.lua_B": [
+null,
+null
+],
+"Lotus_Powersuits_Jade_Abilities_MindControl.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_Jade_Abilities_PsychicDagger.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Jade_Abilities_SelfBulletAttractor.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Powersuits_Khora_Abilities_KhoraCage.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Khora_Abilities_KhoraCrack.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Khora_Kavat_KhorvatAura.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_Khora_Kavat_KhorvatDervish.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_Koumei_Abilities_KoumeiFortune.lua_B": [
+"FAIL",
+41
+],
+"Lotus_Powersuits_Loki_Abilities_RadialDisarm.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Loki_Abilities_SwitchTeleportAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Lotus_Abilities_LotusCableAbility.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_Mag_Abilities_BulletAttractor.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Powersuits_Mag_Abilities_Pull.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Magician_Abilities_Banish.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Magician_Abilities_TearInSpace.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Magician_Abilities_Volatile.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_MonkeyKing_Abilities_MonkeyCloud.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_MonkeyKing_Abilities_MonkeyPoke.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_Necro_Abilities_SearchTheDead.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Nezha_Abilities_NezhaRing.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Nezha_Abilities_NezhaSpear.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Nezha_Abilities_NezhaTrail.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Ninja_Abilities_NinjaStormNew.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Powersuits_Ninja_Abilities_SmokeScreen.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Ninja_Abilities_TeleportTo.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Nokko_Abilities_NokkoPowerShroom.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Nokko_Abilities_NokkoToxicShroom.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Nokko_NokkoPassive.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_NpcPowersuits_ConservationAbilities_LegendaryKubrowRoar.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_AllyBulletAttractor.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_AmalgamReincarnateAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_AmbulasSweepBeam.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperBroodScript.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperHeatTerraScript.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperIcePassive.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperIndoorIceWave.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidCamperQuickdraw.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidHungerDodgeFire.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidWraithElectroWeb.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Arachnoid_ArachnoidWraithSniperShot.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarCharge.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarFlameWall.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarHowl.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarHowl2.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_AmarSummon.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_ArchonStruggleAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_BorealParalyzingScreamPNW.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Archon_NiraGazeAbility.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_AshenRollAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BlessingNpcAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BonebladeTeleportAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BossVorElectroBallTraps.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BossVorSweepBeam.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BulletAttractorReplicant.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_BusterTrapAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_DeployDroneAbilityRandom.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_DeployGrinderAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_AshigaruBuffAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDaxFirePool.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDaxHeavyBlockAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDaxWaveAbility.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDragonBabyMineAbility.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriDragonGroundFirebreathAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriJackalUFOAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_DuviriMountedDaxLeapingChargeAbility.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Duviri_PaxDuviricusPainfulReprisalAbility.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_DuviriReviveStruggleAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientRopalolystJavelin.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientRopalolystLaserBurst.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientTeralystRainGeyser.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_SentientTeralystRainVoidSpire.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Eidolon_VomvalystRainBeam.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_EnergyLeechAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ExplosiveDissolveReplicantAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_FireBlastReplicantAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_GhoulDevourerGrappleAbility.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_HealthLeechPatches.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_IceShieldSpecter.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ImpactInterrupter.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedAladBeamAbility.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedAladControlAbility.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedGraspAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedJetpackSuicideAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_BulletAttractorReplicant.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_CRTShieldBurstAbility.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_HolographicIllusionRingAbility.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_InfestRupture.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_InfestTendrils.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_LaserDiscProjAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_LichBrawlerBarrier.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_LichRhinoChargeAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_MagneticManipulationAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InfestedLich_MindhackMusicAbility.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_InkBlobAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_IronSkinRhinoReplicant.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_J3GolemSpaceMinionSwarmAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_JackalUFOAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_JadeLightEximus.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_BarrierAbility.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_ChargeAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_DecoyAbility.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_ExplosiveDissolve.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_IronSkin.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_Liquify.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_NullStar.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_PetMegaLaserAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_PetPowerDenial.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_PetStealEximusAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_PetStompAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_Pull.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_RadialDisarm.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_Regeneration.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_StairwayToHeaven.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_StompAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Lich_SwitchTeleportAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_LinkReplicantNpcAbility.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_MachetePull.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerStomp.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerTendrils.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerTetherJavelin.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerVoltaicDrop.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_DoppelgangerWormholeMirror.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_MITWMouthCannon.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ManInTheWall_MITWOctopedeUnhealingHands.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ModCrpRadialNullify.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_NoxChargeAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_NpcSwitchTeleportAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_NullStarReplicantAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_OraxiaAiStomp.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_OraxiaAIWeb.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_OraxiaWallToGround.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_OverLoadReplicant.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_PoisonReplicantAbility.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RadialBlindReplicantAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RadialDisarmReplicantAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Railjack_CrewshipMedicBubbleAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Railjack_RamSledBoarding.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Railjack_RamSledSpawnAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Railjack_SpaceFighterSntHealBall.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RhinoChargeReplicantAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RiotBipedNeuralyzerAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RoyalGuardChargeAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RoyalGuardPassive.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_RushersLatchAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientClotholystSlamAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientGodRays.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientPortalProjectileAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SentientStalkerSparkGrenade.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Shadowgrapher_InkSketchbook.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_ShockVoltSpecter.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SlashDashNewReplicantAbility.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_SpaceTurretMissileAbility.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Lustratus_LustratusDaxWaveAbility.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_DaxMedicHealingWave.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_DaxMedicShieldDroneAbility.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_GrineerTrapperGrenadeAbility.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_TauDaxArcherCanisterAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_TauDaxHeavyBlockAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_OrokinEmpire_TrapperDroneBeamSweepAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Sentient_SentientAerialLaserAbility.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Sentient_SentientDeathLaserAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Sentient_SentientGiantAbilitiesUtil.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Tau_Sentient_SentientHazardChoralystSpawnAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_TNWJackalUFOAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorPushBeam.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorReworkOrbAbility.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_VorTutorialPushBeam.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WarriorChargeAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WeaveMutalistSpikeAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WellOfLifeReplicantAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_InfestedPartyZoneAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianDeployMedstationAbility.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianGoonadierGrenadeAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankAirBurstAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankEfervonSprayAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankInfestedMissileBarrage.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankInfestedSpikesAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WF1999Abilities_LasrianTankJumpAbility.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WolfSpinAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_WormHoleReplicantAbility.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_YinYangBurstReplicantAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_YinYangSwitchReplicantAbility.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_YinYangTargetReplicantAbility.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Zariman_VoidAngelCorruptionAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Zariman_VoidAngelGroundSpike.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_NpcPowersuits_NpcPowersuitAbilities_Zariman_VoidAngelWingClipAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_Odalisk_Abilities_OdaliskAnchor.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Oraxia_Abilities_OraxiaClimb.lua_B": [
+"FAIL",
+40
+],
+"Lotus_Powersuits_Pacifist_Abilities_PacifistDisarm.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_Pacifist_Abilities_PacifistWave.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Paladin_Abilities_Reckoning.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Powersuits_Paladin_Abilities_StairwayToHeaven.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Paladin_PaladinPassive.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_PaxDuviricus_Abilities_PaxBlades.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_PaxDuviricus_Abilities_PaxTeleport.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Pirate_Abilities_CannonBarrage.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Pirate_Abilities_Kraken.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Powersuits_Pirate_Abilities_TidalWaveNew.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_PowersuitAbilities_AbilityAuraLib.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Powersuits_PowersuitAbilities_AWGrappleHookPower.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_PowersuitAbilities_BrawlerPunch.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Powersuits_PowersuitAbilities_DropRepeater.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_PowersuitAbilities_Liquify.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_PowersuitAbilities_NiraWhipHook.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Powersuits_PowersuitAbilities_OperatorAttackUltimateAbility.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_PowersuitAbilities_OperatorPowerUltimateAbility.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_PowersuitAbilities_OperatorTacticUltimateAbility.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_PowersuitAbilities_OperatorTransference.lua_B": [
+"FAIL",
+61
+],
+"Lotus_Powersuits_PowersuitAbilities_Vortex.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Powersuits_PowersuitAbilities_VythelasRuneAbility.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Priest_Abilities_PriestCondemn.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_Priest_Abilities_PriestPact.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Priest_Abilities_PriestRavage.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Powersuits_Ranger_Abilities_RangerControl.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Powersuits_Ranger_Abilities_RangerQuiver.lua_B": [
+"FAIL",
+40
+],
+"Lotus_Powersuits_Ranger_Abilities_RangerSteal.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Revenant_Abilities_RevenantMark.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_Revenant_Abilities_RevenantReborn.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_Rhino_Abilities_IronSkin.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Powersuits_Rhino_Abilities_RhinoChargeAbility.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Runner_Abilities_RunnerPlating.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Powersuits_Runner_Abilities_RunnerRush.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Runner_Abilities_RunnerTransfer.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Runner_RunnerPassive.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Sandman_Abilities_SandmanArmor.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Powersuits_Sandman_Abilities_SandmanDevour.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Powersuits_Sandman_Abilities_SandmanSwarm.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Saryn_Abilities_ExplosiveDissolve.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_Saryn_Abilities_Poison.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Sentient_Abilities_SentientSummon.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Sentient_Abilities_SentientWhirlwind.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Powersuits_Temple_Abilities_TempleShred.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Trapper_Abilities_StasisProbe.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Powersuits_Trapper_Abilities_TrapperMultinade.lua_B": [
+"FAIL",
+34
+],
+"Lotus_Powersuits_Trapper_Abilities_ZapProbe.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Powersuits_Trinity_Abilities_BlessingAbility.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Trinity_Abilities_LinkAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Powersuits_Volt_Abilities_OverLoad.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Powersuits_Volt_Abilities_Shield.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Powersuits_Volt_Abilities_Shock.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Powersuits_Volt_Abilities_Speed.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Werewolf_Abilities_WerewolfShroud.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Powersuits_Wisp_Abilities_WispHarness.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_Wisp_Abilities_WispReservoir.lua_B": [
+"FAIL",
+36
+],
+"Lotus_Powersuits_Wisp_Abilities_WispSun.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Powersuits_Wisp_WispPassive.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Powersuits_Wraith_Abilities_ReaperHarvest.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Powersuits_Wraith_Abilities_WraithGloom.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_Yareli_Abilities_YareliBoard.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Powersuits_YinYang_Abilities_YinYangBurst.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Powersuits_YinYang_Abilities_YinYangSwitch.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Powersuits_YinYang_Abilities_YinYangTarget.lua_B": [
+"FAIL",
+34
+],
+"Lotus_Scripts_1999_APCReinforcements.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_CaliberChicks.lua_B": [
+"FAIL",
+80
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_CaliberChicksGlitch.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameBossI.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameBossII.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameBossIII.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_1999_Arcade_CaliberChicks_MinigameTestV2.lua_B": [
+"PASS",
+8
+],
+"Lotus_Scripts_1999_BalloonConsoleControl.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_1999_BalloonDropdown.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_1999_GroupIdleBarkMonitor.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_1999_HexSyndicateDialog.lua_B": [
+"FAIL",
+157
+],
+"Lotus_Scripts_1999_MotorcycleStream.lua_B": [
+"FAIL",
+51
+],
+"Lotus_Scripts_1999_PagerDeco.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_1999_RomanceCheckBoolean.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_1999_TailorShop.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_1999_VaniaBountyMgr.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_1999_VehicleEncounter.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_1999_VoltFnFTableTeleport.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Accessibility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_AcidDart.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_ActivateAPCEncounter.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_AdBot.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_AimGravityFX.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_AmbientConversation.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Animation_ApproachAnim.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Animation_CreateLoadoutDeco.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_ApplyOperatorCustomization.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Arbitration.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Scripts_ArchwingPursuitShip.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Audio_PlaySound.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_CacheHuntPickup.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_CaptureNew.lua_B": [
+"FAIL",
+42
+],
+"Lotus_Scripts_ChallengeRooms_ArchwingTimedExterminateChallenge.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_ChallengeRooms_ArenaChallenge.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_ChallengeRooms_BaseChallengeRoom.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ChallengeRooms_ChamberSurvivalChallenge.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_ChallengeRooms_ChaseChallenge.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_ChallengeRooms_ComboChallenge.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_ChallengeRooms_DefenseChallenge.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ChallengeRooms_InterceptionChallenge.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_ChallengeRooms_OperatorChallenge.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_ChallengeRooms_PlatformChallenge.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_ChallengeRooms_SurvivalChallenge.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_ChallengeRooms_TargetChallenge.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_ChallengeRooms_TimeAttackChallenge.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ChallengeRooms_WaveChallenge.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Challenges_MatchTagAndSourceType.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Challenges_WeaponSwapChallenge.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_CheckLevelTag.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Cmds_CmdAutoMove.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Cmds_CmdAvatarTracker.lua_B": [
+null,
+null
+],
+"Lotus_Scripts_Cmds_CmdDamageTracker.lua_B": [
+null,
+null
+],
+"Lotus_Scripts_Cmds_CmdGameModeDebug.lua_B": [
+null,
+null
+],
+"Lotus_Scripts_Cmds_CmdImGuiUpgradeTracker.lua_B": [
+null,
+null
+],
+"Lotus_Scripts_Cmds_CmdQuestDebug.lua_B": [
+null,
+null
+],
+"Lotus_Scripts_CrewShip_ActivateAllCrewShips.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_CrewShip_ArchwingCanon.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_CrewShip_CapitalShipWeakPoints.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_CrewShip_CommanderTrap.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_CrewShip_CorpusCrewShip.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_CrewShip_CorpusPOIUtilities.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_CrewShip_CrewShip.lua_B": [
+"FAIL",
+59
+],
+"Lotus_Scripts_CrewShip_CrewShipPartsMission.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_CrewShipScanPoint.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_CrewShip_Encounters_BasicRailJackPatrol.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_CrewShip_Encounters_BoardingPartyEncounter.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_CrewShip_Encounters_CapitalShipStateEncounter.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_CrewShip_Encounters_CorpusCrewShipEncounter.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Scripts_CrewShip_Encounters_CorpusFrozenHullEncounter.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpCargoTrainEncounter.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpCometShredderEncounter.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpRefuelingStationEncounter.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpRoboticsFactoryEncounter.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpTetherPowerplantEncounter.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_CrewShip_Encounters_CrpVolatileDeliveryMainEncounter.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_CrewShip_Encounters_DeepSpaceNavBeaconObjective.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_CrewShip_Encounters_DeepSpaceNavConsoleObjective.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerAsteroidHangarEncounter.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerCrewShipEncounter.lua_B": [
+"FAIL",
+33
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerGalleonEncounter.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerMissilePlatformEncounter.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerRadarTowerEncounter.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_CrewShip_Encounters_GrineerSuperWeaponEncounter.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_CrewShip_Encounters_InvestigateDerelictShipEncounter.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_CrewShip_Encounters_KillCapitalShipCaptainEncounter.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_CrewShip_Encounters_KillCrewShipsExterminateObjective.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_CrewShip_Encounters_LasXStadiumEncounter.lua_B": [
+"FAIL",
+39
+],
+"Lotus_Scripts_CrewShip_Encounters_NemesisAssassinate.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_CrewShip_Encounters_OverrideObjective.lua_B": [
+"FAIL",
+38
+],
+"Lotus_Scripts_CrewShip_Encounters_RailjackPatrol.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_CrewShip_Encounters_RJCorpusCapitalShipEncounter.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_CrewShip_Encounters_SentientFragmentExterminate.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_CrewShip_Encounters_SentientFragmentInterception.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_CrewShip_Encounters_SentientFragmentLinkObjective.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_CrewShip_Encounters_StealDataObjective.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_CrewShip_GrineerCommander.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_CrewShip_GrineerCrewShip.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_CrewShip_RailjackConstruction.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_CrewShip_RailjackMissionManager.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_CrewShip_RailJackPreDeath.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_CrewShip_RailJackShip.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_CrewShip_StreamMission.lua_B": [
+"FAIL",
+45
+],
+"Lotus_Scripts_CrewShip_VoidEffects.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Dailies_HardModeDaily.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_DarkKuvaEximusShootAbilitySimple.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_DarkKuvaEximusShootPatternsLib.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_DayNight.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_DayNightTestB.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_DayNightTests.lua_B": [
+"PASS",
+8
+],
+"Lotus_Scripts_DeathSquadFlak.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_DedicatedServerInit.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Dialog_Conversation.lua_B": [
+"FAIL",
+55
+],
+"Lotus_Scripts_Dialog_PlayTransmissionAnims.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_DialogTree.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Dojo.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_DojoDuel.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_DoorAnim.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Duviri_ArchivistEmpathyChallenges.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Duviri_ArenaLobby.lua_B": [
+"FAIL",
+87
+],
+"Lotus_Scripts_Duviri_DuviriMissions.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Duviri_DuviriMissionSetup.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Duviri_DuviriNpcCower.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Duviri_DuviriPortal.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Duviri_DuviriPortalEffects.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Duviri_Encounters_CaveEncounter.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Duviri_Encounters_CombatTarget.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Duviri_Encounters_Discs.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Duviri_Encounters_DrifterPuzzleEncounter.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriCombatTrappedChestEncounter.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriDefendPrisonerEncounter.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriGlypthPuzzles.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriKomiGame.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriKullervoBossEncounter.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriPatrol.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriPortalEncounter.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Duviri_Encounters_DuviriSentry.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Duviri_Encounters_GhostMirrorEncounter.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Duviri_Encounters_MazePowerLockEncounter.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Encounters_MITWAmbush.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Duviri_Encounters_MountedDaxMinibossEncounter.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Duviri_Encounters_NpcActivityBaseEncounter.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Scripts_Duviri_Encounters_OwlRecon.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Duviri_Encounters_PowerGridEncounter.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Duviri_Encounters_Shepherding.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Encounters_ShrineAssembleEncounter.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Encounters_SideActivitiesCheat.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Duviri_Encounters_Thicket.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Duviri_Encounters_TownExecutionEncounter.lua_B": [
+"FAIL",
+41
+],
+"Lotus_Scripts_Duviri_Gameplay_DuviriChest.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Duviri_Gameplay_DuviriChestSpawn.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Duviri_Gateways.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Duviri_LotusHandCompass.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Duviri_MawFishing.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Duviri_MoodController.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_DuviriMITW_DualOctopedeBoss.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_DuviriMITW_OctopedeSummonEncounter.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_DuviriMITW_OraxiaBossEncounter.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Effects_ArmorChanneling.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Effects_BaruukEphemera.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Effects_CreditPickups.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Effects_EmoteEffects.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Effects_EphemeraPrimeA.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Effects_HelminthEffects.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Effects_LavosDeluxeEphemeraSnakes.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Effects_LevelWideFog.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Effects_LightFadeTargeted.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Effects_NokkoEphemeraMushrooms.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Effects_Polarity.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Effects_PrimeScarfV.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Effects_ProjectionMasking.lua_B": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Effects_RailJackEffects.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Effects_RailJackEnemyEffects.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Effects_RandomRaycastBeamSpawn.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Effects_RandomSleepAndJitter.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Effects_SabotageEffects.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Effects_SabotageOrokinEffects.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Effects_ScenarioBeaconEffects.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Effects_SentientRegrowth.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Effects_SentientRevealCinematics.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Effects_SkyboxEffects.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Effects_SpeedballEffects.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Effects_SyndicateHubEffects.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Effects_TauQuestEffects.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Effects_TC19GrnGalleonListing.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Effects_TransmissionEffects.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Effects_VoidEclipsePocketTrigger.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Effects_VoidStorm.lua_B": [
+"FAIL",
+34
+],
+"Lotus_Scripts_Effects_WallLatch.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Eidolon_BirdOfPrey.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Eidolon_Bomber.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Eidolon_BomberAbilities.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Eidolon_Dropship.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Eidolon_EidolonMissions.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Eidolon_EidolonMP.lua_B": [
+"FAIL",
+133
+],
+"Lotus_Scripts_Eidolon_EidolonResourceContainers.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Eidolon_Encounters_AnimalSpawns.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Eidolon_Encounters_BaseGeoAnimalEncounter.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Eidolon_Encounters_ConservationEncounter2.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicAssassinate.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicExterminate.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicGhoulExterminate.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicGhoulHunt.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicHijack.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Eidolon_Encounters_DynamicRescue.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Eidolon_Encounters_EidolonHunt.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Eidolon_Encounters_EventDefendMixer.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Eidolon_Encounters_EventInfestedPoison.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Eidolon_Encounters_GlassFrameQuest.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Eidolon_Encounters_GrineerCamp.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Eidolon_Encounters_GrineerGhoulGraveyard.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Eidolon_Encounters_InfestedSpawnPod.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Eidolon_Encounters_Patrol.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Eidolon_Encounters_ResourceCaches.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Eidolon_Encounters_SentientCondrixSpawner.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Eidolon_OstronDialog.lua_B": [
+"FAIL",
+96
+],
+"Lotus_Scripts_Events_CaptureRelayEventEnemy.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Events_CephalonMaze.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Events_EventVendor.lua_B": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Events_EventVendorPlatformDisplay.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Events_HalloweenSalvage.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Events_InfestedPlainsEvent.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Events_MechSurvivalEvent.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Events_NidusReleaseAlchemyChair.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Events_NW3Investigation.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Events_RelayVendorEntity.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Events_SentientScenario.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ExtractionTimer.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Flappy.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_FocusBoost.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_FreeAbilities_FreeAbilitiesCleaner.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Fx.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Gameplay_AbilityLockout.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Gameplay_Complications_Juggernauts.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_Complications_LanternInTheDark.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_Complications_ThinBoundary.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Gameplay_Complications_ToxinInoculation.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_Complications_VolatileAtmosphere.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Gameplay_ElementalLayerSetup.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Gameplay_EntityScaling.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Gameplay_EntratiDoppelgangerSpawner.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Gameplay_Fishing.lua_B": [
+"FAIL",
+69
+],
+"Lotus_Scripts_Gameplay_FishingSpearProjectile.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Gameplay_GasCityAudioLogPuzzle.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Gameplay_GenericInfestedSpawnPods.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Gameplay_GhoulSpawner.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Gameplay_HeroicMomentManager.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Gameplay_HexConquestReviveMechanic.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Gameplay_NoVehicles.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Gameplay_ObjectivePickupScripts.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Gameplay_ShowImpactMessageLocal.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Gameplay_UniversalMissionHub.lua_B": [
+"FAIL",
+50
+],
+"Lotus_Scripts_Gameplay_VoidSink.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Gameplay_VoidTear.lua_B": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Gameplay_ZarimanHandleVoidAngelSpawns.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_GasVariableLaserGrid.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Generators_BandNameGenerator.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Generators_CorpusNameTables.lua_B": [
+"FAIL",
+0
+],
+"Lotus_Scripts_Generators_GenericMarkovName.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Generators_GrineerNameTables.lua_B": [
+"FAIL",
+0
+],
+"Lotus_Scripts_Generators_MarkovNameGenerator.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Generators_TitleNameGenerator.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_GenericSpawnSentinel.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_GhostTower.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_GrineerDeathSquad.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_GrineerDeathSquadRaid.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_GrineerGameplay.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_GrineerTrap.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_GrnFortressTraps.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_GrnHarpoonGrapple.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_HelminthTransmissions.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_HubNpc.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_HudTrackers.lua_B": [
+"FAIL",
+273
+],
+"Lotus_Scripts_IceZone.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_IdleBarkMonitor.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_InfestedMicroplanet_DeimosDayNight.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_ChamberDoorKeyEncounter.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicEscort.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicExcavation.lua_B": [
+"FAIL",
+66
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicExterminate.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicFluidSac.lua_B": [
+"FAIL",
+62
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicGrineerSurvivors.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicPurify.lua_B": [
+"FAIL",
+36
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicRecipe.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_DynamicSurvivors.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_FaceHuggerEncounter.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_InfestedMistEncounter.lua_B": [
+"FAIL",
+43
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_InfestedPodReinforcements.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_InfestedMicroplanet_Encounters_KeyPiecesEncounter.lua_B": [
+"FAIL",
+50
+],
+"Lotus_Scripts_InfestedMicroplanet_WyrmPuddle.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_InfestedMicroplanetCrowdControl.lua_B": [
+"FAIL",
+44
+],
+"Lotus_Scripts_InfestedMicroplanetPitBoss.lua_B": [
+"FAIL",
+33
+],
+"Lotus_Scripts_InfQuantaGrapple.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Intel.lua_B": [
+"FAIL",
+58
+],
+"Lotus_Scripts_JackalArena.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageB.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageC.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageCPOI.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageE.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_AshMissionStageEPOI.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_AshBossAvatarScript.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshLib.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshNinjaStorm.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshSmokeScreen.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Ash_JS2MAshTeleportAttack.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_Garuda_GarudaBossArena.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_GarudaBossBloodAltar.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_Enemies_JS2MInfestedJetpackSuicideAbility.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_GarudaMissionStageC.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_GarudaMissionStageCPOI.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_GarudaMissionStageE.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_GarudaMissionStageEPOI.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_MissionEncounters_GS2Space.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_MissionObjectiveManager.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_JadeShadowsPart2Mission_RailjackTransitionHelper.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_JamNearbyEnemies.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_KahlMissions_KahlChallenges.lua_B": [
+"FAIL",
+47
+],
+"Lotus_Scripts_KahlMissions_KahlMissionMurexRescue.lua_B": [
+"FAIL",
+79
+],
+"Lotus_Scripts_KahlMissions_KahlMissionThumper.lua_B": [
+"FAIL",
+40
+],
+"Lotus_Scripts_KahlMissions_KahlMissionVeilFactory.lua_B": [
+"FAIL",
+50
+],
+"Lotus_Scripts_KahlMissions_KahlOrders.lua_B": [
+"FAIL",
+46
+],
+"Lotus_Scripts_KelaInWorldTransmissions.lua_B": [
+"PASS",
+15
+],
+"Lotus_Scripts_KuvaLich_KuvaEximus.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_KuvaLich_KuvaLichFinisher.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_KuvaPath_AntiVoidSurgeEvent.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_KuvaPath_KuvaKeysLib.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Scripts_KuvaPath_KuvaPath.lua_B": [
+"FAIL",
+60
+],
+"Lotus_Scripts_KuvaPath_KuvaPathAcquire.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_KuvaPath_KuvaPathBackgroundHub.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_KuvaPath_KuvaPathLauncher.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_KuvaPath_RegenCrystalEvent.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_KuvaPath_SignalBridgeEvent.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_LevelIncreasingFissures.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Levels_1999Defense.lua_B": [
+"FAIL",
+43
+],
+"Lotus_Scripts_Levels_GasCityFireJets.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Levels_GasCityLaserDoor.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Levels_OrokinGoldenMawNavChecker.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Levels_RandomObjectTimer.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Levels_ToggleEntities.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Libs_AbilitiesLib.lua_B": [
+"FAIL",
+136
+],
+"Lotus_Scripts_Libs_AudioLib.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Libs_ChallengeLib.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Libs_CloningLib.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Libs_CommonGamemodeFunctions.lua_B": [
+"FAIL",
+106
+],
+"Lotus_Scripts_Libs_ConquestLib.lua_B": [
+"FAIL",
+42
+],
+"Lotus_Scripts_Libs_DuviriActivityLib.lua_B": [
+"FAIL",
+115
+],
+"Lotus_Scripts_Libs_EasingLib.lua_B": [
+"FAIL",
+60
+],
+"Lotus_Scripts_Libs_ElementalLayers.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Libs_EncounterLib.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Libs_EndlessSpawnLib.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Libs_FishingLib.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Libs_GearLib.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Libs_InkblotUtilsLib.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Libs_ItemLib.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Libs_LandscapeLib.lua_B": [
+"FAIL",
+54
+],
+"Lotus_Scripts_Libs_ObjectiveText.lua_B": [
+"FAIL",
+79
+],
+"Lotus_Scripts_Libs_OcclusionLib.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Libs_PlayerShipUtilities.lua_B": [
+"FAIL",
+65
+],
+"Lotus_Scripts_Libs_QuestMissionLib.lua_B": [
+"FAIL",
+82
+],
+"Lotus_Scripts_Libs_RailjackObjectiveUI.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Libs_RailjackUtilities.lua_B": [
+"FAIL",
+93
+],
+"Lotus_Scripts_Libs_ReplayLib.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Libs_SiriusOrionUtilsLib.lua_B": [
+"FAIL",
+61
+],
+"Lotus_Scripts_Libs_SquadLib.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Libs_StatsLib.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Libs_StoryLib.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Libs_TableLib.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Libs_TransmissionSet.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_LoopDefend.lua_B": [
+"FAIL",
+61
+],
+"Lotus_Scripts_LotusDuelObject.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_LotusDuviriGameRules.lua_B": [
+"FAIL",
+59
+],
+"Lotus_Scripts_LotusGameRules.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Scripts_LotusPveDMGameRules.lua_B": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Minigames_GoLib.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Scripts_MissilePlatformDamageResponse.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_MissionScripts_JackalBossStunControl.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_MissionScripts_NarmerSortieArchonMission.lua_B": [
+"FAIL",
+58
+],
+"Lotus_Scripts_MissionScripts_VorReworkArena.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_MissionWrinkles.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_MobileDefense.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Modes_ArchWingMissionScript.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Modes_ArchwingPursuitMode.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Modes_AscensionMission.lua_B": [
+"FAIL",
+85
+],
+"Lotus_Scripts_Modes_AssassinateTankMission.lua_B": [
+"FAIL",
+93
+],
+"Lotus_Scripts_Modes_ColonistDoorDefenseMission.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Modes_ColonistRescueMission.lua_B": [
+"FAIL",
+55
+],
+"Lotus_Scripts_Modes_ComplicationsMgr_ComplicationsData.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Modes_EntratiBurdenAuras.lua_B": [
+"FAIL",
+41
+],
+"Lotus_Scripts_Modes_EntratiLabAlchemy.lua_B": [
+"FAIL",
+51
+],
+"Lotus_Scripts_Modes_EntratiSwarmMission.lua_B": [
+"FAIL",
+55
+],
+"Lotus_Scripts_Modes_EntratiSwarmScannerPickup.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Modes_EntratiVoidVaults.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Scripts_Modes_EscalationExtermination.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Modes_ExcavationMission.lua_B": [
+"FAIL",
+45
+],
+"Lotus_Scripts_Modes_GasCitySabotage.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Modes_HiveMission.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Modes_InfestedCapture.lua_B": [
+"FAIL",
+49
+],
+"Lotus_Scripts_Modes_JunctionMission.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Modes_MechSurvivalMission.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Modes_MeltdownMode.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Modes_OpLinkFragmentGroundTeam.lua_B": [
+"FAIL",
+44
+],
+"Lotus_Scripts_Modes_Purgatory.lua_B": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Modes_PveDeathMatch.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Modes_SentientArtifactMission.lua_B": [
+"FAIL",
+90
+],
+"Lotus_Scripts_Modes_SentientArtifactMissionEnvironment.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Modes_SentientCapture.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Modes_ShadowGraphModeUtility.lua_B": [
+"FAIL",
+114
+],
+"Lotus_Scripts_Modes_SurvivalMission.lua_B": [
+"FAIL",
+60
+],
+"Lotus_Scripts_Modes_TerritoryMission.lua_B": [
+"FAIL",
+45
+],
+"Lotus_Scripts_Modes_WeaveMutalistBossMission.lua_B": [
+"FAIL",
+41
+],
+"Lotus_Scripts_Modes_WF99PvPvEMission.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Modes_WF99PvPvESoloAI.lua_B": [
+"PASS",
+45
+],
+"Lotus_Scripts_Modes_WF99PvPvEStoreManager.lua_B": [
+"FAIL",
+54
+],
+"Lotus_Scripts_Modes_ZarimanCorruptionFractures.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Modes_ZarimanCorruptionMission.lua_B": [
+"FAIL",
+81
+],
+"Lotus_Scripts_Modes_ZarimanSurvivalMission.lua_B": [
+"FAIL",
+96
+],
+"Lotus_Scripts_Modes_ZarimanSurvivalWraithSpawner.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Mods_BattacorAltFire.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Mods_OnSelectiveSlotEquipped.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Mods_ParisHealOnStatus.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Mods_StrengthForOneCast.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_ModularArloAvatarRandomizer.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_ModularCorpusAvatarRandomizer.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_MultiDefend.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Mutators.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_NaniteCloud.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_NecramechSummonConsole.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Nemesis_NemesisGenerator.lua_B": [
+"FAIL",
+73
+],
+"Lotus_Scripts_Nemesis_NemesisMission.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Nemesis_SetupHenchman.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Nemesis_SetupNemesis.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Nightwave_GlassMakerBoss.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Scripts_NPC_AmalgamNullifyDome.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_NPC_AristocratHunterMonitor.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_NPC_CreateFabricator.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_NPC_J3GolemSpace.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_NPC_NokkoBaby.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_NPC_NullifyDome.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_NPC_NullifySound.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_NPC_OrdisShip.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_NPC_PlayerDoppelgangerAbility.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_NPC_RareSpawnScript.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_NPC_TeshinShadowRemnants.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_NPC_TreasureBoxDespawn.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_OperatorGameplay.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_OrokinGlyphScript.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_OrokinTrialPower.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_PaintBot.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_PlayerShip.lua_B": [
+"FAIL",
+43
+],
+"Lotus_Scripts_PlayerShipMachineState.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Precipitation.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_ProceduralLevel.lua_B": [
+"FAIL",
+63
+],
+"Lotus_Scripts_PveCTFTransmissions.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_PveTDMTransmissions.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_PVP_DamageTracking.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_PVP_FightingGameRules.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_PVP_PVPHelper.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_PVP_PVPTeamDeathMatch.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_QuestMissionSetup.lua_B": [
+"FAIL",
+52
+],
+"Lotus_Scripts_Quests_1999_ConvoyMission.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Quests_1999_ConvoyScript.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Quests_1999_HubMissions.lua_B": [
+"FAIL",
+53
+],
+"Lotus_Scripts_Quests_1999_LasriaStreets.lua_B": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Quests_1999_PartyOfALifeTime.lua_B": [
+"FAIL",
+35
+],
+"Lotus_Scripts_Quests_1999_PartyPals.lua_B": [
+"FAIL",
+60
+],
+"Lotus_Scripts_Quests_1999_Prologue_LotusEaterMission.lua_B": [
+"FAIL",
+66
+],
+"Lotus_Scripts_Quests_1999_ZooMission.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Quests_Apostasy.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Quests_BardQuest.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Quests_BardQuestFinalFight.lua_B": [
+"FAIL",
+48
+],
+"Lotus_Scripts_Quests_Chimera.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_ChimeraBallas.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_ChimeraChase.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_ChimeraPlayerShip.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_DuviriQuest_AngryEncounter.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Quests_DuviriQuest_UndercroftEncounter.lua_B": [
+"FAIL",
+34
+],
+"Lotus_Scripts_Quests_EntratiLab_BackToTheFuture.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Quests_EntratiLab_DefendLab.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Quests_EntratiLab_EntratiQuestCalmLikeABomb.lua_B": [
+"FAIL",
+56
+],
+"Lotus_Scripts_Quests_EntratiLab_EntratiQuestNecraliskIntro.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Quests_EntratiLab_EntratiQuestSearchForLoid.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Quests_EntratiLab_EntratiQuestUtil.lua_B": [
+"FAIL",
+66
+],
+"Lotus_Scripts_Quests_EntratiLab_ExamineAnimals.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Quests_EntratiLab_HubBlairWitch.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_EntratiLab_HubFindVoice.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_EntratiLab_HubFulfillSequence.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Quests_EntratiLab_NecramechControl.lua_B": [
+"FAIL",
+46
+],
+"Lotus_Scripts_Quests_EntratiLab_SandSpawner.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Quests_GlassQuest.lua_B": [
+"FAIL",
+51
+],
+"Lotus_Scripts_Quests_InfestedMicroPlanetM4.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Quests_InfestedMicroplanetM6.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_InfestedMicroplanetQuest.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Quests_InfestedMicroplanetQuestTown.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Quests_JadeShadow_JadeShadowsStage4.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Quests_JadeShadow_JadeShadowsStage6.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Quests_JadeShadow_JadeShadowsStage7.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_GarudaSpy_JadeShadowsPart2VenaBossBloodAltar.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2QuestKeyChain.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2Stage12FamilyUnited.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2Stage4StalkingTheUnknown.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2StageInterludes.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2StageSidekicksAshCapture.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2StageSidekicksGarudaSpy.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Quests_JadeShadowsPart2Quest_JadeShadowsPart2Util.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Quests_JordasPodTestMission.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Quests_KubrowQuestMissionTwo.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Quests_MawBugsBunny.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Quests_ModQuest_ModQuestForest.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Quests_ModQuest_ModQuestTeshinDojo.lua_B": [
+"FAIL",
+54
+],
+"Lotus_Scripts_Quests_ModQuest_TheOldWays.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Quests_NewWar_NewWarIntro.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Quests_NewWarQuest_MedusaGates.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarLotusStruggle.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart1KahlMission.lua_B": [
+"FAIL",
+43
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart1TeshinMission.lua_B": [
+"FAIL",
+93
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart1VesoBetrayerMission.lua_B": [
+"FAIL",
+62
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart2LotusAttacks.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart2ZarimanHighschoolMusical.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart2ZarimanLockdown.lua_B": [
+"FAIL",
+41
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3AlmostSevenSamurai.lua_B": [
+"FAIL",
+58
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3Beanstalks.lua_B": [
+"FAIL",
+61
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3Epilogue.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3Erra.lua_B": [
+"FAIL",
+35
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3Liset.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3SunKiller.lua_B": [
+"PASS",
+31
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarPart3TableForTwo.lua_B": [
+"FAIL",
+53
+],
+"Lotus_Scripts_Quests_NewWarQuest_NewWarQuestKeychain.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Scripts_Quests_NewWarQuest_ZarimanStudentCustomization.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Quests_OrokinMoonQuest.lua_B": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Quests_PriestQuestFight.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Quests_ProteaQuestLib.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Quests_ProteaQuestM2.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Quests_QueensFight.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Quests_RevenantMask.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Quests_RevenantMaskCanUseShrine.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Quests_RevenantMaskTown.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Quests_RevenantQuest.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Quests_SacrificeQuest.lua_B": [
+"FAIL",
+42
+],
+"Lotus_Scripts_Quests_SacrificeQuestChaseUmbra.lua_B": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Quests_SacrificeQuestMemoryGame.lua_B": [
+"FAIL",
+35
+],
+"Lotus_Scripts_Quests_SacrificeQuestPlayerShip.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Quests_SolarisQuestBombEncounter.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Quests_SolarisQuestMission.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Quests_StreamShipQuestLayers.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Quests_TauPrequel_ADISPlayFightScript.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Quests_TauPrequel_BattleStationMission.lua_B": [
+"FAIL",
+36
+],
+"Lotus_Scripts_Quests_TauPrequel_EdensUltimatum.lua_B": [
+"FAIL",
+56
+],
+"Lotus_Scripts_Quests_TauPrequel_EscortMission.lua_B": [
+"FAIL",
+66
+],
+"Lotus_Scripts_Quests_TauPrequel_FuneralForAFriend.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Quests_TauPrequel_InterrogationMission.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Quests_TauPrequel_KillBetrayerMission.lua_B": [
+"FAIL",
+36
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceAdisUtil.lua_B": [
+"FAIL",
+48
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceBackToTheFront.lua_B": [
+"FAIL",
+61
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceCinematics.lua_B": [
+"FAIL",
+32
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceGiantKiller.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_TauPrequel_OldPeaceSpawnerUtil.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Quests_TauPrequel_SomaticBearer.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Quests_TauPrequel_SomaticBearerEffects.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Quests_TauPrequel_TauronAcademy.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Quests_TauPrequel_TooFarMission.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Quests_TauPrologue_VesselMission.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Quests_TitaniaQuest.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Quests_WarWithinQuest.lua_B": [
+"FAIL",
+54
+],
+"Lotus_Scripts_Quests_WraitheQuestM3.lua_B": [
+"FAIL",
+39
+],
+"Lotus_Scripts_Quests_WraithQuestM1.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_Quests_WraithQuestM2.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Quests_YareliQuest.lua_B": [
+"FAIL",
+36
+],
+"Lotus_Scripts_Quests_ZarimanQuest_ZarimanQuest.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_RadioChatter.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Raids_GolemTrial_Purifier.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Raids_J3GolemRaid_J3Golem.lua_B": [
+"FAIL",
+24
+],
+"Lotus_Scripts_RandomHangingBlocks.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Restoratives_AnimalLure.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Restoratives_FireWorks.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Restoratives_HealAvatar.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Restoratives_HeavyWeaponSummon.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Restoratives_HuntingGear.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Restoratives_LibraryScanner.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Scripts_Restoratives_LisetAirSupport.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Restoratives_LisetAirSupportSwitches.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Restoratives_OpenArchwingSummon.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Restoratives_Scanner.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Restoratives_ScenarioBeacon.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Restoratives_SpawnEntratiTech.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Restoratives_SpearFishing.lua_B": [
+"FAIL",
+45
+],
+"Lotus_Scripts_RiftStatusFromCreator.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Sabotage.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_SabotageForest.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_SabotageOrokin.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Scripts_Sandstorm.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_SeedEmittingPlant.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Sentient_SentientArena.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Sentient_SentientBeacon.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Sentient_SentientLevel.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Sentient_SentientMutators.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Sigil.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_SigilCustom.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_SkateSpawner.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Space.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_SpaceFomorianStrike.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_SpaceMineElectricalField.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_SpacePrefabs.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_SpawnSpectres.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_SpookyEyeball.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_SquadInSky.lua_B": [
+"FAIL",
+30
+],
+"Lotus_Scripts_Stalker.lua_B": [
+"FAIL",
+60
+],
+"Lotus_Scripts_StalkerSuit.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Swim.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Syndicates_CheckSyndicateRank.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Syndicates_SyndicatePickupImpactMsg.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Syndicates_SyndicatePowers.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Scripts_Tau_CannonSabotageObjective.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Tau_CasesObjective.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Tau_ConvoyController.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Tau_ConvoyObjective.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Scripts_Tau_DescendiaUpgrades_StealEximusAura.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Tau_DirectionalArtilleryObjective.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Scripts_Tau_EggMine.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_Tau_HiddenSabotageObjective.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Scripts_Tau_SabotageObjective.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Tau_ShuttleDefenseMission.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Tau_SquadObjective.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Scripts_Tau_StealthRescueObjective.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Tau_SupplyBeaconObjective.lua_B": [
+"FAIL",
+35
+],
+"Lotus_Scripts_Tau_TauBattleMission.lua_B": [
+"FAIL",
+139
+],
+"Lotus_Scripts_Tau_TauDebugCmd.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_Tau_TauDropshipAvatar.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Tau_TauLib.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Tau_WaterWalking.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_TauPrequel_TauPrequelDestructibles.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_TeleportAndFade.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Scripts_TeleportPlayer.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_TennoHubHangar.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_TransitionalEvents.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_TriggerAlarm.lua_B": [
+"FAIL",
+40
+],
+"Lotus_Scripts_Tutorials_NewPlayerTutorial.lua_B": [
+"FAIL",
+71
+],
+"Lotus_Scripts_Tutorials_NewPlayerTutorialFoundry.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Tutorials_NewPlayerTutorialRemaster.lua_B": [
+"FAIL",
+81
+],
+"Lotus_Scripts_Tutorials_NewPlayerWeaponSetup.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Vault.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_VayHekLandslide.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_Venus_Encounters_CorpusAssassinate.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Scripts_Venus_Encounters_CorpusBase.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Scripts_Venus_Encounters_CorpusSpy.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Scripts_Venus_Encounters_CorpusTurretTower.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_Venus_Encounters_DynamicAmbush.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Venus_Encounters_DynamicDroneDefense.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Venus_Encounters_DynamicExcavation.lua_B": [
+"FAIL",
+38
+],
+"Lotus_Scripts_Venus_Encounters_DynamicRace.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Scripts_Venus_Encounters_DynamicResourceCapture.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Venus_Encounters_SolarisCapture.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Venus_Encounters_VehicleReinforcements.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_Venus_EncounterScheduler.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Venus_HeatFissure.lua_B": [
+"FAIL",
+37
+],
+"Lotus_Scripts_Venus_Heists_CamperHeistCapture.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Venus_Heists_CamperHeistOrbFight.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_Venus_Heists_CamperHeistShields.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Scripts_Venus_Heists_StealingTech.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Venus_Hub_FortunaHubNpcs.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_Venus_Hub_SolarisEmissives.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Venus_Hub_VentKidsBand.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_Assassinate.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_DroneDefense.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_FindNokkoBabies.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_MushroomHunting.lua_B": [
+"FAIL",
+28
+],
+"Lotus_Scripts_Venus_NokkoColony_Encounters_Rescue.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Scripts_Venus_NokkoColony_MushroomPatchMarker.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_Venus_NokkoColony_NokkoLib.lua_B": [
+"FAIL",
+25
+],
+"Lotus_Scripts_Venus_NokkoColony_NokkoMushroomEffectsLib.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Scripts_WaterDroneProximityMine.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_WaveDefend.lua_B": [
+"FAIL",
+59
+],
+"Lotus_Scripts_WeaponAttachments_ApplyEmissiveFromElements.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_WeaponAttachments_BaruukDeluxeIIMaceAndShield.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_WeaponAttachments_BountyHunterBadge.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_WeaponAttachments_CorpusBow.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_WeaponAttachments_CrpBfg.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Scripts_WeaponAttachments_CrpTonfa.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Scripts_WeaponAttachments_DeimosSupporterSkin.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_WeaponAttachments_ElevatingGlow.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_WeaponAttachments_EvolvingArmour.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Scripts_WeaponAttachments_GrineerWhip.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_WeaponAttachments_GrnHeatGun.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_WeaponAttachments_InfBoomerangPods.lua_B": [
+"PASS",
+4
+],
+"Lotus_Scripts_WeaponAttachments_InfCrpShockSwarm.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Scripts_WeaponAttachments_LasrianNoxWeapon.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_WeaponAttachments_LoopingFireAnimation.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Scripts_WeaponAttachments_NWOrokinSword.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Scripts_WeaponAttachments_SMSydon.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Scripts_WeaponAttachments_TnDagathBladeWhip.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Scripts_WeaponAttachments_TnHeavyShotgun.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Scripts_Zariman_Apartment.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Scripts_Zariman_Encounters_DynamicAssassinateEndless.lua_B": [
+"FAIL",
+100
+],
+"Lotus_Scripts_Zariman_Gardening.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Scripts_Zariman_TeleportToElevator.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Types_Challenges_FullZarimanSet.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Types_Enemies_AdvancedSpawners_AmalgamSpawnScript.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_AdvancedSpawners_BursaSpawnScript.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Enemies_AdvancedSpawners_ColonistRescueSyndicateAssassins.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_AdvancedSpawners_CorpusModularSpawnerScript.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_AdvancedSpawners_ErrantSpecterInvasion.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Types_Enemies_AdvancedSpawners_JuggernautSpawnScript.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_AdvancedSpawners_ManicGrineerSpawnScript.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_AdvancedSpawners_MobDefGenericMinibossSpawnScript.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Types_Enemies_AdvancedSpawners_SentientScoutScanEventSpawnScript.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Types_Enemies_AdvancedSpawners_SentientTrooperSpawnScript.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Types_Enemies_AdvancedSpawners_SurvivalGenericMinibossSpawnScript.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_AdvancedSpawners_WolfGangsterSpawnScript.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Corpus_Drones_Vip_RaptorTwo.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Corpus_Vip_Ambulas_AmbulasOrbitalLaser.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Types_Enemies_Duviri_Dragon_Flying_DragonBoss.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Types_Enemies_Duviri_Dragon_Flying_DragonTransference.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Duviri_Dragon_Ground_DragonGroundBoss.lua_B": [
+"FAIL",
+40
+],
+"Lotus_Types_Enemies_Duviri_Jackal_DuviriJackalArenaScript.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Duviri_Jackal_DuviriJackalBossStunControl.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_Duviri_PaxDuviricus_PaxDuviricusDungeonEncounterAvatarScript.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_Enhancements_Nightwave_GlassMakerInvulnerability.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_Entrati_Doppelganger_EntratiDoppelgangerAvatarScript.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Types_Enemies_Grineer_Eidolon_Vip_TeralystAvatarScript.lua_B": [
+"FAIL",
+19
+],
+"Lotus_Types_Enemies_Grineer_Eidolon_VomvalystLure_AbsorbVomEnergyAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_SpragBossArena.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_VenkraBossArena.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Types_Enemies_Grineer_Veilbreaker_Scripts_VenkraSniperTrack.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Grineer_Vip_VorTwo_VorInTheVoid.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Infested_AiWeek_Emissary_ShellAncientGoo.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Infested_SpecialEvents_ArloZealots.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_Infested_Vip_GolemMinionSpawning.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Infested_Vip_J3Golem_GolemAssassinate.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Infested_Vip_J3Golem_SpaceGolem.lua_B": [
+"FAIL",
+38
+],
+"Lotus_Types_Enemies_InfestedLich_Base_InfestedLichPreDeath.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Types_Enemies_InfestedLich_InfestedLichBoss.lua_B": [
+"FAIL",
+83
+],
+"Lotus_Types_Enemies_InfestedLich_InfestedLichBossStageSequence.lua_B": [
+"FAIL",
+133
+],
+"Lotus_Types_Enemies_ManInTheWall_NecramechRanged_NecramechRangedArmDestruction.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_ManInTheWall_Octopede_MITWOctopedeBoss.lua_B": [
+"FAIL",
+46
+],
+"Lotus_Types_Enemies_Narmer_NarmerOstron.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Narmer_NarmerVeil.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_NewWar_Archons_ArchonAvatarScript.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Types_Enemies_Orokin_Entrati_EntratiTech_NechroTech_NechroTechAvatarScript.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Sentients_Scripts_SentientPassiveImmunity.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Types_Enemies_SpaceBattles_Corpus_Ships_CorpusFighterScripts.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_DactolystArenaScript.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_DactolystHardModeArenaScript.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_DactolystLaserWallAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_DactolystSummonAdds.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_LiminalBossArenaScript.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Types_Enemies_Tau_GuiltSentient_SentientGuiltBossLaserHandsAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_Tau_Monolyst_ChoralystAvatar.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Types_Enemies_Tau_Monolyst_SentientArenaScript.lua_B": [
+"FAIL",
+31
+],
+"Lotus_Types_Enemies_Tau_Monolyst_SentientGiantAvatar.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Enemies_Tau_Primes_Ash_AshPrimeLib.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Types_Enemies_Tau_Primes_Ash_NinjaStorm.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Types_Enemies_Tau_Primes_Ash_SmokeScreen.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Tau_Primes_Ash_TeleportAttack.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Tau_Primes_Caliban_SentientWhirlwind.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Types_Enemies_Tau_Primes_Ember_EmberBossInferno.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Tau_Primes_Mesa_PeaceMaker.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Types_Enemies_Tau_Primes_PrimeWarframeArenaScript.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Types_Enemies_Tau_Primes_Trinity_TrinityBossBlessingAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Tau_Primes_Trinity_TrinityBossLinkAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Types_Enemies_Tau_Primes_Trinity_TrinityBossWellOfLifeAbility.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_LightningStrikes.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_OverLoad.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_Shield.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_Shock.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_Speed.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Tau_Primes_Volt_SpeedEximus.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Enemies_Tau_Uriel_UrielBossBrimstoneAbility.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Types_Enemies_Tau_Uriel_UrielBossEncounter.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Types_Enemies_TennoReplicants_OraxiaEnemy_OraxiaBossUtility.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Types_Enemies_TennoReplicants_OraxiaEnemy_OraxiaEnemyArenaScript.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Types_Enemies_TennoReplicants_OraxiaEnemy_OraxiaEnemySpiderlings.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Enemies_WF1999Lasrian_LasrianTank_LasrianTankArenaScript.lua_B": [
+"FAIL",
+42
+],
+"Lotus_Types_Enemies_WF1999Lasrian_LasrianTank_LasrianTankAvatarScript.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Types_Enemies_WF1999Lasrian_LasrianTank_LasrianTankGooScript.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Types_Enemies_Zariman_VoidAngel.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Types_Friendly_Pets_CatbrowPetBehaviors_CatbrowDistractAbility.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Friendly_Pets_CatbrowPetBehaviors_CatbrowLuckAbility.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Types_Friendly_Pets_CatbrowPetBehaviors_CatbrowShredAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedCatbrowEvasionBuff.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedCatbrowGoreToss.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedCatbrowVampireShield.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedPredatorFinisherSpores.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_InfestedPredatorMaggotSummoner.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Types_Friendly_Pets_CreaturePets_CreaturePrecepts_SpawnSpore.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowChargerStrainAbility.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowFearAbility.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowFerocityAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowLootAbility.lua_B": [
+"FAIL",
+21
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowMarkMechaAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowSavageryAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_Pets_KubrowPetBehaviors_KubrowVipChaseAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Friendly_Pets_MoaPets_MoaPetComponents_MoaStasisField.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Types_Friendly_PlayerControllable_Abilities_TeshinStanceChange.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Friendly_PlayerControllable_Scripts_DrifterGrappleAbility.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Types_Friendly_PlayerControllable_Scripts_DrifterHorseAbility.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Friendly_PlayerControllable_Scripts_DrifterRadarAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Friendly_PlayerControllable_Scripts_VesoCommandMoaAbility.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Types_Friendly_PlayerControllable_Weapons_DuviriWeapons_Scripts_DuviriNikanaSlamsScript.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Friendly_PlayerControllable_Weapons_DuviriWeapons_Scripts_DuviriWeaponSlamUtil.lua_B": [
+"FAIL",
+27
+],
+"Lotus_Types_Game_CrewShip_Ships_Abilities_CrewShipEMPAbility.lua_B": [
+"FAIL",
+13
+],
+"Lotus_Types_Gameplay_1999Wf_HexConquest_MissionConditions_ConquestHostileOvergrowth.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Gameplay_1999Wf_HexConquest_MissionConditions_PvPvESpilloverAuraScript.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Types_Gameplay_DevilTower_LiteGameModes_CoHDestroyTargets.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Types_Gameplay_DevilTower_LiteGameModes_CoHExcavationLite.lua_B": [
+"FAIL",
+23
+],
+"Lotus_Types_Gameplay_DevilTower_LiteGameModes_CoHHiveLite.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Gameplay_DevilTower_LiteGameModes_CoHShrineDefenseLite.lua_B": [
+"FAIL",
+76
+],
+"Lotus_Types_Gameplay_DevilTower_Objects_CoHUFO.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Types_Gameplay_DevilTower_Objects_Sunlight.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Types_Gameplay_DevilTower_Upgrades_HarrowHeatInBubbles.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Types_Gameplay_DevilTower_Upgrades_WispBreachSurge.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Types_Gameplay_Events_KuvaIceBlade_NarinBlessing.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Types_Gameplay_GasCity_Ropalolyst_GasCityRopalolyst.lua_B": [
+"FAIL",
+33
+],
+"Lotus_Types_NeutralCreatures_ErsatzHorse_ErsatzWings.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Player_ErisMortemGiantVessel_GiantVessel.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHInterception.lua_B": [
+"FAIL",
+20
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHLootRoom.lua_B": [
+"FAIL",
+26
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHMission.lua_B": [
+"FAIL",
+85
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHProtoframe.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Types_Scripts_Tau_CoH_CohProtoframeDialogue.lua_B": [
+"FAIL",
+17
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHUnique.lua_B": [
+"FAIL",
+22
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHUpgrades.lua_B": [
+"FAIL",
+29
+],
+"Lotus_Types_Scripts_Tau_CoH_CoHUrielFightMonitor.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHFieryTrailAura.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHHeavyWeaponsOnly.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHNarmerPhobiaAura.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHRaptorTwo.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHSpicyKnife.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHSummonHorse.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHSummonVehicle.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Types_Scripts_Tau_CoH_Complications_CoHUnseenFoes.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Types_Scripts_Tau_GrappleLookTriggerScript.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Types_Sentinels_SentinelAbilities_Bait.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Sentinels_SentinelAbilities_BondedExaltation.lua_B": [
+"FAIL",
+14
+],
+"Lotus_Types_Sentinels_SentinelAbilities_CodexScannerAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Sentinels_SentinelAbilities_Looter.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Sentinels_SentinelAbilities_PlantScannerAbility.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Types_Sentinels_SentinelAbilities_ProcAbsorb.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Sentinels_SentinelAbilities_RevengeAbility.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Types_Sentinels_SentinelAbilities_SentinelRevivePlayer.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Sentinels_SentinelAbilities_SwiftDethAbility.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Sentinels_SentinelAbilities_SynthDeconstruct.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Types_Sentinels_SentinelAbilities_VoidClone.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Types_Sentinels_SentinelAbilities_WarframeSuckAbility.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Types_Sentinels_SentinelAbilities_WarriorAbility.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Types_Vehicles_Highway_HighwayVehicle.lua_B": [
+null,
+null
+],
+"Lotus_Types_Vehicles_Hoverboard_HoverboardAbility_HBGrindElecArea.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Types_Vehicles_Hoverboard_HoverboardAbility_HBTrickExplosions.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Upgrades_Boons_Offensive_ElectricFieldOnWeakPointKill.lua_B": [
+"FAIL",
+10
+],
+"Lotus_Upgrades_CosmeticEnhancers_Defensive_InvulnerabilityOnDeathOnCondition.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Upgrades_CosmeticEnhancers_Offensive_GiveStatForDamageType.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Upgrades_CosmeticEnhancers_Offensive_GiveStatForStat.lua_B": [
+"FAIL",
+6
+],
+"Lotus_Upgrades_CosmeticEnhancers_Offensive_OnSummonHitCondition.lua_B": [
+"FAIL",
+1
+],
+"Lotus_Upgrades_CosmeticEnhancers_OperatorArmour_TransferenceHeal.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Upgrades_CosmeticEnhancers_Utility_ConvergeRadialAttackOnAim.lua_B": [
+"FAIL",
+12
+],
+"Lotus_Upgrades_CosmeticEnhancers_Utility_ResidualTrigger.lua_B": [
+"FAIL",
+16
+],
+"Lotus_Upgrades_Intrinsics_InvulnerabilityOnFatalDamage.lua_B": [
+"FAIL",
+8
+],
+"Lotus_Upgrades_Mods_ModOnAimGlideOrSlide.lua_B": [
+"FAIL",
+2
+],
+"Lotus_Upgrades_Mods_Railjack_Gunnery_OffensiveMatrix.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Upgrades_Mods_Railjack_Piloting_NonCombatSpeed.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Upgrades_Mods_Railjack_Subroutines_RailjackSubroutines.lua_B": [
+"FAIL",
+61
+],
+"Lotus_Upgrades_Mods_Rifle_Event_Amalgam_PickUpArrows.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Upgrades_Stickers_Scripts_CreateShieldOnHeavySlam.lua_B": [
+"FAIL",
+7
+],
+"Lotus_Upgrades_Stickers_Scripts_EjectButton.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Upgrades_Stickers_Scripts_EmergencyRescue.lua_B": [
+"FAIL",
+3
+],
+"Lotus_Upgrades_Stickers_Scripts_SporePrimer.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Weapons_Corpus_Pistols_CorpusMinigun_IncarnonCestra_CestraIncarnon.lua_B": [
+"FAIL",
+4
+],
+"Lotus_Weapons_Sentients_SentRifleNewWar_SentRifleNewWar.lua_B": [
+"FAIL",
+5
+],
+"Lotus_Weapons_Tenno_Bayonet_TnBayonet.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Weapons_Tenno_LongGuns_PrimeLightningGun_PrimeLightningGun.lua_B": [
+"FAIL",
+9
+],
+"Lotus_Weapons_Tenno_LongGuns_TnInkRifle_TnInkRifle.lua_B": [
+"FAIL",
+11
+],
+"Lotus_Weapons_Tenno_Melee_Gunblade_RedeemerPrime_Disarm.lua_B": [
+"FAIL",
+15
+],
+"Lotus_Weapons_Tenno_Melee_Swords_TennoSai_Incarnon_OkinaIncarnon.lua_B": [
+"FAIL",
+18
+],
+"Lotus_Weapons_Tenno_Pistols_DuelistPistols_DuelistPistolsPassive.lua_B": [
+"FAIL",
+5
+],
+"Tests_CombatSoak_CombatSoak.lua_B": [
+"FAIL",
+3
+]
+}

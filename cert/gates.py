@@ -48,6 +48,10 @@ CORE GATES (a change ships only if ALL pass):
                           (loop-body DAG, #40), the loop-carried nil fixture (#41, behavior only: the
                           CFG gate is blind to it), the S3 truthy no-op and S4 loop-operand slot
                           normalizations.
+                          Extended 2026-09-30 (numeric-for fixes): for-body part order (#45), the
+                          nested for + break in `while true` (#44/#46/#47), the Proper-dispatched
+                          two-exit inlined loops (#48, compiled at -O2), the selector-residue
+                          compiler-closure fixture (#49) and the S5 OR/AND block normalization (#50).
 
 Usage:
     python cert/gates.py                 # 300 files, baseline from BASELINE below
@@ -81,11 +85,23 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "LOST_CONDITION": 0, "SEMANTIC_BEHAVIOR_SAME": 150,
             "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
-            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 50,
-            "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 14,
+            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 91,
+            "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 16,
             "U43_CLASS_SWAPS": 6590,
-            "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 79,
+            "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 82,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-09-30 (c) -- numeric-for fixes, selector residue, gate S5, SETLIST and
+# capture snapshots (RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md):
+#   Gate 14 50 -> 91 checks. Pre = d51d877e (HEAD 16ecb4f), post = 65c46572; the post gate adds S5
+#   (folded OR/AND does not split the S1 block), so Gate 13 gains mix gate and pipeline effects.
+#     U43 first 300:  CONST-ID 18 -> 18, CFG-ID 14 -> 16, CFG protos equal 7,667 -> 7,687 of 10,925,
+#                     class swaps 6,590 -> 6,590.
+#     U44 1-in-50:    CONST-ID 107 -> 107, CFG-ID 79 -> 82, CFG protos equal 1,494 -> 1,498 of 1,701,
+#                     class swaps 0 -> 0.
+#   ALIGNED 214 -> 219, align LOOP-DIFF 22 -> 14, ORDER-DIFF 44 -> 47; back-edge MATCH 268 -> 275,
+#   LOST-LOOPS 20 -> 7, LOST-HEADERS 105 -> 35, EXTRA-LOOPS 5 -> 9, LATCH-DIFF 7 -> 9,
+#   EXTRA-HEADERS 10 -> 21 (all within their limits; recorded, not hidden); Gate 6 LOOP-DIFF 27 -> 18.
 
 # BASELINE CHANGE OF 2026-09-30 (b) -- multi-exit loop bodies (RESEARCH/CFG_MULTI_EXIT_LOOPS_2026-09-30.md):
 #   Gate 14 26 -> 50 checks. Pre = a788f061 (HEAD b51d08a), post = d51d877e; the post gate adds the S3
