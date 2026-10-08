@@ -6666,7 +6666,14 @@ emit_conditional_region:
     // the OUTER scope. Body tokens use the innermost matching loop binding. The replacement is also
     // what excludes loop locals from the flat function declaration, so disjoint loops may safely
     // reuse one physical register without adding a dead entry LOADNIL.
-    static int canonicalize_lexical_for_variables(std::string& body) {
+    //
+    // Names carry the prototype index (`__renovice_for_<proto>_<loop>_<var>`). This pass runs once per
+    // prototype, and a closure created inside a loop is spliced into the enclosing function's text, so a
+    // per-function serial alone gave the closure's own loop the same name as the enclosing loop it
+    // captures: the inner binding then shadowed the captured upvalue and the recompile read the wrong
+    // variable (OmegaRerollSelection proto 10, 2026-10-08: GETUPVAL of the outer index became the inner
+    // pairs index). Module-unique names keep every capture bound to its own loop.
+    static int canonicalize_lexical_for_variables(std::string& body, int pidx) {
         struct Binding {
             int reg = -1;
             size_t header_token = 0;
@@ -6712,8 +6719,8 @@ emit_conditional_region:
                                             end < body.size() ? end + 1 : end,
                                             scope_end,
                                             indent,
-                                            "__renovice_for_" + std::to_string(serial)
-                                                + "_" + std::to_string(q)});
+                                            "__renovice_for_" + std::to_string(pidx) + "_"
+                                                + std::to_string(serial) + "_" + std::to_string(q)});
                     ++serial;
                 }
             }
@@ -17594,7 +17601,7 @@ emit_conditional_region:
         const bool for_locals_before_state =
             !std::getenv("RENOVICE_NO_FOR_LOCALS_BEFORE_STATE");
         if (for_locals_before_state && !std::getenv("RENOVICE_NO_FOR_LEXICAL_LOCALS"))
-            canonicalize_lexical_for_variables(body);
+            canonicalize_lexical_for_variables(body, pidx);
         if (std::getenv("RENOVICE_CAPTURED_INDEX_KEY_TEMPORARIES")) {
             if (!std::getenv("RENOVICE_NO_CAPTURED_INDEX_RESULT_LIFETIMES"))
                 canonicalize_paired_index_result_lifetimes(body);
@@ -17647,7 +17654,7 @@ emit_conditional_region:
             canonicalize_raw_fornprep_zero_locals(body);
         }
         if (!for_locals_before_state && !std::getenv("RENOVICE_NO_FOR_LEXICAL_LOCALS"))
-            canonicalize_lexical_for_variables(body);
+            canonicalize_lexical_for_variables(body, pidx);
         if (used_cfg_renderer || !std::getenv("RENOVICE_CFG_ONLY_TERMINAL_ELSE_GUARD")) {
             const int flattened_else_guards = canonicalize_terminal_else_guards(body, false);
             if (flattened_else_guards) {
