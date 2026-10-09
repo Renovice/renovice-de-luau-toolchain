@@ -269,6 +269,7 @@ static int cmd_recompile(int argc, char** argv) {
             de::raw_source_hashes = true;
         }
         tc::import_class_overrides = tc::parse_import_class_directives(source);
+        sp::shared_proto_lines() = sp::parse_shared_proto_markers(source);
     }
     catch (const std::exception& e) {
         std::fprintf(stderr, "[derecomp] source metadata error: %s\n", e.what()); return 1;
@@ -290,6 +291,11 @@ static int cmd_recompile(int argc, char** argv) {
                 "hashed-globals=%zu, hashed-fields=%zu%s\n", argv[2], argv[3], de_body.size(), nps,
                 loads ? "yes" : "NO", hashed_globals.size(), hashed_fields.size(),
                 de::raw_source_hashes ? ", raw-hash-source=yes" : "");
+    const sp::MergeReport& shared = tc::last_shared_proto_report();
+    if (shared.groups || !shared.refused.empty())
+        std::printf("[derecomp] shared prototypes: groups=%d merged=%d unequal=%d%s%s\n", shared.groups,
+                    shared.merged, shared.unequal, shared.refused.empty() ? "" : " REFUSED: ",
+                    shared.refused.c_str());
     return loads ? 0 : 2;
 }
 

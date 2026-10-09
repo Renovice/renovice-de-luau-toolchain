@@ -256,6 +256,49 @@ static void compute_orphan_hosts(const de::Module& m, int root) {
     }
 }
 
+// ---- Shared prototypes (O2 inlining) --------------------------------------------------------------
+// DE inlines small local functions (-O2); an inlined body that contains a function literal makes every
+// inlined copy reference THE SAME prototype, so one stock prototype has several closure sites (44.1.1:
+// 31 prototypes in 29 modules). The emitter writes one literal per site, which the compiler turns into
+// one prototype per site: every later prototype index shifted (PROTO_COUNT). Each literal of a
+// prototype with two or more closure sites is marked `-- RENOVICE_SHARED_PROTO <index>` on its
+// `function(` line; the recompiler merges copies that compile to the identical prototype
+// (src/shared_protos.h). Re-inlining instead is not reproducible: Luau's inliner decides by an AST cost
+// model and the register-faithful emission is costlier than the original source (11 of 31 rejected).
+// RENOVICE_NO_SHARED_PROTO_MARKER disables the marker.
+static std::set<int> g_shared_protos;
+
+static void compute_shared_protos(const de::Module& m) {
+    g_shared_protos.clear();
+    if (std::getenv("RENOVICE_NO_SHARED_PROTO_MARKER")) return;
+    const int count = (int)m.protos.size();
+    std::vector<int> refs((size_t)count, 0);
+    for (const de::Proto& proto : m.protos) {
+        size_t offset = 0;
+        while (offset + 4 <= proto.code.size()) {
+            const int op = (uint8_t)proto.code[offset];
+            const int bx = (uint8_t)proto.code[offset + 2] | ((uint8_t)proto.code[offset + 3] << 8);
+            int target = -1;
+            if (op == 0x16 && bx < (int)proto.kids.size()) target = (int)proto.kids[(size_t)bx];
+            else if (op == 0x42 && bx < (int)proto.consts.size() && proto.consts[(size_t)bx].tag == 6)
+                target = (int)proto.consts[(size_t)bx].idx;
+            if (target >= 0 && target < count) ++refs[(size_t)target];
+            offset += tc::is_de_width8(op) ? 8 : 4;
+        }
+    }
+    for (int index = 0; index < count; ++index)
+        if (refs[(size_t)index] >= 2) g_shared_protos.insert(index);
+}
+
+// Append the marker to the `function(...)` header line of an emitted literal.
+static void mark_shared_literal(std::string& body, int proto) {
+    if (!g_shared_protos.count(proto) || body.compare(0, 9, "function(") != 0) return;
+    size_t eol = body.find('\n');
+    if (eol == std::string::npos) return;
+    if (eol > 0 && body[eol - 1] == '\r') --eol;
+    body.insert(eol, std::string(" ") + sp::shared_proto_marker() + std::to_string(proto));
+}
+
 // Insert the dead orphan literals hosted by `host` before the closing `end` of its function text.
 // Placeholders are expanded by the caller's inline_closures pass like any closure site.
 static bool append_orphan_literals(std::string& fn, int host, const de::Module& m) {
@@ -378,7 +421,10 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
                 sok = false;
                 swhy = "orphan host has no insertion point before its closing end";
             }
-            if (sok) body = inline_closures(t, m, pool, depth + 1);
+            if (sok) {
+                body = inline_closures(t, m, pool, depth + 1);
+                mark_shared_literal(body, sub);
+            }
             else g_inline_fail = "proto " + std::to_string(sub) + ": " +
                                  (sp.ok ? swhy : sp.why);
         } else g_inline_fail = "closure index " + std::to_string(sub) + " out of range";
@@ -816,8 +862,10 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
         g_orphans_by_host.clear();
         return false;
     }
+    compute_shared_protos(m);
     src = inline_closures(src, m, pool, 0);
     g_orphans_by_host.clear();          // module-scoped: never leak into another module's inlining
+    g_shared_protos.clear();
     if (!g_inline_fail.empty()) {
         why = std::string("closure inline failed: ") + g_inline_fail;
         return false;
