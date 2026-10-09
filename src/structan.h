@@ -242,6 +242,15 @@ struct Analyzer {
     // RENOVICE_NO_FOR_LOOP_BODY_DAG restore each rejection for A/B.
     const bool nested_loop_body_dag = !std::getenv("RENOVICE_NO_NESTED_LOOP_BODY_DAG");
     const bool for_loop_body_dag = !std::getenv("RENOVICE_NO_FOR_LOOP_BODY_DAG");
+    // PROPER EXIT IN A CUT BODY (proper campaign 2026-10-09, DeathSquadFlak p0). A loop body that
+    // holds a short-circuit test with a statement operand (`if v:A(2) or v:B():C() then X else Y
+    // end`) reduces to a Proper region, and the Proper grows over the body's earlier break tests
+    // (`if IsNull(v) then break end`). Counting a Proper like a nested loop refused the whole cut
+    // body (fail_kind 100), the NaturalLoop kept its interior unreduced and the emitter dropped
+    // the test. A loop-leaving edge of a loop-free Proper part is exact (see exit_in_nested_loop
+    // and the dispatcher's exit-arm rule in emit.h). RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG restores
+    // the refusal.
+    const bool proper_exit_in_body_dag = !std::getenv("RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG");
     // While a cut body is reduced: the header's blocks. The Proper dispatcher follows REAL CFG
     // edges, so a Proper region holding the latch would see the cut back edge as an internal
     // cycle and loop inside the region. The latch (any region with an edge into the header)
@@ -374,8 +383,15 @@ struct Analyzer {
                 return (e.t >= 0 && !body_blocks.count(e.t)) || (e.f >= 0 && !body_blocks.count(e.f));
             }
             const bool loop = region.kind == RK::SelfLoop || region.kind == RK::While
-                || region.kind == RK::NaturalLoop || region.kind == RK::Proper;
-            for (int part : region.parts) if (exit_in_nested_loop(part, inside || loop)) return true;
+                || region.kind == RK::NaturalLoop
+                || (region.kind == RK::Proper && !proper_exit_in_body_dag);
+            // A Proper part is dissolved into raw dispatcher states (`if state == K then ... end`
+            // directly in the loop body), where `if c then break end` leaves the real loop -- unless
+            // the part holds a loop: the dispatcher may then keep it whole inside `repeat ...
+            // until true`, so its exits stay refused.
+            const bool proper = region.kind == RK::Proper && proper_exit_in_body_dag;
+            for (int part : region.parts)
+                if (exit_in_nested_loop(part, inside || loop || (proper && region_has_loop(part)))) return true;
             return false;
         };
         if (root >= 0 && exit_in_nested_loop(root, false)) { root = -1; fail_kind = 100; }
