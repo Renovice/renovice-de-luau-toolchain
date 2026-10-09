@@ -476,6 +476,62 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
     return out;
 }
 
+static void conddiag(const sa::Analyzer& A, int idx) {
+    if (std::getenv("RENOVICE_CONDDIAG")) {
+        // Diagnostic (conditions campaign 2026-10-09): loop-body DAG decisions and NaturalLoop
+        // regions left with an unreduced multi-part interior, per prototype.
+        std::fprintf(stderr, "CONDDIAG pidx=%d dag=", idx);
+        for (const auto& d : A.dag_log) std::fprintf(stderr, "%d:%d,", d.first, d.second);
+        int unreduced = 0, while_tail = 0;
+        std::string branchy;   // NaturalLoops whose unreduced parts branch to >= 2 other non-head parts
+        std::function<void(int)> walk = [&](int r) {
+            if (r < 0 || r >= (int)A.regions.size()) return;
+            const sa::Region& L = A.regions[r];
+            if (L.kind == sa::RK::NaturalLoop && L.parts.size() > 1) {
+                ++unreduced;
+                std::map<int, int> owner;
+                for (int part : L.parts) {
+                    std::set<int> pb; A.region_block_set(part, pb);
+                    for (int b : pb) owner[b] = part;
+                }
+                bool is_branchy = false;
+                for (int part : L.parts) {
+                    std::set<int> pb; A.region_block_set(part, pb);
+                    std::set<int> targets;
+                    for (int b : pb) {
+                        if (b < 0 || b >= (int)A.block_edges.size()) continue;
+                        for (int t : {A.block_edges[b].t, A.block_edges[b].f}) {
+                            auto it = owner.find(t);
+                            if (it != owner.end() && it->second != part && it->second != L.head) targets.insert(it->second);
+                        }
+                    }
+                    if (targets.size() >= 2) is_branchy = true;
+                }
+                if (is_branchy) branchy += std::to_string(L.head) + ";";
+            }
+            if (L.kind == sa::RK::While && L.parts.size() >= 2
+                && A.regions[L.parts[0]].kind != sa::RK::Basic) {
+                // While whose test is not the head region's first block (emit.h head_block).
+                std::function<int(int)> first_block = [&](int x) -> int {
+                    if (x < 0 || x >= (int)A.regions.size()) return -1;
+                    if (A.regions[x].kind == sa::RK::Basic) return A.regions[x].block;
+                    return A.regions[x].parts.empty() ? -1 : first_block(A.regions[x].parts[0]);
+                };
+                const int body = first_block(L.parts[1]);
+                std::set<int> hbset; A.region_block_set(L.parts[0], hbset);
+                int test = -1, matches = 0;
+                for (int b : hbset)
+                    if (b >= 0 && b < (int)A.block_edges.size()
+                        && (A.block_edges[b].t == body || A.block_edges[b].f == body)) { test = b; ++matches; }
+                if (matches == 1 && test != first_block(L.parts[0])) ++while_tail;
+            }
+            for (int c : L.parts) walk(c);
+        };
+        if (!A.live.empty()) walk(*A.live.begin());
+        std::fprintf(stderr, " unreduced_loops=%d while_tail=%d branchy=%s\n", unreduced, while_tail, branchy.c_str());
+    }
+}
+
 static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok, std::string& why) {
     ok = false;
     st::Graph g;
@@ -485,6 +541,7 @@ static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok,
     sa::Analyzer A; A.build(g);
     int steps = 0;
     if (!A.reduce(steps)) { why = "did not reduce to one region"; return ""; }
+    conddiag(A, idx);
     em::Emitter E; E.ip = &ip; E.g = &g; E.A = &A; E.pidx = idx;
     // Authoritative loop map, computed from dominators BEFORE emission. The emitter reads it
     // instead of re-deriving loop structure from opcodes (see structur.h find_loops).
@@ -600,6 +657,7 @@ static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
     sa::Analyzer A; A.build(g);
     int steps = 0;
     if (!A.reduce(steps)) { why = "did not reduce"; return ""; }
+    conddiag(A, idx);
     em::Emitter E; E.ip = &ip; E.g = &g; E.A = &A; E.pidx = idx;
     // Authoritative loop map, computed from dominators BEFORE emission. The emitter reads it
     // instead of re-deriving loop structure from opcodes (see structur.h find_loops).

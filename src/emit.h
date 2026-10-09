@@ -32,6 +32,8 @@ struct Emitter {
     bool bad = false;                 // something could not be emitted faithfully
     std::string why;
     int raw_fornprep_serial = 0;
+    // True while the Proper dispatcher emits a raw state: it renders that block's branch itself.
+    bool dispatcher_owns_branch = false;
     std::set<int> loop_blocks;        // blocks of the innermost loop being emitted
     // Back-edge destinations of the innermost emitted source loop. A conditional CFG edge to one
     // of these blocks is `continue`, not ordinary fallthrough and not `break`.
@@ -1493,6 +1495,27 @@ struct Emitter {
             if (t_out != f_out && !structured_terminal_arm) // exactly one unowned arm leaves loop
                 out += ind(depth) + "if " + cond_of(blk, f_out) + " then break end\n";
         }
+        // EMPTY COMPARISON (conditions campaign 2026-10-09). `if a < b then end` (DE source keeps
+        // commented-out bodies) compiles to a compare whose jump target IS the fall-through, so the
+        // block has one successor through two edges and no region template owns a test. Every
+        // structuring path then dropped the compare, but it is observable: a register compare can
+        // run __lt/__le/__eq, and luau-compile keeps the jump. Truthiness tests (JUMPIF/JUMPIFNOT)
+        // are unobservable and stay dropped (gate S3). RENOVICE_NO_EMPTY_COMPARE_IF restores it.
+        static const bool empty_compare_if = !std::getenv("RENOVICE_NO_EMPTY_COMPARE_IF");
+        if (empty_compare_if && !dispatcher_owns_branch && !emitted_region_escape && n.is_branch && !n.branch_predicate
+            && n.succ_true >= 0 && n.succ_true == n.succ_false && n.last >= 0
+            && n.last < (int)ip->code.size()) {
+            const int op = ip->code[n.last].op;
+            const bool truthiness = op == 0x4b || op == 0x18;
+            const bool loop_op = op == 0x0a || op == 0x1e || op == 0x47 || op == 0x0b
+                || op == 0x30 || op == 0x1b;
+            if (!truthiness && !loop_op)
+                // One line: the unused-boolean canonicalizer rewrites a two-line empty `if` into
+                // `local unused = cmp`, a boolean diamond the stock jump does not have.
+                // `if X then end` compiles to "jump past the empty arm unless X": X is the negation
+                // of the jump condition, which reproduces the stock opcode polarity.
+                out += ind(depth) + "if " + cond_of(blk, true) + " then end\n";
+        }
     }
 
     void emit_region(int id, int depth) {
@@ -2009,8 +2032,35 @@ struct Emitter {
                     else if (term_op(header_source_blk) == 0x1e)
                         terminal_arm_loop_latches.insert(header_source_blk);
                 }
+                // CONDITIONAL NEVER STEALS AN ARM'S LOOP (conditions campaign 2026-10-09). The three
+                // rejections above are special cases of one fact: an IfThen/IfThenElse can stand for a
+                // loop's zero-iteration gate only when its OWN condition block is that loop's prep or
+                // latch. Otherwise its condition is a real source test (`if not IsNull(skin) then
+                // for _, b in ipairs(t) do ... end end` at the end of a for body, LoopingFireAnimation
+                // p0): the steal printed the `for` in place of the `if`, deleted the test and the
+                // child While opened the same loop a second time. RENOVICE_ALLOW_CONDITIONAL_PREP_STEAL
+                // restores the narrow rejections only, for A/B.
+                // The region's own decision is the head part's block that branches into an arm; when
+                // the head is a Seq that is its LAST block, not head_block() (CorpusBow p0: the head
+                // `setup; FORNPREP` IS the prep, the established zero-trip owner).
+                bool reject_any_arm_steal = false;
+                if (!std::getenv("RENOVICE_ALLOW_CONDITIONAL_PREP_STEAL")
+                    && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse)
+                    && r.parts.size() >= 2) {
+                    std::vector<int> decision_blocks; collect_blocks(r.parts[0], decision_blocks);
+                    std::set<int> arm_heads;
+                    for (size_t q = 1; q < r.parts.size(); ++q) arm_heads.insert(head_block(r.parts[q]));
+                    int decision = -1, decisions = 0;
+                    for (int b : decision_blocks) {
+                        if (b < 0 || b >= (int)g->n.size()) continue;
+                        if (arm_heads.count(g->n[b].succ_true) || arm_heads.count(g->n[b].succ_false)) {
+                            decision = b; ++decisions;
+                        }
+                    }
+                    reject_any_arm_steal = decisions == 1 && decision != header_source_blk;
+                }
                 if ((reject_terminal_search || reject_terminal_arm
-                     || reject_single_loop_terminal_arm) && isfor
+                     || reject_single_loop_terminal_arm || reject_any_arm_steal) && isfor
                     && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse)
                     && header_source_blk != region_condition_block
                     )
@@ -4041,6 +4091,32 @@ emit_conditional_region:
                         }
                     }
                     emit_region(head, depth);
+                    // COMPOSITE-HEAD DECISION (conditions campaign 2026-10-09). The IfThen rules admit
+                    // any head region n, so the arm is chosen by the head's block that branches into
+                    // it -- for a Seq head its LAST block. hb is the head's FIRST block; when that is
+                    // itself renderable the region printed an earlier, unrelated test (GearLib p0:
+                    // `if _T.prevGearSlots ~= nil then <IsMaster arm>` instead of the IsMaster
+                    // result). Use the unique head block with an edge into an arm head.
+                    // RENOVICE_NO_IFTHEN_TAIL_DECISION restores hb.
+                    if (!std::getenv("RENOVICE_NO_IFTHEN_TAIL_DECISION")
+                        && A->regions[head].kind != sa::RK::Basic && !arms.empty()) {
+                        std::vector<int> decision_blocks; collect_blocks(head, decision_blocks);
+                        std::set<int> decision_set(decision_blocks.begin(), decision_blocks.end());
+                        std::set<int> arm_heads;
+                        for (int a : arms) arm_heads.insert(head_block(a));
+                        int decision = -1, decisions = 0;
+                        for (int b : decision_blocks) {
+                            if (b < 0 || b >= (int)g->n.size()) continue;
+                            const st::Node& bn = g->n[b];
+                            if (arm_heads.count(bn.succ_true) || arm_heads.count(bn.succ_false)) {
+                                decision = b; ++decisions;
+                            }
+                        }
+                        if (decisions == 1 && decision != hb && renderable_cond(decision)
+                            && !decision_set.count(g->n[decision].succ_true)
+                            && !decision_set.count(g->n[decision].succ_false))
+                            hb = decision;
+                    }
                     // POLARITY. cond_of renders "the branch is TAKEN", but Luau compiles
                     // `if a then BODY end` as `JUMPIFNOT a -> past the body`, so the body is the
                     // FALLTHROUGH and its guard is the NEGATION of the taken-condition. Emitting the
@@ -4156,6 +4232,26 @@ emit_conditional_region:
                     std::string body      = capture(r.parts[1], depth + 1);
                     --loop_depth;
                     int bodyblk = head_block(r.parts[1]);
+                    // WHILE TEST BLOCK (conditions campaign 2026-10-09). The structurer's While rule
+                    // admits ANY head region n with a private body that loops back to it, so the
+                    // loop test is the head region's block that branches into the body, which is
+                    // its LAST block when the head is a Seq. head_block() is the FIRST block:
+                    // `while true do if IsNull(o) then return end ... if flightTime < t then break
+                    // end Sleep(0) end` (BirdOfPrey p1) printed the IsNull test's register as the
+                    // exit (`if not v then break end`) and looped forever. Use the unique head
+                    // block with an edge into the body. RENOVICE_NO_WHILE_TAIL_TEST restores hb.
+                    if (!std::getenv("RENOVICE_NO_WHILE_TAIL_TEST") && bodyblk >= 0
+                        && A->regions[head].kind != sa::RK::Basic) {
+                        std::vector<int> head_blocks; collect_blocks(head, head_blocks);
+                        int test_blk = -1, matches = 0;
+                        for (int b : head_blocks) {
+                            if (b < 0 || b >= (int)g->n.size()) continue;
+                            if (g->n[b].succ_true == bodyblk || g->n[b].succ_false == bodyblk) {
+                                test_blk = b; ++matches;
+                            }
+                        }
+                        if (matches == 1) hb = test_blk;
+                    }
                     bool neg = (hb >= 0 && hb < (int)g->n.size())
                                && bodyblk == g->n[hb].succ_false && bodyblk != g->n[hb].succ_true;
                     bool have = renderable_cond(hb);
@@ -5315,7 +5411,9 @@ emit_conditional_region:
                         out += ind(guard_depth) + "end\n";
                         return;
                     }
+                    dispatcher_owns_branch = true;
                     emit_block(b2, d2);
+                    dispatcher_owns_branch = false;
                     const st::Node& bn = g->n[b2];
                     int s_true = st_of(bn.succ_true), s_false = st_of(bn.succ_false);
                     bool t_in = s_true  >= 0 && inreg.count(s_true);

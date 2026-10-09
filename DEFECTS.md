@@ -308,3 +308,20 @@ Full 44.1.1 corpus (`work/u441-r2b-b5200665`, binary `b5200665`, vs batch 1 `49e
 (MissileVolley, #61). `cert/gates.py 300 150`: ALL GATES PASS (ALIGNED 225, NAME-DIFF 0, realtrip 150/150, Gate 14
 91/91). Rejected from the batch: the split-exit condition guard (tables agent) — it broke Gate 14's #49 closure
 checks and AlchemistVial's closure; kept as `work/agents/tables-runs/split_exit_loop_guard.patch` for rework.
+
+## 2026-10-09 — 44.1.1 campaign batch 3: condition fixes (agent conditions)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 63 | `emit_block` ignored a compare whose true and false successors are the same block | `if a < b then end` vanished; observable because `__lt`/`__le`/`__eq` metamethods no longer ran (202 modules / 267 sites corpus-wide carry the shape) | agent conditions; luau.exe fixture `empty_compare_if.luau` | print the one-line `if X then end` with the polarity reproducing the stock opcode; skipped in Proper dispatcher states, which already print the test (`RENOVICE_NO_EMPTY_COMPARE_IF`) |
+| 64 | the While / IfThen(Else) emitters took the test from the head region's FIRST block when the head is several blocks | BirdOfPrey p1: the loop exit tested an earlier IsNull register, the rebuilt loop never ends; GearLib p0: `if _T.prevGearSlots ~= nil then` printed for `IsMaster()` | agent conditions; luau.exe `loop_exit_compare.luau` | take the test from the head block that branches into the body/arm (`RENOVICE_NO_WHILE_TAIL_TEST`, `RENOVICE_NO_IFTHEN_TAIL_DECISION`) |
+| 65 | an `if` whose arm contains a loop took ownership of that loop (`COND_LOOP_OWNER`), printing the arm's `for` instead of its own test, then the loop again | the `if` test lost and the loop duplicated (`cmp 2 nil x` in luau.exe) | agent conditions | one general rule replaces three narrow rejections: an `if` may own a loop only when its own decision block is that loop's prep or latch (`RENOVICE_ALLOW_CONDITIONAL_PREP_STEAL`); costs Illusion's compiler closure |
+| 66 | `reduce_loop_body_dag` never ran for a loop found inside an outer cut body, and never admitted a FORNLOOP/FORGLOOP latch (two successors) | `if not IsNull(x) then for ... end end` at the end of a for body: the guard dropped ("attempt to get length of a nil value", CombatSoak p2) | agent conditions; luau.exe `for_guarded_inner_loop_in_while.luau` | nested cut bodies stack their header set; a for latch whose only leaving edge is its own exit to the single out is the DAG sink (`RENOVICE_NO_NESTED_LOOP_BODY_DAG`, `RENOVICE_NO_FOR_LOOP_BODY_DAG`); supersedes #61's FORNLOOP-only rule (and restores MissileVolley's closure) |
+| 67 | (diagnosed, opt-in only) inside a cut body the entry stayed the function entry, so a nested loop could be headed at its latch | — | agent conditions | `entry = n` for the cut body, now OPT-IN (`RENOVICE_CUT_BODY_ENTRY=1`): on the full corpus it turned Platform PASS -> FAIL, cost KahlOrders p35 and 6 compiler closures (BardMusic, SearchTheDead, EnergyLeech, HealthLeechPatches, AbilityAuraLib, TeshinShadowRemnants) |
+
+Full 44.1.1 corpus (`work/u441-r3b-928298db`, binary `928298db`, vs batch 2 `b5200665`): CFG-ID 4,289 -> 4,465,
+CONST-ID 5,383 -> 5,389, CFG-ID + dataflow 4,187 -> 4,351, equal prototypes 77,006 -> 77,326; no module PASS -> FAIL on
+CFG-ID, CONST-ID or dataflow, no prototype loss; compiler closure 5,424 -> 5,446 (+23, -1 Illusion #65). `cert/gates.py
+300 150`: ALL GATES PASS (ALIGNED 226). Fixtures of this batch: `work/agents/conditions-runs/fixtures/` (to be moved
+into the cert gate). Rejected: forcing the semantic-plan terminal-arm check on (NullStar, JuggernautSpawnScript
+PASS -> FAIL).

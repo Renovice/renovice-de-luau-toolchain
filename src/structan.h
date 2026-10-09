@@ -234,6 +234,14 @@ struct Analyzer {
     // RENOVICE_NO_LOOP_BODY_DAG=1 restores the previous collapse for A/B.
     const bool loop_body_dag = !std::getenv("RENOVICE_NO_LOOP_BODY_DAG");
     int loop_body_dag_depth = 0;
+    // Conditions campaign 2026-10-09: a loop whose natural body is collapsed while an enclosing
+    // loop body is itself being reduced as a DAG (depth > 0) was always left unreduced, and a
+    // `for` body was never admitted (its FORNLOOP/FORGLOOP latch has two successors). Both
+    // left `if not IsNull(x) then for ... end end` at the end of a for body as unreduced parts,
+    // and the emitter dropped the guard. RENOVICE_NO_NESTED_LOOP_BODY_DAG /
+    // RENOVICE_NO_FOR_LOOP_BODY_DAG restore each rejection for A/B.
+    const bool nested_loop_body_dag = !std::getenv("RENOVICE_NO_NESTED_LOOP_BODY_DAG");
+    const bool for_loop_body_dag = !std::getenv("RENOVICE_NO_FOR_LOOP_BODY_DAG");
     // While a cut body is reduced: the header's blocks. The Proper dispatcher follows REAL CFG
     // edges, so a Proper region holding the latch would see the cut back edge as an internal
     // cycle and loop inside the region. The latch (any region with an edge into the header)
@@ -251,48 +259,48 @@ struct Analyzer {
         }
         return false;
     }
+    // Diagnostic log of loop-body DAG decisions: (header region, reason); reason 0 = reduced,
+    // 100+ = fail_kind after reduction, 200 = cut body did not reduce to one region.
+    mutable std::vector<std::pair<int, int>> dag_log;
     int dag_reject(int n, int reason) const {
+        dag_log.push_back({n, reason});
         if (std::getenv("RENOVICE_SASTEPS"))
             std::fprintf(stderr, "SA_LOOP_BODY_DAG_REJECT head=%d reason=%d\n", n, reason);
         return -1;
     }
     // Returns the root region of the reduced body, or -1 with the graph state unchanged.
     int reduce_loop_body_dag(int n, const std::set<int>& body, const std::set<int>& outs) {
-        if (!loop_body_dag || loop_body_dag_depth > 0 || outs.size() > 1 || body.size() < 3) return dag_reject(n, 1);
+        if (!loop_body_dag) return dag_reject(n, 1);
+        if (loop_body_dag_depth > 0 && !nested_loop_body_dag) return dag_reject(n, 13);
+        if (outs.size() > 1) return dag_reject(n, 11);
+        if (body.size() < 3) return dag_reject(n, 12);
         if (succ[n].count(n)) return dag_reject(n, 2);
         std::vector<int> latches;
         for (int x : body) if (x != n && succ[x].count(n)) latches.push_back(x);
-        // NUMERIC-FOR LATCH (2026-10-09). A `for` body's latch ends in FORNLOOP, whose second edge is
-        // the loop op's own exit, not a `break`. `for i = 1, n do if a and b() then break end ... end`
-        // keeps the same short-circuit DAG as #40 (`a` -> {b(), rest}, `b()` -> {exit, rest}); the
-        // latch exit made the rule reject it, NaturalLoop collapsed the body unreduced and the
-        // emitter dropped `a`'s test (`a` was read and discarded, the loop broke on b() alone).
-        // Admit a latch with two successors when exactly one of its blocks leaves the body, that
-        // block ends in FORNLOOP, its taken edge is the back edge and its exit edge is the single
-        // exit target; that one edge is then exempt from the break checks below.
-        // RENOVICE_NO_FOR_LOOP_BODY_DAG restores the rejection.
-        static const bool for_loop_body_dag = !std::getenv("RENOVICE_NO_FOR_LOOP_BODY_DAG");
+        if (latches.size() != 1) return dag_reject(n, 3);
+        // FOR-LATCH SINK (conditions campaign 2026-10-09): a numeric/generic `for` closes its
+        // cycle with FORNLOOP/FORGLOOP, whose fall-through is the loop's normal exit. Once the
+        // back edge and the exit are cut that latch is the DAG's sink exactly like a `while`
+        // latch, and the for header text is printed from the latch by the emitter. Admitted when
+        // the latch region's only loop-leaving edge is that FOR latch exit to the single out.
         int for_latch_block = -1;
-        if (latches.size() == 1 && nsucc(latches[0]) == 2 && for_loop_body_dag && outs.size() == 1) {
-            std::set<int> header_blocks, latch_blocks, exit_blocks;
-            region_block_set(n, header_blocks); region_block_set(latches[0], latch_blocks);
-            region_block_set(*outs.begin(), exit_blocks);
-            int leaving = 0, candidate = -1;
+        if (nsucc(latches[0]) != 1) {
+            if (!for_loop_body_dag || nsucc(latches[0]) != 2 || outs.size() != 1
+                || !succ[latches[0]].count(*outs.begin())) return dag_reject(n, 3);
+            std::set<int> latch_blocks, head_blocks, out_blocks;
+            region_block_set(latches[0], latch_blocks); region_block_set(n, head_blocks);
+            region_block_set(*outs.begin(), out_blocks);
             for (int b : latch_blocks) {
-                if (b < 0 || b >= (int)block_edges.size()) { leaving = -1; break; }
+                if (b < 0 || b >= (int)block_edges.size()) return dag_reject(n, 3);
                 const BlockEdges& e = block_edges[b];
-                const bool t_in = e.t < 0 || latch_blocks.count(e.t);
-                const bool f_in = e.f < 0 || latch_blocks.count(e.f);
-                if (t_in && f_in) continue;
-                ++leaving; candidate = b;
+                const bool leaves = (e.t >= 0 && !latch_blocks.count(e.t)) || (e.f >= 0 && !latch_blocks.count(e.f));
+                if (!leaves) continue;
+                if (for_latch_block >= 0 || (e.term != 0x0a && e.term != 0x1e) || !e.branch
+                    || !head_blocks.count(e.t) || !out_blocks.count(e.f)) return dag_reject(n, 3);
+                for_latch_block = b;
             }
-            if (leaving == 1) {
-                const BlockEdges& e = block_edges[candidate];
-                if (e.term == 0x0a && e.branch && header_blocks.count(e.t) && exit_blocks.count(e.f))
-                    for_latch_block = candidate;
-            }
+            if (for_latch_block < 0) return dag_reject(n, 3);
         }
-        if (latches.size() != 1 || (nsucc(latches[0]) != 1 && for_latch_block < 0)) return dag_reject(n, 3);
         bool dropped_branch = false;
         for (int x : body) {
             int inner = 0;
@@ -307,11 +315,11 @@ struct Analyzer {
             const bool nested_loop = region_has_loop(x);
             for (int b : xb) {
                 if (b < 0 || b >= (int)block_edges.size()) return dag_reject(n, 5);
-                if (b == for_latch_block) continue;
                 const BlockEdges& e = block_edges[b];
                 const bool t_out = e.t >= 0 && !body_blocks.count(e.t);
                 const bool f_out = e.f >= 0 && !body_blocks.count(e.f);
                 if (!t_out && !f_out) continue;
+                if (b == for_latch_block) continue;   // the for's own normal exit (above)
                 if (nested_loop || t_out == f_out || !e.branch || e.t < 0 || e.f < 0 || e.t == e.f)
                     return dag_reject(n, 6);
                 switch (e.term) {
@@ -329,11 +337,25 @@ struct Analyzer {
             for (int s : succ[x])
                 if (s != n && body.count(s)) { cut_succ[x].insert(s); cut_pred[s].insert(x); }
         succ.swap(cut_succ); pred.swap(cut_pred); live = body;
+        // The cut body's only entry is the loop header: it alone has no predecessor left. Without
+        // this the outer function entry (not in the cut graph) stayed `entry`, so a nested loop's
+        // natural-loop candidate headed at its LATCH (lower region id) could swallow the header
+        // and the blocks before the nested loop -- dominance-free `reaches` admits it -- and the
+        // entry-in-loop repair, which prefers the original-CFG header, never ran.
+        // OPT-IN (2026-10-09 integration): on the full 44.1.1 corpus this rule turned Platform
+        // CFG-ID PASS -> FAIL, cost KahlOrders p35 and the compiler closure of 6 modules (BardMusic,
+        // SearchTheDead, EnergyLeech, HealthLeechPatches, AbilityAuraLib, TeshinShadowRemnants);
+        // RENOVICE_CUT_BODY_ENTRY=1 enables it until the Proper-headed inner loop case is resolved.
+        if (std::getenv("RENOVICE_CUT_BODY_ENTRY")
+            && (loop_body_dag_depth > 0 || !std::getenv("RENOVICE_CUT_BODY_ENTRY_NESTED_ONLY")))
+            entry = n;
         ++loop_body_dag_depth;
+        const std::set<int> saved_header_blocks = dag_header_blocks;   // nested cut bodies stack
+        dag_header_blocks.clear();
         region_block_set(n, dag_header_blocks);
         int guard = 0;
         while (live.size() > 1 && guard++ < 100000) if (!step()) break;
-        dag_header_blocks.clear();
+        dag_header_blocks = saved_header_blocks;
         --loop_body_dag_depth;
         const size_t live_left = live.size();
         int root = live.size() == 1 ? *live.begin() : -1;
@@ -359,6 +381,7 @@ struct Analyzer {
         if (root >= 0 && exit_in_nested_loop(root, false)) { root = -1; fail_kind = 100; }
         succ = saved_succ; pred = saved_pred; live = saved_live; entry = saved_entry;
         if (root < 0) regions.resize(saved_regions);
+        dag_log.push_back({n, root >= 0 ? 0 : (fail_kind >= 0 ? fail_kind : 200)});
         if (std::getenv("RENOVICE_SASTEPS"))
             std::fprintf(stderr, "SA_LOOP_BODY_DAG head=%d body=%zu root=%d fail_kind=%d live_left=%zu\n",
                          n, body.size(), root, fail_kind, live_left);
