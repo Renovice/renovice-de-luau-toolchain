@@ -15589,6 +15589,28 @@ emit_conditional_region:
                             if (!is_for && arm_clean) escape.annex.insert(arm.begin(), arm.end());
                             continue;
                         }
+                        // An arm ending at a SHARED bare RETURN (only value loads/moves before it)
+                        // is a return arm, not an escape: the block is duplicable and may lie
+                        // outside an enclosing loop as well (a nested for's `return` jumping to the
+                        // outer loop's exit RETURN, SongFragmentPickup p2), where a selector escape
+                        // cannot reach it. Keep the established rendering for those arms.
+                        if (outs.size() == 1) {
+                            const st::Node& target = g->n[*outs.begin()];
+                            bool bare_return = target.is_return && target.succ_true < 0
+                                && target.succ_false < 0;
+                            for (int pc = target.first; bare_return && pc < target.last; ++pc) {
+                                const uint8_t op = pc >= 0 && pc < (int)ip->code.size()
+                                    ? ip->code[pc].op : 0xff;
+                                if (op != 0x0d && op != 0x04 && op != 0x12 && op != 0x4e && op != 0x14)
+                                    bare_return = false;
+                            }
+                            if (bare_return && !std::getenv("RENOVICE_CFG_LOOP_ESCAPE_TO_RETURN")) {
+                                if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                                    std::fprintf(stderr, "CFG_FOR_LOOP_ESCAPE_RETURN_ARM pidx=%d latch=%d "
+                                                 "target=%d\n", pidx, loop.latch, *outs.begin());
+                                continue;
+                            }
+                        }
                         if (outs.size() != 1 || natural.count(*outs.begin()) || !arm_clean
                             || (escape.join >= 0 && escape.join != *outs.begin())) {
                             admissible = false;
