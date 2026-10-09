@@ -85,11 +85,15 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "LOST_CONDITION": 0, "SEMANTIC_BEHAVIOR_SAME": 150,
             "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
-            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 91,
+            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 98,
             "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 16,
             "U43_CLASS_SWAPS": 7245,
             "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 82,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-10-09 (b) -- Proper exit arms (DEFECTS #76-#77): Gate 14 91 -> 98 checks (new fixture
+#   proper_exit_in_body: default PASS, two legacy controls). Every pre-existing check passes on post 5ce9c9f8;
+#   Gate 13 U43/U44 and every other gate unchanged from batch 5 (work/u441-r6-5ce9c9f8/gates.txt).
 
 # BASELINE CHANGE OF 2026-10-09 -- orphan prototypes, input-profile check, overlap lookup, inline string
 # guard (RESEARCH/CFG_CAMPAIGN_U441_2026-10-09.md, DEFECTS #53-#56):

@@ -532,6 +532,20 @@ static void conddiag(const sa::Analyzer& A, int idx) {
     }
 }
 
+static void proper_text_diag(const std::string& text, int idx) {
+    // Diagnostic (proper campaign 2026-10-09): selector variables left in one prototype's own text
+    // (nested closures are still placeholders here). No output change.
+    if (!std::getenv("RENOVICE_PROPERDIAG")) return;
+    std::set<std::string> names;
+    const std::string prefix = "__renovice_state_";
+    for (size_t at = text.find(prefix); at != std::string::npos; at = text.find(prefix, at + 1)) {
+        size_t end = at + prefix.size();
+        while (end < text.size() && std::isdigit((unsigned char)text[end])) ++end;
+        names.insert(text.substr(at, end - at));
+    }
+    std::fprintf(stderr, "PDIAG_TEXT pidx=%d selectors=%zu\n", idx, names.size());
+}
+
 static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok, std::string& why) {
     ok = false;
     st::Graph g;
@@ -643,6 +657,7 @@ static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok,
     }
     std::string src = E.emit_function(nm);
     if (E.bad) { why = E.why; return src; }
+    proper_text_diag(src, idx);
     ok = true;
     return src;
 }
@@ -749,6 +764,7 @@ static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
     // emit_function("") yields "function (params)...end"; drop the space to get the anonymous form.
     size_t sp = fn.find("function (");
     if (sp != std::string::npos) fn = "function(" + fn.substr(sp + 10);
+    proper_text_diag(fn, idx);
     ok = true;
     return fn;
 }

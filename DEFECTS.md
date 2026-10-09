@@ -362,3 +362,20 @@ Full 44.1.1 corpus (`work/u441-r5-5713df5f`, binary `5713df5f`, vs batch 4 `fd0d
 dataflow 4,367 -> 4,501, dataflow FAIL among CFG-ID PASS 114 -> 14, no module PASS -> FAIL on any gate, no prototype or
 closure loss. `cert/gates.py 300 150`: ALL GATES PASS. Remaining: 24 SETTABLEN modules (a field store between batches
 blocks the merge), 2 truncated multi-value tails (DiegeticUpgradeCards p409, UIUtilities p158).
+
+## 2026-10-09 — 44.1.1 campaign batch 6: Proper exit arms (agent proper, 58aea98)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 76 | `reduce_loop_body_dag` / `exit_in_nested_loop` treated every Proper part as a nested loop, refusing the whole cut body when a Proper had grown over its `if IsNull(x) then break end` tests | the NaturalLoop stayed unreduced and the `or` test was dropped (DeathSquadFlak p0) | agent proper; fixture `proper_exit_in_body` (behavior differs) | a loop-leaving edge inside a LOOP-FREE Proper part is admitted; a Proper part containing a loop stays refused (`RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG`) |
+| 77 | the Proper raw-state rendering re-tested `c` after `emit_block` had already printed `if c then break/continue end` | a second IF stock never had (CFG-only) | agent proper | skip the re-test only when the printed arm is exactly the arm leaving the region (`RENOVICE_NO_PROPER_EXIT_ARM_ONCE`) |
+
+Diagnosed, not changed: the certified profile sets `RENOVICE_NO_PROPER_WHOLE_PROMOTION`, so raw FORNLOOP/FORGLOOP
+states inside dispatchers fall through (125 raw FOR latches, 63 prototypes / 59 modules); promoting FOR-cycle parts whole
+was tried and removed (no clear gain, 5 prototypes newly failing). Dispatcher entry state via `parts[0]` (19 regions) is
+opt-in (`RENOVICE_PROPER_DERIVED_ENTRY=1`), no measured effect. Census: of 5,433 failing prototypes in the 1,000 CFG-ID
+FAIL modules, 1,151 carry a dispatcher; most fail because of loop structure (multi-exit bodies, multi-latch loops).
+
+Full 44.1.1 corpus (`work/u441-r6-5ce9c9f8`, binary `5ce9c9f8`, vs batch 5 `5713df5f`): CFG-ID 4,515 -> 4,533, CFG-ID +
+dataflow 4,501 -> 4,519, no module PASS -> FAIL on any gate, no prototype or closure loss. Gate 14 91 -> 98 checks
+(baseline moved with the record in `cert/gates.py`); `cert/gates.py 300 150` ALL GATES PASS; dataflow fixtures 136/136.

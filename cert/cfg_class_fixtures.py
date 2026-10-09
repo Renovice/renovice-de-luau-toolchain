@@ -32,6 +32,12 @@ Numeric-for fixes (2026-09-30, RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md):
                               with luau-compile -O2 + transcode)
     + PROPER_PREP_FOR_LEGACY_NESTED_{CFG_FAILS,BEHAVIOR_DIFFERS}  RENOVICE_NO_PROPER_NESTED_LOOP_PARTS
 
+Proper dispatcher fixes (proper campaign 2026-10-09):
+  proper_exit_in_body         RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG (a loop-leaving edge inside a Proper
+                              region refused the loop-body DAG; the `or` test was dropped, DeathSquadFlak)
+    + PROPER_EXIT_IN_BODY_LEGACY_EXIT_ARM_ONCE_{CFG_FAILS,BEHAVIOR_SAME}  RENOVICE_NO_PROPER_EXIT_ARM_ONCE
+                              (the dispatcher re-tested a break condition: an extra IF, behavior-neutral)
+
 Compiler-closure fix (#49), fixture selector_residue:
   SELECTOR_RESIDUE_RUNS / _DEFAULT_BEHAVIOR_SAME / _DEFAULT_CFG_IDENTITY
   SELECTOR_RESIDUE_DEFAULT_CLOSES     the decompile->recompile source repeats within 3 rounds
@@ -99,7 +105,8 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS", "RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE",
             "RENOVICE_CFGID_LEGACY_OR_BLOCK", "RENOVICE_NATIVE",
             "RENOVICE_NO_SETLIST_EXISTING_TABLE", "RENOVICE_NO_CAPTURE_SNAPSHOT",
-            "RENOVICE_INNERMOST_LOOP_FIRST", "RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION")
+            "RENOVICE_INNERMOST_LOOP_FIRST", "RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION",
+            "RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control (innermost-loop-first, #68, is
@@ -112,13 +119,17 @@ DECOMPILER_FIXTURES = {
     "for_body_order": "RENOVICE_NO_FOR_BODY_PART_ORDER",
     "nested_for_break": "RENOVICE_NO_PREP_HEADED_WHILE",
     "proper_prep_for": "RENOVICE_NO_PROPER_PREP_FOR",
+    "proper_exit_in_body": "RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG",
 }
-# Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation).
-# cfg expectation "FAIL" = the gate must catch it; "PASS" = a recorded gate blind spot.
+# Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation
+# [, behavior expectation]). cfg expectation "FAIL" = the gate must catch it; "PASS" = a recorded gate
+# blind spot. Behavior expectation (default "DIFFERS"); "SAME" = a CFG-only defect (an extra
+# operation stock never had, behavior-neutral).
 EXTRA_LEGACY = (
     ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM", "FAIL"),
     ("nested_for_break", "ENTRY_NIL", "RENOVICE_NO_LOOP_ENTRY_NIL", "PASS"),
     ("proper_prep_for", "NESTED", "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS", "FAIL"),
+    ("proper_exit_in_body", "EXIT_ARM_ONCE", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE", "FAIL", "SAME"),
 )
 O2_FIXTURES = {"proper_prep_for"}          # compiled with inlining, like the shipped modules
 LUAU_COMPILE = os.path.join(ROOT, "bin", "luau-compile.exe")
@@ -148,8 +159,11 @@ function Sleep(seconds)
     if polls > 20 then error("runaway", 0) end
 end
 """
+# Globals for proper_exit_in_body (proper campaign 2026-10-09): engine mocks and Setup(), which
+# builds the leech and its victim; the victim dies after three hits.
+PROPER_EXIT_PRELUDE = open(os.path.join(FIX, "proper_exit_in_body.prelude.lua"), encoding="utf-8").read()
 PRELUDES = {"import_chain": IMPORT_PRELUDE, "compound_exit_loop": GAME_RULES_PRELUDE,
-            "for_body_order": FOR_BODY_PRELUDE}
+            "for_body_order": FOR_BODY_PRELUDE, "proper_exit_in_body": PROPER_EXIT_PRELUDE}
 OR_BLOCK_PRELUDE = "_T = {}\n"
 OR_BLOCK_ANCHOR = "    _T.Timer = _T.Timer or 0\n"
 OR_BLOCK_MUTATIONS = {
@@ -280,7 +294,9 @@ def main():
                 legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
                 checks[name.upper() + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
                 checks[name.upper() + "_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp, prelude) != expected
-                for extra_name, label, switch, cfg_expect in EXTRA_LEGACY:
+                for extra in EXTRA_LEGACY:
+                    extra_name, label, switch, cfg_expect = extra[:4]
+                    behavior_expect = extra[4] if len(extra) > 4 else "DIFFERS"
                     if extra_name != name:
                         continue
                     extra_env = base_env()
@@ -293,7 +309,10 @@ def main():
                         checks[key + "_CFG_FAILS"] = cfg_verdict(original, extra_rebuilt) == "FAIL"
                     else:
                         checks[key + "_CFG_BLIND"] = cfg_verdict(original, extra_rebuilt) == "PASS"
-                    checks[key + "_BEHAVIOR_DIFFERS"] = trace(extra_source, temp, prelude) != expected
+                    if behavior_expect == "SAME":
+                        checks[key + "_BEHAVIOR_SAME"] = trace(extra_source, temp, prelude) == expected
+                    else:
+                        checks[key + "_BEHAVIOR_DIFFERS"] = trace(extra_source, temp, prelude) != expected
 
             fixture = os.path.join(FIX, "selector_residue.luau")
             expected = trace(fixture, temp)

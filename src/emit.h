@@ -34,6 +34,10 @@ struct Emitter {
     int raw_fornprep_serial = 0;
     // True while the Proper dispatcher emits a raw state: it renders that block's branch itself.
     bool dispatcher_owns_branch = false;
+    // Set by emit_block to the successor block of the conditional arm it printed as a loop/region
+    // exit (`if c then break end`, `if c then continue end`, an escape-selector break), else -1.
+    // The Proper dispatcher then owns only the other arm (proper campaign 2026-10-09).
+    int block_exit_arm_target = -1;
     std::set<int> loop_blocks;        // blocks of the innermost loop being emitted
     // Back-edge destinations of the innermost emitted source loop. A conditional CFG edge to one
     // of these blocks is `continue`, not ordinary fallthrough and not `break`.
@@ -1211,6 +1215,7 @@ struct Emitter {
     }
 
     void emit_block(int blk, int depth) {
+        block_exit_arm_target = -1;
         if (blk < 0 || blk >= (int)g->n.size()) return;
         const st::Node& n = g->n[blk];
         if (std::getenv("RENOVICE_BLOCKTRACE"))
@@ -1394,6 +1399,7 @@ struct Emitter {
                     out += ind(depth + 1) + "break\n";
                     out += ind(depth) + "end\n";
                     emitted_region_escape = true;
+                    block_exit_arm_target = target;
                 }
             } else {
                 // An ordinary block ending in CALL/SETUPVAL/etc. reaches its sole successor by
@@ -1431,6 +1437,7 @@ struct Emitter {
             if (t_continue != f_continue) {
                 out += ind(depth) + "if " + cond_of(blk, f_continue) + " then continue end\n";
                 emitted_loop_continue = true;
+                block_exit_arm_target = t_continue ? n.succ_true : n.succ_false;
             }
         }
         // A conditional branch whose target LEAVES the enclosing loop is a `break`. Nothing else in
@@ -1510,8 +1517,10 @@ struct Emitter {
                         && std::find(blocks.begin(), blocks.end(), outside_target) != blocks.end();
                 }
             }
-            if (t_out != f_out && !structured_terminal_arm) // exactly one unowned arm leaves loop
+            if (t_out != f_out && !structured_terminal_arm) { // exactly one unowned arm leaves loop
                 out += ind(depth) + "if " + cond_of(blk, f_out) + " then break end\n";
+                block_exit_arm_target = outside_target;
+            }
         }
         // EMPTY COMPARISON (conditions campaign 2026-10-09). `if a < b then end` (DE source keeps
         // commented-out bodies) compiles to a compare whose jump target IS the fall-through, so the
@@ -4628,6 +4637,32 @@ emit_conditional_region:
                 std::sort(bl.begin(), bl.end());
                 std::set<int> inreg(bl.begin(), bl.end());
                 if (bl.size() < 2) { for (int p : r.parts) emit_region(p, depth); break; }
+                // Diagnostic (proper campaign 2026-10-09): one line per rendered Proper region with
+                // its blocks (instruction ranges, successors, terminator) and the enclosing region
+                // kinds, so the dispatcher population can be clustered offline. No output change.
+                if (!planning && std::getenv("RENOVICE_PROPERDIAG")) {
+                    std::string chain;
+                    for (int child = id, guard = 0; guard < 64; ++guard) {
+                        int parent = -1;
+                        for (size_t q = 0; q < A->regions.size() && parent < 0; ++q)
+                            for (int c : A->regions[q].parts) if (c == child) { parent = (int)q; break; }
+                        if (parent < 0) break;
+                        chain += rk_name(A->regions[parent].kind); chain += ">";
+                        child = parent;
+                    }
+                    std::fprintf(stderr, "PDIAG_PROPER pidx=%d region=%d head=%d parts=%zu nblocks=%zu chain=%s blocks=",
+                                 pidx, id, head_block(r.head >= 0 ? r.head : id), r.parts.size(), bl.size(),
+                                 chain.c_str());
+                    for (int b : bl)
+                        std::fprintf(stderr, "%d:%d-%d:%d:%d:%02x;", b, g->n[b].first, g->n[b].last,
+                                     g->n[b].succ_true, g->n[b].succ_false, (unsigned)g->n[b].term);
+                    std::fprintf(stderr, " partkinds=");
+                    for (int p : r.parts) {
+                        std::vector<int> pb; collect_blocks(p, pb);
+                        std::fprintf(stderr, "%s/%zu,", rk_name(A->regions[p].kind), pb.size());
+                    }
+                    std::fprintf(stderr, "\n");
+                }
                 // DIAGNOSTIC for FINDINGS #97/#98. `collect_blocks` above recurses through EVERY
                 // child region kind, so a NaturalLoop/While/SelfLoop part is DISSOLVED into raw
                 // blocks and its back edge becomes a backward `p<id> = N` in the flat ascending
@@ -4687,7 +4722,30 @@ emit_conditional_region:
                 std::map<int, int> part_entry;             // part id -> its DERIVED entry block
                 std::map<int, int> part_default_exit;      // normal completion when exits are plural
                 std::map<int, int> proper_prep_owned_for;  // part id -> raw FORNPREP state it owns (#48)
-                const int region_entry = head_block(r.head >= 0 ? r.head : id);
+                // PROPER ENTRY, DERIVED (proper campaign 2026-10-09). `head_block` descends through
+                // parts[0], and NaturalLoop/Proper build `parts` from a std::set, so a composite head
+                // can name its lowest REGION ID instead of its entry block; the dispatcher then
+                // started in the wrong state. A Proper region is single-entry: its entry is the one
+                // block reached from outside the region (or the function entry). Use it when that
+                // block is unique. OPT-IN (RENOVICE_PROPER_DERIVED_ENTRY=1): measured on the 584-module
+                // dispatcher queue, 19 regions in 19 modules start in a different state, every one
+                // inside a prototype whose loop structure is already lost (raw FOR latches, nested
+                // partial NaturalLoops); CFG-ID, dataflow and closure were unchanged, and no
+                // behavior fixture isolates the shape yet. RENOVICE_PROPERDIAG prints PDIAG_ENTRY.
+                static const bool derived_entry = std::getenv("RENOVICE_PROPER_DERIVED_ENTRY") != nullptr;
+                const int head_entry = head_block(r.head >= 0 ? r.head : id);
+                int derived = -1, derived_count = 0;
+                for (int b2 : bl) {
+                    bool external = b2 == 0;
+                    for (int p2 : g->n[b2].preds)
+                        if (!inreg.count(p2) && p2 >= 0 && p2 < (int)g->n.size() && g->n[p2].reach)
+                            external = true;
+                    if (external) { derived = b2; ++derived_count; }
+                }
+                const int region_entry = (derived_entry && derived_count == 1) ? derived : head_entry;
+                if (!planning && std::getenv("RENOVICE_PROPERDIAG") && derived_count == 1 && derived != head_entry)
+                    std::fprintf(stderr, "PDIAG_ENTRY pidx=%d region=%d head_entry=%d derived=%d\n",
+                                 pidx, id, head_entry, derived);
                 // NESTED LOOP CHILDREN (2026-09-30, DEFECTS #48). A cyclic child that is not kept
                 // whole is dissolved into raw states, and so is every loop nested inside it: an
                 // IfThen/Seq/IfThenElse child holding `for ... end` plus a return had its FORGLOOP
@@ -4870,8 +4928,12 @@ emit_conditional_region:
                     }
                     if (for_self_loop && !prep_owned_for_whole) continue;   // only as a #48 child
                     if (std::getenv("RENOVICE_NO_PROPER_WHOLE_PROMOTION") && !for_latch_cycle_whole
-                        && !prep_owned_for_whole)
+                        && !prep_owned_for_whole) {
+                        if (std::getenv("RENOVICE_LOOPTRACE"))
+                            std::fprintf(stderr, "WHOLE_REJECT pidx=%d proper=%d part=%d reason=certified_no_promotion "
+                                         "blocks=%d exits=%d\n", pidx, id, p, (int)pb.size(), (int)ex.size());
                         continue;
+                    }
                     // Identify the normal fallthrough of a multi-exit loop. Conditional non-local
                     // exits are recorded at their source block; FOR latches are not boolean branches,
                     // so their false edge is the explicit normal-completion destination.
@@ -5216,6 +5278,31 @@ emit_conditional_region:
                 for (int b2 : bl)
                     if (!covered.count(b2) && !state_prep.count(b2)) states.push_back(b2);
                 std::sort(states.begin(), states.end());
+                if (!planning && std::getenv("RENOVICE_PROPERDIAG")) {
+                    // A FOR latch left as a raw state: its loop is dissolved into the dispatcher.
+                    for (int b2 : states)
+                        if (!state_part.count(b2) && is_for_latch(b2)) {
+                            std::string chain;
+                            for (int child = b2, guard = 0; child != id && guard < 64; ++guard) {
+                                int parent = -1;
+                                for (size_t q = 0; q < A->regions.size() && parent < 0; ++q)
+                                    for (int c : A->regions[q].parts) if (c == child) { parent = (int)q; break; }
+                                if (parent < 0) break;
+                                chain += std::to_string(parent) + ":" + rk_name(A->regions[parent].kind) + "/"
+                                       + std::to_string(A->regions[parent].parts.size()) + "<";
+                                child = parent;
+                            }
+                            std::fprintf(stderr, "PDIAG_RAWLATCH pidx=%d region=%d latch=%d back=%d back_in_region=%d chain=%s\n",
+                                         pidx, id, b2, g->n[b2].succ_true,
+                                         inreg.count(g->n[b2].succ_true) ? 1 : 0, chain.c_str());
+                        }
+                    for (int p : r.parts)
+                        std::fprintf(stderr, "PDIAG_PART pidx=%d region=%d part=%d kind=%s whole=%d\n", pidx, id, p,
+                                     rk_name(A->regions[p].kind), whole.count(p) ? 1 : 0);
+                    std::fprintf(stderr, "PDIAG_WHOLE pidx=%d region=%d whole=", pidx, id);
+                    for (int p : whole) std::fprintf(stderr, "%d:%s,", p, rk_name(A->regions[p].kind));
+                    std::fprintf(stderr, "\n");
+                }
                 auto st_of = [&](int s2) {
                     if (s2 < 0) return s2;
                     for (int p : whole) {
@@ -5434,6 +5521,8 @@ emit_conditional_region:
                     dispatcher_owns_branch = true;
                     emit_block(b2, d2);
                     dispatcher_owns_branch = false;
+                    const int exit_arm_target = block_exit_arm_target;
+                    static const bool proper_exit_arm_once = !std::getenv("RENOVICE_NO_PROPER_EXIT_ARM_ONCE");
                     const st::Node& bn = g->n[b2];
                     int s_true = st_of(bn.succ_true), s_false = st_of(bn.succ_false);
                     bool t_in = s_true  >= 0 && inreg.count(s_true);
@@ -5490,6 +5579,14 @@ emit_conditional_region:
                         assign_successor(s_false, f_in, d2 + 2);
                         out += ind(d2 + 1) + "end\n";
                         out += ind(d2) + "end\n";
+                    } else if (cond_ok && t_in != f_in && proper_exit_arm_once && exit_arm_target >= 0
+                               && exit_arm_target == (t_in ? bn.succ_false : bn.succ_true)) {
+                        // EXIT ARM PRINTED ONCE (proper campaign 2026-10-09). emit_block already
+                        // printed the arm that leaves the loop/region (`if c then break end`), so
+                        // control reaching this point took the other arm. Re-testing `c` to choose
+                        // it compiled to a second test of the same register that stock never had
+                        // (DeathSquadFlak p0). RENOVICE_NO_PROPER_EXIT_ARM_ONCE restores the re-test.
+                        out += ind(d2) + pv + " = " + std::to_string(t_in ? s_true : s_false) + "\n";
                     } else if (cond_ok && (t_in || f_in)) {
                         out += ind(d2) + "if " + cond_of(b2, false) + " then\n";
                         if (t_in) out += ind(d2 + 1) + pv + " = " + std::to_string(s_true) + "\n";
