@@ -6376,3 +6376,20 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+---
+
+## 2026-10-09 — #63-#66 LIVENESS-GUARDED COALESCING, OR/AND C == A LOWERING, SETLIST BATCH MERGE (agent/coalesce)
+
+Hypothesis: the dataflow gate's `+NIL`/wrong-origin failures among CFG-ID PASS modules come from register coalescing
+rules that check only the current block (copy fold, table-move and multi-result call retarget) and from the
+recompiler's OR/AND lowering when C == A; the SETTABLEN CFG class comes from later SETLIST batches.
+
+Finding: TRUE (with limits). A prototype-wide liveness guard fixes 86 of the 102 dataflow failures attributed to
+coalescing; the scratch-register OR/AND lowering fixes 7; 9 remain (two other open defects + 3 undiagnosed). The batch
+merge turns 33 CFG-ID FAIL modules into PASS and fixes a multret-tail truncation in the old index-store form.
+
+Evidence: see DEFECTS.md 2026-10-09 coalesce section (binary a4f75a21, runs in work/agents/coalesce-runs/).
+
+Next step: integrator re-measure on the full corpus with the emit.h/structan.h batch; the 2 refused multret batch
+sites; the DUPTABLE-with-field-store batch items (merge refusal reason 4, 23 modules still SETTABLEN).

@@ -308,3 +308,32 @@ Full 44.1.1 corpus (`work/u441-r2b-b5200665`, binary `b5200665`, vs batch 1 `49e
 (MissileVolley, #61). `cert/gates.py 300 150`: ALL GATES PASS (ALIGNED 225, NAME-DIFF 0, realtrip 150/150, Gate 14
 91/91). Rejected from the batch: the split-exit condition guard (tables agent) — it broke Gate 14's #49 closure
 checks and AlchemistVial's closure; kept as `work/agents/tables-runs/split_exit_loop_guard.patch` for rework.
+
+## 2026-10-09 — coalesce agent: liveness-guarded coalescing, OR/AND C == A lowering, SETLIST batches
+
+Agent branch `agent/coalesce` (numbers provisional until integrated). All four were found by the dataflow gate or
+the CFG-ID class census; #63-#65 are invisible to CFG-ID (register-free). Shared primitive: an instruction-level
+backward liveness fixpoint over the prototype's bytecode CFG (`expr.h` `InsnLiveness` / `register_live_after`,
+edge model of m6d `build_graph`, register effects of `liveness.h`; unknown effects fail closed for the prototype).
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 63 | `fold_pure_setup_move` deleted `vR = vS` and read `vS` at the use after scanning only the rest of the block; `R` read in a later block lost its only assignment | `local target = entity; if target:IsA(k) then target = target:GetOwner() end; target:Name()` -> `attempt to index nil` (fixture copy_fold_live_dest) | dataflow-identity among CFG-ID PASS (`+NIL` classes) | fold only when `R` is dead after the use on every path and not rewritten between copy and use; a method object is used at its NAMECALL (`RENOVICE_NO_COALESCE_LIVE_DEST_GUARD`) |
+| 64 | the table-move retarget (`NEWTABLE R; MOVE A,R`) and the multi-result CALL retarget (`v1, v2 = f()` from `CALL R; MOVE A,R; MOVE A+1,R+1`) deleted a source register still read later (the single-result form is restored at render, emit.h) | `local names = {}; table.insert(names, x) ... Create(names)` got a stale value; `local b, c = G(); a, d = b, c` left b, c nil (fixtures table_move_live_source, call_move_live_multi) | dataflow-identity | retarget only when the source is dead after the MOVE (`RENOVICE_NO_TABLEMOVE_LIVE_SOURCE_GUARD`, `RENOVICE_NO_CALLMOVE_LIVE_SOURCE_GUARD`) |
+| 65 | RECOMPILER: `transcode.h` lowered `OR/AND A B C` to `MOVE A<-B; JUMPIF A; MOVE A<-C`, reading the overwritten A when C == A != B (A == B, B == C, A == B == C are exact) | `value = IsMissing(value) or value` printed `false` instead of `kept` (fixtures or_lowering_c_equals_a, orand_alias_cases) | dataflow-identity | C == A != B: `MOVE scr<-A` first (scratch p.mx), alternative from scr; the last three instructions keep CFG-ID's F3 shape; every other site byte-identical (`RENOVICE_LEGACY_ORAND_LOWERING`). Stock census: 44 such sites in 26 of 5,465 U44 modules (OR 40/22, AND 4/4) |
+| 66 | later SETLIST batches (aux > 1) of a >16-item constructor printed as `t[17] = v` (SETTABLEN); a multret tail in a later batch was truncated to one value | CFG-ID `LABEL LOAD/SETLIST/GETIMPORT -> SETTABLEN`; `{..., select(2, 0, 36, 37)}` lost 37 (fixture setlist_batch_merge) | CFG-ID class census; luau.exe | merge the batch into the constructor when its item computations substitute exactly (each consumed once, dead after, effect order kept, no closure, no code-running item when the table register is REF-captured) (`RENOVICE_NO_SETLIST_BATCH_MERGE`, trace `RENOVICE_SETLIST_TRACE`). Stock: later batches in 78 U44 modules (956 fixed + 21 multret sites); 2 multret sites still refused (DiegeticUpgradeCards p409, UIUtilities p158) and still truncated |
+
+Measured with `derecomp.a4f75a21` (agent build, commit 69b68a4) against the committed baseline run
+`work/u441-r2b-b5200665/results-u44.json` (same binary re-run in the agent worktree on the stride-20 sample: identical on
+every counted property). Gates: `--gate-exe derecomp.b5200665.exe`. Lists and outputs in `work/agents/coalesce-runs/`.
+- dataflow FAIL among CFG-ID PASS (102 modules): dataflow PASS 0 -> 93, CFG-ID 102 -> 102, CONST-ID 101 -> 101, compiler
+  closure 102 -> 102, no prototype loss. Attribution by opt-out: #63 55, #64 table 18, #64 multi-result 15, #65 7 (overlaps).
+  Remaining 9: for index after exit (4), loop-exit test register (2), FishInfo, OrokinLock, InkBalloon (not diagnosed).
+- CFG-ID FAIL (1,176 modules): CFG-ID 0 -> 33, dataflow 34 -> 67, CONST-ID 1,101 -> 1,101, closure 1,137 -> 1,137, CFG-equal
+  prototypes 35,087 -> 35,151, no module loses an equal prototype. All 33 attributed to #66 (opt-out run: 33 -> 0).
+- stride 20 (274): CFG-ID 217 -> 219, dataflow 213 -> 220, CONST-ID 270 -> 270, closure 270 -> 270, no PASS -> FAIL.
+- recompile byte identity (same decompiled source, old vs new recompiler): 46/46 sampled modules without a C == A site
+  identical; the 26 C == A modules differ and become identical with `RENOVICE_LEGACY_ORAND_LOWERING=1`.
+- `cert/cfg_class_fixtures.py` 91/91, `cert/dataflow_identity_fixtures.py` 129/129 (open: for_index_after_exit_o2,
+  loop_exit_test_register still asserted failing).
+Not measured: the full 5,478-module corpus run, `cert/gates.py`, in-game behavior.
