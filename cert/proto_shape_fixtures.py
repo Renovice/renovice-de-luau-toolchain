@@ -23,6 +23,18 @@ literal is inlined, and every inlined copy references THE SAME prototype.
                               gate FAILs
 The legacy outputs behave the same in these fixtures (closure identity differs only for two DUPCLOSURE
 sites of one prototype inside one function, which the merge refuses; see shared_protos.h).
+
+Dead tails (src/m6e_cmd.h dead_tail_start / splice_dead_tail). The originals are built with
+RENOVICE_NATIVE=JUMPBACK so the endless loop closes with a real JUMPBACK as in stock; the closure rounds
+then see our own lowering (backward JUMP).
+  <F>_RUNS / _DEFAULT_PROTO_COUNT / _DEFAULT_CFG_IDENTITY / _DEFAULT_CONST_IDENTITY / _DEFAULT_DATAFLOW /
+  _DEFAULT_BEHAVIOR_SAME / _DEFAULT_CLOSES   as above
+  <F>_LEGACY_CONST_FAILS      RENOVICE_NO_DEAD_TAIL: the tail's constants are lost, const-identity FAILs
+  <F>_LEGACY_PROTO_COUNT_FAILS  ... and the tail's closure prototype is lost
+  dead_tail_loop              statements after `while true do ... end`; the tail declares 12 registers the
+                              live code never uses (declaration order must follow register order or the
+                              names drift every round, CoHUpgrades) and creates a closure (BoonSelection)
+  dead_tail_return            statements after `repeat return 2 until true` (a single RETURN)
 """
 import os
 import re
@@ -36,8 +48,10 @@ DEC = os.path.join(ROOT, "bin", os.environ.get("RENOVICE_FIXTURE_EXE", "derecomp
 LUAU = os.path.join(ROOT, "bin", "luau.exe")
 LUAU_COMPILE = os.path.join(ROOT, "bin", "luau-compile.exe")
 FIX = os.path.join(HERE, "fixtures", "proto_shape_2026_10_09")
-OPT_OUTS = ("RENOVICE_NO_SHARED_PROTO_MARKER", "RENOVICE_NO_SHARED_PROTO_MERGE", "RENOVICE_NATIVE")
+OPT_OUTS = ("RENOVICE_NO_SHARED_PROTO_MARKER", "RENOVICE_NO_SHARED_PROTO_MERGE", "RENOVICE_NATIVE",
+            "RENOVICE_NO_DEAD_TAIL")
 SHARED_FIXTURES = ("shared_newclosure", "shared_dupclosure")
+DEAD_TAIL_FIXTURES = ("dead_tail_loop", "dead_tail_return")
 CLOSURE = re.compile(r"(?:DUP|NEW)CLOSURE\s.*-> proto\[(\d+)\]")
 
 
@@ -170,12 +184,37 @@ def shared_checks(name, temp, checks):
                                                   and verdict("cfg-identity", original, mutant)[0] == "FAIL")
 
 
+def dead_tail_checks(name, temp, checks):
+    fixture = os.path.join(FIX, name + ".luau")
+    key = name.upper()
+    expected = trace(fixture)
+    checks[key + "_RUNS"] = expected.count("\n") >= 2
+    original = os.path.join(temp, name + ".original.lua_B")
+    native = base_env(); native["RENOVICE_NATIVE"] = "JUMPBACK"
+    recompile(fixture, original, native)
+    source, rebuilt = round_trip(original, temp, name + ".default")
+    cfg = verdict("cfg-identity", original, rebuilt)
+    checks[key + "_DEFAULT_PROTO_COUNT"] = cfg[1] == cfg[2]
+    checks[key + "_DEFAULT_CFG_IDENTITY"] = cfg[0] == "PASS"
+    checks[key + "_DEFAULT_CONST_IDENTITY"] = verdict("const-identity", original, rebuilt)[0] == "PASS"
+    checks[key + "_DEFAULT_DATAFLOW"] = verdict("dataflow-identity", original, rebuilt)[0] == "PASS"
+    checks[key + "_DEFAULT_BEHAVIOR_SAME"] = trace(source) == expected
+    checks[key + "_DEFAULT_CLOSES"] = closes_within(original, temp, name + ".close", 3)
+    legacy_env = base_env(); legacy_env["RENOVICE_NO_DEAD_TAIL"] = "1"
+    _, legacy = round_trip(original, temp, name + ".legacy", decompile_env=legacy_env)
+    checks[key + "_LEGACY_CONST_FAILS"] = verdict("const-identity", original, legacy)[0] == "FAIL"
+    legacy_cfg = verdict("cfg-identity", original, legacy)
+    checks[key + "_LEGACY_PROTO_COUNT_FAILS"] = legacy_cfg[1] != legacy_cfg[2]
+
+
 def main():
     checks = {}
     try:
         with tempfile.TemporaryDirectory(prefix="renovice-proto-shape-") as temp:
             for name in SHARED_FIXTURES:
                 shared_checks(name, temp, checks)
+            for name in DEAD_TAIL_FIXTURES:
+                dead_tail_checks(name, temp, checks)
     except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
         print("FATAL %s" % error)
         return 2
