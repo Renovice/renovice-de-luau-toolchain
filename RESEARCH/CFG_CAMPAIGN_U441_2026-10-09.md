@@ -45,6 +45,22 @@ fixtures and race prototype patches; the integrator applies fixes one at a time 
 counts do not lose any module (PASS -> FAIL) and the existing gates (`cert/gates.py`, `cert/cfg_class_fixtures.py`)
 pass.
 
-## 3. Results
+## 3. Results (full 44.1.1 corpus, 5,478 modules, each batch measured against the previous one)
 
-(in progress)
+| batch | commit | binary | CFG-ID | CONST-ID | CFG-ID + dataflow | equal protos | PASS -> FAIL | gates |
+|---|---|---|---|---|---|---|---|---|
+| baseline | 44e358b | 701a2adf | 4,174 | 5,343 | 4,077 (agent run) | 71,234 | — | — |
+| 1 (#53-#56) | 7db8538 | 49e0683e | 4,187 | 5,382 | — | 76,762 | 0 | PASS after G13 unmasking control |
+| 2 (#57-#62) | 249b3fc | b5200665 | 4,289 | 5,383 | 4,187 | 77,006 | 0 | ALL PASS |
+| 3 (#63-#67) | 6be6bec | 928298db | 4,465 | 5,389 | 4,351 | 77,326 | 0 | ALL PASS |
+| 4 (#68-#71) | 9dd6e06 | fd0d4c81 | 4,481 | 5,389 | 4,367 | 77,348 | 0 | ALL PASS |
+
+CFG-ID 76.2% -> 81.8% of 5,478; CFG-ID + dataflow 74.4% -> 79.7%. Run folders: `work/u441-r1-49e0683e`,
+`work/u441-r2b-b5200665`, `work/u441-r3b-928298db`, `work/u441-r4b-fd0d4c81` (each with `transitions.json` and
+`gates.txt`). Rejected or opt-in on integration (full-corpus regressions found by the integrator, not by the agents'
+samples): split-exit condition guard (Gate 14 closure), cut-body entry #67 and innermost-loop-first #68 (PASS -> FAIL
+modules and closure losses). Lesson: the stride-20 samples of the agents did not contain the regressing modules;
+every batch needs the full corpus.
+
+Wave 2 (in progress): two-exit loops / inlined returns, Proper dispatcher residue, loop selection rework (#67/#68),
+coalescing liveness + OR/AND lowering (dataflow defects).
