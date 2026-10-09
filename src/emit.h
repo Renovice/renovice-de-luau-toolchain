@@ -588,6 +588,20 @@ struct Emitter {
         return g->n[blk].chain.empty() ? 1 : g->n[blk].chain.size();
     }
 
+    // Composite-tail decisions (COMPOSITE_TAIL_TWO_ARM / _SINGLE_LAST) require the unique external
+    // decision block to own the head's last instruction, so the rendered `if` follows every head
+    // statement. A RETURN block with no successor (`if IsNull(x) then return end` as the head's
+    // first IfThen, whose shared return sits after the loop) is complete inside the head and is
+    // never followed by the decision; letting its higher pc veto the tail made the conditional
+    // fall back to the head ENTRY's predicate (a stale register: `if not a then ... continue end`
+    // emitted as `if a then`). RENOVICE_NO_COMPOSITE_TAIL_RETURN_SKIP restores the old rule.
+    bool composite_tail_ignores_terminal(int blk) const {
+        static const bool off = std::getenv("RENOVICE_NO_COMPOSITE_TAIL_RETURN_SKIP") != nullptr;
+        if (off || blk < 0 || blk >= (int)g->n.size()) return false;
+        const st::Node& n = g->n[blk];
+        return n.is_return && n.succ_true < 0 && n.succ_false < 0;
+    }
+
     int head_block(int id) const {
         if (id < 0 || id >= (int)A->regions.size()) return -1;
         const sa::Region& r = A->regions[id];
@@ -3682,7 +3696,8 @@ emit_conditional_region:
                             const int tail = *external_sources.begin();
                             int last_instruction = -1;
                             for (int block : head_blocks_vector)
-                                last_instruction = std::max(last_instruction, g->n[block].last);
+                                if (!composite_tail_ignores_terminal(block))
+                                    last_instruction = std::max(last_instruction, g->n[block].last);
                             const st::Node& tail_node = g->n[tail];
                             std::vector<std::pair<int, int>> ordered_arms;
                             for (int arm : arms) {
@@ -3768,7 +3783,8 @@ emit_conditional_region:
                             const int tail = *external_sources.begin();
                             int last_instruction = -1;
                             for (int block : head_blocks_vector)
-                                last_instruction = std::max(last_instruction, g->n[block].last);
+                                if (!composite_tail_ignores_terminal(block))
+                                    last_instruction = std::max(last_instruction, g->n[block].last);
                             std::vector<int> arm_blocks_vector;
                             collect_blocks(arms[0], arm_blocks_vector);
                             std::set<int> arm_blocks(arm_blocks_vector.begin(),
@@ -13210,6 +13226,41 @@ emit_conditional_region:
             if (!diamond && !empty) { ++i; continue; }
 
             condition = orient_register_comparison(condition);
+
+            // UNUSED SELECTOR CONDITION (2026-10-09). The preserved empty comparison exists for its
+            // possible __eq/__lt metamethod. A generated integer selector compared with an integer
+            // literal (`__renovice_state_N == K`) cannot call anything -- the emitter only ever
+            // assigns that name integer literals (the #49 argument). Keeping it compiled a real
+            // compare plus a LOADB pair (`local __renovice_unused_condition_0 = __renovice_state_0
+            // == 26`) that stock never had (TransferenceHeal p3: GETIMPORT -> LOAD). Drop it.
+            // RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION restores the preserved form.
+            {
+                static const bool keep = std::getenv("RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION") != nullptr;
+                const std::string selector_prefix = "__renovice_state_";
+                bool pure_selector = false;
+                const size_t space = condition.find(' ');
+                if (!keep && space != std::string::npos && space + 4 <= condition.size()
+                    && condition.compare(0, selector_prefix.size(), selector_prefix) == 0) {
+                    const std::string name = condition.substr(0, space);
+                    const std::string op = condition.substr(space, 4);
+                    std::string literal = condition.substr(space + 4);
+                    bool digits = name.size() > selector_prefix.size();
+                    for (size_t q = selector_prefix.size(); q < name.size() && digits; ++q)
+                        digits = std::isdigit((unsigned char)name[q]) != 0;
+                    size_t start = literal.size() > 1 && literal[0] == '-' ? 1 : 0;
+                    bool integer = literal.size() > start;
+                    for (size_t q = start; q < literal.size() && integer; ++q)
+                        integer = std::isdigit((unsigned char)literal[q]) != 0;
+                    pure_selector = digits && integer && (op == " == " || op == " ~= ");
+                }
+                if (pure_selector) {
+                    const size_t count = diamond ? 5 : 2;
+                    lines.erase(lines.begin() + (std::ptrdiff_t)i,
+                                lines.begin() + (std::ptrdiff_t)(i + count));
+                    ++changed;
+                    continue;
+                }
+            }
 
             const std::string prefix(indent, ' ');
             std::vector<std::string> replacement = {

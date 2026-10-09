@@ -452,6 +452,100 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
             }
         }
         out.dispatch_webs = (size_t)web_serial;
+        // S6 (2026-10-09): dead constant loads under a dispatcher. The rule above decides "dead" with
+        // path-insensitive liveness, so in a prototype with a dispatch web a load whose value every
+        // FEASIBLE path overwrites still looked live through a path the state values exclude (state
+        // 5 jumping past the state-5 assignment). Stock `local i = 1; if c then i = a else i = b end`
+        // has a dead LOADN (epsilon); the decompiler's state machine kept it observable and the
+        // identical program compared as GETIMPORT -> LOAD (ModularArloAvatarRandomizer p4).
+        // Liveness is recomputed on the product of instructions and dispatch environments, where a
+        // state test with a known value has only its decided successor (the same decision the
+        // bisimulation makes). A load is epsilon only if it is dead in EVERY reachable environment.
+        // Fails closed (no change) when the product exceeds its bound or a decided successor is not
+        // a real CFG successor. RENOVICE_CFGID_LEGACY_DISPATCH_LIVENESS=1 disables S6.
+        if (web_serial > 0 && !std::getenv("RENOVICE_CFGID_LEGACY_DISPATCH_LIVENESS")) {
+            using PEnv = std::map<int, std::string>;
+            auto penv_key = [](const PEnv& env) {
+                std::string key;
+                for (const auto& item : env) key += std::to_string(item.first) + "=" + item.second + ";";
+                return key;
+            };
+            struct PState { int i; PEnv env; };
+            std::vector<PState> states;
+            std::map<std::string, int> index;
+            std::vector<std::vector<int>> psucc;
+            auto key_of = [&](int i, const PEnv& env) {
+                return std::to_string(i) + "|" + penv_key(env);
+            };
+            auto intern = [&](int i, const PEnv& env) -> int {
+                const std::string key = key_of(i, env);
+                auto it = index.find(key);
+                if (it != index.end()) return it->second;
+                const int id = (int)states.size();
+                index[key] = id;
+                states.push_back({i, env});
+                psucc.emplace_back();
+                return id;
+            };
+            bool bounded = true;
+            const size_t kMaxStates = 200000;
+            intern(0, PEnv());
+            for (size_t head = 0; head < states.size() && bounded; ++head) {
+                const int i = states[head].i;
+                PEnv env = states[head].env;
+                const CfgIdentityNode& node = out.nodes[(size_t)i];
+                std::vector<int> next = raw_succ[(size_t)i];
+                if (node.state_def) env[node.state_web] = node.def_value;
+                if (node.state_test && node.succ.size() == 2) {
+                    auto known = env.find(node.state_web);
+                    if (known != env.end()) {
+                        const int chosen = known->second == node.test_value ? node.succ[0] : node.succ[1];
+                        if (std::find(next.begin(), next.end(), chosen) == next.end()) { bounded = false; break; }
+                        next = {chosen};
+                    }
+                }
+                for (int t : next) {
+                    const int id = intern(t, env);
+                    psucc[head].push_back(id);
+                }
+                if (states.size() > kMaxStates) bounded = false;
+            }
+            if (bounded) {
+                const size_t m = states.size();
+                std::vector<std::vector<bool>> plive_in(m, std::vector<bool>((size_t)regs, false));
+                std::vector<std::vector<bool>> plive_out(m, std::vector<bool>((size_t)regs, false));
+                bool again = true;
+                for (int guard = 0; again && guard < 100000; ++guard) {
+                    again = false;
+                    for (size_t s = m; s-- > 0;) {
+                        std::vector<bool> lo((size_t)regs, false);
+                        for (int t : psucc[s])
+                            for (int r = 0; r < regs; ++r) if (plive_in[(size_t)t][(size_t)r]) lo[(size_t)r] = true;
+                        std::vector<bool> li = lo;
+                        const int i = states[s].i;
+                        for (int r : defs[(size_t)i]) if (r < regs) li[(size_t)r] = false;
+                        for (int r : uses[(size_t)i]) if (r < regs) li[(size_t)r] = true;
+                        if (lo != plive_out[s] || li != plive_in[s]) {
+                            plive_out[s].swap(lo); plive_in[s].swap(li); again = true;
+                        }
+                    }
+                }
+                std::vector<int> reached((size_t)n, 0), live_somewhere((size_t)n, 0);
+                for (size_t s = 0; s < m; ++s) {
+                    const int i = states[s].i;
+                    const ir::IInsn& in = proto.code[(size_t)i];
+                    ++reached[(size_t)i];
+                    if (in.A < regs && plive_out[s][(size_t)in.A]) live_somewhere[(size_t)i] = 1;
+                }
+                for (int i = 0; i < n; ++i) {
+                    const ir::IInsn& in = proto.code[(size_t)i];
+                    CfgIdentityNode& node = out.nodes[(size_t)i];
+                    if (node.epsilon || node.state_def || node.state_test || !reached[(size_t)i]) continue;
+                    if (!cfg_identity_is_load(in.op) || (in.op == 0x04 && in.C) || in.A >= regs) continue;
+                    if (!live_somewhere[(size_t)i]) node.epsilon = true;
+                }
+            }
+        }
         // N5: NOT r2 <- r1 ; JUMPIF/JUMPIFNOT r2 (r2 dead afterwards) is a test of r1 with the
         // opposite polarity (`local t = not x; if t then`).
         for (int i = 0; i + 1 < n; ++i) {

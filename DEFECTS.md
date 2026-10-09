@@ -282,3 +282,29 @@ equal prototypes 71,234 -> 76,762; no module PASS -> FAIL, no prototype loss. Ga
 is an unmasking (control in `cert/gates.py`). Held back: the dead-tail emission (stable registers needed for
 compiler closure). Not fixed: 29 modules whose stock shares one prototype between several closure sites (O2 inlining).
 Details: `RESEARCH/CFG_CAMPAIGN_U441_2026-10-09.md`.
+
+## 2026-10-09 — 44.1.1 campaign batch 2: dataflow-identity gate, access-order and table fixes
+
+New gate (tooling, CFG-ID/CONST-ID verdicts unchanged): `derecomp dataflow-identity STOCK CAND [--u44]`
+(`src/dataflow_identity_cmd.h`, `cert/dataflow_identity_fixtures.py` 92 checks, `cert/u44_rawhash_roundtrip.py
+--dataflow`). It compares, along CFG-ID's matching, which value origin each matched operation reads, the live values
+and what each closure captures. It FAILs the documented CFG-ID blind spots (#41, #47, #52, read-before-write) and on the
+baseline 4,174 CFG-ID PASS modules flagged 97 real defects (open fixtures in `cert/fixtures/dataflow_2026_10_09/
+open_defects/`: copy fold of a live destination, table-move of a live source, OR/AND lowering with C == A in the
+recompiler, for index read after exit, wrong loop-exit register).
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 57 | GATE normalization gap: pass-3 dead-load liveness in `cfg_identity_cmd.h` was path-insensitive; a constant load under a dispatcher looked live through a path the state values rule out | identical programs reported `GETIMPORT -> LOAD` (CorpusAvatarRandomizer p4) | agent accessorder | S6: liveness over (instruction x dispatch environment), state tests decided like the bisimulation, fail closed when unbounded; two live-on-a-real-path mutations still FAIL (`RENOVICE_CFGID_LEGACY_DISPATCH_LIVENESS`) |
+| 58 | the composite-tail rule was vetoed by a later-pc RETURN block inside the head, so the condition came from the head's entry block | `if not a then ...; continue end` printed as `if a then` inside `while not IsNull(x)` (IdleBarkMonitor) | agent accessorder; luau.exe | skip such RETURN blocks in the last-instruction check (`RENOVICE_NO_COMPOSITE_TAIL_RETURN_SKIP`) |
+| 59 | `local __renovice_unused_condition_N = __renovice_state_K == <int>` residue kept; a generated integer state compare cannot call anything (#49's argument) | an extra compare + LOADB pair stock never had (TransferenceHeal p3) | agent accessorder | drop it (`RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION`); Gate 14's #49 legacy control now sets both knobs |
+| 60 | `fold_pure_setup_move` folded `vA = vB` into a call although `vB` was rewritten before the call | `f(..., vB, frame, vB, ...)`: scaleAmount passed twice, the table lost (ShowImpactMessageLocal) | agent accessorder; luau.exe | refuse the fold when the source is redefined before the use (`RENOVICE_NO_CALLCOALESCE_SOURCE_GUARD`) |
+| 61 | the #40 loop-body DAG rule rejected a `for` body because its FORNLOOP latch has two successors | `for ... do if a and b() then break end ... end` lost `a`'s test (SpaceTurretMissileAbility) | agent accessorder; luau.exe | admit the FORNLOOP latch whose only leaving edge is the loop exit (`RENOVICE_NO_FOR_LOOP_BODY_DAG`); to be superseded by batch 3's general for/nested version; costs MissileVolley's compiler closure (closes at 2 with the opt-out) |
+| 62 | #51's existing-table SETLIST path read item registers whose setup MOVEs `fold_pure_setup_move` had deleted | list elements printed as `vR = nil; vA[k] = vR` (DarkKuvaEximusShootPatternsLib, 18 sites) — invisible to CFG-ID | agent tables; luau.exe (`0 0.75 true nil nil` -> `4 0.75 true x y`) | store the folded item expressions (`RENOVICE_NO_SETLIST_EXISTING_FOLDED_ITEMS`) |
+
+Full 44.1.1 corpus (`work/u441-r2b-b5200665`, binary `b5200665`, vs batch 1 `49e0683e`): CFG-ID 4,187 -> 4,289, CONST-ID
+5,382 -> 5,383, equal prototypes 76,762 -> 77,006, no module PASS -> FAIL, no prototype loss; CFG-ID + dataflow PASS
+4,187 (baseline 4,077); no baseline CFG-PASS module newly fails dataflow; compiler closure 5,425 -> 5,424
+(MissileVolley, #61). `cert/gates.py 300 150`: ALL GATES PASS (ALIGNED 225, NAME-DIFF 0, realtrip 150/150, Gate 14
+91/91). Rejected from the batch: the split-exit condition guard (tables agent) — it broke Gate 14's #49 closure
+checks and AlchemistVial's closure; kept as `work/agents/tables-runs/split_exit_loop_guard.patch` for rework.

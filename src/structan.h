@@ -262,7 +262,37 @@ struct Analyzer {
         if (succ[n].count(n)) return dag_reject(n, 2);
         std::vector<int> latches;
         for (int x : body) if (x != n && succ[x].count(n)) latches.push_back(x);
-        if (latches.size() != 1 || nsucc(latches[0]) != 1) return dag_reject(n, 3);
+        // NUMERIC-FOR LATCH (2026-10-09). A `for` body's latch ends in FORNLOOP, whose second edge is
+        // the loop op's own exit, not a `break`. `for i = 1, n do if a and b() then break end ... end`
+        // keeps the same short-circuit DAG as #40 (`a` -> {b(), rest}, `b()` -> {exit, rest}); the
+        // latch exit made the rule reject it, NaturalLoop collapsed the body unreduced and the
+        // emitter dropped `a`'s test (`a` was read and discarded, the loop broke on b() alone).
+        // Admit a latch with two successors when exactly one of its blocks leaves the body, that
+        // block ends in FORNLOOP, its taken edge is the back edge and its exit edge is the single
+        // exit target; that one edge is then exempt from the break checks below.
+        // RENOVICE_NO_FOR_LOOP_BODY_DAG restores the rejection.
+        static const bool for_loop_body_dag = !std::getenv("RENOVICE_NO_FOR_LOOP_BODY_DAG");
+        int for_latch_block = -1;
+        if (latches.size() == 1 && nsucc(latches[0]) == 2 && for_loop_body_dag && outs.size() == 1) {
+            std::set<int> header_blocks, latch_blocks, exit_blocks;
+            region_block_set(n, header_blocks); region_block_set(latches[0], latch_blocks);
+            region_block_set(*outs.begin(), exit_blocks);
+            int leaving = 0, candidate = -1;
+            for (int b : latch_blocks) {
+                if (b < 0 || b >= (int)block_edges.size()) { leaving = -1; break; }
+                const BlockEdges& e = block_edges[b];
+                const bool t_in = e.t < 0 || latch_blocks.count(e.t);
+                const bool f_in = e.f < 0 || latch_blocks.count(e.f);
+                if (t_in && f_in) continue;
+                ++leaving; candidate = b;
+            }
+            if (leaving == 1) {
+                const BlockEdges& e = block_edges[candidate];
+                if (e.term == 0x0a && e.branch && header_blocks.count(e.t) && exit_blocks.count(e.f))
+                    for_latch_block = candidate;
+            }
+        }
+        if (latches.size() != 1 || (nsucc(latches[0]) != 1 && for_latch_block < 0)) return dag_reject(n, 3);
         bool dropped_branch = false;
         for (int x : body) {
             int inner = 0;
@@ -277,6 +307,7 @@ struct Analyzer {
             const bool nested_loop = region_has_loop(x);
             for (int b : xb) {
                 if (b < 0 || b >= (int)block_edges.size()) return dag_reject(n, 5);
+                if (b == for_latch_block) continue;
                 const BlockEdges& e = block_edges[b];
                 const bool t_out = e.t >= 0 && !body_blocks.count(e.t);
                 const bool f_out = e.f >= 0 && !body_blocks.count(e.f);

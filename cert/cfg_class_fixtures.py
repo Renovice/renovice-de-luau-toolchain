@@ -303,6 +303,9 @@ def main():
                                                                       "selector_residue.close", 3)
             legacy_env = base_env()
             legacy_env["RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE"] = "1"
+            # 2026-10-09 (#59): the unused-condition canonicalizer also drops the residue's integer
+            # compare, so the legacy control must switch both off to reproduce the #49 output.
+            legacy_env["RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION"] = "1"
             checks["SELECTOR_RESIDUE_LEGACY_NOT_CLOSED"] = not closes_within(
                 original, temp, "selector_residue.legacy_close", 5, legacy_env)
             legacy_source, legacy_rebuilt = round_trip(original, temp, "selector_residue.legacy",
