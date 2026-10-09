@@ -6392,4 +6392,4 @@ merge turns 33 CFG-ID FAIL modules into PASS and fixes a multret-tail truncation
 Evidence: see DEFECTS.md 2026-10-09 coalesce section (binary a4f75a21, runs in work/agents/coalesce-runs/).
 
 Next step: integrator re-measure on the full corpus with the emit.h/structan.h batch; the 2 refused multret batch
-sites; the DUPTABLE-with-field-store batch items (merge refusal reason 4, 23 modules still SETTABLEN).
+sites; the 24 CFG-ID FAIL modules that still carry a SETTABLEN class (before: 80; refusal reasons via RENOVICE_SETLIST_TRACE, e.g. reason 4 = a non-register statement such as a field store between batches).
