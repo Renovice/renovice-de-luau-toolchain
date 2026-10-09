@@ -325,3 +325,24 @@ CFG-ID, CONST-ID or dataflow, no prototype loss; compiler closure 5,424 -> 5,446
 300 150`: ALL GATES PASS (ALIGNED 226). Fixtures of this batch: `work/agents/conditions-runs/fixtures/` (to be moved
 into the cert gate). Rejected: forcing the semantic-plan terminal-arm check on (NullStar, JuggernautSpawnScript
 PASS -> FAIL).
+
+## 2026-10-09 — 44.1.1 campaign, agent loops: innermost-first loop selection made default (numbers provisional, L1-L7)
+
+Innermost-first selection (#70 in batch 4, opt-in after the integration run) is the dominance loop-forest order
+on the reduced graph. Each regression of the integration run was a latent defect that the outer-first tree hid,
+not a wrong loop choice. Base `6be6bec` (binary `928298db`); the fixes also change outer-first output.
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| L1 | an IfThen whose composite head is (or ends in) a loop with a break arm printed `if cond(head's first block) then ARM end` after the loop: the loop header's own test, not the arm's | Platform p2 innermost (`if c3v1 ~= false then SetMaterialParam(...)`); fixture `loop_break_arm_join`: `reset1` logged for a normal exit (also wrong in outer-first output) | agent loops; region tree dump (`RENOVICE_SATREE_PIDX`) | a composite head is an exact decision only when ONE head block enters the arms and both its successors leave the head; otherwise the recorded-exit selector (`RENOVICE_NO_INEXACT_HEAD_SELECTOR`), not for heads with a FOR prep/latch exit (raw zero-trip test does not converge; `RENOVICE_INEXACT_SELECTOR_FOR_EXITS=1`), and only when every arm's selector value is assigned in the head (else the previous rendering; PveDeathMatch p17 lost a print through a nested selector without relay) |
+| L2 | the selector form of L1 is exact but grows a relay per compile cycle | Platform, KubrowChargerStrainAbility p8, PickUpArrows never closed | closure rounds | BREAK ARM INSIDE ITS LOOP: IfThen(loop, ARM) with one entering block d directly in one loop of the head, ARM continuing only to that loop's exit: d's loop-exit test prints `if c then ARM break end` (stock layout); verified by a scratch render (exactly one print, else selector) (`RENOVICE_NO_INLINE_BREAK_ARM`) |
+| L3 | `reduce_loop_body_dag` refused a body when a PART contained a nested loop and that part had any loop-exit edge, even one after the nested loop | `if IsNull(t) then for ... end; if IsNull(t) then break end end` (AmbulasOrbitalLaser p2, innermost): body unreduced, guard dropped | `RENOVICE_SASTEPS` reason 6 | the nested-loop test is per block (block inside a loop region of the part), like the post-reduction check (`RENOVICE_NO_DAG_PRECISE_NESTED_EXIT`) |
+| L4 | the interior PREP scan of a conditional takes the FIRST prep in its head; when the head holds an earlier complete loop (or starts with its prep) the #65 rule refused it and the real decision FORNPREP printed as the raw `(step > 0 and i > n) or ...` test before a second `for` | KahlOrders p35, ActivateAllCrewShips p2 (innermost) | `RENOVICE_PLANDBG` claims | the unique head block with an edge into an arm (arm block sets, not head_block(): a NaturalLoop arm's first part can be its latch) owns the conditional when it is a FORNPREP (`RENOVICE_NO_DECISION_PREP_OWNER`) |
+| L5 | a FORNLOOP-latch-headed loop region was keyed by its body start while its prep owner was keyed by the terminal-arm latch, so both won and the same `for` opened twice, nested | DragonGroundBoss p43 `for i ... do for j = i, ... do` (N^2), also outer-first; with innermost-first it grew one nesting per cycle | `RENOVICE_PLANDBG` loopkeys 9 vs 6 | key a FORNLOOP latch head by the latch like FORGLOOP (`RENOVICE_NO_FORNLOOP_LATCH_KEY`) |
+| L6 | the loop-body DAG admitted one exit target; a loop with a statement break arm has two (arm, normal exit) | body left unreduced, branches dropped (DragonGroundBoss p34 shape) | reason 11 | admit a second target that is a break arm (all preds in the body, continues only to the other exit or ends) (`RENOVICE_NO_DAG_BREAK_ARM_EXIT`) |
+| L7 | innermost-first was opt-in | lost outer loops: `while true do for ... do repeat if lost then return end until done end ... end` headed at the inner repeat (VentKidsBand p1; fixture `innermost_nested_repeat`) | integration run | default again (`RENOVICE_NO_INNERMOST_LOOP_FIRST` restores outer-first) |
+
+Rejected/kept opt-in: `RENOVICE_PROPER_HEADER_EXIT_GUARD=1` (keep a loop header's exit target out of the header
+Proper) fixes VoidClone's closure but on the 442-module focus list turned 31 modules CFG-ID PASS -> FAIL;
+`RENOVICE_CUT_BODY_ENTRY=1` (#67) still costs AbilityAuraLib's closure with these fixes (Platform and KahlOrders p35
+no longer regress).

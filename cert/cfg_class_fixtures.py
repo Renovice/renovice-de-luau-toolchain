@@ -38,6 +38,17 @@ Compiler-closure fix (#49), fixture selector_residue:
   SELECTOR_RESIDUE_LEGACY_NOT_CLOSED  RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE: no repeat within 5 rounds
   SELECTOR_RESIDUE_LEGACY_CFG_FAILS   ... and the first pass fails cfg-identity (the residue compare)
 
+Break arm of a loop (loops campaign 2026-10-09), fixture loop_break_arm_join (Platform p2 shape):
+  loop_break_arm_join         RENOVICE_NO_INEXACT_HEAD_SELECTOR (IfThen(loop, ARM) printed ARM after the
+                              loop under the loop header's test: `reset1` logged for a normal exit)
+  LOOP_BREAK_ARM_JOIN_DEFAULT_CLOSES        the arm printed inside its loop repeats within 3 rounds
+  LOOP_BREAK_ARM_JOIN_SELECTOR_NOT_CLOSED   RENOVICE_NO_INLINE_BREAK_ARM (exact selector relay) does
+                              not repeat within 5 rounds
+
+Innermost-first loop selection (loops campaign 2026-10-09), fixture innermost_nested_repeat (VentKidsBand p1):
+  innermost_nested_repeat     RENOVICE_NO_INNERMOST_LOOP_FIRST (outer-first selection headed one cycle at
+                              the inner `repeat` and lost the outer loops: the trace stops after one round)
+
 Loop-carried nil (emit.h implicit-nil canonicalizer, #41), fixture loop_carried_nil:
   LOOP_CARRIED_NIL_RUNS / _DEFAULT_BEHAVIOR_SAME / _DEFAULT_CFG_IDENTITY
   LOOP_CARRIED_NIL_LEGACY_BEHAVIOR_DIFFERS  RENOVICE_NO_LOOP_NIL_HOIST resets the variable per iteration
@@ -98,10 +109,14 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_FOR_BREAK_ARM", "RENOVICE_NO_LOOP_ENTRY_NIL", "RENOVICE_NO_PROPER_PREP_FOR",
             "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS", "RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE",
             "RENOVICE_CFGID_LEGACY_OR_BLOCK", "RENOVICE_NATIVE",
-            "RENOVICE_NO_SETLIST_EXISTING_TABLE", "RENOVICE_NO_CAPTURE_SNAPSHOT")
+            "RENOVICE_NO_SETLIST_EXISTING_TABLE", "RENOVICE_NO_CAPTURE_SNAPSHOT",
+            "RENOVICE_NO_INEXACT_HEAD_SELECTOR", "RENOVICE_NO_INLINE_BREAK_ARM",
+            "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INNERMOST_LOOP_FIRST")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
-    "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP",
+    # Loops campaign 2026-10-09: innermost-first selection also takes the clean header first, so
+    # the legacy control switches both off.
+    "entry_headed_loop": ("RENOVICE_NO_ENTRY_HEADED_LOOP", "RENOVICE_NO_INNERMOST_LOOP_FIRST"),
     "entry_outer_loop": "RENOVICE_NO_ENTRY_CALLER_EDGE",
     "import_chain": "RENOVICE_NO_IMPORT_CHAIN_GUARD",
     "compound_exit_loop": "RENOVICE_NO_LOOP_BODY_DAG",
@@ -109,11 +124,14 @@ DECOMPILER_FIXTURES = {
     "for_body_order": "RENOVICE_NO_FOR_BODY_PART_ORDER",
     "nested_for_break": "RENOVICE_NO_PREP_HEADED_WHILE",
     "proper_prep_for": "RENOVICE_NO_PROPER_PREP_FOR",
+    "loop_break_arm_join": "RENOVICE_NO_INEXACT_HEAD_SELECTOR",
+    "innermost_nested_repeat": "RENOVICE_NO_INNERMOST_LOOP_FIRST",
 }
 # Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation).
 # cfg expectation "FAIL" = the gate must catch it; "PASS" = a recorded gate blind spot.
 EXTRA_LEGACY = (
-    ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM", "FAIL"),
+    # Loops campaign 2026-10-09: the break arm printed inside its loop covers #46's arm too.
+    ("nested_for_break", "BREAK_ARM", ("RENOVICE_NO_FOR_BREAK_ARM", "RENOVICE_NO_INLINE_BREAK_ARM"), "FAIL"),
     ("nested_for_break", "ENTRY_NIL", "RENOVICE_NO_LOOP_ENTRY_NIL", "PASS"),
     ("proper_prep_for", "NESTED", "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS", "FAIL"),
 )
@@ -272,7 +290,8 @@ def main():
                 checks[name.upper() + "_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp, prelude) == expected
                 checks[name.upper() + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
                 legacy_env = base_env()
-                legacy_env[opt_out] = "1"
+                for switch in (opt_out if isinstance(opt_out, tuple) else (opt_out,)):
+                    legacy_env[switch] = "1"
                 legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
                 checks[name.upper() + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
                 checks[name.upper() + "_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp, prelude) != expected
@@ -280,7 +299,8 @@ def main():
                     if extra_name != name:
                         continue
                     extra_env = base_env()
-                    extra_env[switch] = "1"
+                    for one_switch in (switch if isinstance(switch, tuple) else (switch,)):
+                        extra_env[one_switch] = "1"
                     extra_source, extra_rebuilt = round_trip(original, temp,
                                                              "%s.legacy_%s" % (name, label.lower()),
                                                              extra_env)
@@ -306,11 +326,28 @@ def main():
             # 2026-10-09 (#59): the unused-condition canonicalizer also drops the residue's integer
             # compare, so the legacy control must switch both off to reproduce the #49 output.
             legacy_env["RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION"] = "1"
+            # Loops campaign 2026-10-09: the residue came from a break-arm selector, which the break
+            # arm printed inside its loop no longer creates.
+            legacy_env["RENOVICE_NO_INLINE_BREAK_ARM"] = "1"
             checks["SELECTOR_RESIDUE_LEGACY_NOT_CLOSED"] = not closes_within(
                 original, temp, "selector_residue.legacy_close", 5, legacy_env)
             legacy_source, legacy_rebuilt = round_trip(original, temp, "selector_residue.legacy",
                                                        legacy_env)
             checks["SELECTOR_RESIDUE_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
+
+            # Loops campaign 2026-10-09: the break arm printed inside its loop re-decompiles to
+            # itself; the recorded-exit selector (RENOVICE_NO_INLINE_BREAK_ARM) is exact but grows a
+            # relay per compile cycle and never closes.
+            fixture = os.path.join(FIX, "loop_break_arm_join.luau")
+            original = os.path.join(temp, "loop_break_arm_join.close.lua_B")
+            run([DEC, "recompile", fixture, original])
+            checks["LOOP_BREAK_ARM_JOIN_DEFAULT_CLOSES"] = closes_within(original, temp,
+                                                                         "loop_break_arm_join.close", 3)
+            selector_env = base_env()
+            selector_env["RENOVICE_NO_INLINE_BREAK_ARM"] = "1"
+            selector_env["RENOVICE_NO_INNERMOST_LOOP_FIRST"] = "1"   # outer-first: the selector spans the outer loop
+            checks["LOOP_BREAK_ARM_JOIN_SELECTOR_NOT_CLOSED"] = not closes_within(
+                original, temp, "loop_break_arm_join.selector_close", 5, selector_env)
 
             fixture = os.path.join(FIX, "loop_carried_nil.luau")
             expected = trace(fixture, temp)
