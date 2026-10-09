@@ -379,3 +379,17 @@ FAIL modules, 1,151 carry a dispatcher; most fail because of loop structure (mul
 Full 44.1.1 corpus (`work/u441-r6-5ce9c9f8`, binary `5ce9c9f8`, vs batch 5 `5713df5f`): CFG-ID 4,515 -> 4,533, CFG-ID +
 dataflow 4,501 -> 4,519, no module PASS -> FAIL on any gate, no prototype or closure loss. Gate 14 91 -> 98 checks
 (baseline moved with the record in `cert/gates.py`); `cert/gates.py 300 150` ALL GATES PASS; dataflow fixtures 136/136.
+
+## 2026-10-10 — 44.1.1 campaign batch 7: shared prototypes and dead tails (agent protos2, a20f296 + c788b43)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 78 | one stock prototype is referenced from several closure sites (DE's -O2 inliner inlined a local function containing a closure); we emit one literal per site, so the rebuild has extra prototypes | PROTO_COUNT in 29 modules (30 groups, 21 NEWCLOSURE / 10 DUPCLOSURE) | agents protos/protos2; re-inlining at -O2 measured infeasible (Luau's cost model rejects 11 of 31 of our bodies) | the decompiler marks each literal of a shared prototype `-- RENOVICE_SHARED_PROTO <index>`; the recompiler (`src/shared_protos.h`) merges the copies only when they compiled to the identical prototype (children included) and fixes child lists / NEWCLOSURE operands / closure constants; refused when one function would hold two closure constants for one prototype (`RENOVICE_NO_SHARED_PROTO_MARKER`, `RENOVICE_NO_SHARED_PROTO_MERGE`); StatsLib refused (an existing capture-snapshot shape makes Luau pick DUPCLOSURE) |
+| 79 | the emitter walks only reachable blocks; stock code after an endless loop or a final RETURN (`repeat return X until true` keeps it) was dropped | CONST-ID losses (dead strings), lost prototypes (BoonSelection 7) in 53 modules | agents protos/protos2 | the dead suffix is decompiled as a synthetic prototype and spliced in; closure-stable: a backward JUMP (our JUMPBACK lowering) is recognized as the loop end, missing locals are declared in register order, a CLOSEUPVALS+RETURN-only tail is compiler glue (`RENOVICE_NO_DEAD_TAIL`, trace `RENOVICE_DEAD_TAIL_TRACE`); refused: WF99PvPvEMission p171 |
+
+New gate `cert/proto_shape_fixtures.py` (40 checks: two shared-prototype cases built at -O2, two dead-tail cases, opt-out
+controls, an edited-copy mutation that must not merge). Full 44.1.1 corpus (`work/u441-r7-909755e9`, binary `909755e9`,
+vs batch 6 `5ce9c9f8`): CFG-ID 4,533 -> 4,544, CONST-ID 5,389 -> 5,434, CFG-ID + dataflow 4,519 -> 4,533, PROTO_COUNT
+30 -> 1 (StatsLib), prototype-aligned modules 5,435 -> 5,464, equal prototypes 77,432 -> 79,024 of 83,518; no module
+PASS -> FAIL on any gate, no prototype or closure loss. Gate 13 U43 swaps 7,245 -> 7,501 = unmasking (control in
+`cert/gates.py`). Open: mid-function dead code under a constant-false condition (~20 ranges, 10 modules).

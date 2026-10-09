@@ -256,6 +256,49 @@ static void compute_orphan_hosts(const de::Module& m, int root) {
     }
 }
 
+// ---- Shared prototypes (O2 inlining) --------------------------------------------------------------
+// DE inlines small local functions (-O2); an inlined body that contains a function literal makes every
+// inlined copy reference THE SAME prototype, so one stock prototype has several closure sites (44.1.1:
+// 31 prototypes in 29 modules). The emitter writes one literal per site, which the compiler turns into
+// one prototype per site: every later prototype index shifted (PROTO_COUNT). Each literal of a
+// prototype with two or more closure sites is marked `-- RENOVICE_SHARED_PROTO <index>` on its
+// `function(` line; the recompiler merges copies that compile to the identical prototype
+// (src/shared_protos.h). Re-inlining instead is not reproducible: Luau's inliner decides by an AST cost
+// model and the register-faithful emission is costlier than the original source (11 of 31 rejected).
+// RENOVICE_NO_SHARED_PROTO_MARKER disables the marker.
+static std::set<int> g_shared_protos;
+
+static void compute_shared_protos(const de::Module& m) {
+    g_shared_protos.clear();
+    if (std::getenv("RENOVICE_NO_SHARED_PROTO_MARKER")) return;
+    const int count = (int)m.protos.size();
+    std::vector<int> refs((size_t)count, 0);
+    for (const de::Proto& proto : m.protos) {
+        size_t offset = 0;
+        while (offset + 4 <= proto.code.size()) {
+            const int op = (uint8_t)proto.code[offset];
+            const int bx = (uint8_t)proto.code[offset + 2] | ((uint8_t)proto.code[offset + 3] << 8);
+            int target = -1;
+            if (op == 0x16 && bx < (int)proto.kids.size()) target = (int)proto.kids[(size_t)bx];
+            else if (op == 0x42 && bx < (int)proto.consts.size() && proto.consts[(size_t)bx].tag == 6)
+                target = (int)proto.consts[(size_t)bx].idx;
+            if (target >= 0 && target < count) ++refs[(size_t)target];
+            offset += tc::is_de_width8(op) ? 8 : 4;
+        }
+    }
+    for (int index = 0; index < count; ++index)
+        if (refs[(size_t)index] >= 2) g_shared_protos.insert(index);
+}
+
+// Append the marker to the `function(...)` header line of an emitted literal.
+static void mark_shared_literal(std::string& body, int proto) {
+    if (!g_shared_protos.count(proto) || body.compare(0, 9, "function(") != 0) return;
+    size_t eol = body.find('\n');
+    if (eol == std::string::npos) return;
+    if (eol > 0 && body[eol - 1] == '\r') --eol;
+    body.insert(eol, std::string(" ") + sp::shared_proto_marker() + std::to_string(proto));
+}
+
 // Insert the dead orphan literals hosted by `host` before the closing `end` of its function text.
 // Placeholders are expanded by the caller's inline_closures pass like any closure site.
 static bool append_orphan_literals(std::string& fn, int host, const de::Module& m) {
@@ -330,6 +373,221 @@ static size_t lua_string_span(const std::string& text, size_t at) {
     return 0;
 }
 
+// ---- Dead tails after an endless loop ------------------------------------------------------------
+// Source such as `while true do ... end  print("exit")` compiles the statements after the loop even
+// though no path reaches them (the loop has no exit test). The emitter walks reachable blocks only,
+// so the rebuilt prototype lost those instructions and their constants (44.1.1: 43 such tails in 31
+// modules, e.g. PatrolScript "exit", DayNightTests "... Complete!"). The upstream compiler keeps code
+// after `while true do ... end` (it is not an always-terminating statement), so re-emitting the
+// tail after the loop reproduces it.
+// Accepted shape only: the maximal unreachable SUFFIX of the code, directly after a JUMPBACK (endless
+// loop) or a RETURN, closed (no branch leaves it), containing at least one op other than
+// RETURN/JUMP/JUMPBACK. The tail is decompiled as a synthetic prototype whose code is that suffix
+// (relative branch offsets are unchanged by the shift). After a JUMPBACK its statements are spliced
+// before the function's final `do return end`; after a RETURN the final `do return X end` is spelled
+// `repeat return X until true` (same instruction; not a terminator to the upstream compiler's
+// dead-code rule, which drops statements after `return`) and the tail follows it. Register names are register-derived (`v<N>`); a tail using a lexical
+// `__renovice_local_` name, or a function not ending in `do return end`, is left as before.
+// RENOVICE_NO_DEAD_TAIL disables the mechanism.
+static size_t dead_tail_start(const de::Proto& proto, int* previous_op = nullptr) {
+    const std::string& code = proto.code;
+    std::vector<size_t> offsets; std::vector<int> ops;
+    for (size_t offset = 0; offset + 4 <= code.size();) {
+        const int op = (uint8_t)code[offset];
+        offsets.push_back(offset); ops.push_back(op);
+        offset += tc::is_de_width8(op) ? 8 : 4;
+    }
+    if (offsets.size() < 2) return std::string::npos;
+    std::map<size_t, size_t> at;
+    for (size_t index = 0; index < offsets.size(); ++index) at[offsets[index]] = index;
+    auto branch_target = [&](size_t index, long long& target) -> bool {
+        switch (ops[index]) {
+        case 0x40: case 0x25: case 0x4b: case 0x18: case 0x37: case 0x27: case 0x21:
+        case 0x1c: case 0x23: case 0x33: case 0x20: case 0x41: case 0x34: case 0x3a:
+        case 0x47: case 0x0a: case 0x0b: case 0x30: case 0x1b: case 0x1e: {
+            const size_t offset = offsets[index];
+            const int bx = (int16_t)(uint16_t)((uint8_t)code[offset + 2] | ((uint8_t)code[offset + 3] << 8));
+            target = (long long)offset + 4 + (long long)bx * 4;
+            return true;
+        }
+        default: return false;
+        }
+    };
+    std::vector<char> reach(offsets.size(), 0);
+    std::vector<size_t> work{0};
+    while (!work.empty()) {
+        const size_t index = work.back(); work.pop_back();
+        if (index >= offsets.size() || reach[index]) continue;
+        reach[index] = 1;
+        const int op = ops[index];
+        if (op == 0x29) continue;                                   // RETURN
+        long long target = 0;
+        if (branch_target(index, target)) {
+            const auto found = at.find((size_t)target);
+            if (target < 0 || found == at.end()) return std::string::npos;   // malformed: refuse
+            work.push_back(found->second);
+            if (op == 0x40 || op == 0x25 || op == 0x0b || op == 0x30 || op == 0x1b) continue;
+        }
+        if (op == 0x04 && (uint8_t)code[offsets[index] + 3]) {     // LOADB with skip
+            const auto found = at.find(offsets[index] + 4 + 4 * (size_t)(uint8_t)code[offsets[index] + 3]);
+            if (found == at.end()) return std::string::npos;
+            work.push_back(found->second);
+        }
+        work.push_back(index + 1);
+    }
+    size_t first = offsets.size();
+    while (first > 0 && !reach[first - 1]) --first;
+    if (first == offsets.size() || first == 0) return std::string::npos;
+    // An endless loop closes with JUMPBACK in stock; our transcoder lowers JUMPBACK to a backward
+    // JUMP, so a re-decompile of our own output must accept that spelling too (compiler closure).
+    long long back_target = 0;
+    const bool backward_jump = ops[first - 1] == 0x40 && branch_target(first - 1, back_target)
+                               && back_target < (long long)offsets[first - 1];
+    if (ops[first - 1] != 0x25 && ops[first - 1] != 0x29 && !backward_jump) return std::string::npos;
+    if (previous_op) *previous_op = backward_jump ? 0x25 : ops[first - 1];
+    bool substantive = false;
+    for (size_t index = first; index < offsets.size(); ++index) {
+        // RETURN/JUMP/JUMPBACK and CLOSEUPVALS (0x39, the implicit end of a function with captured
+        // locals) are compiler glue: a tail of only these is the function's own implicit end and
+        // has no source statement (SkyboxEffects p4).
+        if (ops[index] != 0x29 && ops[index] != 0x40 && ops[index] != 0x25 && ops[index] != 0x39)
+            substantive = true;
+        long long target = 0;
+        if (branch_target(index, target) && target < (long long)offsets[first]) return std::string::npos;
+    }
+    return substantive ? offsets[first] : std::string::npos;
+}
+
+static bool splice_dead_tail(std::string& fn, const de::Proto& proto, int idx,
+                             const std::vector<std::string>& pool) {
+    if (std::getenv("RENOVICE_NO_DEAD_TAIL")) return false;
+    int previous_op = -1;
+    const size_t start = dead_tail_start(proto, &previous_op);
+    if (start == std::string::npos) return false;
+    auto refuse = [&](const char* reason) {
+        if (std::getenv("RENOVICE_DEAD_TAIL_TRACE"))
+            std::fprintf(stderr, "DEAD_TAIL refused proto=%d reason=%s\n", idx, reason);
+        return false;
+    };
+    de::Proto tail_proto = proto;
+    tail_proto.code = proto.code.substr(start);
+    tail_proto.sc = (int)(tail_proto.code.size() / 4);
+    const ir::IProto annotated = ir_annotate(tail_proto, idx, pool, g_nb);
+    if (!annotated.ok) return refuse("annotate");
+    bool ok = false; std::string why;
+    const std::string tail = decompile_proto_anon(annotated, idx, ok, why);
+    // Closure placeholders in the tail (`function<N|caps>`) name the same child indices and the same
+    // register-derived capture names as the host, so the caller's inlining pass expands them like
+    // any other site; the tail follows every live literal, as it did in the original source.
+    if (!ok) return refuse("tail decompile");
+    if (tail.find("__renovice_local_") != std::string::npos) return refuse("lexical local in tail");
+    auto split = [](const std::string& text) {
+        std::vector<std::string> lines; size_t pos = 0;
+        while (pos <= text.size()) {
+            size_t end = text.find('\n', pos);
+            if (end == std::string::npos) end = text.size();
+            lines.push_back(text.substr(pos, end - pos));
+            if (end == text.size()) break;
+            pos = end + 1;
+        }
+        while (!lines.empty() && lines.back().find_first_not_of(" \t\r") == std::string::npos) lines.pop_back();
+        return lines;
+    };
+    const std::vector<std::string> tail_lines = split(tail);
+    std::vector<std::string> fn_lines = split(fn);
+    if (tail_lines.size() < 3 || fn_lines.size() < 3) return refuse("short text");
+    if (tail_lines.back().find_first_not_of(' ') == std::string::npos
+        || tail_lines.back().substr(tail_lines.back().find_first_not_of(' ')) != "end") return refuse("tail end");
+    if (fn_lines.back().substr(fn_lines.back().find_first_not_of(' ')) != "end") return refuse("host end");
+    std::string& final_return = fn_lines[fn_lines.size() - 2];
+    const size_t body_indent = final_return.find_first_not_of(' ');
+    if (body_indent == std::string::npos) return refuse("indent");
+    const std::string final_text = final_return.substr(body_indent);
+    if (previous_op == 0x25 && final_text != "do return end") return refuse("loop host final statement is not do return end");
+    if (previous_op == 0x29) {
+        // Live flow ends in a RETURN. The upstream compiler drops statements after an always-
+        // terminating `return`, so spell that return as `repeat return ... until true`: the same
+        // single RETURN instruction (verified with bin/luau-compile.exe -O1), but not a terminator
+        // to the compiler's dead-code rule, so the tail after it is compiled as in stock.
+        if (final_text.compare(0, 9, "do return") != 0) return refuse("return host final statement is not do return");
+        if (final_text.size() < 13 || final_text.compare(final_text.size() - 4, 4, " end") != 0) return refuse("return host final statement shape");
+        const std::string values = final_text.substr(9, final_text.size() - 9 - 4);
+        final_return = std::string(body_indent, ' ') + "repeat return" + values + " until true";
+    }
+    auto declared_names = [](const std::vector<std::string>& lines, size_t indent, size_t first, size_t last,
+                             std::set<std::string>& names) {
+        for (size_t index = first; index < last; ++index) {
+            const std::string& line = lines[index];
+            if (line.size() <= indent + 6 || line.compare(0, indent, std::string(indent, ' ')) != 0
+                || line.compare(indent, 6, "local ") != 0) continue;
+            std::string list = line.substr(indent + 6);
+            const size_t assign = list.find(" = ");
+            if (assign != std::string::npos) list = list.substr(0, assign);
+            size_t pos = 0;
+            while (pos < list.size()) {
+                size_t comma = list.find(',', pos);
+                if (comma == std::string::npos) comma = list.size();
+                std::string name = list.substr(pos, comma - pos);
+                name.erase(0, name.find_first_not_of(' '));
+                name.erase(name.find_last_not_of(' ') + 1);
+                if (!name.empty()) names.insert(name);
+                pos = comma + 1;
+            }
+        }
+    };
+    // The tail's body: drop its header line, its leading register declarations, its closing `end`.
+    size_t tail_first = 1;
+    std::set<std::string> tail_declared, fn_declared;
+    while (tail_first + 1 < tail_lines.size()
+           && tail_lines[tail_first].compare(0, body_indent + 6, std::string(body_indent, ' ') + "local ") == 0) {
+        declared_names(tail_lines, body_indent, tail_first, tail_first + 1, tail_declared);
+        ++tail_first;
+    }
+    declared_names(fn_lines, body_indent, 1, fn_lines.size() - 2, fn_declared);
+    // Parameters are declared by the function header on both sides.
+    // Declare in REGISTER order: locals are allocated in declaration order, so `v10` listed before
+    // `v2` (string order) bound the names to scrambled registers and every re-decompile renamed
+    // the tail again (CoHUpgrades p31: no compiler fixed point).
+    auto register_number = [](const std::string& name) -> long {
+        if (name.size() < 2 || name[0] != 'v') return -1;
+        long value = 0;
+        for (size_t at = 1; at < name.size(); ++at) {
+            if (!std::isdigit((unsigned char)name[at])) return -1;
+            value = value * 10 + (name[at] - '0');
+        }
+        return value;
+    };
+    std::vector<std::string> missing_names;
+    for (const std::string& name : tail_declared)
+        if (!fn_declared.count(name)) missing_names.push_back(name);
+    std::stable_sort(missing_names.begin(), missing_names.end(),
+                     [&](const std::string& left, const std::string& right) {
+                         const long a = register_number(left), b = register_number(right);
+                         if ((a < 0) != (b < 0)) return a >= 0;
+                         return a < b;
+                     });
+    std::string missing;
+    for (const std::string& name : missing_names) missing += (missing.empty() ? "" : ", ") + name;
+    std::string block;
+    if (!missing.empty()) block += std::string(body_indent, ' ') + "local " + missing + "\n";
+    for (size_t index = tail_first; index + 1 < tail_lines.size(); ++index) block += tail_lines[index] + "\n";
+    std::string rebuilt;
+    for (size_t index = 0; index + 2 < fn_lines.size(); ++index) rebuilt += fn_lines[index] + "\n";
+    if (previous_op == 0x29) rebuilt += fn_lines[fn_lines.size() - 2] + "\n" + block + fn_lines.back();
+    else {
+        // The tail ends with the function's own final RETURN (`do return end`); the host's
+        // synthetic final return after it would be a second, uncompiled terminator.
+        const std::string& tail_last = tail_lines[tail_lines.size() - 2];
+        const size_t tail_text = tail_last.find_first_not_of(' ');
+        const bool tail_returns = tail_text != std::string::npos
+                                  && tail_last.compare(tail_text, std::string::npos, "do return end") == 0;
+        rebuilt += block + (tail_returns ? std::string() : fn_lines[fn_lines.size() - 2] + "\n")
+                 + fn_lines.back();
+    }
+    fn = rebuilt;
+    return true;
+}
+
 // Closures are referenced as `function<N>` by the expression layer, which has no access to the
 // module and so cannot recurse. Substitute each placeholder with the actual emitted sub-function.
 // Without this every DUPCLOSURE/NEWCLOSURE site emits a token that is not Luau at all — the single
@@ -374,11 +632,15 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
             ir::IProto sp = ir_annotate(m.protos[sub], sub, pool, g_nb);
             bool sok = false; std::string swhy;
             std::string t = sp.ok ? decompile_proto_anon(sp, sub, sok, swhy) : std::string();
+            if (sok) splice_dead_tail(t, m.protos[sub], sub, pool);
             if (sok && !append_orphan_literals(t, sub, m)) {
                 sok = false;
                 swhy = "orphan host has no insertion point before its closing end";
             }
-            if (sok) body = inline_closures(t, m, pool, depth + 1);
+            if (sok) {
+                body = inline_closures(t, m, pool, depth + 1);
+                mark_shared_literal(body, sub);
+            }
             else g_inline_fail = "proto " + std::to_string(sub) + ": " +
                                  (sp.ok ? swhy : sp.why);
         } else g_inline_fail = "closure index " + std::to_string(sub) + " out of range";
@@ -826,14 +1088,17 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
     src = decompile_proto_text(ip, root, ok, why);
     if (!ok) { why = std::string("emit problem: ") + why; return false; }
     g_inline_fail.clear();
+    splice_dead_tail(src, m.protos[root], root, pool);
     compute_orphan_hosts(m, root);
     if (!append_orphan_literals(src, root, m)) {
         why = "orphan host has no insertion point before its closing end";
         g_orphans_by_host.clear();
         return false;
     }
+    compute_shared_protos(m);
     src = inline_closures(src, m, pool, 0);
     g_orphans_by_host.clear();          // module-scoped: never leak into another module's inlining
+    g_shared_protos.clear();
     if (!g_inline_fail.empty()) {
         why = std::string("closure inline failed: ") + g_inline_fail;
         return false;

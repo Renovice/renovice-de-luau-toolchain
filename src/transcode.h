@@ -17,6 +17,7 @@
 #include "luau_bc.h"
 #include "de_container.h"
 #include "de_namehash.h"
+#include "shared_protos.h"
 
 namespace tc {
 
@@ -795,11 +796,15 @@ inline CodeResult transcode_code(const luau::Proto& p,
     return { out, sizecode, maxstack };
 }
 
+inline sp::MergeReport& last_shared_proto_report() { static sp::MergeReport report; return report; }
+
 // stock Luau module bytes -> DE 09 03 body bytes.  (assembly mirrors luau_to_de.transcode exactly)
 inline std::string transcode(const std::string& luau_bytes,
                              const std::set<std::string>& hashed_globals = {},
                              const std::set<std::string>& hashed_fields = {}) {
     luau::Module m = luau::read(luau_bytes);
+    // Literals the decompiler marked as copies of one shared stock prototype (shared_protos.h).
+    last_shared_proto_report() = sp::merge_shared_protos(m, sp::shared_proto_lines());
     std::vector<std::string> pool;
     std::map<std::string, int> s2i;
     struct Blob { int mx, npar, nups, isvararg, sizecode; std::string code; std::vector<de::Const> consts; std::vector<uint32_t> kids; };

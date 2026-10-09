@@ -87,9 +87,19 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
             "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 98,
             "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 16,
-            "U43_CLASS_SWAPS": 7245,
+            "U43_CLASS_SWAPS": 7501,
             "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 82,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-10-10 -- shared prototypes and dead tails (DEFECTS #78-#79):
+#   U43 class swaps 7,245 -> 7,501 is an UNMASKING (PITFALLS B6/E6). Control, U43 first 300, production env, first
+#   pass (work/u441-r7-909755e9/g13): pre 5ce9c9f8 swaps 7,245 / 12,607 protos compared / 291 aligned modules;
+#   post 909755e9 7,501 / 13,571 / 300; post + RENOVICE_NO_SHARED_PROTO_MARKER/_MERGE + RENOVICE_NO_DEAD_TAIL
+#   7,245 / 12,607 / 291. All +256 swaps sit in the 9 modules whose prototype count became exact (RetroMessenger
+#   367 -> 368 of 368, BoonSelection 64 -> 71 of 71, ..., InputDialog 65 -> 64 of 64); their decompiled source
+#   (closure prefixes and shared-proto markers normalized) has 0 removed lines (RetroMessenger +213, BoonSelection
+#   +122 dead-tail lines, the other 7 identical: the recompiler merge aligned them). U43 CONST-ID 18 -> 18, CFG-ID
+#   17 -> 17, CFG protos equal 9,284 of 13,571; U44 1-in-50 unchanged; every other gate passed on post.
 
 # BASELINE CHANGE OF 2026-10-09 (b) -- Proper exit arms (DEFECTS #76-#77): Gate 14 91 -> 98 checks (new fixture
 #   proper_exit_in_body: default PASS, two legacy controls). Every pre-existing check passes on post 5ce9c9f8;
