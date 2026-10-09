@@ -2790,6 +2790,7 @@ static int cmd_de_builtins(int argc, char** argv) {
 #include "closure_map_cmd.h"
 #include "u44_raw_cmd.h"
 #include "cfg_identity_cmd.h"
+#include "dataflow_identity_cmd.h"
 
 // The fixed-point rules below were A/B tested, then certified together at 360/360 in raw mode,
 // with five witnesses stable through ten cycles and 19 executable behavior fixtures. Keep that
@@ -2908,6 +2909,7 @@ int main(int argc, char** argv) {
     if (mode == "ir-u44" && argc >= 3) { g_input_profile_u44 = true; return cmd_ir(argc, argv); }
     if (mode == "const-identity" && argc >= 4) return cmd_const_identity(argc, argv);
     if (mode == "cfg-identity" && argc >= 4) return cmd_cfg_identity(argc, argv);
+    if (mode == "dataflow-identity" && argc >= 4) return cmd_dataflow_identity(argc, argv);
     if (mode == "u44-rawhash-selftest") return cmd_u44_rawhash_selftest();
     if ((mode == "profile-to-u44" || mode == "profile-from-u44") && argc == 5) {
         try {
@@ -3043,6 +3045,7 @@ int main(int argc, char** argv) {
                 "  recompile-u44 <in.luau> <out.lua_B> [alias-map] U44 build; raw when the source declares the seed\n"
                 "  recompile-u44-raw <in.luau> <out.lua_B> U44 build; X__<hex> suffixes are raw U44 hashes\n"
                 "  const-identity <stock.lua_B> <candidate.lua_B> [--u44] per-prototype hash/string/key-use gate\n"
-                "  cfg-identity <stock.lua_B> <candidate.lua_B> [--u44] per-prototype control-flow/operation-order gate\n");
+                "  cfg-identity <stock.lua_B> <candidate.lua_B> [--u44] per-prototype control-flow/operation-order gate\n"
+                "  dataflow-identity <stock.lua_B> <candidate.lua_B> [--u44] [--dump=N] per-prototype reaching-origin/capture gate\n");
     return (mode.empty() ? 0 : 2);
 }

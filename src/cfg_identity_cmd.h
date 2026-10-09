@@ -61,6 +61,9 @@ struct CfgIdentityNode {
     // describe the point where it now sits, so it must not prune the dispatch environment.
     bool floating = false;
     std::string def_value;
+    // Successors in instruction order with canonical branch order, recorded before S1 repositions
+    // pure nodes (read only by dataflow_identity_cmd.h; empty when register effects are unknown).
+    std::vector<int> base_succ;
 };
 
 struct CfgIdentityProto {
@@ -472,6 +475,7 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
                 k = out.nodes[(size_t)k].succ.empty() ? -1 : out.nodes[(size_t)k].succ[0];
             if (k >= 0 && k < n && proto.code[(size_t)k].op == 0x29) out.nodes[(size_t)i].epsilon = true;
         }
+        for (auto& node : out.nodes) node.base_succ = node.succ;
         // S1: pure value materializations (constant loads, NEWTABLE, DUPTABLE, GETIMPORT) are
         // unobservable until their value is first read. Within each straight-line block, sink every
         // such node to just before the first real reader of its value (following MOVE copies), or to
@@ -733,10 +737,19 @@ static int cfg_identity_resolve(const CfgIdentityProto& proto, int i, CfgIdentit
     }
 }
 
+// Optional read-only trace of a bisimulation (dataflow_identity_cmd.h): every matched pair of
+// observable nodes with its dispatch environments, in breadth-first order, and the upvalue
+// bijection. Recording it never changes the verdict.
+struct CfgIdentityTrace {
+    struct Pair { int x = -1, y = -1; std::string env_x, env_y; };
+    std::vector<Pair> pairs;
+    std::map<int, int> upvalues;              // stock upvalue slot -> candidate upvalue slot
+};
+
 // Deterministic bisimulation of (node, dispatch environment) pairs from the entries; reports the
 // first mismatch in breadth-first order. `limit` bounds the explored product (fail closed).
 static bool cfg_identity_equal(const CfgIdentityProto& a, const CfgIdentityProto& b, CfgIdentityMismatch& why,
-                               size_t limit, bool& exhausted) {
+                               size_t limit, bool& exhausted, CfgIdentityTrace* trace = nullptr) {
     exhausted = false;
     struct Side { int node; CfgIdentityEnv env; };
     struct Item { Side x, y; size_t depth; };
@@ -779,8 +792,15 @@ static bool cfg_identity_equal(const CfgIdentityProto& a, const CfgIdentityProto
                 why = {x, y, p.label, q.label, "UPVALUE", item.depth}; return false;
             }
             up_ab[ua] = ub; up_ba[ub] = ua;
+            if (trace) trace->upvalues[ua] = ub;
         } else if (p.label != q.label) { why = {x, y, p.label, q.label, "LABEL", item.depth}; return false; }
         if (p.succ.size() != q.succ.size()) { why = {x, y, p.label, q.label, "ARITY", item.depth}; return false; }
+        if (trace) {
+            CfgIdentityTrace::Pair pair;
+            pair.x = x; pair.y = y;
+            pair.env_x = cfg_identity_env_key(item.x.env); pair.env_y = cfg_identity_env_key(item.y.env);
+            trace->pairs.push_back(pair);
+        }
         for (size_t s = 0; s < p.succ.size(); ++s) {
             Item next; next.depth = item.depth + 1;
             next.x.env = item.x.env; next.y.env = item.y.env;
