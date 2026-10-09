@@ -38,6 +38,15 @@ Open-defect witnesses (cert/fixtures/dataflow_2026_10_09/open_defects, real defe
   <F>_OPEN_BEHAVIOR_DIFFERS  luau.exe output differs (decompiled source; for the recompiler defect the
                              source re-decompiled from the rebuilt bytecode)
 When a fix lands these flip: move the fixture to the passing set and record it in DEFECTS.md.
+
+Fixed defects (the decompiler opt-out reproduces the old output):
+  loop_exit_test_register  RENOVICE_NO_WHILE_TAIL_TEST            (#64, 2026-10-09 batch 3)
+  for_index_after_exit_o2  RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN       (#76, two-exit loop escape join;
+                           moved up to cert/fixtures/dataflow_2026_10_09)
+  escape_pretest           RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST    (#76, the construct starts at the
+                           inlined helper's guard; cert/fixtures/twoexit_2026_10_09, -O2)
+  <F>_FIXED_BEHAVIOR_SAME / <F>_FIXED_CFG_PASS / <F>_FIXED_DF_PASS          the fixed output
+  <F>_LEGACY_BEHAVIOR_DIFFERS / <F>_LEGACY_CFG_BLIND / <F>_LEGACY_DF_FAILS  the defect stays reproducible
 """
 import os
 import sys
@@ -53,9 +62,18 @@ FIX_OPEN = os.path.join(FIX_DF, "open_defects")
 # fixture -> how its behavior is observed: "source" (decompiled source) or "rebuilt" (the source
 # re-decompiled from the rebuilt bytecode: the defect is in recompile, the decompiled text is right)
 OPEN_DEFECTS = {"copy_fold_live_dest": "source", "table_move_live_source": "source",
-                "or_lowering_c_equals_a": "rebuilt", "for_index_after_exit_o2": "source",
-                "loop_exit_test_register": "source"}
+                "or_lowering_c_equals_a": "rebuilt"}
+FIX_TWO = os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
+# Fixed defects: fixture -> (decompiler opt-out reproducing the old output, fixture folder)
+FIXED_DEFECTS = {
+    "loop_exit_test_register": ("RENOVICE_NO_WHILE_TAIL_TEST", FIX_OPEN),
+    "for_index_after_exit_o2": ("RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN", FIX_DF),
+    "escape_pretest": ("RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST", FIX_TWO),
+}
+# never inherit these from the caller's shell (PITFALLS A7)
+cc.OPT_OUTS = tuple(cc.OPT_OUTS) + tuple(sorted({switch for switch, _ in FIXED_DEFECTS.values()}))
 cc.O2_FIXTURES.add("for_index_after_exit_o2")
+cc.O2_FIXTURES.add("escape_pretest")
 
 LEGACY = (("loop_carried_nil", "RENOVICE_NO_LOOP_NIL_HOIST"),
           ("nested_for_break", "RENOVICE_NO_LOOP_ENTRY_NIL"),
@@ -175,6 +193,27 @@ def main():
                 checks[key + "_CFG_BLIND"] = cc.cfg_verdict(original, rebuilt) == "PASS"
                 checks[key + "_DF_FAILS"] = df_verdict(original, rebuilt) == "FAIL"
                 checks[key + "_BEHAVIOR_DIFFERS"] = cc.trace(source, temp) != cc.trace(fixture, temp)
+            for name, (switch, folder) in FIXED_DEFECTS.items():
+                fixture = os.path.join(folder, name + ".luau")
+                expected = cc.trace(fixture, temp)
+                original = os.path.join(temp, name + ".fixed_original.lua_B")
+                cc.compile_fixture(fixture, name, original)
+                legacy_env = cc.base_env()
+                legacy_env[switch] = "1"
+                for variant, env in (("FIXED", None), ("LEGACY", legacy_env)):
+                    source, rebuilt = cc.round_trip(original, temp, "%s.%s" % (name, variant.lower()), env)
+                    same = cc.trace(source, temp) == expected
+                    cfg = cc.cfg_verdict(original, rebuilt)
+                    df = df_verdict(original, rebuilt)
+                    key = "%s_%s" % (name.upper(), variant)
+                    if variant == "FIXED":
+                        checks[key + "_BEHAVIOR_SAME"] = same
+                        checks[key + "_CFG_PASS"] = cfg == "PASS"
+                        checks[key + "_DF_PASS"] = df == "PASS"
+                    else:
+                        checks[key + "_BEHAVIOR_DIFFERS"] = not same
+                        checks[key + "_CFG_BLIND"] = cfg == "PASS"
+                        checks[key + "_DF_FAILS"] = df == "FAIL"
     except (OSError, RuntimeError) as error:
         print("FATAL %s" % error)
         return 2
