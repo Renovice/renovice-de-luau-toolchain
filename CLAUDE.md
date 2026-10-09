@@ -1,3 +1,9 @@
+> **END GOAL (user, 2026-10-09):** make the decompiler 99-100% accurate across the CURRENT build's
+> corpus, failure class by failure class (measured by CONST-ID + CFG-ID against the original
+> bytecode, plus a dataflow check for what CFG-ID cannot see). No per-script VERIFIED/UNVERIFIED
+> labelling layer: fix the decompiler instead. Then the modding API. Build on this repo's existing
+> research, tools, gates and DEFECTS.md; do not restart. See the workspace `AGENTS.md`.
+>
 > **READ FIRST: `.claude/M6_TRUTH.md`** (what is true / what is not) and
 > **`.claude/PITFALLS.md`** (every way this project has fooled itself — measurement traps, metric
 > traps, comparison traps, process traps, and the parallel-workspace rules).
