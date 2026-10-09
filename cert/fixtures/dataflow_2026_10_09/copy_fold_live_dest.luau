@@ -1,7 +1,9 @@
--- OPEN DEFECT witness (2026-10-09, dataflow-identity). expr.h fold_pure_setup_move erases
--- `target = entity` (MOVE R1 <- R0) and substitutes R0 into the call although R1 is live out of the
--- block (the conditional reassignment and the later read): `target:GetOwner()` then reads nil.
--- CFG-ID PASS; RENOVICE_NO_CALLCOALESCE=1 restores the behavior. Corpus class NAMECALL VALUE +NIL -PARAM.
+-- FIXED (DEFECTS #63, 2026-10-09; found by dataflow-identity). expr.h fold_pure_setup_move erased
+-- `target = entity` (MOVE R1 <- R0) and substituted R0 into the call although R1 is live out of the
+-- block (the conditional reassignment and the later read): `target:GetOwner()` then read nil.
+-- CFG-ID PASS either way. The fold now requires the copy's destination to be dead after the use
+-- (prototype-wide liveness); RENOVICE_NO_COALESCE_LIVE_DEST_GUARD=1 reproduces the old output.
+-- Corpus class NAMECALL VALUE +NIL -PARAM.
 local Thing = {}
 Thing.__index = Thing
 function Thing.new(name, owner) return setmetatable({ name = name, owner = owner }, Thing) end

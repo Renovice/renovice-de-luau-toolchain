@@ -38,6 +38,22 @@ Open-defect witnesses (cert/fixtures/dataflow_2026_10_09/open_defects, real defe
   <F>_OPEN_BEHAVIOR_DIFFERS  luau.exe output differs (decompiled source; for the recompiler defect the
                              source re-decompiled from the rebuilt bytecode)
 When a fix lands these flip: move the fixture to the passing set and record it in DEFECTS.md.
+
+Fixed open defects (fixture moved up to cert/fixtures/dataflow_2026_10_09; the opt-out reproduces the
+old output, applied to decompile-mod for decompiler fixes and to recompile for the recompiler fix):
+  copy_fold_live_dest     RENOVICE_NO_COALESCE_LIVE_DEST_GUARD    (#63, decompiler)
+  table_move_live_source  RENOVICE_NO_TABLEMOVE_LIVE_SOURCE_GUARD (#64, decompiler)
+  or_lowering_c_equals_a  RENOVICE_LEGACY_ORAND_LOWERING          (#65, recompiler)
+  orand_alias_cases       RENOVICE_LEGACY_ORAND_LOWERING          (#65, all A/B/C aliasing cases)
+  call_move_live_multi    RENOVICE_NO_CALLMOVE_LIVE_SOURCE_GUARD  (#64, multi-result call retarget)
+  <F>_FIXED_BEHAVIOR_SAME / <F>_FIXED_CFG_PASS / <F>_FIXED_DF_PASS     the fixed output
+  <F>_LEGACY_BEHAVIOR_DIFFERS / <F>_LEGACY_CFG_BLIND / <F>_LEGACY_DF_FAILS  the defect stays reproducible
+
+Fixed shape defects (CFG-ID sees the old form):
+  setlist_batch_merge     RENOVICE_NO_SETLIST_BATCH_MERGE         (#66, >16-item constructors)
+  <F>_FIXED_BEHAVIOR_SAME / <F>_FIXED_CFG_PASS / <F>_FIXED_DF_PASS / <F>_LEGACY_BEHAVIOR_DIFFERS / <F>_LEGACY_CFG_FAILS
+  (the old index-store form also truncated a multret tail in a later batch to one value: the fixture's
+  `select(2, 0, 36, 37)` tail lost 37)
 """
 import os
 import sys
@@ -52,12 +68,21 @@ FIX_DF = os.path.join(HERE, "fixtures", "dataflow_2026_10_09")
 FIX_OPEN = os.path.join(FIX_DF, "open_defects")
 # fixture -> how its behavior is observed: "source" (decompiled source) or "rebuilt" (the source
 # re-decompiled from the rebuilt bytecode: the defect is in recompile, the decompiled text is right)
-OPEN_DEFECTS = {"copy_fold_live_dest": "source", "table_move_live_source": "source",
-                "or_lowering_c_equals_a": "rebuilt", "for_index_after_exit_o2": "source"}
-# Fixed open defects (fixture stays in open_defects/): the default rebuild must pass dataflow with the
-# same behavior, and the fix's opt-out must still reproduce the CFG-blind, dataflow-caught defect.
-# loop_exit_test_register: fixed by #64 (2026-10-09 batch 3).
-FIXED_DEFECTS = {"loop_exit_test_register": "RENOVICE_NO_WHILE_TAIL_TEST"}
+OPEN_DEFECTS = {"for_index_after_exit_o2": "source"}
+# Fixed open defects: fixture (in FIX_DF) -> (legacy opt-out, observation, stage the opt-out applies to)
+FIXED_DEFECTS = {
+    "copy_fold_live_dest": ("RENOVICE_NO_COALESCE_LIVE_DEST_GUARD", "source", "decompile"),
+    "table_move_live_source": ("RENOVICE_NO_TABLEMOVE_LIVE_SOURCE_GUARD", "source", "decompile"),
+    "or_lowering_c_equals_a": ("RENOVICE_LEGACY_ORAND_LOWERING", "rebuilt", "recompile"),
+    "orand_alias_cases": ("RENOVICE_LEGACY_ORAND_LOWERING", "rebuilt", "recompile"),
+    "call_move_live_multi": ("RENOVICE_NO_CALLMOVE_LIVE_SOURCE_GUARD", "source", "decompile"),
+    # fixed by #64 (2026-10-09 batch 3)
+    "loop_exit_test_register": ("RENOVICE_NO_WHILE_TAIL_TEST", "source", "decompile"),
+}
+SHAPE_FIXED = {"setlist_batch_merge": "RENOVICE_NO_SETLIST_BATCH_MERGE"}
+# never inherit these from the caller's shell (PITFALLS A7)
+cc.OPT_OUTS = tuple(cc.OPT_OUTS) + tuple(sorted({switch for switch, _, _ in FIXED_DEFECTS.values()}
+                                                 | set(SHAPE_FIXED.values())))
 cc.O2_FIXTURES.add("for_index_after_exit_o2")
 
 LEGACY = (("loop_carried_nil", "RENOVICE_NO_LOOP_NIL_HOIST"),
@@ -105,6 +130,22 @@ def df_verdict(original, candidate, env=None):
         if line.startswith("DATAFLOW_IDENTITY "):
             return line.rsplit("verdict=", 1)[-1].strip()
     return "ERROR"
+
+
+def native_original(fixture, out):
+    """Stock DE carries native OR/AND (0x2b/0x2f); our recompile lowers them, so a recompiler-defect
+    original is built with the native-emission knob exactly as the stock module was."""
+    native_env = cc.base_env()
+    native_env["RENOVICE_NATIVE"] = "OR,AND"
+    cc.run([cc.DEC, "recompile", fixture, out], env=native_env)
+
+
+def round_trip_staged(bytecode, temp, tag, decompile_env=None, recompile_env=None):
+    source = os.path.join(temp, tag + ".luau")
+    rebuilt = os.path.join(temp, tag + ".lua_B")
+    cc.run([cc.DEC, "decompile-mod", bytecode, source], env=decompile_env)
+    cc.run([cc.DEC, "recompile", source, rebuilt], env=recompile_env)
+    return source, rebuilt
 
 
 def fixtures():
@@ -165,11 +206,7 @@ def main():
                 key = name.upper() + "_OPEN"
                 original = os.path.join(temp, name + ".open_original.lua_B")
                 if observe == "rebuilt":
-                    # stock DE carries native OR (0x2b); our recompile lowers it, so the original is
-                    # built with the native-emission knob exactly as the stock module was
-                    native_env = cc.base_env()
-                    native_env["RENOVICE_NATIVE"] = "OR,AND"
-                    cc.run([cc.DEC, "recompile", fixture, original], env=native_env)
+                    native_original(fixture, original)
                 else:
                     cc.compile_fixture(fixture, name, original)
                 source, rebuilt = cc.round_trip(original, temp, name + ".open")
@@ -178,21 +215,50 @@ def main():
                 checks[key + "_CFG_BLIND"] = cc.cfg_verdict(original, rebuilt) == "PASS"
                 checks[key + "_DF_FAILS"] = df_verdict(original, rebuilt) == "FAIL"
                 checks[key + "_BEHAVIOR_DIFFERS"] = cc.trace(source, temp) != cc.trace(fixture, temp)
-            for name, switch in FIXED_DEFECTS.items():
-                fixture = os.path.join(FIX_OPEN, name + ".luau")
-                key = name.upper() + "_FIXED"
-                original = os.path.join(temp, name + ".fixed_original.lua_B")
-                cc.compile_fixture(fixture, name, original)
+            for name, (switch, observe, stage) in FIXED_DEFECTS.items():
+                fixture = os.path.join(FIX_DF, name + ".luau")
                 expected = cc.trace(fixture, temp)
-                source, rebuilt = cc.round_trip(original, temp, name + ".fixed")
-                checks[key + "_DEFAULT_DF_PASS"] = df_verdict(original, rebuilt) == "PASS"
-                checks[key + "_DEFAULT_BEHAVIOR_SAME"] = cc.trace(source, temp) == expected
+                original = os.path.join(temp, name + ".fixed_original.lua_B")
+                if observe == "rebuilt":
+                    native_original(fixture, original)
+                else:
+                    cc.compile_fixture(fixture, name, original)
                 legacy_env = cc.base_env()
                 legacy_env[switch] = "1"
-                source, rebuilt = cc.round_trip(original, temp, name + ".fixed_legacy", legacy_env)
-                checks[key + "_LEGACY_CFG_BLIND"] = cc.cfg_verdict(original, rebuilt) == "PASS"
-                checks[key + "_LEGACY_DF_FAILS"] = df_verdict(original, rebuilt) == "FAIL"
+                for variant, env in (("FIXED", None), ("LEGACY", legacy_env)):
+                    source, rebuilt = round_trip_staged(
+                        original, temp, "%s.%s" % (name, variant.lower()),
+                        decompile_env=env if stage == "decompile" else None,
+                        recompile_env=env if stage == "recompile" else None)
+                    if observe == "rebuilt":
+                        source, _ = cc.round_trip(rebuilt, temp, "%s.%s2" % (name, variant.lower()))
+                    same = cc.trace(source, temp) == expected
+                    cfg = cc.cfg_verdict(original, rebuilt)
+                    df = df_verdict(original, rebuilt)
+                    key = "%s_%s" % (name.upper(), variant)
+                    if variant == "FIXED":
+                        checks[key + "_BEHAVIOR_SAME"] = same
+                        checks[key + "_CFG_PASS"] = cfg == "PASS"
+                        checks[key + "_DF_PASS"] = df == "PASS"
+                    else:
+                        checks[key + "_BEHAVIOR_DIFFERS"] = not same
+                        checks[key + "_CFG_BLIND"] = cfg == "PASS"
+                        checks[key + "_DF_FAILS"] = df == "FAIL"
+            for name, switch in SHAPE_FIXED.items():
+                fixture = os.path.join(FIX_DF, name + ".luau")
+                expected = cc.trace(fixture, temp)
+                original = os.path.join(temp, name + ".shape_original.lua_B")
+                cc.compile_fixture(fixture, name, original)
+                legacy_env = cc.base_env()
+                legacy_env[switch] = "1"
+                key = name.upper()
+                source, rebuilt = round_trip_staged(original, temp, name + ".shape_fixed")
+                checks[key + "_FIXED_BEHAVIOR_SAME"] = cc.trace(source, temp) == expected
+                checks[key + "_FIXED_CFG_PASS"] = cc.cfg_verdict(original, rebuilt) == "PASS"
+                checks[key + "_FIXED_DF_PASS"] = df_verdict(original, rebuilt) == "PASS"
+                source, rebuilt = round_trip_staged(original, temp, name + ".shape_legacy", decompile_env=legacy_env)
                 checks[key + "_LEGACY_BEHAVIOR_DIFFERS"] = cc.trace(source, temp) != expected
+                checks[key + "_LEGACY_CFG_FAILS"] = cc.cfg_verdict(original, rebuilt) == "FAIL"
     except (OSError, RuntimeError) as error:
         print("FATAL %s" % error)
         return 2

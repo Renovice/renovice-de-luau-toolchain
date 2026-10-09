@@ -20,6 +20,9 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <bitset>
+#include <functional>
+#include <cstdint>
 #include "ir.h"
 #include "liveness.h"
 
@@ -223,7 +226,115 @@ inline bool stmt_uses_reg(const Stmt& s, int reg) {
     return false;
 }
 
-inline void fold_pure_setup_move(std::vector<Stmt>& statements, EP& value) {
+// ---------------------------------------------------------------------------------------------
+// INSTRUCTION-LEVEL REGISTER LIVENESS over the whole prototype (2026-10-09, DEFECTS #63/#64).
+// The register coalescing rules below delete a register definition and let another register stand
+// in for it. That is only the same program when the deleted register's value is read by nothing
+// else, on ANY path -- including blocks after the current one. A scan of the current block's
+// statements cannot see a read in a later block (the conditional reassignment + later read of a
+// local), so those rules used to delete live locals. This is a backward may-liveness fixpoint over
+// the bytecode CFG with the same edge model as m6d build_graph (JUMP/JUMPBACK/FORGPREP* are
+// unconditional, LOADB C skips, RETURN ends, every other branch has target + fallthrough) and the
+// shared register-effect model of liveness.h. Any instruction with an unknown register effect makes
+// the whole prototype unknown, and every query then answers "live" (fail closed: no coalescing).
+// Cached per prototype CONTENT (prototypes are annotated into temporaries whose addresses recur).
+struct InsnLiveness {
+    bool valid = false, known = false;
+    int index = -1, maxstack = -1;
+    size_t size = 0;
+    uint64_t fingerprint = 0;
+    std::vector<std::bitset<256>> defs, live_out;
+};
+
+inline uint64_t proto_code_fingerprint(const ir::IProto& ip) {
+    uint64_t h = 1469598103934665603ull;
+    auto mix = [&](uint64_t v) { h ^= v; h *= 1099511628211ull; };
+    for (const ir::IInsn& in : ip.code) {
+        mix(in.op); mix(in.A); mix(in.B); mix(in.C); mix((uint64_t)in.aux);
+        mix((uint64_t)(int64_t)in.target); mix(in.branch ? 1 : 0);
+    }
+    return h;
+}
+
+inline void insn_successors(const ir::IProto& ip, int pc, std::vector<int>& out) {
+    out.clear();
+    const int n = (int)ip.code.size();
+    const ir::IInsn& in = ip.code[(size_t)pc];
+    auto add = [&](int s) { if (s >= 0 && s < n) out.push_back(s); };
+    if (in.op == 0x29) return;                                                   // RETURN
+    if (in.op == 0x04 && in.C) { add(pc + 1 + (int)in.C); return; }              // LOADB skip
+    if (in.op == 0x40 || in.op == 0x25 || in.op == 0x30 || in.op == 0x1b || in.op == 0x0b) {
+        if (in.branch) add(in.target);                                           // unconditional
+        return;
+    }
+    if (in.branch) add(in.target);
+    add(pc + 1);
+}
+
+inline const InsnLiveness& insn_liveness(const ir::IProto& ip) {
+    static thread_local InsnLiveness cache;
+    const uint64_t fingerprint = proto_code_fingerprint(ip);
+    if (cache.valid && cache.index == ip.index && cache.maxstack == ip.maxstack
+        && cache.size == ip.code.size() && cache.fingerprint == fingerprint) return cache;
+    InsnLiveness a;
+    a.valid = true; a.index = ip.index; a.maxstack = ip.maxstack; a.size = ip.code.size();
+    a.fingerprint = fingerprint;
+    const int n = (int)ip.code.size();
+    std::vector<std::bitset<256>> uses((size_t)n), live_in((size_t)n);
+    a.defs.assign((size_t)n, {}); a.live_out.assign((size_t)n, {});
+    std::vector<std::vector<int>> succ((size_t)n);
+    a.known = ip.maxstack <= 256;
+    for (int pc = 0; a.known && pc < n; ++pc) {
+        std::set<int> u, d;
+        if (!lv::register_effects(ip, ip.code[(size_t)pc], u, d)) { a.known = false; break; }
+        for (int r : u) if (r >= 0 && r < 256) uses[(size_t)pc].set((size_t)r);
+        for (int r : d) if (r >= 0 && r < 256) a.defs[(size_t)pc].set((size_t)r);
+        insn_successors(ip, pc, succ[(size_t)pc]);
+    }
+    if (a.known) {
+        bool changed = true;
+        int guard = 0;
+        while (changed && guard++ < 100000) {
+            changed = false;
+            for (int pc = n - 1; pc >= 0; --pc) {
+                std::bitset<256> out;
+                for (int s : succ[(size_t)pc]) out |= live_in[(size_t)s];
+                std::bitset<256> in = uses[(size_t)pc] | (out & ~a.defs[(size_t)pc]);
+                if (out != a.live_out[(size_t)pc] || in != live_in[(size_t)pc]) {
+                    a.live_out[(size_t)pc] = out; live_in[(size_t)pc] = in; changed = true;
+                }
+            }
+        }
+        if (changed) a.known = false;                                            // no fixpoint: fail closed
+    }
+    cache = std::move(a);
+    return cache;
+}
+
+// Is the value register `reg` holds right after instruction `pc` read on any path? True (live)
+// whenever the prototype's effects are unknown. An instruction that itself writes `reg` ends the
+// value it read, so the register is dead after it.
+inline bool register_live_after(const ir::IProto& ip, int pc, int reg) {
+    if (pc < 0 || pc >= (int)ip.code.size() || reg < 0 || reg >= 256) return true;
+    const InsnLiveness& a = insn_liveness(ip);
+    if (!a.known) return true;
+    if (a.defs[(size_t)pc].test((size_t)reg)) return false;
+    return a.live_out[(size_t)pc].test((size_t)reg);
+}
+
+// Does any instruction strictly between `from` and `to` (straight-line, same block) write `reg`?
+inline bool register_written_between(const ir::IProto& ip, int from, int to, int reg) {
+    if (reg < 0 || reg >= 256) return true;
+    const InsnLiveness& a = insn_liveness(ip);
+    if (!a.known) return true;
+    for (int pc = from + 1; pc < to && pc < (int)ip.code.size(); ++pc)
+        if (pc >= 0 && a.defs[(size_t)pc].test((size_t)reg)) return true;
+    return false;
+}
+
+// `use_pc` is the instruction that consumes the folded value (CALL, CONCAT, SETLIST or RETURN).
+inline void fold_pure_setup_move(std::vector<Stmt>& statements, EP& value,
+                                 const ir::IProto& ip, int use_pc) {
     if (!value || value->k != EK::Reg) return;
     int reg = value->reg, candidate = -1;
     for (int q = (int)statements.size() - 1; q >= 0; --q) {
@@ -236,6 +347,21 @@ inline void fold_pure_setup_move(std::vector<Stmt>& statements, EP& value) {
     if (candidate < 0) return;
     for (int q = candidate + 1; q < (int)statements.size(); ++q)
         if (stmt_uses_reg(statements[q], reg)) return;
+    // LIVE DESTINATION GUARD (2026-10-09, DEFECTS #63). Deleting `vR = vS` is only exact when the
+    // copy's value is read by THIS use and nothing else. The statement scan above sees the rest of
+    // this block only; a local copied here and read again in a later block (`local target =
+    // entity; if target:IsA(k) then target = target:GetOwner() end; target:Name()`) lost its only
+    // assignment and the later read saw nil. Require the destination to be dead after the use on
+    // every path (prototype-wide liveness) and not rewritten between the copy and the use (a
+    // multi-target `vR, vX = f()` is invisible to the statement scan).
+    // RENOVICE_NO_COALESCE_LIVE_DEST_GUARD restores the block-local rule for A/B.
+    static const bool live_dest_guard = !std::getenv("RENOVICE_NO_COALESCE_LIVE_DEST_GUARD");
+    if (live_dest_guard) {
+        const int copy_pc = statements[candidate].insn;
+        if (copy_pc < 0 || copy_pc >= use_pc) return;
+        if (register_written_between(ip, copy_pc, use_pc, reg)) return;
+        if (register_live_after(ip, use_pc, reg)) return;
+    }
     // The fold reads the copy's SOURCE register at the use instead of at the MOVE. That is the
     // same value only if no later statement in this block rewrites the source. An inlined call
     // result built in a scratch register (`vB = {..}; vA = vB; vB = scaleAmount; f(vA, vB)`)
@@ -328,6 +454,122 @@ inline bool setlist_table_observed(const ir::IProto& ip, int at, int reg) {
     return true;
 }
 
+// LATER SETLIST BATCH MERGE (2026-10-09, DEFECTS #66). A list constructor with more than 16 items
+// compiles to NEWTABLE, items 1..16 into temporaries, SETLIST aux=1, items 17.. into the SAME
+// temporaries, SETLIST aux=17, ... The first batch became `vA = {v1, ..., v16}`; every later batch
+// was printed as index stores `vA[17] = v1` (SETTABLEN), which is not the stock program shape.
+// Merge a later batch into the constructor itself: `vA = {v1, ..., v16, <item 17>, ...}`, with each
+// later item's computation substituted from the statements that produced it. Exact only when
+//   - the latest statement defining vA in this block is that constructor (plain list, no template,
+//     not multret) holding exactly aux-1 items, and every statement after it is a single-register
+//     assignment (the later batch's item computations, nothing else);
+//   - every value those statements compute is consumed exactly once, by a later one of them or by an
+//     item (no computation dropped or duplicated) and its register is dead after the SETLIST;
+//   - no remaining register read inside the merged items is written by those statements, and none
+//     reads vA (moving the computations to the constructor must not change any value they read);
+//   - the effectful computations (anything but a constant or a register copy) keep their order:
+//     the left-to-right evaluation order of the merged items equals the statement order;
+//   - when vA is captured BY REFERENCE anywhere in the prototype, no merged item can run code (a
+//     call, method call, indexing, arithmetic, length or concatenation could reach a closure that
+//     observes the partially filled table); a by-value capture cannot observe it (no computation
+//     here creates a closure). No computation is a closure (its capture list names registers
+//     textually).
+// Otherwise the index-store form is kept. RENOVICE_NO_SETLIST_BATCH_MERGE restores it everywhere.
+inline bool merge_setlist_batch(std::vector<Stmt>& stmts, const ir::IProto& ip, int setlist_pc,
+                                int table_reg, int aux, const std::vector<EP>& items, bool multret) {
+    static const bool trace = std::getenv("RENOVICE_SETLIST_TRACE") != nullptr;
+    auto refuse = [&](int reason) {
+        if (trace) std::fprintf(stderr, "SETLIST_BATCH_MERGE proto=%d pc=%d aux=%d refused=%d\n",
+                                ip.index, setlist_pc, aux, reason);
+        return false;
+    };
+    int ctor = -1;
+    for (int q = (int)stmts.size() - 1; q >= 0; --q) {
+        const Stmt& s = stmts[(size_t)q];
+        if (s.k == SK::Assign && s.lhs && s.lhs->k == EK::Reg && s.lhs->reg == table_reg) { ctor = q; break; }
+    }
+    if (ctor < 0) return refuse(1);
+    Stmt& c = stmts[(size_t)ctor];
+    if (!c.rhs || c.rhs->k != EK::Table || !c.rhs->text.empty() || c.rhs->multret
+        || (int)c.rhs->list.size() != aux - 1) return refuse(2);
+    bool ref_captured = false;
+    for (const ir::IInsn& in : ip.code)
+        if (in.op == 0x35 && in.A == 1 && (int)in.B == table_reg) ref_captured = true;
+    struct Avail { EP expr; bool consumed = false; };
+    std::map<int, Avail> avail;
+    std::set<int> written;
+    std::map<const Expr*, int> effect_id;
+    std::vector<int> effectful;
+    bool ok = true;
+    // copy-on-write substitution of available register values
+    std::function<EP(const EP&)> subst = [&](const EP& e) -> EP {
+        if (!e || !ok) return e;
+        if (e->k == EK::Closure) { ok = false; return e; }
+        if (e->k == EK::Reg) {
+            if (e->reg == table_reg) { ok = false; return e; }
+            auto it = avail.find(e->reg);
+            if (it != avail.end() && !it->second.consumed) { it->second.consumed = true; return it->second.expr; }
+            if (written.count(e->reg)) ok = false;             // a rewritten or twice-read value
+            return e;
+        }
+        EP a = subst(e->a), b = subst(e->b);
+        std::vector<EP> list;
+        bool changed = a != e->a || b != e->b;
+        for (const EP& item : e->list) { list.push_back(subst(item)); if (list.back() != item) changed = true; }
+        if (!changed) return e;
+        auto copy = std::make_shared<Expr>(*e);
+        copy->a = a; copy->b = b; copy->list = list;
+        return copy;
+    };
+    for (size_t q = (size_t)ctor + 1; q < stmts.size() && ok; ++q) {
+        const Stmt& s = stmts[q];
+        if (s.k != SK::Assign || !s.lhs || s.lhs->k != EK::Reg || !s.rhs) return refuse(4);
+        if (s.call_sources.size() > 1 || s.call_targets.size() > 1) return refuse(5);
+        const int r = s.lhs->reg;
+        if (r == table_reg) return refuse(6);
+        EP value = subst(s.rhs);
+        if (!ok) return refuse(7);
+        auto prior = avail.find(r);
+        if (prior != avail.end() && !prior->second.consumed) return refuse(8);     // a computation dropped
+        if (value->k != EK::Const && value->k != EK::Reg) {
+            value = std::make_shared<Expr>(*value);                            // unique node per statement
+            effect_id[value.get()] = (int)q;
+            effectful.push_back((int)q);
+        }
+        avail[r] = Avail{value, false};
+        written.insert(r);
+    }
+    std::vector<EP> merged;
+    for (const EP& item : items) { merged.push_back(subst(item)); if (!ok) return refuse(9); }
+    for (const auto& entry : avail) if (!entry.second.consumed) return false;
+    for (int r : written) if (register_live_after(ip, setlist_pc, r)) return refuse(10);
+    std::vector<int> order;
+    bool runs_code = false;
+    std::function<void(const EP&)> post = [&](const EP& e) {
+        if (!e) return;
+        if (e->k == EK::Call || e->k == EK::Method || e->k == EK::Field || e->k == EK::Index
+            || e->k == EK::Bin || e->k == EK::Un || e->k == EK::Concat) runs_code = true;
+        post(e->a); post(e->b);
+        for (const EP& item : e->list) post(item);
+        auto it = effect_id.find(e.get());
+        if (it != effect_id.end()) order.push_back(it->second);
+    };
+    for (const EP& item : merged) post(item);
+    if (order != effectful) return refuse(11);
+    if (ref_captured && runs_code) return refuse(3);
+    auto table = std::make_shared<Expr>(*c.rhs);
+    for (const EP& item : merged) table->list.push_back(item);
+    table->multret = multret;
+    c.rhs = table;
+    // The constructor now completes at this SETLIST: keep the convention of the single-batch
+    // constructor (statement instruction = its last SETLIST), which the adjacent table-move retarget
+    // (`NEWTABLE..SETLIST; MOVE dst, tmp`) relies on. Leaving the first batch's pc made every round
+    // trip keep `tmp = {...}; dst = tmp` and declare one more local (compiler closure diverged).
+    c.insn = setlist_pc;
+    stmts.erase(stmts.begin() + ctor + 1, stmts.end());
+    return true;
+}
+
 inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                               ProtoOut& out, BlockOut& bo) {
     RegEnv env;
@@ -408,6 +650,18 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                             }
                         // No emitted statement may intervene: successfully folded earlier result
                         // MOVEs leave this CALL as bo.stmts.back(). Raw result MOVEs are consecutive.
+                        //
+                        // LIVE SOURCE GUARD (2026-10-09, DEFECTS #64, multi-result form). Retargeting
+                        // removes the result's own register; only exact when it is dead after the
+                        // MOVE. `local b, c = G(); a, d = b, c` retargeted both results into a, d and
+                        // left the locals b, c unassigned (read later as nil). The single-result
+                        // form is restored at render time (emit.h RESTORE_LIVE_CALL_MOVE); the
+                        // multi-result `vA, vB = call` form had no such check.
+                        // RENOVICE_NO_CALLMOVE_LIVE_SOURCE_GUARD restores the unguarded retarget.
+                        static const bool call_live_source_guard
+                            = !std::getenv("RENOVICE_NO_CALLMOVE_LIVE_SOURCE_GUARD");
+                        if (slot >= 0 && call_live_source_guard && in.A != in.B
+                            && register_live_after(ip, i, (int)in.B)) slot = -1;
                         if (slot >= 0 && i == prior.insn + 1 + slot) {
                             prior.call_targets[slot] = in.A;
                             std::string targets;
@@ -435,10 +689,20 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                 // adjacent copy is removed. Keep this deliberately narrower than general expression
                 // coalescing: calls have their separately proven rule above, and other expressions
                 // may observe evaluation order or register reuse differently.
+                //
+                // LIVE SOURCE GUARD (2026-10-09, DEFECTS #64). The retarget deletes the table's
+                // own register: only exact when that register is dead after the MOVE. `local names
+                // = {}; table.insert(names, x); ...; Create(names)` copies the local into the
+                // argument slot and reads it again later; retargeting left `names` unassigned.
+                // RENOVICE_NO_TABLEMOVE_LIVE_SOURCE_GUARD restores the unguarded retarget for A/B.
+                static const bool table_live_source_guard
+                    = !std::getenv("RENOVICE_NO_TABLEMOVE_LIVE_SOURCE_GUARD");
                 if (!retargeted && !std::getenv("RENOVICE_NO_TABLEMOVECOALESCE")) {
                     if (prior.k == SK::Assign && prior.rhs && prior.rhs->k == EK::Table
                         && prior.insn == i - 1 && prior.lhs && prior.lhs->k == EK::Reg
-                        && prior.lhs->reg == in.B) {
+                        && prior.lhs->reg == in.B
+                        && !(table_live_source_guard && in.A != in.B
+                             && register_live_after(ip, i, (int)in.B))) {
                         prior.lhs = mkreg(in.A);
                         env.kill(in.B);
                         env.set(in.A, mkreg(in.A));
@@ -620,7 +884,7 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
             auto e = mk(EK::Concat);
             for (int r = in.B; r <= in.C; ++r) e->list.push_back(env.get(r));
             if (!std::getenv("RENOVICE_NO_CALLCOALESCE"))
-                for (EP& item : e->list) fold_pure_setup_move(bo.stmts, item);
+                for (EP& item : e->list) fold_pure_setup_move(bo.stmts, item, ip, i);
             def_(in.A, e); d = Disp::Expr;
         }
         else if (const char* bo_op = binop_for(op)) {
@@ -659,8 +923,14 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                 // Fold only pure MOVE setup slots. Moving an arbitrary RHS into the call could move
                 // allocation or a nested call across observable statements; a register copy has no
                 // such timing. The destination must have no intervening emitted use.
-                fold_pure_setup_move(bo.stmts, call->a);
-                for (EP& arg : call->list) fold_pure_setup_move(bo.stmts, arg);
+                // A method call reads its object at the NAMECALL that set it up (which then writes
+                // A and A+1), not at the CALL: that is the use point of the folded object.
+                int object_pc = i;
+                if (ismeth)
+                    for (int q = i - 1; q >= first; --q)
+                        if (ip.code[(size_t)q].op == 0x2d && ip.code[(size_t)q].A == in.A) { object_pc = q; break; }
+                fold_pure_setup_move(bo.stmts, call->a, ip, object_pc);
+                for (EP& arg : call->list) fold_pure_setup_move(bo.stmts, arg, ip, i);
             }
             // A call COLLAPSES the stack back to its own base: the argument registers are consumed.
             // `top` must therefore be reset here, not left as a high-water mark, or the next multret
@@ -723,7 +993,7 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
             if (in.aux <= 1) {
                 for (int r = in.B; r < vend; ++r) tbl->list.push_back(env.get(r));
                 if (!std::getenv("RENOVICE_NO_CALLCOALESCE"))
-                    for (EP& item : tbl->list) fold_pure_setup_move(bo.stmts, item);
+                    for (EP& item : tbl->list) fold_pure_setup_move(bo.stmts, item, ip, i);
                 // NEWTABLE was materialised earlier as `vA = {}`. Emitting another assignment here
                 // (`vA = {values}`) makes the empty precursor survive recompilation, so every later
                 // decompile adds one more orphan. Remove that precursor only when it is the latest
@@ -781,7 +1051,12 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                     def_(in.A, tbl);
                 }
             } else {
-                for (int r = in.B; r < vend; ++r) {
+                static const bool batch_merge = !std::getenv("RENOVICE_NO_SETLIST_BATCH_MERGE");
+                std::vector<EP> batch_items;
+                for (int r = in.B; r < vend; ++r) batch_items.push_back(env.get(r));
+                const bool merged = batch_merge && in.aux > 1
+                    && merge_setlist_batch(bo.stmts, ip, i, (int)in.A, (int)in.aux, batch_items, cnt < 0);
+                for (int r = in.B; !merged && r < vend; ++r) {
                     auto ix = mk(EK::Index);
                     ix->a = mkreg(in.A);
                     ix->b = mkconst(std::to_string((int)in.aux + (r - in.B)));
@@ -805,7 +1080,7 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                 for (int r = in.A; r < in.A + n; ++r) s.list.push_back(env.get(r));
             }
             if (!std::getenv("RENOVICE_NO_CALLCOALESCE"))
-                for (EP& item : s.list) fold_pure_setup_move(bo.stmts, item);
+                for (EP& item : s.list) fold_pure_setup_move(bo.stmts, item, ip, i);
             bo.stmts.push_back(s); d = Disp::Stmt;
         }
         // ---- control flow: recorded, structured by M6d --------------------------------

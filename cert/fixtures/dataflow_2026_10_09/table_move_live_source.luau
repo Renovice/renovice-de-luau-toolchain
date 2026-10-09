@@ -1,7 +1,8 @@
--- OPEN DEFECT witness (2026-10-09, dataflow-identity). NEWTABLE R3; MOVE R5 <- R3 for the
--- table.insert argument: the table allocation is retargeted to R5 (expr.h TABLEMOVECOALESCE) although
--- R3 is read after the loop, so Create(names) receives a stale number. CFG-ID PASS;
--- RENOVICE_NO_TABLEMOVECOALESCE=1 (or RENOVICE_NO_CALLCOALESCE=1) restores it. Class CALL VALUE +K -N:NEWTABLE.
+-- FIXED (DEFECTS #64, 2026-10-09; found by dataflow-identity). NEWTABLE R3; MOVE R5 <- R3 for the
+-- table.insert argument: the table allocation was retargeted to R5 (expr.h TABLEMOVECOALESCE) although
+-- R3 is read after the loop, so Create(names) received a stale number. CFG-ID PASS either way. The
+-- retarget now requires the table register to be dead after the MOVE;
+-- RENOVICE_NO_TABLEMOVE_LIVE_SOURCE_GUARD=1 reproduces the old output. Class CALL VALUE +K -N:NEWTABLE.
 local Skel = {}
 Skel.__index = Skel
 function Skel:GetFullName() return "skel:" .. self.id end

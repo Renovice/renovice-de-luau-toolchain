@@ -344,3 +344,21 @@ dataflow 4,351 -> 4,367, no module PASS -> FAIL on CFG-ID, CONST-ID or dataflow,
 prototype loss only ThemedMainMenu p187 (#71, gate side); closed-bytecode CONST-ID PASS -> FAIL on VolatileAtmosphere
 and CoHNarmerPhobiaAura (first pass unchanged). `cert/gates.py 300 150`: ALL GATES PASS; Gate 14 91/91; dataflow
 fixtures 94/94.
+
+## 2026-10-09 — 44.1.1 campaign batch 5: liveness-guarded coalescing, OR/AND C == A lowering, SETLIST batch merge (agent coalesce, its #63-#66)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 72 | `fold_pure_setup_move` deleted `vR = vS` and substituted `vS` into the use after checking only the rest of the block; `vR` could be read in later blocks | `local t = p; if t:IsA() then t = t:GetOwner() end` read nil ("attempt to index nil with 'GetOwner'"); CFG-ID blind, dataflow FAIL (55 of the 102 dataflow failures) | dataflow-identity; agent coalesce | fold only when R is dead after the use on every path (new prototype-wide liveness `register_live_after`, unknown effects = live) and not rewritten in between (`RENOVICE_NO_COALESCE_LIVE_DEST_GUARD`) |
+| 73 | the table-move retarget (`NEWTABLE R; MOVE A,R`) and the multi-result call retarget (`local b, c = G(); a, d = b, c`) moved a value whose source register was still read later | stale values passed on ("attempt to index number with number"; b, c nil) (18 + 15 of the 102) | dataflow-identity; agent coalesce | retarget only when the source is dead after the MOVE (`RENOVICE_NO_TABLEMOVE_LIVE_SOURCE_GUARD`, `RENOVICE_NO_CALLMOVE_LIVE_SOURCE_GUARD`) |
+| 74 | RECOMPILER: `transcode.h` lowered `OR/AND A B C` as `MOVE A<-B; JUMPIF A; MOVE A<-C`, reading the overwritten A when C == A (B != A) | `value = f(value) or value` became `f(value) or f(value)`; 44 stock sites in 26 modules (OR 40/22, AND 4/4) | dataflow-identity; agent coalesce (all aliasing cases tested; only C == A was wrong) | `MOVE scr<-A; MOVE A<-B; JUMPIF/NOT A; MOVE A<-scr` with the scratch at the frame top; every other site byte-identical (`RENOVICE_LEGACY_ORAND_LOWERING`) |
+| 75 | constructors with more than 16 items: later SETLIST batches printed as `t[17] = v` (SETTABLEN); a multi-value call tail of a later batch was cut to one value | CFG-ID `SETLIST -> SETTABLEN` / `LOAD -> SETTABLEN`; 37 -> 36 items | agents tables/accessorder/loadorder/coalesce | merge later batches into the one constructor when every item inlines exactly (used once, dead after the SETLIST, side-effect order kept, no closure; no code-running item when the table is captured by reference) (`RENOVICE_NO_SETLIST_BATCH_MERGE`, trace `RENOVICE_SETLIST_TRACE`) |
+
+Fixtures moved out of `open_defects/` and asserted fixed with their legacy controls: copy_fold_live_dest,
+table_move_live_source, or_lowering_c_equals_a, orand_alias_cases, call_move_live_multi, setlist_batch_merge, and
+loop_exit_test_register (#64). Still open: for_index_after_exit_o2. `cert/dataflow_identity_fixtures.py` 134/134.
+
+Full 44.1.1 corpus (`work/u441-r5-5713df5f`, binary `5713df5f`, vs batch 4 `fd0d4c81`): CFG-ID 4,481 -> 4,515, CFG-ID +
+dataflow 4,367 -> 4,501, dataflow FAIL among CFG-ID PASS 114 -> 14, no module PASS -> FAIL on any gate, no prototype or
+closure loss. `cert/gates.py 300 150`: ALL GATES PASS. Remaining: 24 SETTABLEN modules (a field store between batches
+blocks the merge), 2 truncated multi-value tails (DiegeticUpgradeCards p409, UIUtilities p158).

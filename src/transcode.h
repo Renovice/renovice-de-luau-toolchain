@@ -567,13 +567,33 @@ inline CodeResult transcode_code(const luau::Proto& p,
             // AND keeps R[B] when falsey (JUMPIFNOT skips the alt), OR keeps R[B] when truthy (JUMPIF skips).
             bool isor = (nm == "OR" || nm == "ORK");
             bool isk  = (nm == "ANDK" || nm == "ORK");
+            // ALIASED ALTERNATIVE (2026-10-09, DEFECTS #65). The sequence below writes A before it
+            // reads C, so when C == A (and B != A) the alternative read B's value instead of A's old
+            // value: `value = IsMissing(value) or value` became `... or IsMissing(value)`. Aliasing
+            // cases: A == B is exact (the first MOVE is a no-op); B == C is exact (both arms copy B);
+            // A == B == C is exact. Only C == A != B is wrong. For it, save C in a scratch register
+            // first (p.mx, like the SUBK/JUMPXEQK lowerings) and use the scratch as the alternative:
+            //   MOVE scr <- A ; MOVE A <- B ; JUMPIF/JUMPIFNOT A -> end ; MOVE A <- scr ; end:
+            // The last three instructions keep the exact F3 shape cfg-identity folds back to OR/AND.
+            // Every non-aliased site is emitted byte-identically to before.
+            // RENOVICE_LEGACY_ORAND_LOWERING restores the aliased three-instruction form for A/B.
+            static const bool legacy_orand = std::getenv("RENOVICE_LEGACY_ORAND_LOWERING") != nullptr;
+            const bool alias_alt = !isk && !legacy_orand && ins[i].C == ins[i].A && ins[i].B != ins[i].A;
+            int alt_reg = ins[i].C;
+            if (alias_alt) {
+                const int scr = p.mx;
+                if (scr > 254) throw std::runtime_error("OR/AND lowering: no scratch register above maxstack 255");
+                maxstack = std::max(maxstack, scr + 1);
+                DI save; save.op = 0x14; save.A = scr; save.B = ins[i].A; de.push_back(save);   // MOVE scr <- A
+                alt_reg = scr;
+            }
             int base = (int)de.size();
             DI mv; mv.op = 0x14; mv.A = ins[i].A; mv.B = ins[i].B; de.push_back(mv);            // MOVE A <- B
             DI br; br.op = isor ? 0x4b : 0x18; br.A = ins[i].A;                                 // JUMPIF / JUMPIFNOT
             br.has_jt = true; br.jt_dei = base + 3; de.push_back(br);                           // -> just past the alt
             DI alt;
             if (isk) { alt.op = 0x4e; alt.A = ins[i].A; alt.bx = true; alt.Bx = ins[i].C; }     // LOADK A, K[C]
-            else     { alt.op = 0x14; alt.A = ins[i].A; alt.B = ins[i].C; }                     // MOVE  A <- C
+            else     { alt.op = 0x14; alt.A = ins[i].A; alt.B = alt_reg; }                      // MOVE  A <- C
             de.push_back(alt);
             continue;
         }
