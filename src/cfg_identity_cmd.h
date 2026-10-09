@@ -408,11 +408,19 @@ static CfgIdentityProto cfg_identity_model(const ir::IProto& proto) {
             std::map<int, bool> dispatch;
             std::vector<int> members;
             for (const auto& item : parent) members.push_back(item.first);
+            // S6 (2026-10-09): a LOADB that also skips (`LOADB r b +C`, the compiler's materialized
+            // comparison `local x = a < b`) is as constant a definition as a plain LOADB; its skip
+            // is ordinary control flow (succ = i+1+C). Excluding it made the same web a dispatch
+            // state in a rendering that spells the diamond with LOADB + JUMP and a runtime value in
+            // stock, so `x == true` was decided statically on one side only (InkBlobAbility p0:
+            // `LOAD B:true -> LOAD N:1` for identical programs). RENOVICE_CFGID_LEGACY_BOOL_SKIP_DEF=1
+            // restores the exclusion.
+            static const bool legacy_bool_skip = std::getenv("RENOVICE_CFGID_LEGACY_BOOL_SKIP_DEF") != nullptr;
             for (int d : members) {
                 const int root = find(d);
                 if (!dispatch.count(root)) dispatch[root] = true;
                 const bool constant = d >= 0 && cfg_identity_is_load(proto.code[(size_t)d].op)
-                    && !(proto.code[(size_t)d].op == 0x04 && proto.code[(size_t)d].C)
+                    && !(legacy_bool_skip && proto.code[(size_t)d].op == 0x04 && proto.code[(size_t)d].C)
                     && proto.code[(size_t)d].A == r && defs[(size_t)d].size() == 1;
                 if (!constant) dispatch[root] = false;
             }

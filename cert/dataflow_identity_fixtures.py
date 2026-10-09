@@ -53,8 +53,11 @@ FIX_OPEN = os.path.join(FIX_DF, "open_defects")
 # fixture -> how its behavior is observed: "source" (decompiled source) or "rebuilt" (the source
 # re-decompiled from the rebuilt bytecode: the defect is in recompile, the decompiled text is right)
 OPEN_DEFECTS = {"copy_fold_live_dest": "source", "table_move_live_source": "source",
-                "or_lowering_c_equals_a": "rebuilt", "for_index_after_exit_o2": "source",
-                "loop_exit_test_register": "source"}
+                "or_lowering_c_equals_a": "rebuilt", "for_index_after_exit_o2": "source"}
+# Fixed open defects (fixture stays in open_defects/): the default rebuild must pass dataflow with the
+# same behavior, and the fix's opt-out must still reproduce the CFG-blind, dataflow-caught defect.
+# loop_exit_test_register: fixed by #64 (2026-10-09 batch 3).
+FIXED_DEFECTS = {"loop_exit_test_register": "RENOVICE_NO_WHILE_TAIL_TEST"}
 cc.O2_FIXTURES.add("for_index_after_exit_o2")
 
 LEGACY = (("loop_carried_nil", "RENOVICE_NO_LOOP_NIL_HOIST"),
@@ -175,6 +178,21 @@ def main():
                 checks[key + "_CFG_BLIND"] = cc.cfg_verdict(original, rebuilt) == "PASS"
                 checks[key + "_DF_FAILS"] = df_verdict(original, rebuilt) == "FAIL"
                 checks[key + "_BEHAVIOR_DIFFERS"] = cc.trace(source, temp) != cc.trace(fixture, temp)
+            for name, switch in FIXED_DEFECTS.items():
+                fixture = os.path.join(FIX_OPEN, name + ".luau")
+                key = name.upper() + "_FIXED"
+                original = os.path.join(temp, name + ".fixed_original.lua_B")
+                cc.compile_fixture(fixture, name, original)
+                expected = cc.trace(fixture, temp)
+                source, rebuilt = cc.round_trip(original, temp, name + ".fixed")
+                checks[key + "_DEFAULT_DF_PASS"] = df_verdict(original, rebuilt) == "PASS"
+                checks[key + "_DEFAULT_BEHAVIOR_SAME"] = cc.trace(source, temp) == expected
+                legacy_env = cc.base_env()
+                legacy_env[switch] = "1"
+                source, rebuilt = cc.round_trip(original, temp, name + ".fixed_legacy", legacy_env)
+                checks[key + "_LEGACY_CFG_BLIND"] = cc.cfg_verdict(original, rebuilt) == "PASS"
+                checks[key + "_LEGACY_DF_FAILS"] = df_verdict(original, rebuilt) == "FAIL"
+                checks[key + "_LEGACY_BEHAVIOR_DIFFERS"] = cc.trace(source, temp) != expected
     except (OSError, RuntimeError) as error:
         print("FATAL %s" % error)
         return 2

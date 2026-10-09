@@ -325,3 +325,22 @@ CFG-ID, CONST-ID or dataflow, no prototype loss; compiler closure 5,424 -> 5,446
 300 150`: ALL GATES PASS (ALIGNED 226). Fixtures of this batch: `work/agents/conditions-runs/fixtures/` (to be moved
 into the cert gate). Rejected: forcing the semantic-plan terminal-arm check on (NullStar, JuggernautSpawnScript
 PASS -> FAIL).
+
+## 2026-10-09 — 44.1.1 campaign batch 4: load-order fixes (agent loadorder)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 68 | (opt-in only) NaturalLoop selection tries the outer header first when the outer body begins with an inner loop's setup; the outer cycle swallows the inner loop and its break arm | a search loop's `found = true; break` ran unconditionally (PickUpArrows p1) | agent loadorder; luau.exe | innermost loops first with true (dominating) back edges, established scan as fallback; OPT-IN `RENOVICE_INNERMOST_LOOP_FIRST=1`: enabled on the full corpus it gained ~95 CFG-ID modules but turned Platform and AmbulasOrbitalLaser PASS -> FAIL, cost KahlOrders p35 and 11 compiler closures (rework in progress, agent loops) |
+| 69 | a plain While region had no proven-loop protection, so the scan claimed a nested `for` for it; and a `for` running before the `while` that exits into its header was read as a back edge | VayHekLandslide p0 lost `while t > 0` and its back edge: the body ran once | agent loadorder; luau.exe fixtures | proven-loop protection for While regions; a preceding for's exit edge is not a back edge (`RENOVICE_NO_PROVEN_WHILE_REGION`, `RENOVICE_NO_PRECEDING_FOR_ENTRY`) |
+| 70 | the return-guard rotation flipped the first `==`/`~=` anywhere in a compound condition | `not IsNull(p) and a == p` became `not IsNull(p) and a ~= p` (OnSummonHitCondition p0; luau.exe `false true false false` vs `true true false true`) | agent loadorder | flip only a single top-level relation, otherwise wrap in `not (...)` (`RENOVICE_NO_TOPLEVEL_RELATION_INVERSE`) |
+| 71 | GATE normalization gap: stock's `local x = a < b` (LOADB with skip) was excluded as a constant definition while the decompiled if/else spelling was not, so only one side decided `x == true` statically | identical programs reported different (InkBlobAbility p0) | agent loadorder; mutation controls (`<` -> `<=`, changed constant) still FAIL | treat both spellings alike in the dispatch-web constant test (`RENOVICE_CFGID_LEGACY_BOOL_SKIP_DEF`); costs ThemedMainMenu p187 (already failing module; the asymmetry flips there) |
+
+The composite-tail terminal-block patch of the same agent is not applied: #58 already fixes its case (EntityScaling
+passes). The dataflow open defect `loop_exit_test_register` was fixed by #64 (batch 3); `cert/dataflow_identity_fixtures.py`
+now asserts the fixed state with `RENOVICE_NO_WHILE_TAIL_TEST` as the legacy control (94 checks).
+
+Full 44.1.1 corpus (`work/u441-r4b-fd0d4c81`, binary `fd0d4c81`, vs batch 3 `928298db`): CFG-ID 4,465 -> 4,481, CFG-ID +
+dataflow 4,351 -> 4,367, no module PASS -> FAIL on CFG-ID, CONST-ID or dataflow, compiler closure unchanged (5,446);
+prototype loss only ThemedMainMenu p187 (#71, gate side); closed-bytecode CONST-ID PASS -> FAIL on VolatileAtmosphere
+and CoHNarmerPhobiaAura (first pass unchanged). `cert/gates.py 300 150`: ALL GATES PASS; Gate 14 91/91; dataflow
+fixtures 94/94.

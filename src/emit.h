@@ -973,7 +973,16 @@ struct Emitter {
         header = -1;
         prep_override = false;
         if (id < 0 || id >= (int)A->regions.size()) return false;
-        if (A->regions[id].kind != sa::RK::NaturalLoop) return false;
+        // PROVEN WHILE REGION (2026-10-09). The same proof applies to a structurer While region
+        // (conditional header + body part): `while t > 0 do ...; if c then for ... end end ... end`
+        // nested in an outer loop. Its body holds the FORNPREP of the nested `for` inside a composite
+        // part; the interior-PREP scan claimed that prep for the While region, the `while` header and
+        // back edge were never printed and the loop body ran once (VayHekLandslide p0: the slide
+        // timer loop vanished). RENOVICE_NO_PROVEN_WHILE_REGION restores NaturalLoop-only proofs.
+        static const bool while_regions = !std::getenv("RENOVICE_NO_PROVEN_WHILE_REGION");
+        if (A->regions[id].kind != sa::RK::NaturalLoop
+            && !(while_regions && A->regions[id].kind == sa::RK::While))
+            return false;
         const int H = semantic_head_block(id);
         if (H < 0 || H >= (int)g->n.size()) return false;
         const st::Loop* loop = nullptr;
@@ -1001,8 +1010,17 @@ struct Emitter {
                 && latch >= 0 && latch != H && loop->body.count(latch);
             if ((prep_latch.first == H && !nested_prep_header) || latch == H) return false;
             if (latch >= 0 && latch < (int)g->n.size()
-                && (g->n[latch].succ_true == H || g->n[latch].succ_false == H))
-                return false;
+                && (g->n[latch].succ_true == H || g->n[latch].succ_false == H)) {
+                // PRECEDING FOR (2026-10-09). The exit edge of a `for` that runs BEFORE the loop
+                // (`for ... end; while t > 0 do ... end`) enters H from outside: the latch is
+                // neither in H's loop body nor dominated by H, so the edge cannot be a back edge
+                // and H is not that for's header. Rejecting it left the while to the interior-PREP
+                // scan (VayHekLandslide p0). RENOVICE_NO_PRECEDING_FOR_ENTRY restores the rejection.
+                static const bool preceding_for = !std::getenv("RENOVICE_NO_PRECEDING_FOR_ENTRY");
+                if (!(preceding_for && !loop->body.count(latch) && g->n[latch].reach
+                      && !st::dominates(*g, H, latch)))
+                    return false;
+            }
         }
         std::vector<int> blocks; collect_blocks(id, blocks);
         const std::set<int> region(blocks.begin(), blocks.end());
@@ -1787,7 +1805,9 @@ struct Emitter {
                 // restores the previous behavior for A/B attribution.
                 int proven_while_header = -1;
                 bool proven_prep_override = false;
-                const bool proven_loop = r.kind == sa::RK::NaturalLoop
+                const bool proven_loop = (r.kind == sa::RK::NaturalLoop
+                                          || (r.kind == sa::RK::While
+                                              && !std::getenv("RENOVICE_NO_PROVEN_WHILE_REGION")))
                     && !std::getenv("RENOVICE_NO_PROVEN_WHILE_NATURAL")
                     && proven_non_for_natural_loop(id, proven_while_header, proven_prep_override);
                 // `proven_while`: the PREP overrides; `proven_loop`: header-first part order only.
@@ -7006,7 +7026,60 @@ emit_conditional_region:
         auto returns_identifier = [](const std::string& text, const std::string& target) {
             return text == "do return " + target + " end";
         };
-        auto inverse_condition = [](std::string condition) {
+        // The textual inverse may flip `==`/`~=` only when that relation IS the whole condition: one
+        // top-level relation (outside parentheses, brackets, braces and string literals) and no
+        // top-level `and`/`or`. Flipping the one relation inside `(not a and b == c)` produced
+        // `(not a and b ~= c)`, which is not the negation: OnSummonHitCondition's
+        // `if not IsNull(p) and a == p then return true end return false` returned true for a null
+        // p. Anything else is wrapped in `not (...)`. RENOVICE_NO_TOPLEVEL_RELATION_INVERSE restores
+        // the first-occurrence flip.
+        // Position of the only top-level relation, or npos when there is none, more than one, or
+        // a top-level `and`/`or`.
+        auto toplevel_relation = [](const std::string& condition) {
+            int depth = 0, relations = 0;
+            size_t where = std::string::npos;
+            char quote = 0;
+            for (size_t i = 0; i < condition.size(); ++i) {
+                const char ch = condition[i];
+                if (quote) {
+                    if (ch == '\\' && i + 1 < condition.size()) ++i;
+                    else if (ch == quote) quote = 0;
+                    continue;
+                }
+                if (ch == '\'' || ch == '"') { quote = ch; continue; }
+                if (ch == '[' && i + 1 < condition.size()
+                    && (condition[i + 1] == '[' || condition[i + 1] == '='))
+                    return std::string::npos;
+                if (ch == '(' || ch == '[' || ch == '{') { ++depth; continue; }
+                if (ch == ')' || ch == ']' || ch == '}') {
+                    if (--depth < 0) return std::string::npos;
+                    continue;
+                }
+                if (depth) continue;
+                if (condition.compare(i, 5, " and ") == 0 || condition.compare(i, 4, " or ") == 0)
+                    return std::string::npos;
+                if (condition.compare(i, 4, " == ") == 0 || condition.compare(i, 4, " ~= ") == 0
+                    || condition.compare(i, 4, " <= ") == 0 || condition.compare(i, 4, " >= ") == 0) {
+                    ++relations; where = i; i += 2; continue;
+                }
+                if (condition.compare(i, 3, " < ") == 0 || condition.compare(i, 3, " > ") == 0) {
+                    ++relations; where = i; i += 1; continue;
+                }
+            }
+            return (!quote && depth == 0 && relations == 1) ? where : std::string::npos;
+        };
+        auto inverse_condition = [&](std::string condition) {
+            if (!std::getenv("RENOVICE_NO_TOPLEVEL_RELATION_INVERSE")) {
+                const size_t split = toplevel_relation(condition);
+                if (split != std::string::npos && split > 0 && split + 4 < condition.size()
+                    && (condition.compare(split, 4, " == ") == 0
+                        || condition.compare(split, 4, " ~= ") == 0)) {
+                    condition.replace(split, 4,
+                                      condition.compare(split, 4, " == ") == 0 ? " ~= " : " == ");
+                    return condition;
+                }
+                return std::string("not (") + condition + ")";
+            }
             for (const std::pair<const char*, const char*>& relation : {
                      std::pair<const char*, const char*>{" == ", " ~= "},
                      std::pair<const char*, const char*>{" ~= ", " == "}}) {

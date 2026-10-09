@@ -98,9 +98,12 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_FOR_BREAK_ARM", "RENOVICE_NO_LOOP_ENTRY_NIL", "RENOVICE_NO_PROPER_PREP_FOR",
             "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS", "RENOVICE_KEEP_SELECTOR_GUARD_RESIDUE",
             "RENOVICE_CFGID_LEGACY_OR_BLOCK", "RENOVICE_NATIVE",
-            "RENOVICE_NO_SETLIST_EXISTING_TABLE", "RENOVICE_NO_CAPTURE_SNAPSHOT")
+            "RENOVICE_NO_SETLIST_EXISTING_TABLE", "RENOVICE_NO_CAPTURE_SNAPSHOT",
+            "RENOVICE_INNERMOST_LOOP_FIRST", "RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
+    # Space-separated switches are all set for the legacy control (innermost-loop-first, #68, is
+    # opt-in and also structures #36's shape when enabled).
     "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP",
     "entry_outer_loop": "RENOVICE_NO_ENTRY_CALLER_EDGE",
     "import_chain": "RENOVICE_NO_IMPORT_CHAIN_GUARD",
@@ -272,7 +275,8 @@ def main():
                 checks[name.upper() + "_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp, prelude) == expected
                 checks[name.upper() + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
                 legacy_env = base_env()
-                legacy_env[opt_out] = "1"
+                for switch_name in opt_out.split():
+                    legacy_env[switch_name] = "1"
                 legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
                 checks[name.upper() + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
                 checks[name.upper() + "_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp, prelude) != expected

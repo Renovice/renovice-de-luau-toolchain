@@ -728,11 +728,57 @@ struct Analyzer {
             if (body_root >= 0) r.parts = {body_root};
             int id = add(r); collapse(parts, id, c.outs);
         };
+        // INNERMOST LOOP FIRST (2026-10-09). Region-id order tries the OUTER header first whenever
+        // it has the lower id, which is always the case for a loop whose body begins with a nested
+        // loop's preheader (`for i ... do local found = false; for j ... do if c then found = true;
+        // break end end ... end`): the outer cycle collapsed with the inner loop and its break arm
+        // as raw parts, and the emitter printed the break arm `found = true` AFTER the inner loop,
+        // unconditionally (PickUpArrows p1). Pass 0 skips a candidate whose body strictly contains
+        // a live original-CFG loop cycle that does not contain its header; pass 1 is the established
+        // scan, so a graph the innermost rule cannot reduce keeps the previous result. Both the
+        // candidate and the inner cycle must be dominance back edges.
+        // RENOVICE_NO_INNERMOST_LOOP_FIRST restores the single established pass.
+        // OPT-IN (2026-10-09 integration): on the full 44.1.1 corpus this pass turned Platform and
+        // AmbulasOrbitalLaser CFG-ID PASS -> FAIL, cost KahlOrders p35 and 11 compiler closures
+        // (BardMusic, GrineerDeathSquad(Raid), PlayerShip, ...); RENOVICE_INNERMOST_LOOP_FIRST=1
+        // enables it until it is reworked.
+        static const bool innermost_first = std::getenv("RENOVICE_INNERMOST_LOOP_FIRST") != nullptr;
+        auto holds_inner_cycle = [&](const LoopCandidate& outer) -> bool {
+            for (int n2 : outer.body) {
+                if (n2 == outer.n || !live.count(n2)) continue;
+                for (int p2 : pred[n2]) {
+                    if (!outer.body.count(p2)) continue;
+                    LoopCandidate inner;
+                    if (!dominates_current(n2, p2) || !natural_candidate(n2, p2, inner)
+                        || inner.body.count(outer.n)
+                        || inner.body.size() >= outer.body.size() || !heads_cycle(n2, p2)) continue;
+                    // A generic `for` is headed at its FORGLOOP, which is also its latch; the
+                    // emitter renders that loop only through the established outer-first path (an
+                    // inner-first NaturalLoop{body, FORGLOOP} with a break arm printed the `for`
+                    // twice, gsearch fixture). Only other inner cycles take precedence.
+                    std::set<int> inner_head_blocks; region_block_set(n2, inner_head_blocks);
+                    bool generic_head = false;
+                    for (int b : inner_head_blocks)
+                        if (b >= 0 && b < (int)block_edges.size() && block_edges[b].term == 0x1e)
+                            generic_head = true;
+                    if (generic_head) continue;
+                    bool subset = true;
+                    for (int x : inner.body) if (!outer.body.count(x)) { subset = false; break; }
+                    if (subset) return true;
+                }
+            }
+            return false;
+        };
+        for (int pass = innermost_first ? 0 : 1; pass < 2; ++pass)
         for (int n : order) {
             if (!live.count(n)) continue;
             for (int p : pred[n]) {
                 LoopCandidate first;
                 if (!natural_candidate(n, p, first)) continue;
+                // Pass 0 admits only dominance back edges: `p -> n` of a generic for whose FORGPREP
+                // jumps to its FORGLOOP header is a cycle edge but not a back edge, and taking it
+                // headed the whole function at the inner FORGLOOP (gsearch fixture).
+                if (pass == 0 && (!dominates_current(n, p) || holds_inner_cycle(first))) continue;
                 if (n != entry && first.body.count(entry) && !std::getenv("RENOVICE_LEGACY_ENTRY_IN_LOOP")) {
                     // The entry itself may be the clean head (2026-09-30): a function whose body
                     // starts with the loop, `while true do if c then ... end Sleep(0) end`. Region
