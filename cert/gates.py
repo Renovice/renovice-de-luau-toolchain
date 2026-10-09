@@ -87,9 +87,25 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
             "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 91,
             "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 16,
-            "U43_CLASS_SWAPS": 6590,
+            "U43_CLASS_SWAPS": 7245,
             "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 82,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-10-09 -- orphan prototypes, input-profile check, overlap lookup, inline string
+# guard (RESEARCH/CFG_CAMPAIGN_U441_2026-10-09.md, DEFECTS #53-#56):
+#   U43 class swaps 6,590 -> 7,245 is an UNMASKING, not a regression (PITFALLS B6/E6). Control on the same
+#   U43 first-300 sample, production env, first pass (work/u441-r1-49e0683e/g13):
+#     pre  701a2adf                                 swaps 6,590, CFG protos compared 10,925
+#     post 49e0683e                                 swaps 7,245, CFG protos compared 12,607
+#     post 49e0683e + RENOVICE_NO_ORPHAN_PROTOS=1   swaps 6,590, CFG protos compared 10,925
+#   All +655 swaps are in 11 modules whose prototype count was short by the orphan(s) before
+#   (Codex 273/274 -> 274/274, ..., Hub 129/131 -> 131/131). With closure prefixes normalized, the
+#   decompiled source of all 11 differs ONLY by added `if false then local _ = function ... end end`
+#   blocks (0 removed lines): every function's code is unchanged; the index shift had paired different
+#   functions, which hid their existing U43 hash-class losses (the known pending U43 defect).
+#   Other Gate 13 numbers: U43 CONST-ID 18 -> 18, CFG-ID 16 -> 16, CFG protos equal 7,687/10,925 ->
+#   8,742/12,607 (280 -> 291 aligned modules); U44 1-in-50 unchanged (107 / 82 / 1,498 of 1,701 / 0).
+#   Every other gate passed on post.
 
 # BASELINE CHANGE OF 2026-09-30 (c) -- numeric-for fixes, selector residue, gate S5, SETLIST and
 # capture snapshots (RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md):

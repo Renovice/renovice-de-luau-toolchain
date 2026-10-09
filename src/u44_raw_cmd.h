@@ -61,6 +61,7 @@ static bool u44_scan_import(const ir::IProto& proto, const ir::KVal& import, U44
 
 static bool u44_scan_names(const std::string& path, U44NameScan& scan) {
     const std::string bytes = read_de_input(path);
+    if (bytes.empty() && !g_input_profile_failure.empty()) { scan.failure = g_input_profile_failure; return false; }
     de::Module module;
     try { module = de::walk(bytes); }
     catch (const std::exception& e) { scan.failure = std::string("walk error: ") + e.what(); return false; }

@@ -266,3 +266,19 @@ closes within 5), `or_block`, `setlist_existing` and `capture_snapshot` (behavio
 cfg-identity, #51's exact output still differs from stock SETLIST). Still open: a call inside the break condition (`s == Target()`) splits
 the for body into a two-exit DAG that stays unreduced (`RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30/repro`).
 Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+## 2026-10-09 — 44.1.1 campaign batch 1: orphan prototypes, input profile, overlap lookup, string guard
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 53 | the emitter reaches prototypes only through closure sites; the compiler also compiles function literals inside folded-away code (`if false then ... function ... end`), which leaves a prototype with no closure site (an orphan) | the rebuilt module lost every orphan and every later prototype index shifted: 42 of the 72 44.1.1 PROTO_COUNT modules (ReplayLib p10, Zariman p13-19) | agent protos; `luau-compile` fixture; prototype-count census | each orphan is emitted as a dead literal `if false then local _ = function ... end end` at the end of the lowest-index reachable prototype above it (post-order numbering), upvalues bound to fresh dead locals initialized with `{}` (`RENOVICE_NO_ORPHAN_PROTOS`) |
+| 54 | U44 entry points accepted any container and reported downstream errors | 13 modules in the 44.1.1 cache are stale U43 bytecode (byte-identical to the U43 corpus); the U44 walk read U43 GETTABLEKS AUX bytes as "unsupported opcode 86/87/90" or failed with "cfg build failed" — there are no opcodes 86/87/90 | agent protos; structural walk splits 44.1.1 stock 5,465 U44-only / 13 U43-only, U43 corpus control 5,386/5,386 U43-only | the input profile is detected structurally and a mismatch fails with an exact reason (`RENOVICE_NO_INPUT_PROFILE_CHECK`) |
+| 55 | four path-proof lambdas in `emit.h` read `while_by_header.at(block)` while the renderer had temporarily removed that entry | `Jade_Abilities_Chaos` aborted with `std::out_of_range map::at` (since U43) | agent protos | treat the shared block as the outer loop only while its entry is present; output of every other module unchanged (`RENOVICE_NO_OVERLAP_ACTIVE_LOOKUP`) |
+| 56 | the inline renaming of `v<digit>`/`u<digit>` tokens also rewrote text inside string literals and comments | `"v2.20"` became `"c424v2.20"` (Settings p423; visible once orphans are emitted) | agent protos; CONST-ID | the renaming skips strings, long brackets and comments (`RENOVICE_NO_INLINE_STRING_GUARD`) |
+
+Measured on the full 44.1.1 corpus (`work/u441-r1-49e0683e`, binary `49e0683e`, against baseline `701a2adf`):
+decompile 5,464 -> 5,465, CFG-ID 4,174 -> 4,187, CONST-ID 5,343 -> 5,382, prototype-count mismatches 72 -> 30,
+equal prototypes 71,234 -> 76,762; no module PASS -> FAIL, no prototype loss. Gate 13 U43 class swaps 6,590 -> 7,245
+is an unmasking (control in `cert/gates.py`). Held back: the dead-tail emission (stable registers needed for
+compiler closure). Not fixed: 29 modules whose stock shares one prototype between several closure sites (O2 inlining).
+Details: `RESEARCH/CFG_CAMPAIGN_U441_2026-10-09.md`.

@@ -201,6 +201,135 @@ static void trace_nested_numeric_shapes(const std::vector<st::Loop>& loops, int 
     }
 }
 
+// ---- Orphan prototypes ---------------------------------------------------------------------------
+// The compiler turns EVERY function literal into a prototype, including a literal inside code that it
+// folds away (`if <constant false> then ... function ... end`). That prototype has no closure site
+// anywhere in the module (NEWCLOSURE child / DUPCLOSURE constant): an orphan. The emitter only
+// reaches prototypes through closure sites, so the rebuilt module lost every orphan and every later
+// prototype index shifted (42 of the 72 U44.1.1 proto-count failures; ReplayLib p10, Zariman p13-19).
+//
+// Prototype numbering is post-order over the source (children before their function, siblings in
+// source order). An orphan root O therefore belongs at the END of the body of the lowest-index
+// prototype N > O that is reachable from the chunk: every reachable child of N is below O, N above
+// it. There it is written as a dead literal, `if false then local _ = function ... end end`: the
+// compiler folds the branch (no instruction, no closure site) yet still compiles the literal, so O
+// keeps its index and its code. Its upvalues bind to fresh dead locals initialized with `{}` (not a
+// constant), so constant folding cannot turn an upvalue read into a constant. Orphan subtrees (an
+// orphan's own closure children) follow through the ordinary inlining recursion.
+// RENOVICE_NO_ORPHAN_PROTOS restores the previous behavior (orphans dropped).
+static std::map<int, std::vector<int>> g_orphans_by_host;
+
+static void compute_orphan_hosts(const de::Module& m, int root) {
+    g_orphans_by_host.clear();
+    if (std::getenv("RENOVICE_NO_ORPHAN_PROTOS") || root < 0 || root >= (int)m.protos.size()) return;
+    const int count = (int)m.protos.size();
+    std::vector<std::vector<int>> sites((size_t)count);
+    std::vector<int> refs((size_t)count, 0);
+    for (int index = 0; index < count; ++index) {
+        const de::Proto& proto = m.protos[(size_t)index];
+        size_t offset = 0;
+        while (offset + 4 <= proto.code.size()) {
+            const int op = (uint8_t)proto.code[offset];
+            const int bx = (uint8_t)proto.code[offset + 2] | ((uint8_t)proto.code[offset + 3] << 8);
+            int target = -1;
+            if (op == 0x16 && bx < (int)proto.kids.size()) target = (int)proto.kids[(size_t)bx];
+            else if (op == 0x42 && bx < (int)proto.consts.size() && proto.consts[(size_t)bx].tag == 6)
+                target = (int)proto.consts[(size_t)bx].idx;
+            if (target >= 0 && target < count) { sites[(size_t)index].push_back(target); ++refs[(size_t)target]; }
+            offset += tc::is_de_width8(op) ? 8 : 4;
+        }
+    }
+    std::vector<char> live((size_t)count, 0);
+    std::vector<int> work{root};
+    while (!work.empty()) {
+        const int at = work.back(); work.pop_back();
+        if (live[(size_t)at]) continue;
+        live[(size_t)at] = 1;
+        for (int child : sites[(size_t)at]) work.push_back(child);
+    }
+    for (int index = 0; index < count; ++index) {
+        if (live[(size_t)index] || refs[(size_t)index] != 0) continue;
+        int host = -1;
+        for (int above = index + 1; above < count; ++above)
+            if (live[(size_t)above]) { host = above; break; }
+        if (host >= 0) g_orphans_by_host[host].push_back(index);
+    }
+}
+
+// Insert the dead orphan literals hosted by `host` before the closing `end` of its function text.
+// Placeholders are expanded by the caller's inline_closures pass like any closure site.
+static bool append_orphan_literals(std::string& fn, int host, const de::Module& m) {
+    const auto found = g_orphans_by_host.find(host);
+    if (found == g_orphans_by_host.end()) return true;
+    const size_t last = fn.find_last_not_of(" \t\r\n");
+    if (last == std::string::npos || last < 2 || fn.compare(last - 2, 3, "end") != 0) return false;
+    const size_t end_line = fn.rfind('\n', last - 2);
+    if (end_line == std::string::npos) return false;
+    // A bare trailing `return` must stay the last statement of its block; refuse instead of
+    // producing source the compiler rejects.
+    const size_t previous_end = fn.find_last_not_of(" \t\r\n", end_line);
+    if (previous_end != std::string::npos) {
+        size_t previous_line = fn.rfind('\n', previous_end);
+        previous_line = previous_line == std::string::npos ? 0 : previous_line + 1;
+        size_t text = previous_line;
+        while (text < fn.size() && fn[text] == ' ') ++text;
+        if (fn.compare(text, 7, "return ") == 0 || fn.compare(text, 7, "return\n") == 0) return false;
+    }
+    const size_t end_column = (last - 2) - (end_line + 1);
+    const std::string indent(end_column + 2, ' ');
+    std::string block;
+    for (int orphan : found->second) {
+        const de::Proto& proto = m.protos[(size_t)orphan];
+        const int upvalues = proto.hdr.size() > 2 ? (uint8_t)proto.hdr[2] : 0;
+        std::string names, values, caps;
+        for (int slot = 0; slot < upvalues; ++slot) {
+            const std::string name = "__renovice_orphan_" + std::to_string(orphan) + "_u" + std::to_string(slot);
+            names += (slot ? ", " : "") + name;
+            values += slot ? ", {}" : "{}";
+            caps += (slot ? "," : "") + name;
+        }
+        block += indent + "if false then\n";
+        if (upvalues) block += indent + "  local " + names + " = " + values + "\n";
+        block += indent + "  local _ = function<" + std::to_string(orphan)
+               + (upvalues ? "|" + caps : std::string()) + ">\n";
+        block += indent + "end\n";
+    }
+    fn.insert(end_line + 1, block);
+    return true;
+}
+
+// Length of the Lua string literal starting at `at` ("..." / '...' with escapes, or a long bracket
+// [[...]] / [==[...]==]); 0 when `at` does not start one. The inline renaming passes below rewrite
+// `v<digit>` / `u<digit>` TOKENS; without this guard they also rewrote text inside string literals
+// (Settings p423: "v2.20" became "c424v2.20"). RENOVICE_NO_INLINE_STRING_GUARD disables the guard.
+static size_t lua_string_span(const std::string& text, size_t at) {
+    if (at >= text.size() || std::getenv("RENOVICE_NO_INLINE_STRING_GUARD")) return 0;
+    const char open = text[at];
+    if (open == '-' && at + 1 < text.size() && text[at + 1] == '-') {   // comment: never renamed
+        const size_t bracket = (at + 2 < text.size() && text[at + 2] == '[') ? lua_string_span(text, at + 2) : 0;
+        if (bracket) return 2 + bracket;
+        const size_t line_end = text.find('\n', at);
+        return (line_end == std::string::npos ? text.size() : line_end) - at;
+    }
+    if (open == '"' || open == '\'') {
+        size_t z = at + 1;
+        while (z < text.size() && text[z] != open) {
+            if (text[z] == '\\' && z + 1 < text.size()) ++z;
+            ++z;
+        }
+        return z < text.size() ? z + 1 - at : 0;
+    }
+    if (open == '[') {
+        size_t z = at + 1, level = 0;
+        while (z < text.size() && text[z] == '=') { ++level; ++z; }
+        if (z >= text.size() || text[z] != '[') return 0;
+        const std::string close = "]" + std::string(level, '=') + "]";
+        const size_t end = text.find(close, z + 1);
+        return end == std::string::npos ? 0 : end + close.size() - at;
+    }
+    return 0;
+}
+
 // Closures are referenced as `function<N>` by the expression layer, which has no access to the
 // module and so cannot recurse. Substitute each placeholder with the actual emitted sub-function.
 // Without this every DUPCLOSURE/NEWCLOSURE site emits a token that is not Luau at all — the single
@@ -245,6 +374,10 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
             ir::IProto sp = ir_annotate(m.protos[sub], sub, pool, g_nb);
             bool sok = false; std::string swhy;
             std::string t = sp.ok ? decompile_proto_anon(sp, sub, sok, swhy) : std::string();
+            if (sok && !append_orphan_literals(t, sub, m)) {
+                sok = false;
+                swhy = "orphan host has no insertion point before its closing end";
+            }
             if (sok) body = inline_closures(t, m, pool, depth + 1);
             else g_inline_fail = "proto " + std::to_string(sub) + ": " +
                                  (sp.ok ? swhy : sp.why);
@@ -262,8 +395,11 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
             std::string tag = "c" + std::to_string(serial) + "v";
             std::string outb; size_t z = 0;
             while (z < body.size()) {
-                size_t h = body.find('v', z);
-                if (h == std::string::npos) { outb += body.substr(z); break; }
+                if (const size_t literal = lua_string_span(body, z)) {
+                    outb.append(body, z, literal); z += literal; continue;
+                }
+                if (body[z] != 'v') { outb += body[z++]; continue; }
+                size_t h = z;
                 char before = h ? body[h - 1] : ' ';
                 bool start = !(std::isalnum((unsigned char)before) || before == '_');
                 bool num   = (h + 1 < body.size()) && std::isdigit((unsigned char)body[h + 1]);
@@ -283,6 +419,9 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
             std::string outb;
             size_t z = 0;
             while (z < body.size()) {
+                if (const size_t literal = lua_string_span(body, z)) {
+                    outb.append(body, z, literal); z += literal; continue;
+                }
                 const unsigned char current = (unsigned char)body[z];
                 const unsigned char before = z ? (unsigned char)body[z - 1] : (unsigned char)' ';
                 const bool token_start = current == (unsigned char)'u'
@@ -599,6 +738,7 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
                                     size_t* prototype_count = nullptr) {
     g_primary_ability_loop_scope = is_primary_ability_module_path(path);
     std::string b = read_de_input(path);
+    if (b.empty() && !g_input_profile_failure.empty()) { why = g_input_profile_failure; return false; }
     de::Module m;
     try { m = de::walk(b); }
     catch (const std::exception& e) { why = std::string("walk error: ") + e.what(); return false; }
@@ -612,7 +752,14 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
     src = decompile_proto_text(ip, root, ok, why);
     if (!ok) { why = std::string("emit problem: ") + why; return false; }
     g_inline_fail.clear();
+    compute_orphan_hosts(m, root);
+    if (!append_orphan_literals(src, root, m)) {
+        why = "orphan host has no insertion point before its closing end";
+        g_orphans_by_host.clear();
+        return false;
+    }
     src = inline_closures(src, m, pool, 0);
+    g_orphans_by_host.clear();          // module-scoped: never leak into another module's inlining
     if (!g_inline_fail.empty()) {
         why = std::string("closure inline failed: ") + g_inline_fail;
         return false;
