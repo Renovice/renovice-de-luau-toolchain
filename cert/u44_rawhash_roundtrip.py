@@ -17,12 +17,17 @@ For every stock module:
                  folded, emitter dispatch-state tests decided statically). CONST-ID compares constants
                  only; a reordered or restructured function passes it (SyndicateScarves p13).
   CFG-ID closed  the same gate on the compiler-closed bytecode
+  DATAFLOW-ID    (opt-in, --dataflow) derecomp dataflow-identity stock b1: per-prototype reaching value
+                 origins of every register operand, live values and CAPTURE facts over the CFG-ID
+                 matching (src/dataflow_identity_cmd.h). Reported per module and in the summary; it is
+                 an independent property and does not enter the exit status or any other verdict.
   byte identity  b1 == stock (measured separately; not required)
 
 Per-module work happens in a temporary directory; only failing modules keep artifacts (--keep).
 Usage:
   python cert/u44_rawhash_roundtrip.py STOCK_DIR OUT_DIR [--profile u44|u43] [--jobs N]
       [--match SUBSTR ...] [--list FILE] [--stride K] [--limit N] [--exe PATH] [--gate-exe PATH] [--keep]
+      [--dataflow]
 Exit status 0 only when every selected module passes decompile, recompile, determinism, CONST-ID and
 CFG-ID on the first recompile.
 """
@@ -93,6 +98,27 @@ def cfg_gate(exe, stock, cand, u44, cwd):
     return r
 
 
+def dataflow_gate(exe, stock, cand, u44, cwd):
+    rc, out = run(exe, ["dataflow-identity", stock, cand] + (["--u44"] if u44 else []), cwd)
+    m = re.search(r"DATAFLOW_IDENTITY protos_stock=(\d+) protos_candidate=(\d+) df_equal=(\d+) df_diff=(\d+) "
+                  r"df_unpaired=(\d+) df_model_errors=(\d+) product_nodes=(\d+) slots=(\d+) verdict=(\w+)", out)
+    if not m:
+        return {"verdict": "ERROR", "detail": out[-400:]}
+    r = dict(zip(["protosStock", "protosCandidate", "dfEqual", "dfDiff", "dfUnpaired", "dfModelErrors",
+                  "productNodes", "slots"], map(int, m.groups()[:8])))
+    r["verdict"] = m.group(9)
+    classes = re.search(r"^DF_CLASSES \{([^}]*)\}", out, re.M)
+    r["classes"] = {}
+    if classes and classes.group(1):
+        for item in classes.group(1).split(";"):
+            name, _, count = item.rpartition(":")
+            r["classes"][name] = int(count)
+    diffs = [line for line in out.splitlines() if line.startswith("proto ")]
+    if diffs:
+        r["firstDiffs"] = diffs[:6]
+    return r
+
+
 def one(stock, args):
     u44 = args.profile == "u44"
     decomp = "decompile-mod-u44" if u44 else "decompile-mod"
@@ -118,6 +144,8 @@ def one(stock, args):
         res["deterministic"] = rc2 == 0 and b1r.read_bytes() == b1.read_bytes()
         res["constIdentity"] = gate(args.gate_exe, stock, b1, u44, work)
         res["cfgIdentity"] = cfg_gate(args.gate_exe, stock, b1, u44, work)
+        if args.dataflow:
+            res["dataflowIdentity"] = dataflow_gate(args.gate_exe, stock, b1, u44, work)
         res["byteIdentical"] = b1.read_bytes() == stock.read_bytes()
         # one-pass and compiler-closed fixed points (skipped with --first-pass-only)
         sources, binaries = [s1.read_bytes()], [b1]
@@ -169,6 +197,8 @@ def main():
     ap.add_argument("--gate-exe", default=None, help="derecomp providing const-identity (default: --exe)")
     ap.add_argument("--tmp", default=None)
     ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--dataflow", action="store_true",
+                    help="also run dataflow-identity on the first rebuild (reported only; not in the exit status)")
     ap.add_argument("--first-pass-only", action="store_true",
                     help="skip the fixed-point/compiler-closed passes (release-gate sampling)")
     args = ap.parse_args()
@@ -238,6 +268,19 @@ def main():
             module_classes["PROTO_COUNT"] = module_classes.get("PROTO_COUNT", 0) + 1
     summary["cfgFailureClassesByProto"] = dict(sorted(proto_classes.items(), key=lambda kv: -kv[1]))
     summary["cfgFailureClassesByModule"] = dict(sorted(module_classes.items(), key=lambda kv: -kv[1]))
+    if args.dataflow:
+        summary["dataflowIdentityFirstPass"] = count(lambda r: r.get("dataflowIdentity", {}).get("verdict") == "PASS")
+        summary["cfgAndDataflowIdentityFirstPass"] = count(
+            lambda r: r.get("cfgIdentity", {}).get("verdict") == "PASS"
+            and r.get("dataflowIdentity", {}).get("verdict") == "PASS")
+        summary["dataflowFailAmongCfgPass"] = count(
+            lambda r: r.get("cfgIdentity", {}).get("verdict") == "PASS"
+            and r.get("dataflowIdentity", {}).get("verdict") != "PASS")
+        df_classes = {}
+        for r in results:
+            for name in r.get("dataflowIdentity", {}).get("classes", {}):
+                df_classes[name] = df_classes.get(name, 0) + 1
+        summary["dataflowClassesByModule"] = dict(sorted(df_classes.items(), key=lambda kv: -kv[1]))
     summary["hashClassOk"] = count(lambda r: r.get("constIdentity", {}).get("hashEqual") is not None
                                    and r["constIdentity"]["hashEqual"] == r["constIdentity"]["protosStock"]
                                    and r["constIdentity"]["stringEqual"] == r["constIdentity"]["protosStock"])
