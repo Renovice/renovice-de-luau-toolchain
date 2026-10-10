@@ -15575,6 +15575,7 @@ inexact_selector_fallback:
         std::set<int> overlapping_for_prep_whiles;
         std::set<int> interior_exit_whiles;
         std::map<int, int> interior_while_canonical;   // INTERIOR WHILE ARMS: header -> exit X
+        std::set<int> plain_header_whiles;             // PLAIN-HEADER WHILE headers
         bool has_source_for = false, has_source_while = false;
         for (const st::Loop& loop : authoritative_loops) {
             has_source_for = has_source_for || loop.kind == st::Loop::ForNum
@@ -15763,6 +15764,7 @@ inexact_selector_fallback:
                 if (!while_by_header.emplace(loop.header, &loop).second)
                     return reject_setup("DUPLICATE_WHILE_HEADER");
                 interior_exit_whiles.insert(loop.header);
+                if (plain_header) plain_header_whiles.insert(loop.header);
                 if (interior_canonical >= 0) interior_while_canonical[loop.header] = interior_canonical;
                 continue;
             }
@@ -17864,10 +17866,12 @@ inexact_selector_fallback:
                     const int outside = *exits.begin();
                     // the only exit was a private RETURN printed inside the body (PLAIN-HEADER
                     // WHILE): nothing follows the loop
-                    if (!std::getenv("RENOVICE_NO_CFG_PLAIN_HEADER_WHILE") && emitted.count(outside)
-                        && g->n[outside].is_return && g->n[outside].succ_true < 0
-                        && g->n[outside].succ_false < 0)
-                        return true;
+                    bool private_return_exit = plain_header_whiles.count(start)
+                        && emitted.count(outside) && g->n[outside].is_return
+                        && g->n[outside].succ_true < 0 && g->n[outside].succ_false < 0;
+                    for (int pred : g->n[outside].preds)
+                        if (g->n[pred].reach && !loop.body.count(pred)) private_return_exit = false;
+                    if (private_return_exit) return true;
                     return outside == stop || outside == terminal
                         || emit_cfg(outside, stop, terminal, domain, indent);
                 }

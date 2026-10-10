@@ -128,18 +128,20 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_CFG_EXITLESS_WHILE", "RENOVICE_NO_CFG_INTERIOR_WHILE_ARMS",
             "RENOVICE_NO_CFG_GUARD_TRANSACTION", "RENOVICE_NO_CFG_SMALL_GUARD_DISPATCH",
             "RENOVICE_NO_CFG_GUARD_EXIT_ONLY_ARM", "RENOVICE_NO_CFG_GUARD_DISJOINT_ARMS",
-            "RENOVICE_NO_CFG_PRECISE_LATCH_SPLIT")
+            "RENOVICE_NO_CFG_PRECISE_LATCH_SPLIT", "RENOVICE_NO_CFG_PLAIN_HEADER_WHILE")
 DECOMPILER_FIXTURES = {
-    "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
+    # (render campaign 2026-10-10) the plain-header while renderer owns the exitless one-block loop,
+    # so the control switches it off too
+    "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP RENOVICE_NO_CFG_PLAIN_HEADER_WHILE",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
     # default again since #82) also takes the clean header first, so the control switches both off.
     # (render campaign 2026-10-10) the exitless interior while renderer also owns this whole-function
     # `while true`, so the control switches it off too
     "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP RENOVICE_NO_INNERMOST_LOOP_FIRST "
                          "RENOVICE_NO_CFG_EXITLESS_WHILE",
-    "entry_outer_loop": "RENOVICE_NO_ENTRY_CALLER_EDGE",
+    "entry_outer_loop": "RENOVICE_NO_ENTRY_CALLER_EDGE RENOVICE_NO_CFG_PLAIN_HEADER_WHILE",
     "import_chain": "RENOVICE_NO_IMPORT_CHAIN_GUARD",
-    "compound_exit_loop": "RENOVICE_NO_LOOP_BODY_DAG",
+    "compound_exit_loop": "RENOVICE_NO_LOOP_BODY_DAG RENOVICE_NO_CFG_PLAIN_HEADER_WHILE",
     "compound_exit_namecall": "RENOVICE_NO_LOOP_BODY_DAG RENOVICE_NO_CFG_EXITLESS_WHILE",
     "for_body_order": "RENOVICE_NO_FOR_BODY_PART_ORDER",
     "nested_for_break": "RENOVICE_NO_PREP_HEADED_WHILE RENOVICE_NO_CFG_EXITLESS_WHILE",
