@@ -681,7 +681,7 @@ public:
         F_NONE, F_READ_TABLE, F_REUSE, F_MULTRET_SINGLE, F_UNDEF_TEMP, F_NOT_PENDING, F_WRITE_LOW,
         F_WRITE_TABLE, F_DROPPED, F_OP, F_CLOSURE, F_CONST_OPERAND, F_STORE, F_SETLIST, F_KEY,
         F_TEMPLATE, F_UNCOND, F_RANGE, F_BRANCH_SHAPE, F_COND, F_IFELSE_OPT, F_SUB, F_LIVE_AFTER,
-        F_ORDER, F_CHAIN, F_INCOMPLETE, F_CALL, F_NAMECALL
+        F_ORDER, F_CHAIN, F_INCOMPLETE, F_CALL, F_NAMECALL, F_IMPORT_CHAIN
     };
 
 private:
@@ -844,6 +844,22 @@ private:
             if (other.branch) todo.push_back(other.target);
             if (op2 == 0x04 && other.C) { todo.push_back(pc + 1 + other.C); continue; }
             todo.push_back(pc + 1);
+        }
+        return false;
+    }
+    // Is there a store into `table` at or after `from` (before `e`) with no other read or write of
+    // the table register in between? Unknown effects answer no.
+    bool later_store(int from, int table, int e) const {
+        for (int q = from; q < e && q < (int)ip.code.size(); ++q) {
+            const ir::IInsn& in = ip.code[(size_t)q];
+            const uint8_t op = in.op;
+            if ((op == 0x15 || op == 0x2e) && in.B == table && in.A != table) return true;
+            if (op == 0x2a && in.B == table && in.A != table && in.C != table) return true;
+            if (op == 0x3f && in.A == table) return true;
+            if (op == 0x29) return false;
+            std::set<int> uses, defs;
+            if (!lv::register_effects(ip, in, uses, defs)) return false;
+            if (uses.count(table) || defs.count(table)) return false;
         }
         return false;
     }
@@ -1156,6 +1172,11 @@ private:
         else if (op == 0x3d) {
             auto v = node(EK::Field); v->a = read(in.B, pc); v->text = in.note;
             if (in.note.empty()) { bad(F_OP, pc); return -1; }
+            // `G.x` / `G.a.x` compile to ONE GETIMPORT chain (compileExprIndexName, up to three
+            // names); stock GETIMPORT G + GETFIELD x (`_G.Name`: UIUtilities p0, SacrificeQuest-
+            // MemoryGame p33, a string key turned into a hashed import) has no expression spelling.
+            if (v->a && v->a->k == EK::Global
+                && std::count(v->a->text.begin(), v->a->text.end(), '.') < 2) { bad(F_IMPORT_CHAIN, pc); return -1; }
             def(in.A, v, pc);
         }
         else if (op == 0x01) {
@@ -1433,6 +1454,9 @@ private:
                 // observe the table in between: never for a table captured by reference.
                 if (outermost && floor_captured) break;
                 if (cur.dup && cur.tpl_pos >= (int)cur.tpl_keys.size()) break;
+                // Extend only toward a later store into this table: a linear scan instead of
+                // re-parsing the following sibling items (quadratic in long lists of nested tables).
+                if (!later_store(pc, cur.reg, e)) break;
             }
             if (pc >= e || st.fail) break;
             const int nx = step(pc, e);
