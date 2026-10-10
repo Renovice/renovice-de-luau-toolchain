@@ -29,6 +29,12 @@ inline std::map<int, int>& late_scope_locals() {
     return reserved;
 }
 
+// Interior dead-code anchors (m6e_cmd.h splice_interior_dead_ranges, RENOVICE_NO_INTERIOR_DEAD_CODE):
+// IR instruction index -> one marker line printed at the head of that block's statements in the
+// final (non-planning) render. Filled only around one host prototype's emission; empty otherwise,
+// so every prototype without an interior unreachable range renders exactly as before.
+inline std::map<int, std::string> interior_dead_markers;
+
 // One Emitter is constructed per proto, so a construction counter identifies the proto even on the
 // anonymous path (which carries no index). Needed because block ids are PER-PROTO and collide.
 
@@ -1242,6 +1248,10 @@ struct Emitter {
                          loop_control_blocks.count(blk) ? 1 : 0);
         for (int i = n.first; i <= n.last && i < (int)ip->code.size(); ++i)
             if (ip->code[i].A > maxreg) maxreg = ip->code[i].A;
+        if (!planning && !interior_dead_markers.empty()) {
+            const auto marker = interior_dead_markers.find(n.first);
+            if (marker != interior_dead_markers.end()) out += ind(depth) + marker->second + "\n";
+        }
         ex::ProtoOut po; ex::BlockOut bo; bo.first = n.first; bo.last = n.last;
         ex::reconstruct_block(*ip, n.first, n.last, po, bo);
         auto register_dead_after = [&](int insn, int reg) {

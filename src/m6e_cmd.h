@@ -610,6 +610,300 @@ static bool splice_dead_tail(std::string& fn, const de::Proto& proto, int idx,
     return true;
 }
 
+// ---- Interior dead code (unreachable ranges inside the function) ----------------------------------
+// Stock keeps code the upstream compiler cannot prove dead: the THEN arm of an if-expression whose
+// condition folds to false (`if x and false then A else B`: JUMPIFNOT x -> B; JUMP B; A...; B:), the
+// statements after an early `do return end` (DE's compiler keeps them), arms of conditions with
+// constant-false operands. No path reaches them, so the emitter, which walks reachable blocks, dropped
+// their instructions and constants (44.1.1: KuvaPath, ThemedSquadPanel, RailJackEnemyEffects,
+// EndlessSpawnLib, InfBoomerangPods, CoHUpgrades; CONST-ID failures). #79 handles only the SUFFIX.
+// Accepted shape: a maximal unreachable range that is not the code suffix and contains an op other
+// than RETURN/JUMP/JUMPBACK/CLOSEUPVALS/FORNLOOP/FORGLOOP (those are compiler glue: an always-exiting
+// loop body leaves its latch unreachable, and the compiler emits it again from the same source).
+// The range is decompiled as a synthetic prototype: its code plus one appended RETURN, every branch
+// leaving the range retargeted to that RETURN (the range is dead, so where it would have gone is not
+// observable; the retargeted form is what our rebuild contains, so a re-decompile reads the same
+// range back). It is printed at the head of the live block that follows it in layout:
+//     repeat
+//       if true then break end      -- one JUMP over the range (`if true` folds; not a terminator)
+//       local <registers the host does not declare, in register order>
+//       <dead statements>
+//     until true                    -- `until true` emits no back-edge
+// The emitter prints a marker line there (em::interior_dead_markers); a range whose marker is not
+// printed exactly once, whose text needs a lexical local or contains a closure (prototype order), is
+// left out as before. RENOVICE_NO_INTERIOR_DEAD_CODE disables the mechanism; trace with
+// RENOVICE_DEAD_TAIL_TRACE.
+struct InteriorDeadRange { size_t start = 0, end = 0; };
+
+static bool interior_dead_trace() { return std::getenv("RENOVICE_DEAD_TAIL_TRACE") != nullptr; }
+
+static int dead_code_branch_target(const std::string& code, size_t offset, int op, long long& target) {
+    switch (op) {
+    case 0x40: case 0x25: case 0x4b: case 0x18: case 0x37: case 0x27: case 0x21:
+    case 0x1c: case 0x23: case 0x33: case 0x20: case 0x41: case 0x34: case 0x3a:
+    case 0x47: case 0x0a: case 0x0b: case 0x30: case 0x1b: case 0x1e: {
+        const int bx = (int16_t)(uint16_t)((uint8_t)code[offset + 2] | ((uint8_t)code[offset + 3] << 8));
+        target = (long long)offset + 4 + (long long)bx * 4;
+        return 1;
+    }
+    default: return 0;
+    }
+}
+
+static std::vector<InteriorDeadRange> interior_dead_ranges(const de::Proto& proto) {
+    std::vector<InteriorDeadRange> result;
+    const std::string& code = proto.code;
+    std::vector<size_t> offsets; std::vector<int> ops;
+    for (size_t offset = 0; offset + 4 <= code.size();) {
+        const int op = (uint8_t)code[offset];
+        offsets.push_back(offset); ops.push_back(op);
+        offset += tc::is_de_width8(op) ? 8 : 4;
+    }
+    if (offsets.size() < 3) return result;
+    std::map<size_t, size_t> at;
+    for (size_t index = 0; index < offsets.size(); ++index) at[offsets[index]] = index;
+    std::vector<char> reach(offsets.size(), 0);
+    std::vector<size_t> work{0};
+    while (!work.empty()) {
+        const size_t index = work.back(); work.pop_back();
+        if (index >= offsets.size() || reach[index]) continue;
+        reach[index] = 1;
+        const int op = ops[index];
+        if (op == 0x29) continue;                                   // RETURN
+        long long target = 0;
+        if (dead_code_branch_target(code, offsets[index], op, target)) {
+            const auto found = at.find((size_t)target);
+            if (target < 0 || found == at.end()) return {};          // malformed: refuse the proto
+            work.push_back(found->second);
+            if (op == 0x40 || op == 0x25 || op == 0x0b || op == 0x30 || op == 0x1b) continue;
+        }
+        if (op == 0x04 && (uint8_t)code[offsets[index] + 3]) {     // LOADB with skip
+            const auto found = at.find(offsets[index] + 4 + 4 * (size_t)(uint8_t)code[offsets[index] + 3]);
+            if (found == at.end()) return {};
+            work.push_back(found->second);
+        }
+        work.push_back(index + 1);
+    }
+    for (size_t index = 0; index < offsets.size();) {
+        if (reach[index]) { ++index; continue; }
+        size_t last = index;
+        while (last + 1 < offsets.size() && !reach[last + 1]) ++last;
+        // Leading RETURN/JUMP/JUMPBACK are glue, not part of the range: the upstream compiler turns
+        // our wrapper's `break` into a copy of the RETURN it jumps to (jump-to-return folding) and
+        // threads the jumps that reached it, which leaves that copy unreachable in front of the
+        // range on the next decompile. Starting after it reads the same range back (closure).
+        while (index <= last && (ops[index] == 0x29 || ops[index] == 0x40 || ops[index] == 0x25)) ++index;
+        if (index > last) { index = last + 1; continue; }
+        bool substantive = false;
+        for (size_t k = index; k <= last; ++k)
+            if (ops[k] != 0x29 && ops[k] != 0x40 && ops[k] != 0x25 && ops[k] != 0x39
+                && ops[k] != 0x0a && ops[k] != 0x1e) substantive = true;
+        // The suffix is the dead tail's (#79); a range at index 0 cannot occur (entry is reachable).
+        if (substantive && last + 1 < offsets.size() && index > 0)
+            result.push_back({offsets[index], offsets[last + 1]});
+        index = last + 1;
+    }
+    return result;
+}
+
+static std::vector<std::string> dead_code_lines(const std::string& text) {
+    std::vector<std::string> lines; size_t pos = 0;
+    while (pos <= text.size()) {
+        size_t end = text.find('\n', pos);
+        if (end == std::string::npos) end = text.size();
+        lines.push_back(text.substr(pos, end - pos));
+        if (end == text.size()) break;
+        pos = end + 1;
+    }
+    while (!lines.empty() && lines.back().find_first_not_of(" \t\r") == std::string::npos) lines.pop_back();
+    return lines;
+}
+
+// Names declared by `local a, b = ...` lines at exactly `indent` in lines[first, last).
+static void dead_code_declared_names(const std::vector<std::string>& lines, size_t indent, size_t first,
+                                     size_t last, std::set<std::string>& names) {
+    for (size_t index = first; index < last && index < lines.size(); ++index) {
+        const std::string& line = lines[index];
+        if (line.size() <= indent + 6 || line.compare(0, indent, std::string(indent, ' ')) != 0
+            || line.compare(indent, 6, "local ") != 0) continue;
+        std::string list = line.substr(indent + 6);
+        const size_t assign = list.find(" = ");
+        if (assign != std::string::npos) list = list.substr(0, assign);
+        size_t pos = 0;
+        while (pos < list.size()) {
+            size_t comma = list.find(',', pos);
+            if (comma == std::string::npos) comma = list.size();
+            std::string name = list.substr(pos, comma - pos);
+            name.erase(0, name.find_first_not_of(' '));
+            name.erase(name.find_last_not_of(' ') + 1);
+            if (!name.empty()) names.insert(name);
+            pos = comma + 1;
+        }
+    }
+}
+
+// Decompile one interior range as a synthetic prototype and return its statements (one per line, no
+// indentation prefix beyond their own nesting) and the register names it declares.
+static bool interior_dead_text(const de::Proto& proto, int idx, const std::vector<std::string>& pool,
+                               const InteriorDeadRange& range, std::vector<std::string>& body,
+                               std::vector<std::string>& declared, std::string& reason) {
+    std::string code = proto.code.substr(range.start, range.end - range.start);
+    const size_t ret = code.size();
+    code += std::string("\x29\x00\x01\x00", 4);                    // RETURN R0 B=1 (no values)
+    for (size_t offset = 0; offset < ret;) {
+        const int op = (uint8_t)code[offset];
+        const size_t width = tc::is_de_width8(op) ? 8 : 4;
+        long long target = 0;
+        if (dead_code_branch_target(code, offset, op, target)) {
+            bool inside = target >= 0 && target < (long long)ret;
+            if (inside) {
+                // must land on an instruction boundary inside the range
+                bool boundary = false;
+                for (size_t probe = 0; probe < ret;) {
+                    if ((long long)probe == target) { boundary = true; break; }
+                    probe += tc::is_de_width8((uint8_t)code[probe]) ? 8 : 4;
+                }
+                inside = boundary;
+            }
+            if (!inside) {
+                const long long bx = ((long long)ret - (long long)offset - 4) / 4;
+                if (bx < -32768 || bx > 32767) { reason = "retarget out of range"; return false; }
+                code[offset + 2] = (char)(bx & 0xff);
+                code[offset + 3] = (char)((bx >> 8) & 0xff);
+            }
+        }
+        if (op == 0x04 && (uint8_t)code[offset + 3]
+            && offset + 4 + 4 * (size_t)(uint8_t)code[offset + 3] > ret) {
+            reason = "LOADB skip leaves the range"; return false;
+        }
+        offset += width;
+    }
+    de::Proto dead = proto;
+    dead.code = code;
+    dead.sc = (int)(code.size() / 4);
+    const ir::IProto annotated = ir_annotate(dead, idx, pool, g_nb);
+    if (!annotated.ok) { reason = "annotate"; return false; }
+    bool ok = false; std::string why;
+    const std::string text = decompile_proto_anon(annotated, idx, ok, why);
+    if (!ok) { reason = "decompile: " + why; return false; }
+    if (text.find("__renovice_local_") != std::string::npos) { reason = "lexical local"; return false; }
+    if (text.find("function<") != std::string::npos) { reason = "closure (prototype order)"; return false; }
+    const std::vector<std::string> lines = dead_code_lines(text);
+    if (lines.size() < 3) { reason = "short text"; return false; }
+    const std::string& last = lines.back();
+    if (last.find_first_not_of(' ') == std::string::npos || last.substr(last.find_first_not_of(' ')) != "end") {
+        reason = "text end"; return false;
+    }
+    const size_t indent = lines[1].find_first_not_of(' ');
+    if (indent == std::string::npos) { reason = "indent"; return false; }
+    size_t first = 1;
+    std::set<std::string> names;
+    while (first + 1 < lines.size() && lines[first].compare(0, indent + 6, std::string(indent, ' ') + "local ") == 0) {
+        dead_code_declared_names(lines, indent, first, first + 1, names);
+        ++first;
+    }
+    for (size_t index = first; index + 1 < lines.size(); ++index) {
+        const std::string& line = lines[index];
+        if (line.compare(0, indent, std::string(indent, ' ')) != 0 && line.find_first_not_of(' ') != std::string::npos) {
+            reason = "body indent"; return false;
+        }
+        body.push_back(line.size() >= indent ? line.substr(indent) : std::string());
+    }
+    declared.assign(names.begin(), names.end());
+    return true;
+}
+
+// Set the markers for `proto` before its host emission (returns the ranges); after the emission,
+// replace each marker with its range's text. Both are no-ops without interior ranges.
+static std::vector<InteriorDeadRange> arm_interior_dead_markers(const de::Proto& proto, const ir::IProto& ip) {
+    em::interior_dead_markers.clear();
+    if (std::getenv("RENOVICE_NO_INTERIOR_DEAD_CODE")) return {};
+    const std::vector<InteriorDeadRange> ranges = interior_dead_ranges(proto);
+    for (size_t k = 0; k < ranges.size(); ++k)
+        for (const ir::IInsn& in : ip.code)
+            if ((size_t)in.off == ranges[k].end) {
+                em::interior_dead_markers[in.idx] = "--[[RENOVICE_INTERIOR_DEAD " + std::to_string(k) + "]]";
+                break;
+            }
+    return ranges;
+}
+
+static void splice_interior_dead_ranges(std::string& fn, const de::Proto& proto, int idx,
+                                        const std::vector<std::string>& pool,
+                                        const std::vector<InteriorDeadRange>& ranges) {
+    em::interior_dead_markers.clear();
+    if (ranges.empty()) return;
+    std::vector<std::string> lines = dead_code_lines(fn);
+    // Host-declared register names: the function-top `local` lines (body indent of line 1).
+    std::set<std::string> host_declared;
+    if (lines.size() >= 2) {
+        const size_t body_indent = lines[1].find_first_not_of(' ');
+        if (body_indent != std::string::npos) {
+            size_t last = 1;
+            while (last < lines.size()
+                   && lines[last].compare(0, body_indent + 6, std::string(body_indent, ' ') + "local ") == 0) ++last;
+            dead_code_declared_names(lines, body_indent, 1, last, host_declared);
+        }
+    }
+    auto register_number = [](const std::string& name) -> long {
+        if (name.size() < 2 || name[0] != 'v') return -1;
+        long value = 0;
+        for (size_t at = 1; at < name.size(); ++at) {
+            if (!std::isdigit((unsigned char)name[at])) return -1;
+            value = value * 10 + (name[at] - '0');
+        }
+        return value;
+    };
+    std::string rebuilt;
+    for (size_t k = 0; k < ranges.size(); ++k) {
+        const std::string marker = "--[[RENOVICE_INTERIOR_DEAD " + std::to_string(k) + "]]";
+        std::vector<size_t> where;
+        for (size_t index = 0; index < lines.size(); ++index) {
+            const size_t text = lines[index].find_first_not_of(' ');
+            if (text != std::string::npos && lines[index].compare(text, std::string::npos, marker) == 0)
+                where.push_back(index);
+        }
+        std::string reason;
+        std::vector<std::string> body, declared;
+        if (where.size() != 1) reason = where.empty() ? "marker not printed" : "marker printed twice";
+        else if (!interior_dead_text(proto, idx, pool, ranges[k], body, declared, reason)) {}
+        if (!reason.empty()) {
+            if (interior_dead_trace())
+                std::fprintf(stderr, "INTERIOR_DEAD refused proto=%d range=%zu..%zu reason=%s\n", idx,
+                             ranges[k].start / 4, ranges[k].end / 4, reason.c_str());
+            for (auto it = where.rbegin(); it != where.rend(); ++it) lines.erase(lines.begin() + (std::ptrdiff_t)*it);
+            continue;
+        }
+        std::vector<std::string> missing;
+        for (const std::string& name : declared) if (!host_declared.count(name)) missing.push_back(name);
+        std::stable_sort(missing.begin(), missing.end(), [&](const std::string& a, const std::string& b) {
+            const long x = register_number(a), y = register_number(b);
+            if ((x < 0) != (y < 0)) return x >= 0;
+            return x < y;
+        });
+        const size_t at = where[0];
+        const std::string indent(lines[at].find_first_not_of(' '), ' ');
+        std::vector<std::string> block;
+        block.push_back(indent + "repeat");
+        block.push_back(indent + "  if true then break end");
+        if (!missing.empty()) {
+            std::string list;
+            for (const std::string& name : missing) list += (list.empty() ? "" : ", ") + name;
+            block.push_back(indent + "  local " + list);
+        }
+        for (const std::string& line : body) block.push_back(line.empty() ? line : indent + "  " + line);
+        block.push_back(indent + "until true");
+        lines.erase(lines.begin() + (std::ptrdiff_t)at);
+        lines.insert(lines.begin() + (std::ptrdiff_t)at, block.begin(), block.end());
+        if (interior_dead_trace())
+            std::fprintf(stderr, "INTERIOR_DEAD spliced proto=%d range=%zu..%zu lines=%zu\n", idx,
+                         ranges[k].start / 4, ranges[k].end / 4, body.size());
+    }
+    for (size_t index = 0; index < lines.size(); ++index) rebuilt += lines[index] + (index + 1 < lines.size() ? "\n" : "");
+    if (!fn.empty() && fn.back() == '\n') rebuilt += "\n";
+    fn = rebuilt;
+}
+
 // Closures are referenced as `function<N>` by the expression layer, which has no access to the
 // module and so cannot recurse. Substitute each placeholder with the actual emitted sub-function.
 // Without this every DUPCLOSURE/NEWCLOSURE site emits a token that is not Luau at all — the single
@@ -653,7 +947,11 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
         if (sub >= 0 && sub < (int)m.protos.size()) {
             ir::IProto sp = ir_annotate(m.protos[sub], sub, pool, g_nb);
             bool sok = false; std::string swhy;
+            const std::vector<InteriorDeadRange> interior =
+                sp.ok ? arm_interior_dead_markers(m.protos[sub], sp) : std::vector<InteriorDeadRange>();
             std::string t = sp.ok ? decompile_proto_anon(sp, sub, sok, swhy) : std::string();
+            em::interior_dead_markers.clear();
+            if (sok) splice_interior_dead_ranges(t, m.protos[sub], sub, pool, interior);
             if (sok) splice_dead_tail(t, m.protos[sub], sub, pool);
             if (sok && !append_orphan_literals(t, sub, m)) {
                 sok = false;
@@ -1132,13 +1430,16 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
     // local-limit rule can count the orphan locals added to the root afterwards.
     compute_orphan_hosts(m, root);
     compute_late_scope_locals(m);
+    const std::vector<InteriorDeadRange> interior = arm_interior_dead_markers(m.protos[root], ip);
     src = decompile_proto_text(ip, root, ok, why);
+    em::interior_dead_markers.clear();
     if (!ok) {
         why = std::string("emit problem: ") + why;
         g_orphans_by_host.clear(); em::late_scope_locals().clear();
         return false;
     }
     g_inline_fail.clear();
+    splice_interior_dead_ranges(src, m.protos[root], root, pool, interior);
     splice_dead_tail(src, m.protos[root], root, pool);
     if (!append_orphan_literals(src, root, m)) {
         why = "orphan host has no insertion point before its closing end";
