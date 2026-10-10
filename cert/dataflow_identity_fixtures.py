@@ -50,7 +50,8 @@ old output, applied to decompile-mod for decompiler fixes and to recompile for t
   <F>_LEGACY_BEHAVIOR_DIFFERS / <F>_LEGACY_CFG_BLIND / <F>_LEGACY_DF_FAILS  the defect stays reproducible
 
 Fixed shape defects (CFG-ID sees the old form):
-  setlist_batch_merge     RENOVICE_NO_SETLIST_BATCH_MERGE         (#66, >16-item constructors)
+  setlist_batch_merge     RENOVICE_NO_SETLIST_BATCH_MERGE RENOVICE_NO_CTOR_EXPR (#66/#90, >16-item
+                          constructors)
   <F>_FIXED_BEHAVIOR_SAME / <F>_FIXED_CFG_PASS / <F>_FIXED_DF_PASS / <F>_LEGACY_BEHAVIOR_DIFFERS / <F>_LEGACY_CFG_FAILS
   (the old index-store form also truncated a multret tail in a later batch to one value: the fixture's
   `select(2, 0, 36, 37)` tail lost 37)
@@ -89,10 +90,12 @@ FIXED_DEFECTS = {
 }
 # fixtures outside FIX_DF
 FIXED_FOLDERS = {"escape_pretest": os.path.join(HERE, "fixtures", "twoexit_2026_10_09")}
-SHAPE_FIXED = {"setlist_batch_merge": "RENOVICE_NO_SETLIST_BATCH_MERGE"}
+# (#90) more than one SETLIST batch is also a constructor expression now: the legacy control switches
+# the parse off too.
+SHAPE_FIXED = {"setlist_batch_merge": "RENOVICE_NO_SETLIST_BATCH_MERGE RENOVICE_NO_CTOR_EXPR"}
 # never inherit these from the caller's shell (PITFALLS A7)
 cc.OPT_OUTS = tuple(cc.OPT_OUTS) + tuple(sorted({switch for switch, _, _ in FIXED_DEFECTS.values()}
-                                                 | set(SHAPE_FIXED.values())))
+                                                 | {w for v in SHAPE_FIXED.values() for w in v.split()}))
 cc.O2_FIXTURES.add("for_index_after_exit_o2")
 cc.O2_FIXTURES.add("escape_pretest")
 
@@ -261,7 +264,8 @@ def main():
                 original = os.path.join(temp, name + ".shape_original.lua_B")
                 cc.compile_fixture(fixture, name, original)
                 legacy_env = cc.base_env()
-                legacy_env[switch] = "1"
+                for switch_name in switch.split():
+                    legacy_env[switch_name] = "1"
                 key = name.upper()
                 source, rebuilt = round_trip_staged(original, temp, name + ".shape_fixed")
                 checks[key + "_FIXED_BEHAVIOR_SAME"] = cc.trace(source, temp) == expected

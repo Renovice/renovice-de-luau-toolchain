@@ -280,6 +280,67 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     return true;
 }
 
+// CONSTRUCTOR INTERVAL COLLAPSE (2026-10-10, DEFECTS #90). A constructor whose item evaluation
+// branches (`{ if a then 1 else 0 }`, `{ f(x ~= nil) }`) spans several blocks; expr.h parses the
+// whole NEWTABLE..last-store interval into ONE expression (ex::constructor_expression). For the
+// decompile emitter the interval's blocks are merged into the block holding the NEWTABLE so the
+// item branches are no longer structured as statements: the head takes over the instructions,
+// terminator and exits of the block holding the last store; the inner blocks become unreachable.
+// Only a closed interval is merged: no edge enters an inner block from outside and none leaves the
+// interval except through the last block. Decompile path only (m6e); every other command keeps the
+// plain CFG. RENOVICE_NO_CTOR_EXPR disables it with the parse.
+static void collapse_constructor_intervals(const ir::IProto& ip, st::Graph& g) {
+    if (std::getenv("RENOVICE_NO_CTOR_EXPR")) return;
+    const int count = (int)ip.code.size();
+    auto node_of = [&](int pc) -> int {
+        for (size_t b = 0; b < g.n.size(); ++b)
+            if (g.n[b].reach && g.n[b].first <= pc && pc <= g.n[b].last) return (int)b;
+        return -1;
+    };
+    auto rebuild_preds = [&]() {
+        for (auto& nd : g.n) nd.preds.clear();
+        for (size_t i = 0; i < g.n.size(); ++i)
+            for (int s : {g.n[i].succ_true, g.n[i].succ_false})
+                if (s >= 0 && s < (int)g.n.size()) g.n[s].preds.push_back((int)i);
+    };
+    for (int pc = 0; pc < count; ++pc) {
+        const uint8_t op = ip.code[(size_t)pc].op;
+        if (op != 0x2c && op != 0x4f) continue;
+        ex::CtorParse cp;
+        if (!ex::constructor_expression(ip, pc, cp)) continue;
+        const int h = node_of(pc), j = node_of(cp.end);
+        if (h < 0 || j < 0) continue;
+        if (h == j) { pc = cp.end; continue; }
+        std::set<int> inner;
+        for (size_t b = 0; b < g.n.size(); ++b)
+            if (g.n[b].reach && (int)b != h && g.n[b].first > pc && g.n[b].first <= cp.end) inner.insert((int)b);
+        if (!inner.count(j)) continue;
+        bool closed = true;
+        for (int b : inner)
+            for (int p : g.n[b].preds) if (p != h && !inner.count(p)) closed = false;
+        for (int s : {g.n[h].succ_true, g.n[h].succ_false}) if (s >= 0 && !inner.count(s)) closed = false;
+        for (int b : inner) {
+            if (b == j) continue;
+            for (int s : {g.n[b].succ_true, g.n[b].succ_false}) if (s >= 0 && !inner.count(s)) closed = false;
+        }
+        if (std::getenv("RENOVICE_CTOR_TRACE"))
+            std::fprintf(stderr, "CTOR_COLLAPSE proto=%d pc=%d end=%d head=%d last=%d inner=%zu closed=%d\n",
+                         ip.index, pc, cp.end, h, j, inner.size(), closed ? 1 : 0);
+        if (!closed) continue;
+        const st::Node J = g.n[j];
+        st::Node& H = g.n[h];
+        H.last = J.last; H.term = J.term;
+        H.is_branch = J.is_branch; H.is_return = J.is_return; H.is_uncond = J.is_uncond;
+        H.succ_true = J.succ_true; H.succ_false = J.succ_false;
+        H.chain = J.chain; H.chain_and = J.chain_and; H.branch_predicate = J.branch_predicate;
+        H.chain_loadn_literals = J.chain_loadn_literals;
+        H.chain_setup_insns.insert(J.chain_setup_insns.begin(), J.chain_setup_insns.end());
+        for (int b : inner) { g.n[b].reach = false; g.n[b].succ_true = g.n[b].succ_false = -1; }
+        rebuild_preds();                     // a later interval in the merged head reads these
+        pc = cp.end;
+    }
+}
+
 static std::map<std::string,long long> g_structdiag;
 
 // One structuring attempt at a given duplication allowance.

@@ -61,16 +61,21 @@ Loop-carried nil (emit.h implicit-nil canonicalizer, #41), fixture loop_carried_
   LOOP_CARRIED_NIL_LEGACY_CFG_BLIND         ... and cfg-identity still PASSes it (LOADNIL is epsilon):
                               a recorded gate blind spot, not a requirement to keep
 
-Behavior fixes the gate cannot see or cannot yet match (#51, #52):
-  setlist_existing   RENOVICE_NO_SETLIST_EXISTING_TABLE  (`{ k = v, (f()) }`: the SETLIST rebuilt a fresh
-                     table and lost the fields). SETLIST_EXISTING_{RUNS,DEFAULT_BEHAVIOR_SAME,
-                     LEGACY_BEHAVIOR_DIFFERS}; no CFG-ID check: the exact output stores `t[1] = v`
-                     (SETTABLEN), stock uses SETLIST, so the prototype still differs (recorded).
+Behavior fixes (#51, #52):
+  setlist_existing   RENOVICE_NO_SETLIST_EXISTING_TABLE RENOVICE_NO_CTOR_EXPR (`{ k = v, (f()) }`: the
+                     SETLIST rebuilt a fresh table and lost the fields). SETLIST_EXISTING_{RUNS,
+                     DEFAULT_BEHAVIOR_SAME,DEFAULT_CFG_IDENTITY,LEGACY_BEHAVIOR_DIFFERS,LEGACY_CFG_FAILS}:
+                     since #90 the constructor expression prints the one stock constructor (before:
+                     exact `t[1] = v` index stores, SETTABLEN, CFG-ID FAIL).
   capture_snapshot   RENOVICE_NO_CAPTURE_SNAPSHOT  (a by-value capture of a loop-rewritten register saw
                      the last element). CAPTURE_SNAPSHOT_{RUNS,DEFAULT_BEHAVIOR_SAME,
                      DEFAULT_CFG_IDENTITY,DEFAULT_CLOSES,LEGACY_BEHAVIOR_DIFFERS,LEGACY_CFG_BLIND}:
                      cfg-identity does not compare MOVE/CAPTURE dataflow, so the legacy output PASSes
                      (blind spot); DEFAULT_CLOSES = the source repeats within 3 rounds.
+
+Constructor expressions (#90, cert/fixtures/ctor_2026_10_10/ctor_cond_items.luau):
+  CTOR_COND_ITEMS_{RUNS,DEFAULT_BEHAVIOR_SAME,DEFAULT_CFG_IDENTITY,DEFAULT_DATAFLOW_IDENTITY,
+  DEFAULT_CLOSES,LEGACY_CFG_FAILS,LEGACY_BEHAVIOR_DIFFERS}; legacy = RENOVICE_NO_CTOR_EXPR.
 
 Gate normalization S5 (cfg_identity_cmd.h, #50), fixture or_block (original built with native ORK):
   OR_BLOCK_DEFAULT_BEHAVIOR_SAME / OR_BLOCK_DEFAULT_CFG_IDENTITY
@@ -124,7 +129,7 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INEXACT_HEAD_SELECTOR",
             "RENOVICE_NO_DAG_PRECISE_NESTED_EXIT", "RENOVICE_NO_DECISION_PREP_OWNER",
             "RENOVICE_NO_FORNLOOP_LATCH_KEY", "RENOVICE_NO_DAG_BREAK_ARM_EXIT",
-            "RENOVICE_NO_WHILE_PREP_GUARD")
+            "RENOVICE_NO_WHILE_PREP_GUARD", "RENOVICE_NO_CTOR_EXPR")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
@@ -153,6 +158,7 @@ DECOMPILER_FIXTURES = {
     "loop_break_arm_join": "RENOVICE_NO_INEXACT_HEAD_SELECTOR",
     "innermost_nested_repeat": "RENOVICE_NO_INNERMOST_LOOP_FIRST",
 }
+CTOR_FIX = os.path.join(HERE, "fixtures", "ctor_2026_10_10")
 FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
                 for name in ("escape_join_forgen", "escape_join_loop_value", "while_break_return_arms")}
 # Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation
@@ -262,6 +268,14 @@ def cfg_verdict(original, candidate, env=None):
     out = run([DEC, "cfg-identity", original, candidate], env=env, check=False).stdout
     for line in out.splitlines():
         if line.startswith("CFG_IDENTITY "):
+            return line.rsplit("verdict=", 1)[-1].strip()
+    return "ERROR"
+
+
+def df_verdict(original, candidate, env=None):
+    out = run([DEC, "dataflow-identity", original, candidate], env=env, check=False).stdout
+    for line in out.splitlines():
+        if line.startswith("DATAFLOW_IDENTITY "):
             return line.rsplit("verdict=", 1)[-1].strip()
     return "ERROR"
 
@@ -405,8 +419,11 @@ def main():
             checks["LOOP_CARRIED_NIL_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp) != expected
             checks["LOOP_CARRIED_NIL_LEGACY_CFG_BLIND"] = cfg_verdict(original, legacy_rebuilt) == "PASS"
 
-            for name, switch, cfg_checks in (("setlist_existing", "RENOVICE_NO_SETLIST_EXISTING_TABLE", False),
-                                              ("capture_snapshot", "RENOVICE_NO_CAPTURE_SNAPSHOT", True)):
+            # (#90) the constructor expression also prints #51's mixed constructor (now one SETLIST
+            # constructor, CFG-ID exact), so its legacy control switches the parse off too.
+            for name, switch, cfg_checks in (("setlist_existing",
+                                              "RENOVICE_NO_SETLIST_EXISTING_TABLE RENOVICE_NO_CTOR_EXPR", False),
+                                             ("capture_snapshot", "RENOVICE_NO_CAPTURE_SNAPSHOT", True)):
                 fixture = os.path.join(FIX, name + ".luau")
                 expected = trace(fixture, temp)
                 key = name.upper()
@@ -416,14 +433,38 @@ def main():
                 source, rebuilt = round_trip(original, temp, name + ".default")
                 checks[key + "_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
                 legacy_env = base_env()
-                legacy_env[switch] = "1"
+                for switch_name in switch.split():
+                    legacy_env[switch_name] = "1"
                 legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
                 checks[key + "_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp) != expected
+                if name == "setlist_existing":
+                    checks[key + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+                    checks[key + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
                 if cfg_checks:
                     checks[key + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
                     checks[key + "_LEGACY_CFG_BLIND"] = cfg_verdict(original, legacy_rebuilt) == "PASS"
                     # the snapshot must re-decompile to itself (no new local per round)
                     checks[key + "_DEFAULT_CLOSES"] = closes_within(original, temp, name + ".close", 3)
+
+            # Constructor expressions (#90): branchy items, record items before list items, more
+            # than one SETLIST batch. Legacy = RENOVICE_NO_CTOR_EXPR: the statement path printed
+            # `t = {}` + item if/else + a second constructor (CFG-ID SETLIST -> NEWTABLE) and lost a
+            # record field before a multret list tail (#51's rebuild case).
+            fixture = os.path.join(CTOR_FIX, "ctor_cond_items.luau")
+            expected = trace(fixture, temp)
+            checks["CTOR_COND_ITEMS_RUNS"] = expected.count("\n") >= 2
+            original = os.path.join(temp, "ctor_cond_items.original.lua_B")
+            run([DEC, "recompile", fixture, original])
+            source, rebuilt = round_trip(original, temp, "ctor_cond_items.default")
+            checks["CTOR_COND_ITEMS_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
+            checks["CTOR_COND_ITEMS_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+            checks["CTOR_COND_ITEMS_DEFAULT_DATAFLOW_IDENTITY"] = df_verdict(original, rebuilt) == "PASS"
+            checks["CTOR_COND_ITEMS_DEFAULT_CLOSES"] = closes_within(original, temp, "ctor_cond_items.close", 3)
+            legacy_env = base_env()
+            legacy_env["RENOVICE_NO_CTOR_EXPR"] = "1"
+            legacy_source, legacy_rebuilt = round_trip(original, temp, "ctor_cond_items.legacy", legacy_env)
+            checks["CTOR_COND_ITEMS_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
+            checks["CTOR_COND_ITEMS_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp) != expected
 
             fixture = os.path.join(FIX, "or_block.luau")
             text = open(fixture, encoding="utf-8").read()

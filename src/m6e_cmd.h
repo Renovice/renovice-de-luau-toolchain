@@ -832,6 +832,7 @@ static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok,
     st::Graph g;
     if (!build_graph(ip, g)) { why = "cfg build failed"; return ""; }
     if (g.n.empty()) { why = "empty proto"; return ""; }
+    collapse_constructor_intervals(ip, g);   // DEFECTS #90: branchy constructor = one expression
     st::compute_dom(g);
     sa::Analyzer A; A.build(g);
     int steps = 0;
@@ -950,6 +951,7 @@ static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
     st::Graph g;
     if (!build_graph(ip, g)) { why = "cfg build failed"; return ""; }
     if (g.n.empty()) { why = "empty proto"; return ""; }
+    collapse_constructor_intervals(ip, g);   // DEFECTS #90: branchy constructor = one expression
     st::compute_dom(g);
     sa::Analyzer A; A.build(g);
     int steps = 0;
