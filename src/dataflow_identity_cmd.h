@@ -1094,6 +1094,12 @@ static int cmd_dataflow_identity(int argc, char** argv) {
         if (text == "--u44") u44 = true;
         else if (text.compare(0, 7, "--dump=") == 0) dump = std::atoi(text.c_str() + 7);
     }
+    {   // input-profile routing: a U43-only stock module is gated under its own profile
+        std::string profile_note;
+        const std::string mismatch = de::resolve_gate_profile(read_file(argv[2]), read_file(argv[3]), u44, profile_note);
+        if (!profile_note.empty()) std::printf("INPUT_PROFILE %s\n", profile_note.c_str());
+        if (!mismatch.empty()) { std::printf("DATAFLOW_IDENTITY verdict=ERROR %s\n", mismatch.c_str()); return 2; }
+    }
     std::vector<ir::IProto> stock, candidate;
     std::vector<CfgIdentityProto> stock_models, candidate_models;
     std::string failure;

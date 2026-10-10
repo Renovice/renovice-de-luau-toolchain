@@ -85,9 +85,11 @@ static bool u44_scan_names(const std::string& path, U44NameScan& scan) {
     return true;
 }
 
-// Enable the U44 input profile and precompute the module's mixed hashed/string spellings.
+// Enable the U44 input profile (or, for a module valid only under U43, route it through its own
+// profile: select_u44_entry_profile) and precompute the module's mixed hashed/string spellings.
 static bool u44_prepare(const std::string& path, std::string& failure) {
-    g_input_profile_u44 = true;
+    select_u44_entry_profile(path);
+    g_raw_hash_names = true;
     ir_load_namebase();
     g_u44_mixed_names.clear();
     U44NameScan scan;
@@ -108,7 +110,7 @@ static bool u44_source_header(const std::string& path, std::string& header, std:
             if (scan.strings[name_class].count(name)) { failure = "mixed hashed/string name " + name; return false; }
             if (!ex::is_ident(name)) { failure = "hashed name is not an identifier: " + name; return false; }
         }
-    char seed[16]; std::snprintf(seed, sizeof seed, "%08x", de::NAMEHASH_SEED_U44);
+    char seed[16]; std::snprintf(seed, sizeof seed, "%08x", g_source_seed);
     std::string out = std::string(tc::name_hash_seed_directive_prefix()) + seed + "\n";
     for (const std::string& name : scan.hashed[0]) out += tc::hashed_global_directive_prefix() + name + "\n";
     for (const std::string& name : scan.hashed[1]) out += tc::hashed_field_directive_prefix() + name + "\n";
@@ -157,7 +159,7 @@ static int cmd_semantic_ir_render_module_u44(int argc, char** argv) {
     if (!u44_scan_names(argv[2], scan)) {
         std::fprintf(stderr, "semantic-ir-render-module-u44: %s\n", scan.failure.c_str()); return 1;
     }
-    char seed[16]; std::snprintf(seed, sizeof seed, "%08x", de::NAMEHASH_SEED_U44);
+    char seed[16]; std::snprintf(seed, sizeof seed, "%08x", g_source_seed);
     std::string header = std::string(tc::name_hash_seed_directive_prefix()) + seed + "\n";
     for (const auto& item : scan.import_classes)
         header += tc::import_class_directive_prefix() + item.first + "=" + item.second + "\n";
@@ -279,6 +281,12 @@ static int cmd_const_identity(int argc, char** argv) {
     bool u44 = false;
     for (int argument = 4; argument < argc; ++argument)
         if (std::string(argv[argument]) == "--u44") u44 = true;
+    {   // input-profile routing: a U43-only stock module is gated under its own profile
+        std::string profile_note;
+        const std::string mismatch = de::resolve_gate_profile(read_file(argv[2]), read_file(argv[3]), u44, profile_note);
+        if (!profile_note.empty()) std::printf("INPUT_PROFILE %s\n", profile_note.c_str());
+        if (!mismatch.empty()) { std::printf("%s verdict=ERROR %s\n", "CONST_IDENTITY", mismatch.c_str()); return 2; }
+    }
     std::vector<ConstIdentityProto> stock, candidate;
     std::string failure;
     if (!const_identity_load(argv[2], u44, stock, failure) || !const_identity_load(argv[3], u44, candidate, failure)) {

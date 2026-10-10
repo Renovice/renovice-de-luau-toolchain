@@ -130,6 +130,8 @@ def one(stock, args):
         s1, b1, b1r = work / "s1.luau", work / "b1.lua_B", work / "b1r.lua_B"
         rc, out = run(args.exe, [decomp, stock, s1], work)
         res["decompile"] = rc == 0 and s1.exists()
+        # input-profile routing: a U44 entry point decompiles a U43-only module through its own profile
+        res["inputProfile"] = "u43" if "handled through the U43 profile" in out else args.profile
         if not res["decompile"]:
             res["error"] = "decompile: " + out[-300:]; return res
         text = s1.read_text(encoding="utf-8", errors="replace")
@@ -238,6 +240,7 @@ def main():
         "constAndCfgIdentityFirstPass": count(lambda r: r.get("constIdentity", {}).get("verdict") == "PASS"
                                               and r.get("cfgIdentity", {}).get("verdict") == "PASS"),
         "byteIdenticalFirstPass": count(lambda r: r.get("byteIdentical")),
+        "inputProfileRouted": count(lambda r: r.get("inputProfile") not in (None, args.profile)),
         "seconds": round(time.time() - t0, 1),
     }
     summary["modulesWithDirective"] = {k: count(lambda r, k=k: r.get("directives", {}).get(k, 0) > 0)
