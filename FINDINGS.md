@@ -6376,3 +6376,18 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+## 2026-10-10 - Generic-for preparation shapes in the region emitter (agent forprep, wave 3)
+
+Hypothesis: the FORGPREP-first CFG-ID labels are one family: generic `for` loops that the CFG renderer refuses and the
+region emitter cannot render exactly.
+Finding: TRUE (mostly). 112 of 114 FORGPREP-labelled prototypes fall back to the region emitter; six independent defects
+(DEFECTS #90-#96, provisional): empty generic break scope, conditional claiming a loop it does not decide, FORGLOOP-claimed
+region emitting its body as setup, entry-based dominance inside cut bodies, one-latch-at-a-time generic loops, the deciding
+FORNPREP losing its loop, nested generic prep stolen by the enclosing loop. The LOAD-first labels are mostly NOT for-prep
+(escape-join selector residue, dispatcher dead-load live ranges, prototype order).
+Evidence: work/agents/forprep-runs/full2-9a4adcd1 vs work/u441-r9-c62f1665 (CFG-ID 4830 -> 4878, 0 PASS -> FAIL);
+fixtures cert/fixtures/forprep_2026_10_10; repros RESEARCH/CFG_CAMPAIGN_U441_2026-10-09/forprep_wave3/repro.
+Reason: each rule has an opt-out that reproduces its fixture defect under luau.exe; the full corpus moved only upward.
+Next Step: compound break conditions inside a generic for (repro gfor_compound_break_in_while) and loop variables read
+by Proper-dispatcher escape arms after the loop (7 modules CFG PASS / dataflow FAIL).
