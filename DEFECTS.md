@@ -465,3 +465,35 @@ Measured (agent worktree, binary `0a075272`, vs `c62f1665`, both `--dataflow`): 
 prototypes 4,156 -> 4,158; no PASS -> FAIL, no prototype, dataflow or closure loss. Remaining in the queue: 18 modules
 FAIL on other classes (SETLIST -> NEWTABLE, CLOSEUPVALS, FORGPREP, SETLIST -> SETTABLEN); no `-> GETTABLEN` label left.
 Full corpus not measured by the agent.
+## 2026-10-10 — 44.1.1 campaign wave 3: captured locals and upvalues (agent captures, integrated as batch 12)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 93 | a local captured BY REFERENCE inside a block (Luau ends it with `CLOSEUPVALS R` at the block end) was the flat function-lifetime `vR`; CLOSEUPVALS was skipped in expr.h | every loop iteration's closure shared ONE variable, and later code reusing the register wrote into the variable the closure still reads (luau.exe fixture: `a1 b2 c3` became a runtime error, closures returned functions); CFG-ID `LABEL CLOSEUPVALS -> *` (58 module-class entries, r9), dataflow `CLOSURE REFWRITES` / `TAG CAP VAL->CAP REF` | wave-1 diagnosis, agent captures; `cert/fixtures/captures_2026_10_10/scoped_capture_loop.luau` | expr.h prints each CLOSEUPVALS not followed by RETURN as a marker statement; `src/scoped_captures.h` (run on the raw body before any other text pass) wraps the lines from the last top-level `vR = <rhs not reading vR>` before the closure to the marker in `do ... end`, renames vR there to `__renovice_scope_<proto>_<capture ordinal>` and declares it `local`; only when the closure reaches that CLOSEUPVALS, R is dead after it, the placeholder is in the marker's block and no top-level local of the range is read after it; dispatcher shapes (definition and closure in different state blocks) fail closed (`RENOVICE_NO_SCOPED_CAPTURE_LOCALS`, control `RENOVICE_SCOPED_CAPTURE_MARKERS_ONLY`, trace `RENOVICE_SCOPED_CAPTURE_TRACE`) |
+| 94 | a closure capturing one register in two by-value slots (Luau binds `local alias = base` to base's register when neither is written) had both slots bound to the one name `vR` | one upvalue fewer, every later upvalue index shifted: CFG-ID `UPVALUE GETUPVAL -> GETUPVAL`, dataflow `CLOSURE SLOT_COUNT` (TouchInterface Window, LookJoystick, MoveJoystick) | agent captures; luau-compile shows `CAPTURE VAL R0` twice for the alias | every repeated by-value slot gets its own #52 snapshot; the copy-reuse of #52 is off for such a register (`RENOVICE_NO_DUPLICATE_CAPTURE_SNAPSHOT`) |
+| 95 | the #52 snapshots of a closure at the main chunk's top level are immutable top-level locals, which Luau shares (DUPCLOSURE); stock had NEWCLOSURE because the captured locals belonged to an -O2 inlined function | StatsLib: one prototype referenced through NEWCLOSURE in one function and DUPCLOSURE constants in the chunk, the #78 merge refused, PROTO_COUNT (the last one of the corpus) | agent captures; luau-compile: `repeat ... until true` emits no instruction and makes the snapshots loop-depth 1 | in the main chunk only, when every stock site of that prototype is NEWCLOSURE with by-value captures and every capture is a snapshot declared directly above, wrap snapshots + closure in `repeat ... until true` (`RENOVICE_NO_UNSHARED_SNAPSHOT_CLOSURE`) |
+
+Diagnosed, not changed (other owners):
+- `UPVALUE GETUPVAL -> GETUPVAL` in 12 of the 16 r9 modules (RetroMessenger, ChatRedux, Codex, EndOfMatch, HudRedux,
+  LoadOutRedux, MapRedux, ThemedDetailedPurchaseDialog, ThemedPhotoboothControls, ThemedSquadOverlay,
+  ThemedTennoCustomization, WF99PvPvEMission) is the >195-local spill frame (`local vT = {}`, emit.h LOCAL_BUDGET):
+  every local of the chunk becomes a field of one table captured as ONE upvalue (dataflow `CLOSURE SLOT_COUNT 6->1`),
+  by-value captures become live table reads. The same frame produces most `LABEL * -> GETTABLEN` prototypes.
+- InterceptionChallenge p15: upvalue ORDER. Luau numbers upvalues in compile order and compiles an assignment's
+  target first (`u4 = f(u5.X)` gives u4 the lower index); the register form `v = f(u5.X); u4 = v` references u5
+  first. A fix needs the SETUPVAL value chain inlined into the assignment.
+- FishInfo p14 (dataflow `GETFIELD VALUE +NIL -D:GETUPVAL`): emit.h `canonicalize_paired_index_base_lifetimes`
+  folds `v1 = u4; v2 = v1.decoType` because the TEXTUALLY next mention of v1 is a plain definition, but that line is
+  in another dispatcher state; the path state 5 -> state 7 reads v1 (`v1.caughtAnimIndex`) and now reads nil.
+  Confirmed with `RENOVICE_NO_CAPTURED_INDEX_BASE_LIFETIMES=1` (the fold disappears).
+- The other 12 CFG-PASS / dataflow-FAIL modules of r9 (ConsumablesOverlay, ArachnoidHungerDodgeFire, BusterTrapAbility,
+  VoidStorm, Bomber, InfestedPodReinforcements, CreateFabricator, TreasureBoxDespawn, ShellAncientGoo, ArloZealots,
+  DrifterGrappleAbility, VoidClone) are one class: `VALUE -D:FORNLOOP/FORGLOOP`, a loop variable read after a break
+  exit; e.g. Bomber p4 prints the escape arm `c5v3 = c5v17[c5v20]` in a Proper dispatcher state after the loop,
+  reading the for-prep start register instead of the index (loop structure, emit.h).
+
+Measured (agent captures, binary 46694dd9 vs c62f1665, `RESEARCH/CAPTURES_CAMPAIGN_2026-10-10.md`): queue of 88 modules
+CFG-ID 13 -> 39, CONST-ID 78 -> 79, CFG-ID + dataflow 0 -> 25, equal prototypes 7,158 -> 7,224, PROTO_COUNT 1 -> 0;
+stride 20 CFG-ID 247 -> 248; full-corpus decompile diff: 60 modules change (59 queue + 1 measured unchanged). No PASS ->
+FAIL on any gate, no closure or prototype loss. Fixture gates with 46694dd9: Gate 14 135/135 (+10 checks), dataflow
+157/157 (+6), proto shape 52/52 (+12), natural-loop 8/8.

@@ -6385,3 +6385,18 @@ below Luau's real 200-local limit, plus a constant-key fold into GETTABLEN range
 Evidence: stock `ir-u44` (14 protos with maxstack >= 196, all single-block roots), `luau-compile` limit probes,
 agent-spill runs `work/agents/spill-runs/{q-before,q-final,s20-before,s20-final}`.
 Next Step: integrator full-corpus run of the agent/spill commit.
+---
+
+## 2026-10-10 - Captured locals: block scope, duplicate by-value slots, unshared chunk snapshots (agent captures)
+
+Hypothesis: `CLOSEUPVALS -> *` is a block-scoped REF-captured local flattened to function scope (behavior-changing);
+`UPVALUE GETUPVAL -> GETUPVAL` and StatsLib's PROTO_COUNT are capture-binding defects.
+Finding: TRUE for CLOSEUPVALS (luau.exe `1 2` vs `2 2`); PARTIALLY TRUE for UPVALUE (3 of 16 modules are duplicate
+by-value slots, 12 are the vT spill frame, 1 is upvalue numbering order); TRUE for StatsLib (Luau shares top-level
+snapshot closures).
+Evidence: queue of 88 modules c62f1665 -> 46694dd9: CFG-ID 13 -> 39, CFG-ID + dataflow 0 -> 25, PROTO_COUNT 1 -> 0;
+full-corpus decompile diff 60 modules, no PASS -> FAIL; fixture gates PASS.
+Reason: Luau emits CLOSEUPVALS only for REF-captured block locals and shares closures of immutable top-level locals.
+DEFECTS #93-#95 (batch 12).
+Next Step: dispatcher shapes (definition and closure in different state blocks), the vT spill frame, FishInfo's
+text-order fold (emit.h). Details: `RESEARCH/CAPTURES_CAMPAIGN_2026-10-10.md`.

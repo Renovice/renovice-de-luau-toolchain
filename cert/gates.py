@@ -85,11 +85,15 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "LOST_CONDITION": 0, "SEMANTIC_BEHAVIOR_SAME": 150,
             "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
-            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 143,
+            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 153,
             "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 16,
             "U43_CLASS_SWAPS": 7501,
             "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 82,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-10-10 (e) -- captured locals (DEFECTS #93-#95, batch 12): Gate 14 143 -> 153 checks
+#   (captures fixtures scoped_capture_loop and its controls). Post 64ea0d59: every other gate passes
+#   (work/u441-r12-64ea0d59/gates.txt; U43 CFG protos equal 9525 -> 9528).
 
 # BASELINE CHANGE OF 2026-10-10 (d) -- exact local limit, register merge, index-key guard (DEFECTS #90-#92): Gate 14
 #   125 -> 143 checks (fixtures register_key_index, wide_root, merged_root). Post 0a075272: every other gate passes

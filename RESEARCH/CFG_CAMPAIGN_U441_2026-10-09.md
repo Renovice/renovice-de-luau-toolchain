@@ -61,6 +61,7 @@ pass.
 | 9 (#82-#89) | c01796c | c62f1665 | 4,830 | 5,437 | 4,817 | 79,485 of 83,518 | 0 | ALL PASS (G14 113 -> 125) |
 | 10 (#90-#92) | 5a40038 | 0a075272 | 4,838 | 5,437 | 4,825 | 82,637 of 83,518 | 0 | ALL PASS (G14 125 -> 143) |
 | 11 (input-profile routing, interior dead code) | ddaedf3 | e3e8ea0d | 4,851 | 5,456 | 4,838 | 82,736 of 83,618 | 0 | ALL PASS; decompile 5,478 / 5,478 |
+| 12 (#93-#95 captured locals, agent captures) | (this commit) | 64ea0d59 | 4,877 | 5,457 | 4,863 | 82,814 of 83,635 | 0 | ALL PASS (G14 143 -> 153); PROTO_COUNT 1 -> 0 |
 
 CFG-ID 76.2% -> 88.2% of 5,478; CFG-ID + dataflow 74.4% -> 87.9%; CONST-ID 97.5% -> 99.3%; PROTO_COUNT 72 -> 1. Run folders: `work/u441-r1-49e0683e`,
 `work/u441-r2b-b5200665`, `work/u441-r3b-928298db`, `work/u441-r4b-fd0d4c81` (each with `transitions.json` and
@@ -71,3 +72,12 @@ every batch needs the full corpus.
 
 Wave 2 (in progress): two-exit loops / inlined returns, Proper dispatcher residue, loop selection rework (#67/#68),
 coalescing liveness + OR/AND lowering (dataflow defects).
+
+Batch 12 (2026-10-10, agent captures `667770c`, integrated onto batch 11; details
+`RESEARCH/CAPTURES_CAMPAIGN_2026-10-10.md`): block-scoped REF-captured locals (CLOSEUPVALS), duplicate by-value capture
+slots, unshared main-chunk snapshots. Full corpus `work/u441-r12-64ea0d59` vs r11: CFG-ID 4,851 -> 4,877 (26 FAIL ->
+PASS, 0 PASS -> FAIL), CONST-ID 5,456 -> 5,457, CFG-ID + dataflow 4,838 -> 4,863, PROTO_COUNT 1 -> 0, 54 modules gain
+equal prototypes and none loses one, closure 0 open->closed / 0 closed->open, class swaps 0. Source fixed point
+2,067 -> 2,066: TouchInterface_Window now passes CFG-ID and dataflow on the first pass but closes at pass 2 (closed
+identity PASS), not a loss. The agents' DEFECTS #90-#92 were renumbered #93-#95 (batch 10 already used #90-#92).
+Wave 3 still pending integration: ctor (`cd43ad0`, measured by the agent against r9: CFG-ID +33), render, forprep.
