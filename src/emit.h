@@ -20,6 +20,15 @@
 
 namespace em {
 
+// Locals the module assembler (m6e_cmd.h) adds to a prototype's OWN scope after emit_function has
+// returned: orphan literals (`if false then local u.. ; local _ = function ... end`) and the dead-tail
+// splice. Keyed by global prototype index; -1 = unknown (the exact local-limit rule then fails
+// closed for that prototype). Module-scoped: filled before a module is emitted, cleared after.
+inline std::map<int, int>& late_scope_locals() {
+    static std::map<int, int> reserved;
+    return reserved;
+}
+
 // One Emitter is constructed per proto, so a construction counter identifies the proto even on the
 // anonymous path (which carries no index). Needed because block ids are PER-PROTO and collide.
 
@@ -10982,6 +10991,17 @@ inexact_selector_fallback:
             const std::string base = lines[i].substr(base_definition[0].last + 3);
             const std::string key = lines[i + 1].substr(key_definition[0].last + 3);
             if (!identifier(base) || !unsigned_number(key)) continue;
+            // REGISTER-KEY GUARD (2026-10-10). The stock access is GETTABLE/SETTABLE with the key in
+            // a register. Luau compiles a literal key that is an integer in [1, 256] to the
+            // immediate-index form GETTABLEN/SETTABLEN instead (Compiler.cpp compileExprIndexExpr /
+            // compileLValue, the same range test), so `u0[1]` is a different program shape than the
+            // stock `LOADN R, 1; GETTABLE`. Folding is exact only for keys Luau keeps in a register
+            // (0, fractions, > 256): leave the two scratch lifetimes in place otherwise.
+            // RENOVICE_NO_INDEXN_KEY_GUARD restores the unguarded fold.
+            if (!std::getenv("RENOVICE_NO_INDEXN_KEY_GUARD")) {
+                const double number = std::strtod(key.c_str(), nullptr);
+                if (number >= 1 && number <= 256 && number == (double)(int)number) continue;
+            }
 
             const std::vector<RegToken> access_tokens = reg_tokens(lines[i + 2]);
             RegToken base_use, key_use;
@@ -18576,6 +18596,341 @@ inexact_selector_fallback:
     }
 
     // Whole function: params, then every register as a local, then the body.
+    // STRAIGHT-LINE REGISTER MERGE (2026-10-10). A function whose flat declaration would exceed
+    // Luau's 200-local limit by a few names (stock: <= 200 source locals plus compiler temporaries
+    // on top of them, e.g. the `DUPCLOSURE R200; SETGLOBAL Name <- R200` temporaries of a module root
+    // with 200 locals) previously spilled EVERY register to `vT[N]`, which turns every child's
+    // upvalue read into `GETUPVAL; GETTABLEN`. Instead give a register a name already used by
+    // another register whose value lifetimes never overlap it, until the declaration fits.
+    //
+    // Fail-closed proof, all textual on the final body (folding may have moved reads, so bytecode
+    // liveness is not used for the decision):
+    //   - the function has exactly one reachable basic block and every body line is a root
+    //     statement (indent 1), so text order IS execution order and each line runs once;
+    //   - every line is one of: `vA[, vB...] = expr` (pure register targets), an assignment whose
+    //     target list holds no bare register target, a call/expression statement, or
+    //     `do return ... end`; anything else (compound assignment, a register beside a non-register
+    //     target, control flow) refuses the merge;
+    //   - a register captured by a closure (CAPTURE operand or a `function<..|captures>`
+    //     placeholder) or a parameter is never merged;
+    //   - per line, reads happen before writes. A lifetime is (def time, last read time]; a
+    //     register read before any write starts at function entry (its nil). Two registers may
+    //     share a name only when no write of one falls inside a live range of the other and they
+    //     are never written by the same statement.
+    // Returns the rename map (empty when the merge cannot reach `need` names).
+    std::map<int, int> merge_straight_line_registers(const std::string& body,
+                                                     const std::vector<int>& decl,
+                                                     size_t need) const {
+        if (!need) return {};
+        int reachable = 0;
+        for (const st::Node& node : g->n) if (node.reach) ++reachable;
+        if (reachable != 1) return {};
+
+        std::set<int> captured;
+        for (const ir::IInsn& in : ip->code)
+            if (in.op == 0x35 && in.A != 2) captured.insert(in.B);
+
+        std::vector<std::string> lines;
+        {
+            size_t pos = 0;
+            while (pos < body.size()) {
+                size_t end = body.find('\n', pos);
+                if (end == std::string::npos) end = body.size();
+                lines.push_back(body.substr(pos, end - pos));
+                pos = end + 1;
+            }
+        }
+        const std::string root = ind(1);
+        // Event times: a read on line L is 2L+2, a write on line L is 2L+3 (reads first), entry -1.
+        struct Event { long time; bool write; };
+        std::map<int, std::vector<Event>> events;
+        for (size_t l = 0; l < lines.size(); ++l) {
+            const std::string& line = lines[l];
+            if (line.empty()) continue;
+            if (line.compare(0, root.size(), root) != 0 || line.size() == root.size()
+                || line[root.size()] == ' ')
+                return {};
+            const std::string text = line.substr(root.size());
+            // Leading keyword (whole word) other than `do return ... end`: refuse.
+            size_t word_end = 0;
+            while (word_end < text.size()
+                   && (std::isalnum((unsigned char)text[word_end]) || text[word_end] == '_'))
+                ++word_end;
+            const std::string first_word = text.substr(0, word_end);
+            static const std::set<std::string> refused = {
+                "if", "for", "while", "repeat", "until", "else", "elseif", "end", "local",
+                "goto", "break", "continue", "return", "function", "do", "then"};
+            const bool is_return = text.compare(0, 10, "do return ") == 0
+                || text == "do return end";
+            if (refused.count(first_word) && !is_return) return {};
+            // Placeholder captures are captures.
+            for (size_t at = line.find("function<"); at != std::string::npos;
+                 at = line.find("function<", at + 1)) {
+                const size_t close = line.find('>', at);
+                if (close == std::string::npos) return {};
+                for (const RegToken& token : reg_tokens(line.substr(at, close - at)))
+                    captured.insert(token.reg);
+            }
+            // Top-level `=` (not ==, ~=, <=, >=), skipping strings and brackets. The whole line is
+            // scanned: a statement continued on another line (brackets not balanced here) or a
+            // comment refuses the merge, so each line is exactly one complete statement.
+            size_t assign = std::string::npos;
+            int depth = 0;
+            for (size_t q = 0; q < line.size(); ++q) {
+                const char c = line[q];
+                if (c == '-' && q + 1 < line.size() && line[q + 1] == '-') return {};
+                if (c == '"' || c == '\'') {
+                    ++q;
+                    while (q < line.size() && line[q] != c) { if (line[q] == '\\') ++q; ++q; }
+                    continue;
+                }
+                if (c == '[' && q + 1 < line.size() && (line[q + 1] == '[' || line[q + 1] == '='))
+                    return {};  // long bracket: refuse rather than scan it
+                if (c == '(' || c == '[' || c == '{') ++depth;
+                else if (c == ')' || c == ']' || c == '}') --depth;
+                else if (c == '=' && depth == 0 && !is_return) {
+                    const char prev = q ? line[q - 1] : ' ';
+                    const char next = q + 1 < line.size() ? line[q + 1] : ' ';
+                    if (next == '=' ) { ++q; continue; }
+                    if (prev == '~' || prev == '<' || prev == '>' || prev == '=') continue;
+                    if (prev != ' ' || next != ' ') return {};  // `+=` and similar compounds
+                    if (assign != std::string::npos) return {};  // two assignments on one line
+                    assign = q;
+                }
+                if (depth < 0) return {};
+            }
+            if (depth != 0) return {};
+            const std::vector<RegToken> tokens = reg_tokens(line);
+            std::set<int> writes;
+            size_t rhs_from = 0;
+            if (assign != std::string::npos) {
+                const std::string lhs = line.substr(root.size(), assign - 1 - root.size());
+                std::vector<RegToken> lhs_tokens = reg_tokens(lhs);
+                // Pure register target list `vA, vB, ...`?
+                std::string rebuilt;
+                for (size_t q = 0; q < lhs_tokens.size(); ++q) {
+                    if (q) rebuilt += ", ";
+                    rebuilt += lhs.substr(lhs_tokens[q].first,
+                                          lhs_tokens[q].last - lhs_tokens[q].first);
+                }
+                if (!lhs_tokens.empty() && rebuilt == lhs) {
+                    for (const RegToken& token : lhs_tokens) {
+                        if (!writes.insert(token.reg).second) return {};
+                    }
+                    rhs_from = assign;
+                } else {
+                    // Any bare register target beside other targets is refused; register tokens
+                    // inside a target (`vX.f`, `t[vK]`) are reads.
+                    int top = 0;
+                    for (size_t q = 0; q < lhs.size(); ++q) {
+                        if (lhs[q] == '(' || lhs[q] == '[' || lhs[q] == '{') ++top;
+                        else if (lhs[q] == ')' || lhs[q] == ']' || lhs[q] == '}') --top;
+                        else if (lhs[q] == ',' && top == 0) {
+                            for (const RegToken& token : lhs_tokens) {
+                                const bool bare_left = token.first == 0
+                                    || lhs[token.first - 1] == ' ';
+                                const bool bare_right = token.last == lhs.size()
+                                    || lhs[token.last] == ',';
+                                if (bare_left && bare_right) return {};
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            const long read_time = 2 * (long)l + 2, write_time = 2 * (long)l + 3;
+            std::set<int> reads;
+            for (const RegToken& token : tokens)
+                if (token.first >= rhs_from || !writes.count(token.reg)) reads.insert(token.reg);
+            // A target token of the pure list is a write, not a read.
+            if (rhs_from) {
+                reads.clear();
+                for (const RegToken& token : tokens)
+                    if (token.first > rhs_from) reads.insert(token.reg);
+            }
+            for (int reg : reads) events[reg].push_back({read_time, false});
+            for (int reg : writes) events[reg].push_back({write_time, true});
+        }
+
+        struct Life { long def, last; };
+        std::map<int, std::vector<Life>> lives;
+        std::vector<int> candidates;
+        for (int reg : decl) {
+            if (reg < ip->nparams || captured.count(reg)) continue;
+            auto found = events.find(reg);
+            if (found == events.end()) continue;
+            std::vector<Life> out;
+            bool open = false;
+            Life cur{-1, -1};
+            for (const Event& e : found->second) {
+                if (e.write) {
+                    if (open) out.push_back(cur);
+                    cur = {e.time, e.time};
+                    open = true;
+                } else {
+                    if (!open) { cur = {-1, -1}; open = true; }
+                    cur.last = std::max(cur.last, e.time);
+                }
+            }
+            if (open) out.push_back(cur);
+            lives[reg] = out;
+            candidates.push_back(reg);
+        }
+        auto conflict = [](const std::vector<Life>& a, const std::vector<Life>& b) {
+            for (const Life& x : a) for (const Life& y : b) {
+                if (x.def == y.def) return true;
+                if (x.def < y.def && y.def < x.last) return true;
+                if (y.def < x.def && x.def < y.last) return true;
+            }
+            return false;
+        };
+        std::map<int, int> names;
+        std::set<int> received;
+        std::sort(candidates.begin(), candidates.end());
+        for (size_t qi = candidates.size(); qi-- > 0 && names.size() < need;) {
+            const int reg = candidates[qi];
+            if (received.count(reg)) continue;  // its name already carries merged lifetimes
+            for (int target : candidates) {
+                if (target == reg || names.count(target)) continue;
+                if (conflict(lives[reg], lives[target])) continue;
+                names[reg] = target;
+                received.insert(target);
+                std::vector<Life>& merged = lives[target];
+                merged.insert(merged.end(), lives[reg].begin(), lives[reg].end());
+                break;
+            }
+        }
+        if (names.size() < need) return {};
+        return names;
+    }
+
+    // Conservative count of the source locals a function body declares in its OWN scope, besides
+    // the flat register declaration: every `local` name and every `for` variable whose statement is
+    // not inside a nested function literal, counted as if all were active at once (an over-count can
+    // only make the caller fall back to the register table). Luau's limit is per function: locals
+    // of a nested function do not count toward the enclosing function (luau-compile probe
+    // 2026-10-10: 200 flat locals plus a child with 50 locals compiles; 200 flat locals plus one
+    // `for` variable or one more `local` fails "Out of local registers ... exceeded limit 200").
+    // Keyword-level scan: strings, long brackets and comments are skipped; `function` opens a
+    // nested scope closed by its matching `end` (if/do/while/for/repeat blocks are tracked so the
+    // match is exact). Returns -1 when the scan cannot balance the text (caller fails closed).
+    static int root_scope_extra_locals(const std::string& text) {
+        enum Kind { BLOCK, FUNC, REPEAT };
+        std::vector<Kind> stack;
+        int pending_do = 0;
+        int function_depth = 0;
+        int count = 0;
+        size_t i = 0;
+        const size_t n = text.size();
+        auto long_bracket = [&](size_t at, size_t& level) {
+            if (at >= n || text[at] != '[') return false;
+            size_t q = at + 1; level = 0;
+            while (q < n && text[q] == '=') { ++level; ++q; }
+            return q < n && text[q] == '[';
+        };
+        auto skip_long = [&](size_t at, size_t level) {
+            const std::string close = "]" + std::string(level, '=') + "]";
+            const size_t end = text.find(close, at + level + 2);
+            return end == std::string::npos ? n : end + close.size();
+        };
+        auto ident_start = [](char c) { return std::isalpha((unsigned char)c) || c == '_'; };
+        auto ident_char = [](char c) { return std::isalnum((unsigned char)c) || c == '_'; };
+        auto skip_space = [&](size_t at) {
+            while (at < n && std::isspace((unsigned char)text[at])) ++at;
+            return at;
+        };
+        auto read_ident = [&](size_t at, std::string& word) {
+            word.clear();
+            if (at >= n || !ident_start(text[at])) return at;
+            size_t q = at;
+            while (q < n && ident_char(text[q])) ++q;
+            word = text.substr(at, q - at);
+            return q;
+        };
+        // Names in `a, b, c` starting at `at`; stops at the first token that is not a name/comma.
+        auto count_names = [&](size_t at) {
+            int names = 0;
+            std::string word;
+            for (;;) {
+                at = skip_space(at);
+                const size_t next = read_ident(at, word);
+                if (word.empty()) break;
+                ++names;
+                at = skip_space(next);
+                if (at < n && text[at] == ',') { ++at; continue; }
+                break;
+            }
+            return names;
+        };
+        while (i < n) {
+            const char c = text[i];
+            if (c == '-' && i + 1 < n && text[i + 1] == '-') {
+                size_t level = 0;
+                if (long_bracket(i + 2, level)) { i = skip_long(i + 2, level); continue; }
+                const size_t end = text.find('\n', i);
+                i = end == std::string::npos ? n : end + 1;
+                continue;
+            }
+            if (c == '"' || c == '\'') {
+                ++i;
+                while (i < n && text[i] != c) { if (text[i] == '\\') ++i; ++i; }
+                ++i;
+                continue;
+            }
+            if (c == '[') {
+                size_t level = 0;
+                if (long_bracket(i, level)) { i = skip_long(i, level); continue; }
+                ++i;
+                continue;
+            }
+            if (std::isdigit((unsigned char)c)) {
+                while (i < n && (ident_char(text[i]) || text[i] == '.'
+                                 || ((text[i] == '+' || text[i] == '-')
+                                     && (text[i - 1] == 'e' || text[i - 1] == 'E'))))
+                    ++i;
+                continue;
+            }
+            if (!ident_start(c)) { ++i; continue; }
+            // A name following `.` or `:` is a field/method, never a keyword.
+            size_t back = i;
+            while (back > 0 && std::isspace((unsigned char)text[back - 1])) --back;
+            const bool member = back > 0 && (text[back - 1] == '.' || text[back - 1] == ':');
+            std::string word;
+            const size_t next = read_ident(i, word);
+            if (member) { i = next; continue; }
+            if (word == "function") {
+                // `function<proto|captures>` is the emitter's closure placeholder (the literal is
+                // inlined later): it has no body and no `end` in this text.
+                if (next < n && text[next] == '<') { i = next; continue; }
+                stack.push_back(FUNC); ++function_depth;
+            }
+            else if (word == "if") stack.push_back(BLOCK);
+            else if (word == "while" || word == "for") {
+                if (word == "for" && function_depth == 0) count += count_names(next);
+                stack.push_back(BLOCK); ++pending_do;
+            }
+            else if (word == "do") {
+                if (pending_do > 0) --pending_do;
+                else stack.push_back(BLOCK);
+            }
+            else if (word == "repeat") stack.push_back(REPEAT);
+            else if (word == "end" || word == "until") {
+                if (stack.empty()) return -1;
+                const Kind top = stack.back();
+                if ((word == "until") != (top == REPEAT)) return -1;
+                stack.pop_back();
+                if (top == FUNC) --function_depth;
+            }
+            else if (word == "local" && function_depth == 0) {
+                std::string after;
+                read_ident(skip_space(next), after);
+                count += after == "function" ? 1 : count_names(next);
+            }
+            i = next;
+        }
+        return stack.empty() && pending_do == 0 ? count : -1;
+    }
+
     std::string emit_function(const std::string& name) {
         out.clear(); maxreg = 0; bad = false; state_name_serial = 0; lexical_table_serial = 0;
         raw_fornprep_serial = 0;
@@ -19123,7 +19478,52 @@ inexact_selector_fallback:
         const size_t LOCAL_BUDGET = std::getenv("RENOVICE_LOCAL_BUDGET_199") ? 199
                                   : std::getenv("RENOVICE_LOCAL_BUDGET_195") ? 195
                                   : 150;
-        if (decl.size() > LOCAL_BUDGET) {
+        // EXACT LOCAL LIMIT (2026-10-10). The fixed budget above is headroom for the other locals a
+        // body declares; it spilled every function naming 196..200 registers to `vT[N]` although
+        // Luau accepts the flat declaration whenever parameters + flat locals + the body's own
+        // other locals fit its hard per-function limit of 200. The spill rewrites every captured
+        // module local into a table slot, so every child read `GETUPVAL u; GETTABLEN` instead of
+        // `GETUPVAL u` (13 large 44.1.1 UI modules, ~2,500 prototypes, all CFG-ID FAIL). Keep the
+        // flat declaration when that exact bound holds (other locals over-counted, unbalanced scan
+        // fails closed). RENOVICE_NO_EXACT_LOCAL_LIMIT restores the fixed budget alone.
+        bool flat_fits = decl.size() <= LOCAL_BUDGET;
+        int late_locals = 0;
+        {
+            const auto late = late_scope_locals().find(pidx);
+            if (late != late_scope_locals().end()) late_locals = late->second;
+        }
+        auto own_scope_locals = [&]() {
+            const int scanned = root_scope_extra_locals(body);
+            return scanned < 0 || late_locals < 0 ? -1 : scanned + late_locals;
+        };
+        if (!flat_fits && !std::getenv("RENOVICE_NO_EXACT_LOCAL_LIMIT")) {
+            const int extra = own_scope_locals();
+            if (extra >= 0 && (size_t)ip->nparams + decl.size() + (size_t)extra <= 200)
+                flat_fits = true;
+            if (std::getenv("RENOVICE_LOCAL_LIMIT_TRACE"))
+                std::fprintf(stderr, "LOCAL_LIMIT pidx=%d nparams=%d decl=%d extra=%d flat=%d\n",
+                             pidx, ip->nparams, (int)decl.size(), extra, flat_fits ? 1 : 0);
+        }
+        if (!flat_fits && !std::getenv("RENOVICE_NO_EXACT_LOCAL_LIMIT")
+            && !std::getenv("RENOVICE_NO_STRAIGHT_LINE_REGISTER_MERGE")) {
+            const int extra = own_scope_locals();
+            const long limit = 200L - ip->nparams - (extra < 0 ? 200 : extra);
+            if (extra >= 0 && limit > 0 && (long)decl.size() > limit) {
+                const std::map<int, int> names =
+                    merge_straight_line_registers(body, decl, decl.size() - (size_t)limit);
+                if (std::getenv("RENOVICE_LOCAL_LIMIT_TRACE"))
+                    std::fprintf(stderr, "REGISTER_MERGE pidx=%d need=%d merged=%d\n", pidx,
+                                 (int)(decl.size() - (size_t)limit), (int)names.size());
+                if (!names.empty()) {
+                    body = rewrite_registers(body, names);
+                    std::vector<int> kept;
+                    for (int reg : decl) if (!names.count(reg)) kept.push_back(reg);
+                    decl.swap(kept);
+                    flat_fits = true;
+                }
+            }
+        }
+        if (!flat_fits) {
             std::string outb; size_t i = 0;
             while (i < body.size()) {
                 if (body[i] == 'v' && i + 1 < body.size() && std::isdigit((unsigned char)body[i + 1])

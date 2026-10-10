@@ -443,3 +443,25 @@ CFG-ID + dataflow 4,667 -> 4,817, equal prototypes 79,266 -> 79,485, compiler cl
 FAIL -> PASS); no module PASS -> FAIL on any gate, no prototype loss. Dataflow FAIL among CFG-ID PASS 5 -> 13 (newly
 CFG-passing modules with pre-existing dataflow differences; no module lost dataflow). `cert/gates.py 300 150`: all gates
 pass except the Gate 14 check count 113 -> 125 (all 125 pass; baseline moved with the record).
+
+## 2026-10-10 — 44.1.1 campaign wave 3: the `* -> GETTABLEN` family (agent spill)
+
+Not a register-spill inside DE's compiler. Stock never reads these values through a table: the GETTABLEN is in OUR
+rebuild, from two decompiler mechanisms. Measured on c62f1665 (`work/u441-r9-c62f1665`): 24 modules carry a
+`* -> GETTABLEN` first-mismatch label.
+
+| # | defect | symptom | evidence | fix (switch) |
+|---|---|---|---|---|
+| 90 | `emit_function` spilled every register of a function naming more than `LOCAL_BUDGET` (195 by default, 150 without the default knob) registers into a table `vT[N]`, although Luau accepts a flat declaration up to its hard 200-local limit. All 14 44.1.1 stock prototypes with maxstack >= 196 are single-block module roots with 196-201 registers | every captured module local became a table slot: each child read `GETUPVAL u; GETTABLEN k` instead of `GETUPVAL u` (13 large UI modules + QorvexDeluxeEphemeraBat; ~3,000 prototypes FAIL, labels `GETFIELD/CALL/GETIMPORT/GETUPVAL/IF ... -> GETTABLEN`) | stock census `ir-u44` over 5,478 modules (14 protos >= 196); `luau-compile` probe: 200 flat locals compile, a 201st local or one `for` variable fails "exceeded limit 200", a child's locals do not count | keep the flat declaration when nparams + flat locals + the body's own other locals (keyword scan, nested functions excluded; orphan-literal and dead-tail locals reserved from `m6e_cmd.h` via `em::late_scope_locals`, unknown fails closed) <= 200 (`RENOVICE_NO_EXACT_LOCAL_LIMIT`) |
+| 91 | roots with 201 registers (200 locals + the closure temporary `DUPCLOSURE R200; SETGLOBAL`) still exceeded the limit | EndOfMatch, ThemedSquadOverlay kept the `vT` spill | same | single reachable block, every line one complete root statement: give a register the name of another whose textual value lifetimes never overlap (captured registers and parameters never merged; any other statement shape refuses) (`RENOVICE_NO_STRAIGHT_LINE_REGISTER_MERGE`) |
+| 92 | `canonicalize_paired_index_key_temporaries` folded `vB = u0; vK = <n>; vA = vB[vK]` into `vA = u0[n]` for every unsigned numeric key | stock `LOADN R, n; GETTABLE` (key kept in a register) rebuilt as `GETTABLEN` for 1 <= n <= 256 (Luau's immediate-index range): `LOAD -> GETTABLEN` / `LOAD -> SETTABLEN`, e.g. Settings 79 prototypes, SyndicatePowers, RunnerPlating | `ir-u44` stock vs rebuild (Settings p109: `LOADN R2 1; GETTABLE` vs `GETTABLEN C=0`) | keep the scratch pair when the key is an integer in [1, 256] (`RENOVICE_NO_INDEXN_KEY_GUARD`) |
+
+Fixtures (Gate 14, `cert/fixtures/spill_2026_10_10`): register_key_index, wide_root, merged_root; each default
+PASS + closes within 3 rounds, each legacy control FAILs cfg-identity with identical behavior (CFG-only defects).
+
+Measured (agent worktree, binary `0a075272`, vs `c62f1665`, both `--dataflow`): GETTABLEN queue (26 modules:
+24 labelled + the 2 CompositionTool `LOAD -> SETTABLEN` modules) CFG-ID 0 -> 7, dataflow 0 -> 7, equal prototypes
+4,018 -> 7,169 of 7,239, compiler closure 25 -> 26 (Codex); stride 20 (274 modules) CFG-ID 247 -> 248 (Qorvex), equal
+prototypes 4,156 -> 4,158; no PASS -> FAIL, no prototype, dataflow or closure loss. Remaining in the queue: 18 modules
+FAIL on other classes (SETLIST -> NEWTABLE, CLOSEUPVALS, FORGPREP, SETLIST -> SETTABLEN); no `-> GETTABLEN` label left.
+Full corpus not measured by the agent.
