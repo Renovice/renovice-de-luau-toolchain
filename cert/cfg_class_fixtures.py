@@ -124,18 +124,25 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INEXACT_HEAD_SELECTOR",
             "RENOVICE_NO_DAG_PRECISE_NESTED_EXIT", "RENOVICE_NO_DECISION_PREP_OWNER",
             "RENOVICE_NO_FORNLOOP_LATCH_KEY", "RENOVICE_NO_DAG_BREAK_ARM_EXIT",
-            "RENOVICE_NO_WHILE_PREP_GUARD")
+            "RENOVICE_NO_WHILE_PREP_GUARD", "RENOVICE_NO_CFG_LOOP_LOCAL_JOIN",
+            "RENOVICE_NO_CFG_EXITLESS_WHILE", "RENOVICE_NO_CFG_INTERIOR_WHILE_ARMS",
+            "RENOVICE_NO_CFG_GUARD_TRANSACTION", "RENOVICE_NO_CFG_SMALL_GUARD_DISPATCH",
+            "RENOVICE_NO_CFG_GUARD_EXIT_ONLY_ARM", "RENOVICE_NO_CFG_GUARD_DISJOINT_ARMS",
+            "RENOVICE_NO_CFG_PRECISE_LATCH_SPLIT")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
     # default again since #82) also takes the clean header first, so the control switches both off.
-    "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP RENOVICE_NO_INNERMOST_LOOP_FIRST",
+    # (render campaign 2026-10-10) the exitless interior while renderer also owns this whole-function
+    # `while true`, so the control switches it off too
+    "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP RENOVICE_NO_INNERMOST_LOOP_FIRST "
+                         "RENOVICE_NO_CFG_EXITLESS_WHILE",
     "entry_outer_loop": "RENOVICE_NO_ENTRY_CALLER_EDGE",
     "import_chain": "RENOVICE_NO_IMPORT_CHAIN_GUARD",
     "compound_exit_loop": "RENOVICE_NO_LOOP_BODY_DAG",
-    "compound_exit_namecall": "RENOVICE_NO_LOOP_BODY_DAG",
+    "compound_exit_namecall": "RENOVICE_NO_LOOP_BODY_DAG RENOVICE_NO_CFG_EXITLESS_WHILE",
     "for_body_order": "RENOVICE_NO_FOR_BODY_PART_ORDER",
-    "nested_for_break": "RENOVICE_NO_PREP_HEADED_WHILE",
+    "nested_for_break": "RENOVICE_NO_PREP_HEADED_WHILE RENOVICE_NO_CFG_EXITLESS_WHILE",
     # Space-separated switches are all set for the legacy control. Since the two-exit loop escape
     # (2026-10-09, #80) the CFG renderer owns proper_prep_for's inlined two-exit loops, so the #48
     # legacy control must switch the escape off as well to reach the Proper dispatcher again.
@@ -152,6 +159,14 @@ DECOMPILER_FIXTURES = {
     # Loops campaign (#82-#89): Platform p2 break arm, VentKidsBand p1 innermost-first
     "loop_break_arm_join": "RENOVICE_NO_INEXACT_HEAD_SELECTOR",
     "innermost_nested_repeat": "RENOVICE_NO_INNERMOST_LOOP_FIRST",
+    # Render campaign (2026-10-10, cert/fixtures/render_2026_10_10): renderer refusals that sent the
+    # whole prototype to the legacy region emitter. Each fixture also holds an -O2 inlined two-exit
+    # search loop (#80) that the legacy emitter cannot spell, so a refusal is observable.
+    "loop_local_join": "RENOVICE_NO_CFG_LOOP_LOCAL_JOIN",
+    "exitless_interior_while": "RENOVICE_NO_CFG_EXITLESS_WHILE",
+    "interior_while_arms": "RENOVICE_NO_CFG_INTERIOR_WHILE_ARMS",
+    "guard_small_dispatch": "RENOVICE_NO_CFG_SMALL_GUARD_DISPATCH",
+    "guard_disjoint_arms": "RENOVICE_NO_CFG_GUARD_DISJOINT_ARMS",
 }
 FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
                 for name in ("escape_join_forgen", "escape_join_loop_value", "while_break_return_arms")}
@@ -161,14 +176,22 @@ FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
 # operation stock never had, behavior-neutral). Space-separated switches are all set.
 EXTRA_LEGACY = (
     # the break arm printed inside its loop (#83) covers #46's arm too
-    ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM RENOVICE_NO_INLINE_BREAK_ARM", "FAIL"),
+    ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM RENOVICE_NO_INLINE_BREAK_ARM "
+     "RENOVICE_NO_CFG_EXITLESS_WHILE", "FAIL"),
     ("nested_for_break", "ENTRY_NIL", "RENOVICE_NO_LOOP_ENTRY_NIL", "PASS"),
     ("proper_prep_for", "NESTED", "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
      "FAIL"),
+    # the rolled-back guard candidate (RENDER TRANSACTIONS) is what reaches the small dispatcher
+    ("guard_small_dispatch", "GUARD_TRANSACTION", "RENOVICE_NO_CFG_GUARD_TRANSACTION", "FAIL"),
     ("proper_exit_in_body", "EXIT_ARM_ONCE", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE RENOVICE_NO_CFG_WHILE_LOOP_ARMS", "FAIL", "SAME"),
 )
 O2_FIXTURES = {"proper_prep_for",          # compiled with inlining, like the shipped modules
-               "escape_join_forgen", "escape_join_loop_value"}
+               "escape_join_forgen", "escape_join_loop_value",
+               "loop_local_join", "exitless_interior_while", "interior_while_arms",
+               "guard_small_dispatch", "guard_disjoint_arms"}
+FIXTURE_DIRS.update({name: os.path.join(HERE, "fixtures", "render_2026_10_10")
+                     for name in ("loop_local_join", "exitless_interior_while", "interior_while_arms",
+                                  "guard_small_dispatch", "guard_disjoint_arms")})
 LUAU_COMPILE = os.path.join(ROOT, "bin", "luau-compile.exe")
 IMPORT_PRELUDE = '_T = { RenoviceImportFixture = "stale", RenoviceOther = "other" }\n'
 # Globals for compound_exit_loop: gGameRules appears after the second Sleep, starts on its second
@@ -370,6 +393,9 @@ def main():
             # (#83) the residue came from a break-arm selector, which the break arm printed inside its
             # loop no longer creates
             legacy_env["RENOVICE_NO_INLINE_BREAK_ARM"] = "1"
+            # (render campaign 2026-10-10) a rolled-back guard candidate (RENDER TRANSACTIONS) lets
+            # the CFG renderer own this prototype instead of the legacy region emitter
+            legacy_env["RENOVICE_NO_CFG_GUARD_TRANSACTION"] = "1"
             checks["SELECTOR_RESIDUE_LEGACY_NOT_CLOSED"] = not closes_within(
                 original, temp, "selector_residue.legacy_close", 5, legacy_env)
             legacy_source, legacy_rebuilt = round_trip(original, temp, "selector_residue.legacy",

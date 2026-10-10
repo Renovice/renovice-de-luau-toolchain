@@ -15574,6 +15574,7 @@ inexact_selector_fallback:
         std::set<int> source_for_preps;
         std::set<int> overlapping_for_prep_whiles;
         std::set<int> interior_exit_whiles;
+        std::map<int, int> interior_while_canonical;   // INTERIOR WHILE ARMS: header -> exit X
         bool has_source_for = false, has_source_while = false;
         for (const st::Loop& loop : authoritative_loops) {
             has_source_for = has_source_for || loop.kind == st::Loop::ForNum
@@ -15678,10 +15679,75 @@ inexact_selector_fallback:
                         if (successor >= 0 && !loop.body.count(successor))
                             exits.insert(successor);
                 }
-                if (exits.size() != 1) return reject_setup("INTERIOR_WHILE_EXIT_COUNT");
+                // EXITLESS INTERIOR WHILE (render campaign 2026-10-10): `while true do if c then A
+                // else B end; Sleep(t) end` as the rest of a function has no exit at all (its
+                // trailing RETURN is unreachable); 22 failing prototypes of the c62f1665 census were
+                // refused here. The renderer prints `while true do ... end` and nothing after it.
+                // RENOVICE_NO_CFG_EXITLESS_WHILE restores the refusal.
+                // INTERIOR WHILE ARMS (render campaign 2026-10-10): several exits are exact when
+                // one of them, X, is the loop's continuation and every other exit is a private
+                // arm (entered only from the body or the arm itself) that ends at X (`if c then
+                // stmts; break end`) or returns. The arms join the render domain through the loop
+                // escape registration below (as for a plain while, #81) and print inside the loop;
+                // X is the `break` target. 17 + 8 failing prototypes of the c62f1665 census had 2+
+                // exits. Ambiguous or non-private exits keep the refusal.
+                // RENOVICE_NO_CFG_INTERIOR_WHILE_ARMS restores the refusal.
+                int interior_canonical = -1;
+                if (exits.size() > 1 && !std::getenv("RENOVICE_NO_CFG_INTERIOR_WHILE_ARMS")) {
+                    auto private_arm_to = [&](int seed, int x) {
+                        std::set<int> arm;
+                        std::vector<int> pending{seed};
+                        while (!pending.empty()) {
+                            const int block = pending.back(); pending.pop_back();
+                            if (block == x) continue;
+                            if (block < 0 || block >= (int)g->n.size() || !g->n[block].reach
+                                || loop.body.count(block)) return false;
+                            if (!arm.insert(block).second) continue;
+                            for (int next : {g->n[block].succ_true, g->n[block].succ_false})
+                                if (next >= 0) pending.push_back(next);
+                        }
+                        for (int block : arm)
+                            for (int pred : g->n[block].preds)
+                                if (g->n[pred].reach && !loop.body.count(pred) && !arm.count(pred))
+                                    return false;
+                        return true;
+                    };
+                    // X is the code after the loop. Luau emits a loop body contiguously and the code
+                    // after the loop after its back edge, so X is the first block placed after the
+                    // latch (reachable from an exit without re-entering the loop) for which every
+                    // exit is X itself or a private arm ending at X or in a return. It need not be
+                    // an exit itself: `if c then found = i; break end` jumps from the arm to X.
+                    std::set<int> outside_reach;
+                    {
+                        std::vector<int> pending(exits.begin(), exits.end());
+                        while (!pending.empty()) {
+                            const int block = pending.back(); pending.pop_back();
+                            if (block < 0 || block >= (int)g->n.size() || !g->n[block].reach
+                                || loop.body.count(block) || !outside_reach.insert(block).second)
+                                continue;
+                            for (int next : {g->n[block].succ_true, g->n[block].succ_false})
+                                if (next >= 0) pending.push_back(next);
+                        }
+                    }
+                    std::vector<std::pair<int, int>> ordered;    // (first pc, block)
+                    for (int x : outside_reach)
+                        if (g->n[x].first > g->n[loop.latch].last) ordered.push_back({g->n[x].first, x});
+                    std::sort(ordered.begin(), ordered.end());
+                    for (const auto& item : ordered) {
+                        const int x = item.second;
+                        bool all_arms = true;
+                        for (int other : exits)
+                            if (other != x && !private_arm_to(other, x)) { all_arms = false; break; }
+                        if (all_arms) { interior_canonical = x; break; }
+                    }
+                }
+                if ((exits.size() > 1 && interior_canonical < 0)
+                    || (exits.empty() && std::getenv("RENOVICE_NO_CFG_EXITLESS_WHILE")))
+                    return reject_setup("INTERIOR_WHILE_EXIT_COUNT");
                 if (!while_by_header.emplace(loop.header, &loop).second)
                     return reject_setup("DUPLICATE_WHILE_HEADER");
                 interior_exit_whiles.insert(loop.header);
+                if (interior_canonical >= 0) interior_while_canonical[loop.header] = interior_canonical;
                 continue;
             }
             if (!header.is_branch || header.is_uncond || !renderable_cond(loop.header)
@@ -15720,7 +15786,29 @@ inexact_selector_fallback:
         }
 
         std::vector<std::set<int>> postdom;
-        st::compute_postdom(*const_cast<st::Graph*>(g), postdom);
+        {
+            // EXITLESS INTERIOR WHILE: blocks that cannot reach a RETURN have no post-dominators
+            // (compute_postdom leaves them at the full set and ipostdom then names an arbitrary
+            // block: a branch before the loop "joined" at its own arm). An exitless loop ends the
+            // function as far as structure is concerned, so its header acts as the exit node.
+            std::vector<int> exitless_headers;
+            for (int header : interior_exit_whiles) {
+                const st::Loop* loop = while_by_header.at(header);
+                bool leaves = false;
+                for (int member : loop->body)
+                    for (int succ : {g->n[member].succ_true, g->n[member].succ_false})
+                        if (succ >= 0 && !loop->body.count(succ)) leaves = true;
+                if (!leaves) exitless_headers.push_back(header);
+            }
+            if (exitless_headers.empty()) {
+                st::compute_postdom(*const_cast<st::Graph*>(g), postdom);
+            } else {
+                st::Graph exit_graph = *g;
+                for (int header : exitless_headers)
+                    exit_graph.n[header].succ_true = exit_graph.n[header].succ_false = -1;
+                st::compute_postdom(exit_graph, postdom);
+            }
+        }
         if (const char* graph_dump = std::getenv("RENOVICE_CFG_GRAPH_DUMP_PIDX")) {
             if (std::atoi(graph_dump) == pidx) {
                 for (size_t block = 0; block < g->n.size(); ++block) {
@@ -15877,11 +15965,12 @@ inexact_selector_fallback:
                 auto registered_while = while_by_header.find(loop.header);
                 // Only plain (header-tested) source whiles: the overlapping for-prep and interior-exit
                 // forms are rendered by their own paths, which require one exit.
+                const bool interior_arms = interior_while_canonical.count(loop.header) != 0;
                 const bool is_while = while_arms && loop.kind == st::Loop::While
                     && registered_while != while_by_header.end()
                     && registered_while->second == &loop
                     && !overlapping_for_prep_whiles.count(loop.header)
-                    && !interior_exit_whiles.count(loop.header);
+                    && (!interior_exit_whiles.count(loop.header) || interior_arms);
                 if ((!is_for && !is_while) || loop.latch < 0 || loop.latch >= block_count
                     || loop.header < 0 || loop.header >= block_count)
                     continue;
@@ -15908,8 +15997,10 @@ inexact_selector_fallback:
                 } else {
                     natural = loop.body;
                     const st::Node& header = g->n[loop.header];
-                    // the while renderer's own exit: the header test's outside successor
-                    canonical = loop.body.count(header.succ_true) ? header.succ_false : header.succ_true;
+                    // the while renderer's own exit: the header test's outside successor (an
+                    // interior-exit while: the exit X proved by INTERIOR WHILE ARMS)
+                    canonical = interior_arms ? interior_while_canonical.at(loop.header)
+                        : loop.body.count(header.succ_true) ? header.succ_false : header.succ_true;
                 }
                 if (canonical < 0) continue;
                 // The canonical exit followed through pure single-JUMP relays.
@@ -16632,6 +16723,7 @@ inexact_selector_fallback:
         std::function<bool(int, int, int, const std::set<int>*, int)> emit_guard_to_effect;
         std::function<bool(int, int, int, const std::set<int>*, int)> emit_acyclic_dispatch;
         bool consume_guard_dispatch_effect = false;
+        bool small_guard_dispatch = false;     // SMALL GUARD DISPATCH (below)
         bool guard_allows_terminal_returns = false;
         bool first_pass_private_return_guard = false;
         // A guard repeat which already contains a plain crossing-tail selector is a
@@ -16823,6 +16915,103 @@ inexact_selector_fallback:
                     out += ind(indent) + "end\n";
                 }
                 return emit_guard_to_effect(join, effect, exit, domain, indent);
+            }
+            // EXIT-ONLY ARM (render campaign 2026-10-10). One successor can be a private tail that
+            // never reaches the shared effect and ends at the one-shot exit on every path (the
+            // `else` statements of `if a and f() and g() then EFFECT else TAIL end` once `a` fails,
+            // GearSpiral p2). No local join exists (every path meets only at the exit), so the
+            // boundary proofs above refuse it. Spell it where it is: `if <to arm> then TAIL break
+            // end`, then continue the guard chain with the other successor. Admitted only when the
+            // tail's blocks are not reachable from the other successor before the boundaries
+            // (single ownership) and every tail path ends at the exit (no return, no loop exit).
+            // RENOVICE_NO_CFG_GUARD_EXIT_ONLY_ARM restores the refusal.
+            if (!std::getenv("RENOVICE_NO_CFG_GUARD_EXIT_ONLY_ARM")) {
+                for (int arm : {taken, fallthrough}) {
+                    const int other = arm == taken ? fallthrough : taken;
+                    if (arm < 0 || other < 0 || arm == other || emitted.count(arm)
+                        || !in_render_domain(domain, arm)
+                        || can_reach(arm, effect, exit, domain)
+                        || !exact_paths_end_at(arm, exit, exit, domain))
+                        continue;
+                    auto region_of = [&](int seed) {
+                        std::set<int> seen;
+                        std::vector<int> pending{seed};
+                        while (!pending.empty()) {
+                            const int at = pending.back(); pending.pop_back();
+                            if (at < 0 || at == effect || at == exit || at >= (int)g->n.size()
+                                || !seen.insert(at).second) continue;
+                            pending.push_back(g->n[at].succ_true);
+                            pending.push_back(g->n[at].succ_false);
+                        }
+                        return seen;
+                    };
+                    const std::set<int> tail = region_of(arm);
+                    const std::set<int> rest = region_of(other);
+                    bool shared = false;
+                    for (int at : tail) if (rest.count(at) || emitted.count(at)) { shared = true; break; }
+                    if (shared) continue;
+                    if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                        std::fprintf(stderr, "CFG_GUARD_EXIT_ONLY_ARM pidx=%d block=%d arm=%d "
+                                     "effect=%d exit=%d\n", pidx, block, arm, effect, exit);
+                    out += ind(indent) + "if " + cond_of(block, arm == fallthrough) + " then\n";
+                    if (!emit_cfg(arm, exit, -1, domain, indent + 1)) return false;
+                    out += ind(indent + 1) + "break\n";
+                    out += ind(indent) + "end\n";
+                    return emit_guard_to_effect(other, effect, exit, domain, indent);
+                }
+            }
+            // DISJOINT GUARD ARMS (render campaign 2026-10-10). Both successors may lead to the
+            // boundaries through their own private chains: `if a then r = true elseif not f() then
+            // return-arm else r = false end; EFFECT` once an -O2 inlined `return` makes the effect
+            // (`print(r)`) skippable (inlined_search_two_exit fixture, EventVendorPlatformDisplay
+            // p3). The local join of this branch is the effect itself, so no real block join
+            // exists. When the two arms own disjoint blocks up to the boundaries and every path of
+            // each ends exactly at the effect or the exit, spell `if c then <arm chain> else <arm
+            // chain> end`; each chain is the same guard proof, recursively (its exit prints
+            // `break`, its effect edge falls through). RENOVICE_NO_CFG_GUARD_DISJOINT_ARMS
+            // restores the refusal.
+            if (!std::getenv("RENOVICE_NO_CFG_GUARD_DISJOINT_ARMS")
+                && taken != fallthrough && !emitted.count(taken) && !emitted.count(fallthrough)
+                && in_render_domain(domain, taken) && in_render_domain(domain, fallthrough)
+                && exact_paths_end_at(taken, effect, exit, domain)
+                && exact_paths_end_at(fallthrough, effect, exit, domain)) {
+                auto region_of = [&](int seed) {
+                    std::set<int> seen;
+                    std::vector<int> pending{seed};
+                    while (!pending.empty()) {
+                        const int at = pending.back(); pending.pop_back();
+                        if (at < 0 || at == effect || at == exit || at >= (int)g->n.size()
+                            || !seen.insert(at).second) continue;
+                        auto inner_loop = loop_by_prep.find(at);
+                        if (inner_loop != loop_by_prep.end()) {
+                            // an atomic source loop: its body is owned by the loop renderer
+                            for (int member : inner_loop->second->body) seen.insert(member);
+                            pending.push_back(loop_outside(inner_loop->second));
+                            continue;
+                        }
+                        pending.push_back(g->n[at].succ_true);
+                        pending.push_back(g->n[at].succ_false);
+                    }
+                    return seen;
+                };
+                const std::set<int> left = region_of(fallthrough);
+                const std::set<int> right = region_of(taken);
+                bool disjoint = true;
+                for (int at : left) if (right.count(at) || emitted.count(at)) { disjoint = false; break; }
+                for (int at : right) if (emitted.count(at)) { disjoint = false; break; }
+                if (disjoint) {
+                    if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                        std::fprintf(stderr, "CFG_GUARD_DISJOINT_ARMS pidx=%d block=%d effect=%d "
+                                     "exit=%d\n", pidx, block, effect, exit);
+                    const int first = std::min(taken, fallthrough);
+                    const int second = std::max(taken, fallthrough);
+                    out += ind(indent) + "if " + cond_of(block, first == fallthrough) + " then\n";
+                    if (!emit_guard_to_effect(first, effect, exit, domain, indent + 1)) return false;
+                    out += ind(indent) + "else\n";
+                    if (!emit_guard_to_effect(second, effect, exit, domain, indent + 1)) return false;
+                    out += ind(indent) + "end\n";
+                    return true;
+                }
             }
             if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
                 std::fprintf(stderr,
@@ -17036,7 +17225,7 @@ inexact_selector_fallback:
                 color[block] = 2;
             };
             collect(start);
-            if (!valid || nodes.size() < 4) {
+            if (!valid || nodes.size() < (small_guard_dispatch && guard_boundary_dispatch ? 3u : 4u)) {
                 if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
                     std::fprintf(stderr,
                                  "CFG_DISPATCH_REJECT pidx=%d start=%d reason=COLLECT "
@@ -17357,6 +17546,68 @@ inexact_selector_fallback:
             return true;
         };
 
+        // RENDER TRANSACTIONS (render campaign 2026-10-10). A guard-repeat candidate is a proof
+        // search, but a candidate that claimed blocks before its proof failed used to reject the
+        // whole prototype (`if (emitted.size() != emitted_before) return false`): the legacy
+        // region emitter then rendered it (149 failing prototypes stopped at
+        // GUARD_CHAIN_NO_BOUNDARY_EDGE in the c62f1665 census). A transaction snapshots the
+        // complete emitter (the same contract as the per-prototype retry in emit_function) plus
+        // every local renderer fact a walk can change, so a failed candidate leaves no trace and
+        // the next spelling starts from exactly the state the first one saw. The authoritative
+        // loop vector keeps its storage (loop_by_prep / while_by_header / loop_escapes hold
+        // pointers into it); it is read-only during rendering.
+        struct RenderTxn {
+            std::unique_ptr<Emitter> emitter;
+            std::set<int> emitted;
+            int plain_dispatches = 0, guard_repeats = 0, last_guard_depth = -1;
+            size_t last_guard_domain = 0;
+            bool repeat_with_plain = false, consume = false, terminal_returns = false;
+            bool private_return_guard = false, collision = false;
+            std::vector<std::tuple<bool, bool, std::string>> escapes;
+        };
+        auto txn_save = [&]() {
+            RenderTxn txn;
+            txn.emitter.reset(new Emitter(*this));
+            txn.emitted = emitted;
+            txn.plain_dispatches = successful_plain_acyclic_dispatches;
+            txn.guard_repeats = successful_guard_repeats;
+            txn.last_guard_depth = last_guard_repeat_loop_depth;
+            txn.last_guard_domain = last_guard_repeat_domain_size;
+            txn.repeat_with_plain = emitted_guard_repeat_with_plain_dispatch;
+            txn.consume = consume_guard_dispatch_effect;
+            txn.terminal_returns = guard_allows_terminal_returns;
+            txn.private_return_guard = first_pass_private_return_guard;
+            txn.collision = shared_ownership_collision;
+            for (const auto& item : loop_escapes)
+                txn.escapes.emplace_back(item.second.used, item.second.open, item.second.selector);
+            return txn;
+        };
+        auto txn_restore = [&](RenderTxn& txn) {
+            std::vector<st::Loop> keep_loops;
+            keep_loops.swap(authoritative_loops);
+            *this = *txn.emitter;
+            authoritative_loops.swap(keep_loops);
+            emitted = txn.emitted;
+            successful_plain_acyclic_dispatches = txn.plain_dispatches;
+            successful_guard_repeats = txn.guard_repeats;
+            last_guard_repeat_loop_depth = txn.last_guard_depth;
+            last_guard_repeat_domain_size = txn.last_guard_domain;
+            emitted_guard_repeat_with_plain_dispatch = txn.repeat_with_plain;
+            consume_guard_dispatch_effect = txn.consume;
+            guard_allows_terminal_returns = txn.terminal_returns;
+            first_pass_private_return_guard = txn.private_return_guard;
+            shared_ownership_collision = txn.collision;
+            size_t index = 0;
+            for (auto& item : loop_escapes) {
+                if (index >= txn.escapes.size()) break;
+                item.second.used = std::get<0>(txn.escapes[index]);
+                item.second.open = std::get<1>(txn.escapes[index]);
+                item.second.selector = std::get<2>(txn.escapes[index]);
+                ++index;
+            }
+        };
+        const bool guard_transactions = !std::getenv("RENOVICE_NO_CFG_GUARD_TRANSACTION");
+
         // `stop` is the local structured join. `terminal` is the enclosing loop latch: an arm may
         // end the current iteration without reaching a nearer join, and that is still a valid
         // single-arm source `if`. Keeping the two boundaries separate is what makes CFG triangles
@@ -17508,7 +17759,15 @@ inexact_selector_fallback:
                             if (successor >= 0 && !loop.body.count(successor))
                                 exits.insert(successor);
                     }
-                    if (exits.size() != 1)
+                    // INTERIOR WHILE ARMS: the other exits are registered arms inside the loop
+                    if (exits.size() > 1 && interior_while_canonical.count(start)) {
+                        const int registered = registered_while_outside(&loop);
+                        if (registered >= 0 && registered == interior_while_canonical.at(start))
+                            exits = {registered};
+                    }
+                    // an exitless loop (EXITLESS INTERIOR WHILE, setup above) ends the walk
+                    if (exits.size() > 1
+                        || (exits.empty() && std::getenv("RENOVICE_NO_CFG_EXITLESS_WHILE")))
                         return reject_render("FOR_PREP_WHILE_EXIT_COUNT", start, stop, terminal);
 
                     out += ind(indent) + "while true do\n";
@@ -17528,7 +17787,7 @@ inexact_selector_fallback:
                     const st::Loop* outer = while_item->second;
                     while_by_header.erase(start);
                     int guarded_body = -1;
-                    if (interior_exit_whiles.count(start)
+                    if (interior_exit_whiles.count(start) && !exits.empty()
                         && std::getenv("RENOVICE_CFG_INTERIOR_GUARD_CHAIN")) {
                         const int outside = *exits.begin();
                         // A short-circuit header can have both successors inside the natural
@@ -17570,6 +17829,7 @@ inexact_selector_fallback:
                     loop_continue_targets = saved_targets;
                     loop_continue_enabled = saved_continue;
                     out += ind(indent) + "end\n";
+                    if (exits.empty()) return true;
                     const int outside = *exits.begin();
                     return outside == stop || outside == terminal
                         || emit_cfg(outside, stop, terminal, domain, indent);
@@ -17742,6 +18002,8 @@ inexact_selector_fallback:
                             && can_reach(initial_node.succ_false, candidate, local_follow, domain))
                             effect_candidates.push_back(candidate);
                 }
+                bool guard_rolled_back = false;
+                std::vector<int> rolled_back_effects;
                 for (int effect : effect_candidates) {
                     const bool direct_effect = effect == initial_node.succ_true
                         || effect == initial_node.succ_false;
@@ -17834,6 +18096,8 @@ inexact_selector_fallback:
                     const size_t output_before = out.size();
                     const int plain_dispatches_before =
                         successful_plain_acyclic_dispatches;
+                    RenderTxn guard_txn;
+                    if (guard_transactions) guard_txn = txn_save();
                     out += ind(indent) + "repeat\n";
                     const bool terminal_returns_before = guard_allows_terminal_returns;
                     if (expanded_boundary_proofs && expanded_guard_terminals
@@ -17847,6 +18111,16 @@ inexact_selector_fallback:
                         // This candidate is a proof path, not a speculative formatter. Restore the
                         // text but leave the function rejected if it consumed graph nodes; retrying
                         // a different structure after partial ownership would hide the real error.
+                        if (guard_transactions && emitted.size() != emitted_before) {
+                            if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                                std::fprintf(stderr,
+                                             "CFG_GUARD_TXN_ROLLBACK pidx=%d start=%d effect=%d "
+                                             "follow=%d\n", pidx, start, effect, local_follow);
+                            txn_restore(guard_txn);
+                            guard_rolled_back = true;
+                            rolled_back_effects.push_back(effect);
+                            continue;
+                        }
                         out.resize(output_before);
                         successful_plain_acyclic_dispatches = plain_dispatches_before;
                         if (emitted.size() != emitted_before) return false;
@@ -17870,6 +18144,37 @@ inexact_selector_fallback:
                     out += ind(indent) + "until true\n";
                     return local_follow == stop || local_follow == terminal
                         || emit_cfg(local_follow, stop, terminal, domain, indent);
+                }
+                // SMALL GUARD DISPATCH (render campaign 2026-10-10). The smallest guard DAG that no
+                // nested if can spell has three test blocks: a short-circuit `(a or b) and c` whose
+                // operands b and c carry statements (calls), so b's arm reaches the effect directly
+                // while c is shared by a and b (SonicEarthQuake p12, EpisodeStatus p7). The exact
+                // selector dispatcher refuses fewer than four blocks to leave simple shapes to the
+                // guard renderer; once every guard candidate has been rolled back, that refusal no
+                // longer protects anything. Retry each rolled-back candidate as a guard-boundary
+                // dispatcher admitting three blocks, transactionally.
+                // RENOVICE_NO_CFG_SMALL_GUARD_DISPATCH restores the refusal.
+                if (guard_rolled_back && !rolled_back_effects.empty()
+                    && std::getenv("RENOVICE_CFG_GUARD_ACYCLIC_DISPATCH")
+                    && !std::getenv("RENOVICE_NO_CFG_SMALL_GUARD_DISPATCH")) {
+                    for (int effect : rolled_back_effects) {
+                        RenderTxn small_txn = txn_save();
+                        consume_guard_dispatch_effect = true;
+                        small_guard_dispatch = true;
+                        const bool small_rendered =
+                            emit_acyclic_dispatch(start, effect, local_follow, domain, indent);
+                        small_guard_dispatch = false;
+                        consume_guard_dispatch_effect = false;
+                        if (small_rendered) {
+                            if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                                std::fprintf(stderr,
+                                             "CFG_SMALL_GUARD_DISPATCH pidx=%d start=%d effect=%d "
+                                             "follow=%d\n", pidx, start, effect, local_follow);
+                            return local_follow == stop || local_follow == terminal
+                                || emit_cfg(local_follow, stop, terminal, domain, indent);
+                        }
+                        txn_restore(small_txn);
+                    }
                 }
             }
 
@@ -18391,6 +18696,160 @@ inexact_selector_fallback:
                 }
             }
 
+            // LOOP-LOCAL JOIN (render campaign 2026-10-10). Inside a loop body a `break` (an edge
+            // to the loop's own exit) or a `return` arm removes the real immediate post-dominator,
+            // so `follow` is -1 even though both arms of this branch plainly meet again before the
+            // latch (`if not a then X; if c then break end end; JOIN`). The plain if/else below then
+            // renders JOIN inside the first arm and fails single ownership on the second
+            // (START_ALREADY_EMITTED: 120 failing prototypes in the c62f1665 census; BardAmplify
+            // p11, FairySoul p11). The exact source join is the immediate post-dominator over the
+            // paths that continue the iteration: the domain blocks that can still reach the latch
+            // (`terminal`). Paths that leave by a break, an escape or a return are terminating arms
+            // printed inside their branch by the existing rules. Admitted only when both arms reach
+            // that join (the plain spelling below must then duplicate it), every edge leaving the
+            // domain on the way is a legal exit of this loop, and the join lies before `stop`.
+            // RENOVICE_NO_CFG_LOOP_LOCAL_JOIN restores the plain spelling for A/B.
+            int local_join = -1;
+            if (terminal >= 0 && domain && follow < 0
+                && !std::getenv("RENOVICE_NO_CFG_LOOP_LOCAL_JOIN")) {
+                const int block_count = (int)g->n.size();
+                auto loop_exit_of_domain = [&](int target) -> bool {
+                    if (matches_current_loop_exit(target) || escape_to(domain, target)) return true;
+                    for (const st::Loop& active : authoritative_loops) {
+                        if (&active.body != domain || active.kind != st::Loop::While) continue;
+                        const int registered = registered_while_outside(&active);
+                        if (registered >= 0) return target == registered;
+                        std::set<int> exits;
+                        for (int member : active.body)
+                            for (int succ : {g->n[member].succ_true, g->n[member].succ_false})
+                                if (succ >= 0 && !active.body.count(succ)) exits.insert(succ);
+                        if (overlapping_for_prep_whiles.count(active.header)
+                            || interior_exit_whiles.count(active.header))
+                            return exits.size() == 1 && *exits.begin() == target;
+                        const st::Node& header = g->n[active.header];
+                        const int outside = active.body.count(header.succ_true)
+                            ? header.succ_false : header.succ_true;
+                        return target == outside;
+                    }
+                    return false;
+                };
+                // R: domain blocks from which the latch is reachable inside the domain.
+                std::set<int> live_nodes;
+                {
+                    std::vector<int> work{terminal};
+                    while (!work.empty()) {
+                        const int block = work.back(); work.pop_back();
+                        if (block < 0 || block >= block_count || live_nodes.count(block)
+                            || !in_render_domain(domain, block)
+                            || (emitted.count(block) && block != terminal && block != start))
+                            continue;
+                        live_nodes.insert(block);
+                        if (block == start) continue;
+                        for (int pred : g->n[block].preds)
+                            if (pred >= 0 && pred < block_count && g->n[pred].reach
+                                && (g->n[pred].succ_true == block || g->n[pred].succ_false == block)
+                                && pred != terminal)
+                                work.push_back(pred);
+                    }
+                }
+                if (live_nodes.count(start)) {
+                    // forward region from start inside R (stops at the latch)
+                    std::set<int> region;
+                    std::vector<int> work{start};
+                    while (!work.empty()) {
+                        const int block = work.back(); work.pop_back();
+                        if (!live_nodes.count(block) || !region.insert(block).second) continue;
+                        if (block == terminal) continue;
+                        for (int succ : {g->n[block].succ_true, g->n[block].succ_false})
+                            if (succ >= 0) work.push_back(succ);
+                    }
+                    // post-dominators over R toward the latch
+                    std::map<int, std::set<int>> pdom;
+                    for (int block : region) pdom[block] = region;
+                    pdom[terminal] = {terminal};
+                    for (bool changed = true; changed;) {
+                        changed = false;
+                        for (int block : region) {
+                            if (block == terminal) continue;
+                            std::set<int> meet;
+                            bool first_succ = true;
+                            for (int succ : {g->n[block].succ_true, g->n[block].succ_false}) {
+                                if (succ < 0 || !region.count(succ)) continue;
+                                if (first_succ) { meet = pdom[succ]; first_succ = false; continue; }
+                                std::set<int> both;
+                                for (int x : meet) if (pdom[succ].count(x)) both.insert(x);
+                                meet.swap(both);
+                            }
+                            meet.insert(block);
+                            if (meet != pdom[block]) { pdom[block] = meet; changed = true; }
+                        }
+                    }
+                    std::set<int> strict = pdom[start];
+                    strict.erase(start);
+                    for (int candidate : strict) {
+                        std::set<int> expected = strict;
+                        if (pdom[candidate] == expected) { local_join = candidate; break; }
+                    }
+                    bool valid = local_join >= 0 && local_join != terminal && local_join != stop
+                        && local_join != start && !emitted.count(local_join)
+                        && region.count(taken) && region.count(fallthrough);
+                    if (valid && stop >= 0 && stop != terminal
+                        && !can_reach(local_join, stop, terminal, domain)) valid = false;
+                    // Every block an arm owns (start .. join) may leave the domain only by a legal
+                    // exit of this loop or a private RETURN; no source-loop owner on the way may be
+                    // headed at the join itself.
+                    if (valid) {
+                        std::set<int> seen;
+                        std::vector<int> pending{taken, fallthrough};
+                        while (valid && !pending.empty()) {
+                            const int block = pending.back(); pending.pop_back();
+                            if (block == local_join || block == terminal || block == stop
+                                || !seen.insert(block).second) continue;
+                            if (block < 0 || block >= block_count) { valid = false; break; }
+                            if (!in_render_domain(domain, block)) {
+                                const st::Node& outside_node = g->n[block];
+                                const bool private_return = outside_node.is_return
+                                    && outside_node.succ_true < 0 && outside_node.succ_false < 0;
+                                if (!loop_exit_of_domain(block) && !private_return) valid = false;
+                                continue;
+                            }
+                            if (emitted.count(block)) { valid = false; break; }
+                            const st::Node& node = g->n[block];
+                            for (int succ : {node.succ_true, node.succ_false})
+                                if (succ >= 0) pending.push_back(succ);
+                        }
+                    }
+                    if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                        std::fprintf(stderr,
+                                     "CFG_LOOP_LOCAL_JOIN pidx=%d start=%d join=%d valid=%d "
+                                     "stop=%d terminal=%d\n",
+                                     pidx, start, local_join, valid ? 1 : 0, stop, terminal);
+                    if (!valid) local_join = -1;
+                }
+            }
+            auto render_local_join = [&]() -> bool {
+                const int lj_first = std::min(taken, fallthrough);
+                const int lj_second = std::max(taken, fallthrough);
+                if (local_join == taken || local_join == fallthrough) {
+                    const int arm = local_join == taken ? fallthrough : taken;
+                    out += ind(indent) + "if " + cond_of(start, arm == fallthrough) + " then\n";
+                    if (!emit_cfg(arm, local_join, terminal, domain, indent + 1)) return false;
+                    out += ind(indent) + "end\n";
+                } else {
+                    out += ind(indent) + "if " + cond_of(start, lj_first == fallthrough) + " then\n";
+                    if (!emit_cfg(lj_first, local_join, terminal, domain, indent + 1)) return false;
+                    out += ind(indent) + "else\n";
+                    if (!emit_cfg(lj_second, local_join, terminal, domain, indent + 1)) return false;
+                    out += ind(indent) + "end\n";
+                }
+                return emit_cfg(local_join, stop, terminal, domain, indent);
+            };
+            // Before the loop triangle: a join that is not the triangle's continuation means
+            // the triangle (and the plain spelling) would render it in both arms.
+            if (local_join >= 0 && local_join != std::max(taken, fallthrough))
+                return render_local_join();
+
+
             // A loop commonly has a layout triangle where the earlier successor either reaches the
             // later successor or terminates the iteration. Global post-dominance calls the latch the
             // join because of that terminating path, but source layout calls the later successor the
@@ -18419,9 +18878,17 @@ inexact_selector_fallback:
                 && triangle_paths_end) {
                 const bool terminal_triangle = !can_reach(first, second, terminal, domain)
                     && can_reach(first, terminal, terminal, domain);
+                // PRECISE LATCH SPLIT (render campaign 2026-10-10): the split shape is an arm that
+                // reaches the effectful latch WITHOUT passing `second`. `can_reach(first, terminal,
+                // terminal)` also counted the path first -> second -> latch, so every triangle whose
+                // join flows on to a latch with statements (any while latch) was refused
+                // (EFFECTFUL_LATCH_SPLIT_TRIANGLE, 41 failing prototypes in the c62f1665 census).
+                // RENOVICE_NO_CFG_PRECISE_LATCH_SPLIT restores the previous test.
+                static const bool precise_latch_split =
+                    !std::getenv("RENOVICE_NO_CFG_PRECISE_LATCH_SPLIT");
                 const bool split_terminal_and_fallthrough =
                     can_reach(first, second, terminal, domain)
-                    && can_reach(first, terminal, terminal, domain);
+                    && can_reach(first, terminal, precise_latch_split ? second : terminal, domain);
                 // Reaching a for-loop latch is a source `continue` only when the latch block is
                 // control-only. A latch can also own ordinary statements immediately before its
                 // FORNLOOP/FORGLOOP instruction. In that shape both arms join at the effectful
@@ -18496,6 +18963,8 @@ inexact_selector_fallback:
                 return emit_cfg(second, stop, terminal, domain, indent);
                 }
             }
+
+            if (local_join >= 0) return render_local_join();
 
             out += ind(indent) + "if " + cond_of(start, first == fallthrough) + " then\n";
             if (!emit_cfg(first, follow >= 0 ? follow : stop, terminal,
