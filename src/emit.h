@@ -18608,7 +18608,10 @@ inexact_selector_fallback:
                     // `break`. RENOVICE_NO_CFG_LEGAL_EXIT_GUARD restores the unchecked spelling.
                     bool legal = std::getenv("RENOVICE_NO_CFG_LEGAL_EXIT_GUARD") != nullptr
                         || matches_current_loop_exit(outside)
-                        || transfers_to_enclosing_latch(outside);
+                        || transfers_to_enclosing_latch(outside)
+                        // an arm ending at a shared bare RETURN keeps the established spelling
+                        // (LOOP ESCAPE JOINS leave it unregistered on purpose, SongFragmentPickup p2)
+                        || duplicable_terminal_return(outside);
                     for (const st::Loop& active : authoritative_loops) {
                         if (legal) break;
                         if (&active.body != domain || active.kind != st::Loop::While) continue;
