@@ -57,9 +57,10 @@ pass.
 | 5 (#72-#75) | 4f6cb65 | 5713df5f | 4,515 | 5,389 | 4,501 | 77,410 | 0 | ALL PASS |
 | 6 (#76-#77) | c8b6042 | 5ce9c9f8 | 4,533 | 5,389 | 4,519 | 77,432 | 0 | ALL PASS (G14 91 -> 98) |
 | 7 (#78-#79) | 303c799 | 909755e9 | 4,544 | 5,434 | 4,533 | 79,024 of 83,518 | 0 | ALL PASS (G13 unmasking recorded) |
-| 8 (#80-#81) | (this) | 8ea2bc37 | 4,672 | 5,437 | 4,667 | 79,266 of 83,518 | 0 | ALL PASS (G14 98 -> 113) |
+| 8 (#80-#81) | 91e2659 | 8ea2bc37 | 4,672 | 5,437 | 4,667 | 79,266 of 83,518 | 0 | ALL PASS (G14 98 -> 113) |
+| 9 (#82-#89) | (this) | c62f1665 | 4,830 | 5,437 | 4,817 | 79,485 of 83,518 | 0 | ALL PASS (G14 113 -> 125) |
 
-CFG-ID 76.2% -> 82.4% of 5,478; CFG-ID + dataflow 74.4% -> 82.2% (dataflow FAIL among CFG-ID PASS 97 -> 14). Run folders: `work/u441-r1-49e0683e`,
+CFG-ID 76.2% -> 88.2% of 5,478; CFG-ID + dataflow 74.4% -> 87.9%; CONST-ID 97.5% -> 99.3%; PROTO_COUNT 72 -> 1. Run folders: `work/u441-r1-49e0683e`,
 `work/u441-r2b-b5200665`, `work/u441-r3b-928298db`, `work/u441-r4b-fd0d4c81` (each with `transitions.json` and
 `gates.txt`). Rejected or opt-in on integration (full-corpus regressions found by the integrator, not by the agents'
 samples): split-exit condition guard (Gate 14 closure), cut-body entry #67 and innermost-loop-first #68 (PASS -> FAIL

@@ -739,6 +739,25 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
 }
 
 static void conddiag(const sa::Analyzer& A, int idx) {
+    // Diagnostic (loops campaign 2026-10-09): RENOVICE_SATREE_PIDX=N prints prototype N's final
+    // region tree (kind, head, blocks) so loop nesting choices can be read without the emitter.
+    if (const char* tree_pidx = std::getenv("RENOVICE_SATREE_PIDX")) {
+        if (std::atoi(tree_pidx) == idx && !A.live.empty()) {
+            std::function<void(int, int)> dump = [&](int r, int depth) {
+                if (r < 0 || r >= (int)A.regions.size()) return;
+                const sa::Region& R = A.regions[r];
+                static const char* names[] = {"Basic", "Seq", "IfThen", "IfThenElse", "SelfLoop",
+                                              "While", "NaturalLoop", "Proper"};
+                std::set<int> blocks; A.region_block_set(r, blocks);
+                std::fprintf(stderr, "SATREE %*s%d %s head=%d blocks=", depth * 2, "", r,
+                             names[(int)R.kind], R.head);
+                for (int b : blocks) std::fprintf(stderr, "%d,", b);
+                std::fputc('\n', stderr);
+                if (R.kind != sa::RK::Basic) for (int c : R.parts) dump(c, depth + 1);
+            };
+            dump(*A.live.begin(), 0);
+        }
+    }
     if (std::getenv("RENOVICE_CONDDIAG")) {
         // Diagnostic (conditions campaign 2026-10-09): loop-body DAG decisions and NaturalLoop
         // regions left with an unreduced multi-part interior, per prototype.
@@ -816,6 +835,7 @@ static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok,
     st::compute_dom(g);
     sa::Analyzer A; A.build(g);
     int steps = 0;
+    if (std::getenv("RENOVICE_SASTEPS")) std::fprintf(stderr, "SA_BEGIN pidx=%d\n", idx);
     if (!A.reduce(steps)) { why = "did not reduce to one region"; return ""; }
     conddiag(A, idx);
     em::Emitter E; E.ip = &ip; E.g = &g; E.A = &A; E.pidx = idx;
@@ -933,6 +953,7 @@ static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
     st::compute_dom(g);
     sa::Analyzer A; A.build(g);
     int steps = 0;
+    if (std::getenv("RENOVICE_SASTEPS")) std::fprintf(stderr, "SA_BEGIN pidx=%d\n", idx);
     if (!A.reduce(steps)) { why = "did not reduce"; return ""; }
     conddiag(A, idx);
     em::Emitter E; E.ip = &ip; E.g = &g; E.A = &A; E.pidx = idx;

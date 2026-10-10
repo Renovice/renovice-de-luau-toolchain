@@ -291,6 +291,10 @@ struct Emitter {
         std::string selector;
     };
     std::vector<EscapeContext> escape_stack;
+    // Break arms printed inside their loop (see BREAK ARM INSIDE ITS LOOP in the IfThen emitter):
+    // arm entry block -> the loop-body block whose exit test enters it, the arm region, the loop.
+    struct InlineBreakArm { int source = -1, arm = -1, used = 0; bool terminal = false; std::set<int> loop_blocks; };
+    std::map<int, InlineBreakArm> inline_break_arms;
 
     bool escape_target_is_external(int target) const {
         return !escape_stack.empty() && target >= 0
@@ -1517,7 +1521,26 @@ struct Emitter {
                         && std::find(blocks.begin(), blocks.end(), outside_target) != blocks.end();
                 }
             }
-            if (t_out != f_out && !structured_terminal_arm) { // exactly one unowned arm leaves loop
+            auto inline_arm = inline_break_arms.find(outside_target);
+            bool inline_arm_here = false;
+            if (inline_arm != inline_break_arms.end() && inline_arm->second.source == blk
+                && t_out != f_out && !structured_terminal_arm
+                && loop_blocks.count(blk)) {
+                // The innermost loop being printed must be the arm's loop: its body lies inside
+                // that loop region (a nested loop's body would too, but none contains d).
+                inline_arm_here = true;
+                for (int b : loop_blocks)
+                    if (!inline_arm->second.loop_blocks.count(b)) { inline_arm_here = false; break; }
+            }
+            // BREAK ARM INSIDE ITS LOOP (IfThen emitter). A second print of the same exit makes
+            // used == 2, and the IfThen then discards this rendering for the selector.
+            if (inline_arm_here && inline_arm->second.used++ == 0) {
+                const InlineBreakArm ia = inline_arm->second;
+                out += ind(depth) + "if " + cond_of(blk, f_out) + " then\n";
+                emit_region(ia.arm, depth + 1);
+                if (!ia.terminal) out += ind(depth + 1) + "break\n";
+                out += ind(depth) + "end\n";
+            } else if (t_out != f_out && !structured_terminal_arm) { // exactly one unowned arm leaves loop
                 out += ind(depth) + "if " + cond_of(blk, f_out) + " then break end\n";
                 block_exit_arm_target = outside_target;
             }
@@ -1895,9 +1918,60 @@ struct Emitter {
                 // region level instead put it before its own setup (one loop became two, with bounds
                 // assigned inside the body), and simply refusing the prep lost the loop altogether.
                 int prep_part = -1;
+                // DECISION PREP OWNS THE CONDITIONAL (loops campaign 2026-10-09). A conditional whose
+                // head part ends in the FORNPREP that chooses between its arm and the skip path is
+                // that loop's zero-trip gate: `setup; for ... end`. The scan below takes the FIRST
+                // prep anywhere in the head; when the head also holds an earlier, complete loop
+                // (KahlOrders p35: `for` over one block, then the decision FORNPREP; ActivateAll-
+                // CrewShips p2: an ipairs loop, then the FORNPREP), that earlier prep was found, the
+                // #65 rule then refused it, and the real decision FORNPREP printed as the raw
+                // `(step > 0 and i > n) or ...` zero-trip test before a second `for`. Innermost-first
+                // loop reduction produces this head shape for every nested numeric `for`. Take the
+                // unique decision block (the head block with an edge into an arm head) when it is a
+                // FORNPREP with a renderable header. RENOVICE_NO_DECISION_PREP_OWNER restores the scan.
+                // The head's FIRST block may itself be the prep of that earlier loop, which set
+                // isfor above; the decision prep overrides it (`if a then for ... end end; for ...`).
+                if ((!isfor || (latch_blk < 0 && prep_part < 0))
+                    && !proven_while && !std::getenv("RENOVICE_NOPREPSPLIT")
+                    && !std::getenv("RENOVICE_NO_DECISION_PREP_OWNER")
+                    && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse)
+                    && r.parts.size() >= 2 && A->regions[r.parts[0]].kind != sa::RK::Basic) {
+                    // Arm entries are taken from the arms' block sets: head_block() of a NaturalLoop
+                    // arm is its lowest-id part, which may be the latch (parts are in set order).
+                    std::vector<int> decision_blocks; collect_blocks(r.parts[0], decision_blocks);
+                    std::set<int> arm_blocks;
+                    for (size_t q = 1; q < r.parts.size(); ++q) {
+                        std::vector<int> ab; collect_blocks(r.parts[q], ab);
+                        arm_blocks.insert(ab.begin(), ab.end());
+                    }
+                    int decision = -1, decisions = 0;
+                    for (int b : decision_blocks) {
+                        if (b < 0 || b >= (int)g->n.size()) continue;
+                        if (arm_blocks.count(g->n[b].succ_true) || arm_blocks.count(g->n[b].succ_false)) {
+                            decision = b; ++decisions;
+                        }
+                    }
+                    std::string decision_hdr;
+                    if (decisions == 1 && decision != hb && term_op(decision) == 0x47
+                        && for_header(decision, decision_hdr)) {
+                        isfor = true; prep_part = 0; hb = decision; header_source_blk = decision;
+                        hdr = decision_hdr;
+                    }
+                }
                 // RENOVICE_NOPREPSPLIT=1 restores the pre-fix behaviour, so a regression can be
                 // ATTRIBUTED rather than guessed at: rerun an oracle with and without it.
-                if (!isfor && !proven_while && !std::getenv("RENOVICE_NOPREPSPLIT")) {
+                // A WHILE REGION'S TEST IS ITS OWN (loops campaign 2026-10-09). A While region whose
+                // head is a renderable test that is not a FOR latch is a source while; a prep in its
+                // body belongs to a nested `for`. Taking it made the While a `for` claimant that lost
+                // the plan to the prep's own IfThen and was then emitted flat: `while not found do
+                // for ... end; Sleep(1) end` lost its loop (ColonistRescueSyndicateAssassins p2,
+                // reached once innermost-first reduction formed the While before its parent).
+                // proven_non_for_natural_loop is the NaturalLoop counterpart.
+                // RENOVICE_NO_WHILE_PREP_GUARD restores the scan for While regions.
+                const bool while_owns_test = r.kind == sa::RK::While && !r.parts.empty()
+                    && !std::getenv("RENOVICE_NO_WHILE_PREP_GUARD")
+                    && renderable_cond(head_block(r.parts[0])) && !is_for_latch(head_block(r.parts[0]));
+                if (!isfor && !proven_while && !while_owns_test && !std::getenv("RENOVICE_NOPREPSPLIT")) {
                     // Look ONLY at each part's HEAD block, never its whole subtree. `collect_blocks`
                     // recurses, so a parent region would find a prep belonging to a NESTED region and
                     // open a header for it — and then the child would open the very same loop again.
@@ -2135,7 +2209,16 @@ struct Emitter {
                 if (isfor && !terminal_arm_loop_latches.empty()) {
                     if (latch_blk >= 0 && terminal_arm_loop_latches.count(latch_blk))
                         loop_id = latch_blk;
-                    else if (term_op(hb) == 0x1e && terminal_arm_loop_latches.count(hb))
+                    // A FORNLOOP latch head is that numeric loop's latch exactly as a FORGLOOP head
+                    // is (loops campaign 2026-10-09): keyed by its body start instead, the latch-
+                    // headed NaturalLoop of `for i = ... do if IsNull(u) then continue end ... end`
+                    // did not collide with the prep owner's latch key and opened the same `for`
+                    // a second time inside the first (DragonGroundBoss p43, N^2 iterations; with
+                    // innermost-first reduction it grew one nesting per compile cycle).
+                    // RENOVICE_NO_FORNLOOP_LATCH_KEY restores the FORGLOOP-only test.
+                    else if ((term_op(hb) == 0x1e
+                              || (term_op(hb) == 0x0a && !std::getenv("RENOVICE_NO_FORNLOOP_LATCH_KEY")))
+                             && terminal_arm_loop_latches.count(hb))
                         loop_id = hb;
                     else {
                         auto terminal_latch = prep2latch.find(hb);
@@ -3906,9 +3989,187 @@ emit_conditional_region:
                     // production path until the corpus gates establish the rule.
                     bool force_compound_selector =
                         std::getenv("RENOVICE_FORCE_COMPOSITE_SELECTOR") != nullptr;
+                    // INEXACT COMPOSITE DECISION (loops campaign 2026-10-09). `if cond(hb) then ARM end`
+                    // after a composite head is exact only when ONE head block enters the arms and
+                    // both of its successors leave the head (the choice is made at the end of the
+                    // head). A head that is (or ends in) a loop with a break arm -- `while true do ...
+                    // if not c then ARM; break end ... end` reduced as IfThen(loop, ARM) -- enters the
+                    // arm from a block whose other successor stays in the loop, and neither the head's
+                    // first block (the loop's own test) nor that break test is the arm's condition:
+                    // Platform p2 printed `if c3v1 ~= false then ARM end` after the loop, with the loop
+                    // header's test. The recorded-exit selector below is exact for that shape; use it.
+                    // Head edges that do not enter an arm (a `break` of an enclosing loop, the skip
+                    // path) are not part of this decision. RENOVICE_NO_INEXACT_HEAD_SELECTOR restores
+                    // the first-block condition.
+                    bool inexact_head_decision = false;
+                    if (!std::getenv("RENOVICE_NO_INEXACT_HEAD_SELECTOR")
+                        && A->regions[head].kind != sa::RK::Basic && !arms.empty()) {
+                        std::vector<int> head_vector; collect_blocks(head, head_vector);
+                        std::set<int> head_set(head_vector.begin(), head_vector.end());
+                        std::set<int> arm_entries;
+                        for (int a : arms) {
+                            std::vector<int> ab; collect_blocks(a, ab);
+                            arm_entries.insert(ab.begin(), ab.end());
+                        }
+                        std::set<int> entering;
+                        for (int b : head_vector) {
+                            if (b < 0 || b >= (int)g->n.size()) continue;
+                            for (int s : {g->n[b].succ_true, g->n[b].succ_false})
+                                if (s >= 0 && arm_entries.count(s) && !head_set.count(s)) entering.insert(b);
+                        }
+                        if (entering.size() == 1) {
+                            const st::Node& d = g->n[*entering.begin()];
+                            inexact_head_decision = d.succ_true < 0 || d.succ_false < 0
+                                || d.succ_true == d.succ_false
+                                || head_set.count(d.succ_true) || head_set.count(d.succ_false);
+                        } else {
+                            inexact_head_decision = entering.size() >= 2;
+                        }
+                        // BREAK ARM INSIDE ITS LOOP (loops campaign 2026-10-09). The common inexact
+                        // shape is a loop's break arm: `while ... do ... if c then ARM; break end ...
+                        // end` reduced as IfThen(loop, ARM), because ARM reaches neither the latch nor
+                        // the loop's normal exit before the join. Stock compiles ARM inside the loop
+                        // body, so print it there: the loop-exit test of the single entering block d
+                        // becomes `if c then ARM break end` (emit_block, inline_break_arms). Admitted
+                        // only when (1) IfThen with one arm entered from d alone; (2) exactly one
+                        // authoritative loop inside the head contains d (a `break` leaves exactly
+                        // that loop) and no other loop inside the head does; (3) d is not that loop's
+                        // header (a while test is printed by the loop header, not as an exit); (4)
+                        // the head's only other exit target X is that loop's exit, and ARM leaves
+                        // only to X or terminates. The head is rendered once into a scratch string;
+                        // if d's exit was not printed through the loop-exit check (another template
+                        // owned it), the text is discarded and the selector below is used. The
+                        // selector's `__renovice_state` relay is exact but does not re-decompile to
+                        // itself (Platform, KubrowChargerStrainAbility p8 never closed).
+                        // RENOVICE_NO_INLINE_BREAK_ARM keeps the selector.
+                        if (inexact_head_decision && entering.size() == 1 && arms.size() == 1
+                            && r.kind == sa::RK::IfThen
+                            && !std::getenv("RENOVICE_NO_INLINE_BREAK_ARM")) {
+                            const int d = *entering.begin();
+                            const st::Node& dn = g->n[d];
+                            int arm_entry = -1;
+                            for (int s : {dn.succ_true, dn.succ_false})
+                                if (s >= 0 && arm_entries.count(s) && !head_set.count(s)) arm_entry = s;
+                            // The loop regions of the head's region tree that contain d; the innermost
+                            // one is the loop a `break` at d leaves, and it must be the only one.
+                            int loops_with_d = 0, loop_region = -1;
+                            std::function<void(int)> find_loops_with_d = [&](int rr) {
+                                if (rr < 0 || rr >= (int)A->regions.size()) return;
+                                const sa::Region& R = A->regions[rr];
+                                if (R.kind == sa::RK::Basic) return;
+                                std::vector<int> rb; collect_blocks(rr, rb);
+                                if (std::find(rb.begin(), rb.end(), d) == rb.end()) return;
+                                if (R.kind == sa::RK::NaturalLoop || R.kind == sa::RK::While
+                                    || R.kind == sa::RK::SelfLoop) {
+                                    ++loops_with_d;
+                                    if (loop_region < 0) loop_region = rr;
+                                }
+                                for (int part : R.parts) find_loops_with_d(part);
+                            };
+                            find_loops_with_d(head);
+                            std::set<int> loop_region_blocks;
+                            if (loop_region >= 0) {
+                                std::vector<int> lrb; collect_blocks(loop_region, lrb);
+                                loop_region_blocks.insert(lrb.begin(), lrb.end());
+                            }
+                            // The region's header block, for the while-test exclusion below.
+                            int loop_header = -1;
+                            for (const auto& lb : authoritative_loop_bodies)
+                                if (loop_region_blocks.count(lb.first) && lb.second.count(d)) {
+                                    bool inside = true;
+                                    for (int b : lb.second) if (!loop_region_blocks.count(b)) { inside = false; break; }
+                                    if (inside) loop_header = lb.first;
+                                }
+                            if (loop_header < 0 && loop_region >= 0) {
+                                const sa::Region& R = A->regions[loop_region];
+                                loop_header = head_block(R.head >= 0 ? R.head : R.parts[0]);
+                            }
+                            std::set<int> other_exits, arm_exits;
+                            for (int b : head_vector)
+                                for (int s : {g->n[b].succ_true, g->n[b].succ_false})
+                                    if (s >= 0 && !head_set.count(s) && s != arm_entry) other_exits.insert(s);
+                            for (int b : arm_entries)
+                                for (int s : {g->n[b].succ_true, g->n[b].succ_false})
+                                    if (s >= 0 && !arm_entries.count(s)) arm_exits.insert(s);
+                            bool loop_exit_is_x = false;
+                            if (loops_with_d == 1 && other_exits.size() == 1) {
+                                const int x = *other_exits.begin();
+                                for (int b : loop_region_blocks)
+                                    for (int s : {g->n[b].succ_true, g->n[b].succ_false})
+                                        if (s == x) loop_exit_is_x = true;
+                                for (int s : arm_exits) if (s != x) loop_exit_is_x = false;
+                            }
+                            // A `for` header block (the numeric body start / the generic FORGLOOP)
+                            // carries no loop condition text, so its exit test is an ordinary
+                            // body exit; only a while/repeat header's test is the loop's own.
+                            bool for_loop = false;
+                            for (const st::Loop& L : authoritative_loops)
+                                if (L.header == loop_header && L.latch >= 0 && is_for_latch(L.latch))
+                                    for_loop = true;
+                            if (std::getenv("RENOVICE_ESCDBG"))
+                                std::fprintf(stderr, "INLINE_BREAK_ARM_CHECK pidx=%d region=%d d=%d arm_entry=%d loops=%d header=%d for=%d exit_x=%d other_exits=%zu\n",
+                                             pidx, id, d, arm_entry, loops_with_d, loop_header, for_loop ? 1 : 0,
+                                             loop_exit_is_x ? 1 : 0, other_exits.size());
+                            for (int b : loop_region_blocks)
+                                if (is_for_latch(b)) for_loop = true;
+                            if (arm_entry >= 0 && loops_with_d == 1 && (d != loop_header || for_loop)
+                                && loop_exit_is_x && renderable_cond(d)) {
+                                InlineBreakArm ia; ia.source = d; ia.arm = arms[0];
+                                ia.loop_blocks = loop_region_blocks; ia.terminal = arm_exits.empty();
+                                inline_break_arms[arm_entry] = ia;
+                                // The scratch render must leave no trace when it is discarded: an
+                                // opened `for` stays in for_open (never erased), and the selector
+                                // re-render then refused to open that loop again and lost it
+                                // (HelminthTransmissions p1: the ipairs search vanished).
+                                const std::set<int> saved_for_open = for_open;
+                                const std::set<int> saved_suppress = suppress_insns;
+                                const std::set<int> saved_terminal_latches = terminal_arm_loop_latches;
+                                const int saved_state_serial = state_name_serial;
+                                const int saved_table_serial = lexical_table_serial;
+                                const int saved_fornprep_serial = raw_fornprep_serial;
+                                std::string head_text = capture(head, depth);
+                                const int used = inline_break_arms[arm_entry].used;
+                                inline_break_arms.erase(arm_entry);
+                                if (used != 1) {
+                                    for_open = saved_for_open;
+                                    suppress_insns = saved_suppress;
+                                    terminal_arm_loop_latches = saved_terminal_latches;
+                                    state_name_serial = saved_state_serial;
+                                    lexical_table_serial = saved_table_serial;
+                                    raw_fornprep_serial = saved_fornprep_serial;
+                                }
+                                if (std::getenv("RENOVICE_ESCDBG"))
+                                    std::fprintf(stderr, "INLINE_BREAK_ARM pidx=%d region=%d d=%d arm=%d used=%d\n",
+                                                 pidx, id, d, arms[0], used);
+                                if (used == 1) { out += head_text; break; }
+                            }
+                        }
+                        // The selector fallback records a FOR prep's zero-trip exit as the raw
+                        // `(step > 0 and i > n) or ...` test (#48), which re-decompiles to a new shape
+                        // every compile cycle (PlaySound p3, 10 modules stopped converging). Such heads
+                        // keep the previous rendering until that exit has an exact source form.
+                        // RENOVICE_INEXACT_SELECTOR_FOR_EXITS=1 applies the selector to them too.
+                        if (inexact_head_decision && !std::getenv("RENOVICE_INEXACT_SELECTOR_FOR_EXITS")) {
+                            for (int b : head_vector) {
+                                const st::Node& bn = g->n[b];
+                                const bool leaves = (bn.succ_true >= 0 && !head_set.count(bn.succ_true))
+                                    || (bn.succ_false >= 0 && !head_set.count(bn.succ_false));
+                                const int op = term_op(b);
+                                if (leaves && (op == 0x47 || op == 0x0a || op == 0x1e || op == 0x0b
+                                               || op == 0x30 || op == 0x1b))
+                                    inexact_head_decision = false;
+                            }
+                        }
+                        // OPT-IN (full-corpus run of 0040fc8e): even with the two guards above the
+                        // selector relay did not re-decompile to itself on 7 modules
+                        // (OraxiaWallToGround, VoidSink, JunctionMission, ...). When the break arm
+                        // cannot be printed inside its loop the previous rendering is kept;
+                        // RENOVICE_INEXACT_HEAD_SELECTOR=1 uses the (exact) selector instead.
+                        if (!std::getenv("RENOVICE_INEXACT_HEAD_SELECTOR")) inexact_head_decision = false;
+                    }
                     if (!std::getenv("RENOVICE_NO_COMPOSITE_SELECTOR")
                         && A->regions[head].kind != sa::RK::Basic
-                        && (!renderable_cond(hb) || force_compound_selector)) {
+                        && (!renderable_cond(hb) || force_compound_selector || inexact_head_decision)) {
                         std::vector<int> hbl; collect_blocks(head, hbl);
                         std::set<int> hset(hbl.begin(), hbl.end()), exits;
                         bool exits_recordable = true;
@@ -4025,11 +4286,42 @@ emit_conditional_region:
                                         + std::to_string(state_name_serial++);
                             out += ind(depth) + "local " + ec.selector + " = -1\n";
                             const size_t head_start = out.size();
+                            const std::set<int> selector_saved_for_open = for_open;
+                            const std::set<int> selector_saved_suppress = suppress_insns;
+                            const std::set<int> selector_saved_terminal = terminal_arm_loop_latches;
+                            const int selector_saved_table_serial = lexical_table_serial;
+                            const int selector_saved_fornprep_serial = raw_fornprep_serial;
                             escape_stack.push_back(ec);
                             emit_region(head, depth + 1);
                             escape_stack.pop_back();
                             const std::string head_text = out.substr(head_start);
                             out.resize(head_start);
+                            // Self-check for the inexact-head use of the selector (loops campaign
+                            // 2026-10-09): every arm must be selected by an assignment of THIS
+                            // selector in the head. An exit recorded by a nested selector that never
+                            // relays outward leaves the arm dead, and the compiler deletes it
+                            // (PveDeathMatch p17 lost its quest-cheat print). Fall back to the
+                            // previous rendering instead.
+                            if (inexact_head_decision && renderable_cond(hb) && !force_compound_selector) {
+                                bool every_arm_assigned = true;
+                                for (size_t q = 0; q < arms.size(); ++q) {
+                                    bool assigned = false;
+                                    for (int t : arm_targets[q])
+                                        if (head_text.find(ec.selector + " = " + std::to_string(t) + "\n")
+                                            != std::string::npos) assigned = true;
+                                    if (!assigned) every_arm_assigned = false;
+                                }
+                                if (!every_arm_assigned) {
+                                    out.resize(head_start - (ind(depth) + "local " + ec.selector + " = -1\n").size());
+                                    // The discarded render opened loops; leave no trace of it.
+                                    for_open = selector_saved_for_open;
+                                    suppress_insns = selector_saved_suppress;
+                                    terminal_arm_loop_latches = selector_saved_terminal;
+                                    lexical_table_serial = selector_saved_table_serial;
+                                    raw_fornprep_serial = selector_saved_fornprep_serial;
+                                    goto inexact_selector_fallback;
+                                }
+                            }
 
                             // Luau canonicalizes a one-pass repeat whose only early-exit boundary is
                             // `selector ~= -1` into a straight prefix followed by
@@ -4119,6 +4411,7 @@ emit_conditional_region:
                             break;
                         }
                     }
+inexact_selector_fallback:
                     emit_region(head, depth);
                     // COMPOSITE-HEAD DECISION (conditions campaign 2026-10-09). The IfThen rules admit
                     // any head region n, so the arm is chosen by the head's block that branches into

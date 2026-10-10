@@ -119,12 +119,17 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_INNERMOST_LOOP_FIRST", "RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION",
             "RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE",
             "RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN", "RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST",
-            "RENOVICE_NO_CFG_WHILE_LOOP_ARMS")
+            "RENOVICE_NO_CFG_WHILE_LOOP_ARMS",
+            "RENOVICE_NO_INEXACT_HEAD_SELECTOR", "RENOVICE_NO_INLINE_BREAK_ARM",
+            "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INEXACT_HEAD_SELECTOR",
+            "RENOVICE_NO_DAG_PRECISE_NESTED_EXIT", "RENOVICE_NO_DECISION_PREP_OWNER",
+            "RENOVICE_NO_FORNLOOP_LATCH_KEY", "RENOVICE_NO_DAG_BREAK_ARM_EXIT",
+            "RENOVICE_NO_WHILE_PREP_GUARD")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
-    # Space-separated switches are all set for the legacy control (innermost-loop-first, #68, is
-    # opt-in and also structures #36's shape when enabled).
-    "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP",
+    # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
+    # default again since #82) also takes the clean header first, so the control switches both off.
+    "entry_headed_loop": "RENOVICE_NO_ENTRY_HEADED_LOOP RENOVICE_NO_INNERMOST_LOOP_FIRST",
     "entry_outer_loop": "RENOVICE_NO_ENTRY_CALLER_EDGE",
     "import_chain": "RENOVICE_NO_IMPORT_CHAIN_GUARD",
     "compound_exit_loop": "RENOVICE_NO_LOOP_BODY_DAG",
@@ -141,7 +146,12 @@ DECOMPILER_FIXTURES = {
     # Two-exit loops (2026-10-09, cert/fixtures/twoexit_2026_10_09, #80/#81)
     "escape_join_forgen": "RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
     "escape_join_loop_value": "RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
-    "while_break_return_arms": "RENOVICE_NO_CFG_WHILE_LOOP_ARMS",
+    # (#86) the FORNLOOP latch key also structures this shape (verified: with it off the control
+    # reproduces the #81 defect again)
+    "while_break_return_arms": "RENOVICE_NO_CFG_WHILE_LOOP_ARMS RENOVICE_NO_FORNLOOP_LATCH_KEY",
+    # Loops campaign (#82-#89): Platform p2 break arm, VentKidsBand p1 innermost-first
+    "loop_break_arm_join": "RENOVICE_NO_INEXACT_HEAD_SELECTOR",
+    "innermost_nested_repeat": "RENOVICE_NO_INNERMOST_LOOP_FIRST",
 }
 FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
                 for name in ("escape_join_forgen", "escape_join_loop_value", "while_break_return_arms")}
@@ -150,7 +160,8 @@ FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
 # blind spot. Behavior expectation (default "DIFFERS"); "SAME" = a CFG-only defect (an extra
 # operation stock never had, behavior-neutral). Space-separated switches are all set.
 EXTRA_LEGACY = (
-    ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM", "FAIL"),
+    # the break arm printed inside its loop (#83) covers #46's arm too
+    ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM RENOVICE_NO_INLINE_BREAK_ARM", "FAIL"),
     ("nested_for_break", "ENTRY_NIL", "RENOVICE_NO_LOOP_ENTRY_NIL", "PASS"),
     ("proper_prep_for", "NESTED", "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
      "FAIL"),
@@ -356,11 +367,28 @@ def main():
             # 2026-10-09 (#59): the unused-condition canonicalizer also drops the residue's integer
             # compare, so the legacy control must switch both off to reproduce the #49 output.
             legacy_env["RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION"] = "1"
+            # (#83) the residue came from a break-arm selector, which the break arm printed inside its
+            # loop no longer creates
+            legacy_env["RENOVICE_NO_INLINE_BREAK_ARM"] = "1"
             checks["SELECTOR_RESIDUE_LEGACY_NOT_CLOSED"] = not closes_within(
                 original, temp, "selector_residue.legacy_close", 5, legacy_env)
             legacy_source, legacy_rebuilt = round_trip(original, temp, "selector_residue.legacy",
                                                        legacy_env)
             checks["SELECTOR_RESIDUE_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
+
+            # (#83) the break arm printed inside its loop re-decompiles to itself; the recorded-exit
+            # selector (RENOVICE_NO_INLINE_BREAK_ARM) is exact but grows a relay per compile cycle.
+            fixture = os.path.join(FIX, "loop_break_arm_join.luau")
+            original = os.path.join(temp, "loop_break_arm_join.close.lua_B")
+            run([DEC, "recompile", fixture, original])
+            checks["LOOP_BREAK_ARM_JOIN_DEFAULT_CLOSES"] = closes_within(original, temp,
+                                                                         "loop_break_arm_join.close", 3)
+            selector_env = base_env()
+            selector_env["RENOVICE_NO_INLINE_BREAK_ARM"] = "1"
+            selector_env["RENOVICE_INEXACT_HEAD_SELECTOR"] = "1"     # the opt-in selector fallback
+            selector_env["RENOVICE_NO_INNERMOST_LOOP_FIRST"] = "1"   # outer-first: the selector spans the outer loop
+            checks["LOOP_BREAK_ARM_JOIN_SELECTOR_NOT_CLOSED"] = not closes_within(
+                original, temp, "loop_break_arm_join.selector_close", 5, selector_env)
 
             fixture = os.path.join(FIX, "loop_carried_nil.luau")
             expected = trace(fixture, temp)

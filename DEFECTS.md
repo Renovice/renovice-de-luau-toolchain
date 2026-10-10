@@ -414,3 +414,32 @@ Full 44.1.1 corpus (`work/u441-r8b-8ea2bc37`, binary `8ea2bc37`, vs batch 7 `909
 (ALIGNED 232; Gate 14 98 -> 113 checks, recorded). Open: 90 of the 186 shape modules fail for other renderer limits
 (`START_ALREADY_EMITTED`, `GUARD_CHAIN_NO_BOUNDARY_EDGE`, `while true` / interior-exit loops with several exits, an
 inlined return inside an if/elseif chain, escapes leaving two loops).
+
+## 2026-10-10 — 44.1.1 campaign batch 9: loop selection rework (agent loops, 5c5e196 + 26a0bac; its L1-L8)
+
+Innermost-first loop selection (#68) is DEFAULT again. None of its earlier full-corpus regressions was a wrong loop
+choice: the innermost-first tree (the dominance loop-forest order) reached emitter and DAG paths with latent defects
+that the outer-first tree hid. Fixed generically:
+
+| # | defect | symptom | fix (switch) |
+|---|---|---|---|
+| 82 | innermost-first was opt-in | lost loops (search flag `found = true; break` ran unconditionally, PickUpArrows p1; VentKidsBand p1 lost its outer loops) | default again; the dominance-only pass picks the forest order on the reduced graph (`RENOVICE_NO_INNERMOST_LOOP_FIRST`) |
+| 83 | a loop's break arm reduced as IfThen(loop, arm) was printed AFTER the loop under the loop header's own test | Platform p2 (`reset1` logged for a normal exit; outer-first has the same bug) | print the break arm inside its loop at the exit test of the one block entering it, verified by a scratch render; a discarded scratch render restores emitter state (HelminthTransmissions lost its ipairs loop through a stale `for_open`) (`RENOVICE_NO_INLINE_BREAK_ARM`) |
+| 84 | a composite IfThen head whose decision is not made by one exit block was printed with the entry block's test | wrong condition | detect inexact heads; the exact selector fallback is OPT-IN (it grows a relay per compile cycle) (`RENOVICE_NO_INEXACT_HEAD_SELECTOR`, opt-in `RENOVICE_INEXACT_HEAD_SELECTOR=1`) |
+| 85 | `reduce_loop_body_dag` rejected a body when any PART containing a nested loop had an exit edge | AmbulasOrbitalLaser p2: `if IsNull(t)` guard dropped (exit after the inner `for`) | nested-loop exit test per block, not per part (`RENOVICE_NO_DAG_PRECISE_NESTED_EXIT`) |
+| 86 | a FORNLOOP latch head and its prep owner got different loop keys | DragonGroundBoss p43 opened the same `for` twice | key a FORNLOOP latch head by its latch (`RENOVICE_NO_FORNLOOP_LATCH_KEY`) |
+| 87 | a conditional's prep scan took the FIRST prep in its head (an earlier, complete loop) | KahlOrders p35, ActivateAllCrewShips p2: the deciding FORNPREP printed as a raw zero-trip test | the deciding FORNPREP owns the conditional (`RENOVICE_NO_DECISION_PREP_OWNER`) |
+| 88 | the loop-body DAG refused a break arm as a second exit target | unreduced bodies | accept it (`RENOVICE_NO_DAG_BREAK_ARM_EXIT`) |
+| 89 | a While region took a nested `for`'s prep as its own | ColonistRescueSyndicateAssassins lost `while not found do for ... end end` | a While with a real test never takes a nested prep (`RENOVICE_NO_WHILE_PREP_GUARD`) |
+
+Still opt-in: cut-body entry #67 (AbilityAuraLib closure), Proper header exit guard (`RENOVICE_PROPER_HEADER_EXIT_GUARD=1`,
+31 focus modules PASS -> FAIL). New diagnostics: `RENOVICE_SATREE_PIDX=N` (region tree dump), `SA_BEGIN pidx=N` in
+`RENOVICE_SASTEPS`. Integration: one emit.h conflict with batch 8's exit-arm bookkeeping (merged: the inline break arm
+first, else batch 8's bare break with `block_exit_arm_target`); four legacy controls extended.
+
+Full 44.1.1 corpus (`work/u441-r9-c62f1665`, binary `c62f1665`, vs batch 8 `8ea2bc37`): CFG-ID 4,672 -> 4,830 (88.2%),
+CFG-ID + dataflow 4,667 -> 4,817, equal prototypes 79,266 -> 79,485, compiler closure 5,449 -> 5,453 (+7, -3: Progress
+#85, SentientSummon #87 (a `x == a or x == a` term grows per cycle), VoidClone innermost-first, which itself went CFG-ID
+FAIL -> PASS); no module PASS -> FAIL on any gate, no prototype loss. Dataflow FAIL among CFG-ID PASS 5 -> 13 (newly
+CFG-passing modules with pre-existing dataflow differences; no module lost dataflow). `cert/gates.py 300 150`: all gates
+pass except the Gate 14 check count 113 -> 125 (all 125 pass; baseline moved with the record).

@@ -281,7 +281,27 @@ struct Analyzer {
     int reduce_loop_body_dag(int n, const std::set<int>& body, const std::set<int>& outs) {
         if (!loop_body_dag) return dag_reject(n, 1);
         if (loop_body_dag_depth > 0 && !nested_loop_body_dag) return dag_reject(n, 13);
-        if (outs.size() > 1) return dag_reject(n, 11);
+        // BREAK-ARM EXIT (loops campaign 2026-10-09). A loop whose break arm holds statements has
+        // two exit targets: the arm B (`if c then B; break end`) and the normal exit X that B
+        // jumps to. Every exit edge of the cut body is still a conditional arm printed by the
+        // emitter's loop-exit check; after the collapse, IfThen(loop, B) puts B at its exit
+        // (BREAK ARM INSIDE ITS LOOP, emit.h; the recorded-exit selector otherwise). Refusing
+        // the body left it unreduced and the emitter dropped `if IsNull(t) or 1 < Time() - t
+        // then` (DragonGroundBoss p34 under innermost-first). B qualifies when all its
+        // predecessors are in the body and it continues only to X (or ends the function).
+        // RENOVICE_NO_DAG_BREAK_ARM_EXIT restores the single-target rule.
+        int main_out = outs.empty() ? -1 : *outs.begin();
+        if (outs.size() == 2 && !std::getenv("RENOVICE_NO_DAG_BREAK_ARM_EXIT")) {
+            int arms = 0;
+            for (int b : outs) {
+                const int x = b == *outs.begin() ? *outs.rbegin() : *outs.begin();
+                bool arm = !body.count(b) && b != entry && !succ[b].count(b);
+                for (int q : pred[b]) if (!body.count(q)) { arm = false; break; }
+                for (int t : succ[b]) if (t != x) { arm = false; break; }
+                if (arm) { ++arms; main_out = x; }
+            }
+            if (arms != 1) return dag_reject(n, 11);
+        } else if (outs.size() > 1) return dag_reject(n, 11);
         if (body.size() < 3) return dag_reject(n, 12);
         if (succ[n].count(n)) return dag_reject(n, 2);
         std::vector<int> latches;
@@ -294,11 +314,11 @@ struct Analyzer {
         // the latch region's only loop-leaving edge is that FOR latch exit to the single out.
         int for_latch_block = -1;
         if (nsucc(latches[0]) != 1) {
-            if (!for_loop_body_dag || nsucc(latches[0]) != 2 || outs.size() != 1
-                || !succ[latches[0]].count(*outs.begin())) return dag_reject(n, 3);
+            if (!for_loop_body_dag || nsucc(latches[0]) != 2 || main_out < 0
+                || !succ[latches[0]].count(main_out)) return dag_reject(n, 3);
             std::set<int> latch_blocks, head_blocks, out_blocks;
             region_block_set(latches[0], latch_blocks); region_block_set(n, head_blocks);
-            region_block_set(*outs.begin(), out_blocks);
+            region_block_set(main_out, out_blocks);
             for (int b : latch_blocks) {
                 if (b < 0 || b >= (int)block_edges.size()) return dag_reject(n, 3);
                 const BlockEdges& e = block_edges[b];
@@ -319,9 +339,29 @@ struct Analyzer {
         if (!dropped_branch) return dag_reject(n, 4);
         std::set<int> body_blocks;
         for (int x : body) region_block_set(x, body_blocks);
+        // NESTED-LOOP EXIT, PER BLOCK (loops campaign 2026-10-09). A `break` is wrong only for an
+        // exit edge that sits INSIDE a nested loop region (it would leave that inner loop). The
+        // test used to ask whether the whole PART contains a loop, so once innermost-first
+        // reduction had collapsed a nested `for` into a composite part (`if IsNull(t) then for ...
+        // end; if IsNull(t) then break end end`, AmbulasOrbitalLaser p2), the part's own exit test
+        // after the `for` rejected the whole body: the loop stayed unreduced and the emitter
+        // dropped the guard. The post-reduction check below (exit_in_nested_loop) is already per
+        // block. RENOVICE_NO_DAG_PRECISE_NESTED_EXIT restores the per-part test for A/B.
+        static const bool precise_nested_exit = !std::getenv("RENOVICE_NO_DAG_PRECISE_NESTED_EXIT");
+        std::function<void(int, bool, std::set<int>&)> loop_blocks_of =
+            [&](int r, bool inside, std::set<int>& out) {
+                if (r < 0 || r >= (int)regions.size()) return;
+                const Region& region = regions[r];
+                if (region.kind == RK::Basic) { if (inside) out.insert(region.block); return; }
+                const bool loop = region.kind == RK::SelfLoop || region.kind == RK::While
+                    || region.kind == RK::NaturalLoop;
+                for (int part : region.parts) loop_blocks_of(part, inside || loop, out);
+            };
         for (int x : body) {
             std::set<int> xb; region_block_set(x, xb);
-            const bool nested_loop = region_has_loop(x);
+            const bool part_has_loop = region_has_loop(x);
+            std::set<int> nested_loop_blocks;
+            if (precise_nested_exit && part_has_loop) loop_blocks_of(x, false, nested_loop_blocks);
             for (int b : xb) {
                 if (b < 0 || b >= (int)block_edges.size()) return dag_reject(n, 5);
                 const BlockEdges& e = block_edges[b];
@@ -329,6 +369,8 @@ struct Analyzer {
                 const bool f_out = e.f >= 0 && !body_blocks.count(e.f);
                 if (!t_out && !f_out) continue;
                 if (b == for_latch_block) continue;   // the for's own normal exit (above)
+                const bool nested_loop = precise_nested_exit ? nested_loop_blocks.count(b) != 0
+                                                             : part_has_loop;
                 if (nested_loop || t_out == f_out || !e.branch || e.t < 0 || e.f < 0 || e.t == e.f)
                     return dag_reject(n, 6);
                 switch (e.term) {
@@ -594,6 +636,7 @@ struct Analyzer {
         // outside and become the region's single exit. RENOVICE_NO_LOOP_BODY_PROPER=1 restores
         // the previous test for A/B attribution.
         const bool loop_body_proper = !std::getenv("RENOVICE_NO_LOOP_BODY_PROPER");
+        static const bool proper_header_exit_guard = std::getenv("RENOVICE_PROPER_HEADER_EXIT_GUARD") != nullptr;
         for (int n : order) {
             if (!live.count(n)) continue;
             if (nsucc(n) < 2) continue;
@@ -620,6 +663,19 @@ struct Analyzer {
                     if (!all_in) continue;
                     if (returns_to_n(c)) { all_in = false; }      // cyclic: not an acyclic region
                     if (all_in && cut_latch_region(c)) all_in = false;  // DEFECTS #40, below
+                    // LOOP EXIT STAYS OUTSIDE THE HEADER PROPER (loops campaign 2026-10-09). The
+                    // target of the loop header's own exit edge is the code after the loop. When it
+                    // ends the function (`while t < d do ... end; print(x); return`), it has no
+                    // successor and joined the header's Proper region; the loop then had no exit
+                    // and printed as `while true do <dispatcher with the return> ... end`
+                    // (AmbulasOrbitalLaser p2, ActivateAllCrewShips p2 once innermost-first
+                    // reduction had collapsed the body first). OPT-IN (RENOVICE_PROPER_HEADER_EXIT_GUARD=1):
+                    // the dispatcher form is exact (CFG-ID PASS, closes), while keeping the exit
+                    // outside left a loop whose break arm is a second exit target unreduced
+                    // (reduce_loop_body_dag admits one exit target) and the emitter dropped the
+                    // `if IsNull(t) or 1 < Time() - t then` test (DragonGroundBoss p34 PASS -> FAIL).
+                    if (all_in && header_of_current_loop && proper_header_exit_guard
+                        && succ[n].count(c) && !reaches(c, n)) all_in = false;
                     if (all_in) { S.insert(c); grew = true; }
                 }
             }
@@ -754,11 +810,18 @@ struct Analyzer {
         // scan, so a graph the innermost rule cannot reduce keeps the previous result. Both the
         // candidate and the inner cycle must be dominance back edges.
         // RENOVICE_NO_INNERMOST_LOOP_FIRST restores the single established pass.
-        // OPT-IN (2026-10-09 integration): on the full 44.1.1 corpus this pass turned Platform and
-        // AmbulasOrbitalLaser CFG-ID PASS -> FAIL, cost KahlOrders p35 and 11 compiler closures
-        // (BardMusic, GrineerDeathSquad(Raid), PlayerShip, ...); RENOVICE_INNERMOST_LOOP_FIRST=1
-        // enables it until it is reworked.
-        static const bool innermost_first = std::getenv("RENOVICE_INNERMOST_LOOP_FIRST") != nullptr;
+        // DEFAULT AGAIN (loops campaign 2026-10-09). It was opt-in after the integration run: it
+        // turned Platform and AmbulasOrbitalLaser CFG-ID PASS -> FAIL, cost KahlOrders p35 and 11
+        // compiler closures. None of those was a wrong loop choice. The innermost-first tree is the
+        // dominance loop forest order; it reached emitter and DAG paths with latent defects that the
+        // outer-first tree hid: a loop's break arm printed after the loop under the loop header's
+        // test (Platform; INEXACT COMPOSITE DECISION / BREAK ARM INSIDE ITS LOOP, emit.h), a nested
+        // loop's composite part rejecting the outer cut body (AmbulasOrbitalLaser; NESTED-LOOP EXIT,
+        // PER BLOCK, below), the decision FORNPREP of a composite head printed as a raw zero-trip
+        // test (KahlOrders p35; DECISION PREP OWNS THE CONDITIONAL, emit.h), a FORNLOOP-latch head
+        // keyed apart from its prep owner (DragonGroundBoss p43 duplicate `for`), and a selector
+        // relay that never closed. RENOVICE_NO_INNERMOST_LOOP_FIRST restores the outer-first scan.
+        static const bool innermost_first = !std::getenv("RENOVICE_NO_INNERMOST_LOOP_FIRST");
         auto holds_inner_cycle = [&](const LoopCandidate& outer) -> bool {
             for (int n2 : outer.body) {
                 if (n2 == outer.n || !live.count(n2)) continue;
