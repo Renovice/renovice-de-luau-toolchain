@@ -17634,6 +17634,10 @@ inexact_selector_fallback:
             }
         };
         const bool guard_transactions = !std::getenv("RENOVICE_NO_CFG_GUARD_TRANSACTION");
+        // Nested guard candidates retry inside each other, so unbounded rollback is exponential in
+        // the nesting depth (AvatarDiorama p87: 34,000 rollbacks a minute). A deterministic budget
+        // per render attempt bounds it; once spent, a partial candidate rejects the attempt as before.
+        int guard_rollback_budget = 256;
 
         // `stop` is the local structured join. `terminal` is the enclosing loop latch: an arm may
         // end the current iteration without reaching a nearer join, and that is still a valid
@@ -18130,7 +18134,8 @@ inexact_selector_fallback:
                     const int plain_dispatches_before =
                         successful_plain_acyclic_dispatches;
                     RenderTxn guard_txn;
-                    if (guard_transactions) guard_txn = txn_save();
+                    const bool guard_txn_active = guard_transactions && guard_rollback_budget > 0;
+                    if (guard_txn_active) guard_txn = txn_save();
                     out += ind(indent) + "repeat\n";
                     const bool terminal_returns_before = guard_allows_terminal_returns;
                     if (expanded_boundary_proofs && expanded_guard_terminals
@@ -18144,7 +18149,9 @@ inexact_selector_fallback:
                         // This candidate is a proof path, not a speculative formatter. Restore the
                         // text but leave the function rejected if it consumed graph nodes; retrying
                         // a different structure after partial ownership would hide the real error.
-                        if (guard_transactions && emitted.size() != emitted_before) {
+                        if (guard_txn_active && guard_rollback_budget > 0
+                            && emitted.size() != emitted_before) {
+                            --guard_rollback_budget;
                             if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
                                 std::fprintf(stderr,
                                              "CFG_GUARD_TXN_ROLLBACK pidx=%d start=%d effect=%d "
