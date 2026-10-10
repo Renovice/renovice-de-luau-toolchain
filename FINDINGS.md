@@ -6376,3 +6376,15 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+## 2026-10-10 - Innermost-first loop selection regressions were latent emitter/DAG defects (agent loops)
+
+Hypothesis: the integration-run regressions of innermost-first (Platform, AmbulasOrbitalLaser, KahlOrders p35, 11
+closures) come from wrong loop choices.
+Finding: False. The innermost-first trees were correct; they reached paths with latent defects (break arm printed
+after its loop under the header's test, per-part nested-loop exit test, first-prep conditional ownership, FORNLOOP
+latch keying, a While taking a nested prep, scratch renders leaking `for_open`). DEFECTS L1-L8.
+Evidence: region trees (`RENOVICE_SATREE_PIDX`), full corpus `work/agents/loops-runs/full_c331fd64` vs r3b: CFG-ID
+4,465 -> 4,625, 0 PASS -> FAIL on CFG/CONST/dataflow, closure 5,446 -> 5,448 (5 losses attributed).
+Reason: every regression module was reduced to a named mechanism and fixed generically or measured opt-in.
+Next Step: the 5 remaining closure losses (dispatcher relays that grow per cycle); integrate onto 340d54c.
