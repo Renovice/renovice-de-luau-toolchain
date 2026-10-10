@@ -443,3 +443,29 @@ CFG-ID + dataflow 4,667 -> 4,817, equal prototypes 79,266 -> 79,485, compiler cl
 FAIL -> PASS); no module PASS -> FAIL on any gate, no prototype loss. Dataflow FAIL among CFG-ID PASS 5 -> 13 (newly
 CFG-passing modules with pre-existing dataflow differences; no module lost dataflow). `cert/gates.py 300 150`: all gates
 pass except the Gate 14 check count 113 -> 125 (all 125 pass; baseline moved with the record).
+
+## 2026-10-10 — 44.1.1 campaign wave 3: constructor expressions (agent ctor, f90c321..cd43ad0)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 90 | a list constructor whose item evaluation branches compiles to NEWTABLE before the branches and SETLIST after the join; expr.h reconstructs per block, so it printed `t = {}`, the item diamond as if/else statements and `t = {item}` after the join | a second NEWTABLE after the branch, CFG-ID `SETLIST -> NEWTABLE` (47 modules on r9: AddIngredientsScreen p4 `{ if a then 100 else 0 }`, DailyTribute p41 `{ Ternary(u ~= nil, 100, 0) }`, ArenaGambling p12 `{ Ternary(a.Active or a.Q ~= nil, 100, 50), self:CalculateY(a) }`, NewPlayerTutorialFoundry p2 `{ { text = .., check = 3 < n } }`). The same parse covers #51's mixed record+list constructor (index stores `t[1] = v` = SETTABLEN; with a multret list tail the rebuilt table LOST its record fields, luau.exe) and SETLIST batches with nested-table stores between them (#75 refused merges, `SETLIST -> SETTABLEN`) | agent ctor; r9 class populations; luau.exe fixture | `CtorParser` (expr.h) parses the whole NEWTABLE..last-store interval into one expression tree mirroring Luau's expression codegen: comparison values, and/or values (same-operator chains left-associated), if-expressions, `(x and y) or z`, LOADB-tested comparison chains, nested NEWTABLE/DUPTABLE, calls/method calls (builtin FASTCALL order), closures with plain captures, `(G).x` for GETIMPORT G + GETFIELD x. Exactness checks: every value consumed once, evaluation order = instruction order, refusal of shapes the compiler would emit differently (ANDK/ORK/AND/OR, JUMPXEQK*, K arithmetic, if-expression and/or rewrite, constant folding, import chains), writes dead after the interval, NEWTABLE array size. `collapse_constructor_intervals` (m6d_cmd.h, decompile path only) merges the interval's blocks. Admitted: ends in a SETLIST and has a branch, a record item before the last list item, or two or more SETLIST batches (`RENOVICE_NO_CTOR_EXPR`; trace `RENOVICE_CTOR_TRACE`) |
+
+Not admitted (refused, statement path kept), all DE-compiler constant policies our recompiler does not reproduce from any
+source: a constant record value STORED after DUPTABLE instead of folded into the template (ObjectiveText p4,
+RailjackLoadOut p83, Horse/KahlCustomization, ImGuiLib p55, ThemedCompositionTool p51, ThemedAmpCustomization p18,
+UIUtilities p158); `LOADN k; JUMPIFEQ` where the compiler emits JUMPXEQKN for `x == k` (DefenseReward p34,
+TennoHubScreenLauncher p107, UIUtilities p47, Settings p1372, TopMenu p297). Hypothesis (UNCONFIRMED): DE's compiler uses
+a K-form or template constant only when the constant already exists in the constant table. Also not admitted: loops inside
+an item (UICommonResources p2, O2-inlined helper). `LOAD -> NEWTABLE` (21) is not a constructor mechanism (register-spill
+`vT` table in >200-register prototypes, module-entry setup).
+
+Fixtures: `cert/fixtures/ctor_2026_10_10/ctor_cond_items.luau` (Gate 14 `CTOR_COND_ITEMS_*`: behavior, CFG-ID, dataflow,
+closure within 3 rounds; legacy `RENOVICE_NO_CTOR_EXPR` FAILs CFG-ID and loses `mode` in `{ mode = name, ..., Pair(..) }`).
+`setlist_existing` now also asserts CFG-ID PASS; the legacy controls of `setlist_existing` (#51) and `setlist_batch_merge`
+(#75) set `RENOVICE_NO_CTOR_EXPR` too (verified: they reproduce their defects again). Gates: cfg_class 134/134, dataflow
+152/152, proto_shape 40/40, natural_loop 8/8.
+
+Full 44.1.1 corpus (`work/agents/ctor-runs/full-after`, binary `f7654050`, vs r9 `c62f1665`): CFG-ID 4,830 -> 4,863,
+CONST-ID 5,437 -> 5,437, dataflow 4,859 -> 4,893, CFG-ID + dataflow 4,817 -> 4,850, compiler closure 5,453 -> 5,453, closed
+CFG-ID 4,743 -> 4,767, equal prototypes 79,485 -> 79,547 of 83,518; no module PASS -> FAIL on any gate, no prototype or
+closure loss. `SETLIST -> NEWTABLE` 47 -> 6 modules, `SETLIST -> SETTABLEN` 19 -> 7.

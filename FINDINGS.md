@@ -6376,3 +6376,16 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+## 2026-10-10 - Constructor expressions (agent ctor, DEFECTS #90)
+
+Hypothesis: the CFG-ID classes `SETLIST -> NEWTABLE` / `SETLIST -> SETTABLEN` come from constructors whose item
+evaluation spans blocks (branches) or mixes record and list items, which the block-local expression layer cannot print
+as one constructor.
+Finding: True (53 of 54 `SETLIST -> NEWTABLE` sites had a branch between NEWTABLE and SETLIST; the SETTABLEN sites were
+nested-table stores between batches). Partially fixed: the remaining sites are DE-compiler constant policies (stored
+template constants, `LOADN k; JUMPIFEQ`), UNCONFIRMED hypothesis: K-forms only for constants already in the table.
+Evidence: r9 class census; per-site stock windows; full corpus `work/agents/ctor-runs/full-after` (CFG-ID 4,830 -> 4,863,
+0 PASS -> FAIL); luau.exe fixture `cert/fixtures/ctor_2026_10_10/ctor_cond_items.luau`.
+Reason: one expression parse mirroring Luau's codegen reproduces the stock instruction sequence; refusals keep the old path.
+Next Step: integrate; if wanted, decide whether the recompiler should model DE's constant-table K-form policy.
