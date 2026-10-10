@@ -15758,6 +15758,29 @@ inexact_selector_fallback:
                         if (all_arms) { interior_canonical = x; break; }
                     }
                 }
+                // A plain-header loop whose only exit is a private arm that just returns is an
+                // exitless loop with a `return` arm inside its body (DynamicAssassinateEndless p82:
+                // printing the arm after the loop moved its code past the latch). Not admitted.
+                bool return_only_exit = false;
+                if (plain_header && exits.size() == 1) {
+                    std::set<int> arm;
+                    std::vector<int> pending{*exits.begin()};
+                    return_only_exit = true;
+                    while (!pending.empty() && return_only_exit) {
+                        const int block = pending.back(); pending.pop_back();
+                        if (block < 0 || block >= (int)g->n.size() || loop.body.count(block)
+                            || !g->n[block].reach) { return_only_exit = false; break; }
+                        if (!arm.insert(block).second) continue;
+                        for (int next : {g->n[block].succ_true, g->n[block].succ_false})
+                            if (next >= 0) pending.push_back(next);
+                    }
+                    if (return_only_exit)
+                        for (int block : arm)
+                            for (int pred : g->n[block].preds)
+                                if (g->n[pred].reach && !loop.body.count(pred) && !arm.count(pred))
+                                    return_only_exit = false;
+                }
+                if (return_only_exit) return reject_setup("PLAIN_HEADER_RETURN_ARM_EXIT");
                 if ((exits.size() > 1 && interior_canonical < 0)
                     || (exits.empty() && std::getenv("RENOVICE_NO_CFG_EXITLESS_WHILE")))
                     return reject_setup("INTERIOR_WHILE_EXIT_COUNT");
@@ -15768,7 +15791,16 @@ inexact_selector_fallback:
                 if (interior_canonical >= 0) interior_while_canonical[loop.header] = interior_canonical;
                 continue;
             }
+            // CONDITIONAL LATCH (render campaign 2026-10-10): the header-tested renderer prints the
+            // latch with emit_block, which spells its statements but not its branch, so a latch that
+            // also leaves the loop (`repeat ... until c` whose first block is a test: VentKidsBand p1)
+            // lost that exit and the loop printed as `while` with the wrong exit. Such a loop is not
+            // a header-tested while. RENOVICE_NO_CFG_CONDITIONAL_LATCH_GUARD restores the admission.
+            const bool conditional_latch = latch.is_branch && !latch.is_uncond
+                && latch.succ_true != latch.succ_false
+                && !std::getenv("RENOVICE_NO_CFG_CONDITIONAL_LATCH_GUARD");
             if (!header.is_branch || header.is_uncond || !renderable_cond(loop.header)
+                || conditional_latch
                 || true_inside == false_inside || !latch_returns_to_header
                 || body_backedges != 1 || !loop.body.count(loop.header)
                 || !loop.body.count(loop.latch) || loop.header == loop.latch)
@@ -15811,7 +15843,9 @@ inexact_selector_fallback:
             // block: a branch before the loop "joined" at its own arm). An exitless loop ends the
             // function as far as structure is concerned, so its header acts as the exit node.
             std::vector<int> exitless_headers;
-            for (int header : interior_exit_whiles) {
+            std::set<int> shell_headers(interior_exit_whiles.begin(), interior_exit_whiles.end());
+            shell_headers.insert(overlapping_for_prep_whiles.begin(), overlapping_for_prep_whiles.end());
+            for (int header : shell_headers) {
                 const st::Loop* loop = while_by_header.at(header);
                 bool leaves = false;
                 for (int member : loop->body)
@@ -16753,6 +16787,16 @@ inexact_selector_fallback:
         std::function<bool(int, int, int, const std::set<int>*, int)> emit_acyclic_dispatch;
         bool consume_guard_dispatch_effect = false;
         bool small_guard_dispatch = false;     // SMALL GUARD DISPATCH (below)
+        // LOOP EXIT IN A ONE-SHOT REPEAT (render campaign 2026-10-10). The guard spellings wrap code
+        // in `repeat ... until true`; inside it `break` leaves the repeat and `continue` jumps to its
+        // `until true`, i.e. also leaves it, so neither can spell a loop exit or a next iteration of
+        // the enclosing source loop. Depth of open one-shot repeats since the innermost source loop
+        // body; a loop-exit `break` / loop `continue` requested at depth > 0 rejects the spelling
+        // (the guard candidate rolls back). Without this, a rolled-back candidate's successor printed
+        // a loop exit as `break` inside the repeat (SpidersLeap p1: the `return` arm became a skip).
+        // RENOVICE_NO_CFG_ONE_SHOT_EXIT_GUARD restores the unchecked spelling.
+        int oneshot_depth = 0;
+        const bool oneshot_exit_guard = !std::getenv("RENOVICE_NO_CFG_ONE_SHOT_EXIT_GUARD");
         bool guard_allows_terminal_returns = false;
         bool first_pass_private_return_guard = false;
         // A guard repeat which already contains a plain crossing-tail selector is a
@@ -16955,7 +16999,11 @@ inexact_selector_fallback:
             // (single ownership) and every tail path ends at the exit (no return, no loop exit).
             // RENOVICE_NO_CFG_GUARD_EXIT_ONLY_ARM restores the refusal.
             if (!std::getenv("RENOVICE_NO_CFG_GUARD_EXIT_ONLY_ARM")) {
-                for (int arm : {taken, fallthrough}) {
+                // The arm printed inside `if` is the FALL-THROUGH successor: Luau lays out
+                // `if c then TAIL break end; REST` with TAIL falling through and REST taken, so
+                // preferring the taken successor flipped the spelling on every compile cycle when
+                // both successors qualified (WeaponSpin p1 never closed).
+                for (int arm : {fallthrough, taken}) {
                     const int other = arm == taken ? fallthrough : taken;
                     if (arm < 0 || other < 0 || arm == other || emitted.count(arm)
                         || !in_render_domain(domain, arm)
@@ -16982,6 +17030,18 @@ inexact_selector_fallback:
                     if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
                         std::fprintf(stderr, "CFG_GUARD_EXIT_ONLY_ARM pidx=%d block=%d arm=%d "
                                      "effect=%d exit=%d\n", pidx, block, arm, effect, exit);
+                    if (arm == taken) {
+                        // The tail is the TAKEN successor: in the source it is the `else` branch
+                        // (the then-branch, the fall-through, continues the guard chain). Printing
+                        // the tail first would swap the compiled layout (EidolonResourceContainers).
+                        out += ind(indent) + "if " + cond_of(block, other == fallthrough) + " then\n";
+                        if (!emit_guard_to_effect(other, effect, exit, domain, indent + 1)) return false;
+                        out += ind(indent) + "else\n";
+                        if (!emit_cfg(arm, exit, -1, domain, indent + 1)) return false;
+                        out += ind(indent + 1) + "break\n";
+                        out += ind(indent) + "end\n";
+                        return true;
+                    }
                     out += ind(indent) + "if " + cond_of(block, arm == fallthrough) + " then\n";
                     if (!emit_cfg(arm, exit, -1, domain, indent + 1)) return false;
                     out += ind(indent + 1) + "break\n";
@@ -17113,6 +17173,7 @@ inexact_selector_fallback:
                 && !path_contains_loop_before(start, stop, terminal, domain)
                 && stable_guard_boundary_conditions();
             const bool exiting_dispatch = loop_dispatch || guard_boundary_dispatch;
+            if (loop_dispatch && oneshot_exit_guard && oneshot_depth > 0) return false;   // its `break` would leave the repeat
             if (start < 0 || start >= (int)g->n.size()
                 || (terminal >= 0 && !exiting_dispatch)
                 || emitted.count(start) || !g->n[start].is_branch
@@ -17661,6 +17722,8 @@ inexact_selector_fallback:
                 // The escape join of the active loop (LOOP ESCAPE JOINS above): record the escape
                 // and leave the loop; the loop renderer resumes at the join after its `end`.
                 if (LoopEscape* escape = escape_to(domain, start)) {
+                    if (oneshot_exit_guard && oneshot_depth > 0)
+                        return reject_render("LOOP_EXIT_IN_ONE_SHOT", start, stop, terminal);
                     out += ind(indent) + escape->selector + " = 1\n";
                     out += ind(indent) + "break\n";
                     escape->used = true;
@@ -17680,7 +17743,33 @@ inexact_selector_fallback:
                             contains_current_loop = false;
                             break;
                         }
-                    if (contains_current_loop) return true;
+                    if (!contains_current_loop) continue;
+                    // ENCLOSING-LATCH PROOF (render campaign 2026-10-10): the `break` is exact only
+                    // when the current loop's canonical exit also reaches that latch. A header-tested
+                    // while whose header exit is a RETURN arm (a `repeat` whose first test returns,
+                    // VentKidsBand p1) merged the return and the continuation into one `break`.
+                    // RENOVICE_NO_CFG_ENCLOSING_LATCH_PROOF restores the unchecked transfer.
+                    if (!std::getenv("RENOVICE_NO_CFG_ENCLOSING_LATCH_PROOF")) {
+                        int canonical = -1;
+                        for (const st::Loop& active : authoritative_loops) {
+                            if (&active.body != domain) continue;
+                            if (active.kind == st::Loop::ForNum || active.kind == st::Loop::ForGen) {
+                                canonical = active.latch >= 0 ? g->n[active.latch].succ_false : -1;
+                            } else if (registered_while_outside(&active) >= 0) {
+                                canonical = registered_while_outside(&active);
+                            } else if (!interior_exit_whiles.count(active.header)
+                                       && !overlapping_for_prep_whiles.count(active.header)) {
+                                const st::Node& header = g->n[active.header];
+                                canonical = active.body.count(header.succ_true)
+                                    ? header.succ_false : header.succ_true;
+                            }
+                            break;
+                        }
+                        if (canonical >= 0 && canonical != target
+                            && !can_reach(canonical, target, -1, nullptr))
+                            return false;
+                    }
+                    return true;
                 }
                 return false;
             };
@@ -17838,12 +17927,15 @@ inexact_selector_fallback:
                             break;
                         }
                     }
+                    const int saved_oneshot = oneshot_depth;
+                    oneshot_depth = 0;
                     const bool rendered_body = guarded_body >= 0
                         ? emit_guard_to_effect(start, guarded_body, *exits.begin(),
                                                &loop.body, indent + 1)
                             && emit_cfg(guarded_body, loop.latch, loop.latch,
                                         &loop.body, indent + 1)
                         : emit_cfg(start, loop.latch, loop.latch, &loop.body, indent + 1);
+                    oneshot_depth = saved_oneshot;
                     while_by_header.emplace(start, outer);
                     if (!rendered_body) {
                         --loop_depth;
@@ -17895,8 +17987,12 @@ inexact_selector_fallback:
                 out += ind(indent + 1) + "if "
                      + cond_of(loop.header, outside == header.succ_false)
                      + " then break end\n";
-                if (inside != loop.latch
-                    && !emit_cfg(inside, loop.latch, loop.latch, &loop.body, indent + 1)) {
+                const int saved_oneshot = oneshot_depth;
+                oneshot_depth = 0;
+                const bool while_body_ok = inside == loop.latch
+                    || emit_cfg(inside, loop.latch, loop.latch, &loop.body, indent + 1);
+                oneshot_depth = saved_oneshot;
+                if (!while_body_ok) {
                     --loop_depth;
                     loop_blocks = saved_blocks; loop_control_blocks = saved_control;
                     loop_continue_targets = saved_targets;
@@ -17946,7 +18042,12 @@ inexact_selector_fallback:
                 loop_continue_targets = {loop.latch};
                 loop_continue_enabled = false;
                 ++loop_depth;
-                if (!emit_cfg(body_entry, loop.latch, loop.latch, &loop.body, indent + 1)) {
+                const int saved_oneshot = oneshot_depth;
+                oneshot_depth = 0;
+                const bool for_body_ok =
+                    emit_cfg(body_entry, loop.latch, loop.latch, &loop.body, indent + 1);
+                oneshot_depth = saved_oneshot;
+                if (!for_body_ok) {
                     --loop_depth;
                     loop_blocks = saved_blocks; loop_control_blocks = saved_control;
                     loop_continue_targets = saved_targets; loop_continue_enabled = saved_continue;
@@ -18141,6 +18242,7 @@ inexact_selector_fallback:
                     const bool guard_txn_active = guard_transactions && guard_rollback_budget > 0;
                     if (guard_txn_active) guard_txn = txn_save();
                     out += ind(indent) + "repeat\n";
+                    ++oneshot_depth;
                     const bool terminal_returns_before = guard_allows_terminal_returns;
                     if (expanded_boundary_proofs && expanded_guard_terminals
                         && std::getenv("RENOVICE_CFG_GUARD_PRIVATE_TERMINALS"))
@@ -18148,8 +18250,10 @@ inexact_selector_fallback:
                     const bool guard_rendered =
                         emit_guard_to_effect(start, effect, local_follow, domain, indent + 1);
                     guard_allows_terminal_returns = terminal_returns_before;
-                    if (!guard_rendered
-                        || !emit_cfg(effect, local_follow, terminal, domain, indent + 1)) {
+                    const bool guard_effect_rendered = guard_rendered
+                        && emit_cfg(effect, local_follow, terminal, domain, indent + 1);
+                    --oneshot_depth;
+                    if (!guard_effect_rendered) {
                         // This candidate is a proof path, not a speculative formatter. Restore the
                         // text but leave the function rejected if it consumed graph nodes; retrying
                         // a different structure after partial ownership would hide the real error.
@@ -18247,9 +18351,12 @@ inexact_selector_fallback:
                     // cannot reach this terminal. A one-shot guard preserves every
                     // prefix event and executes the shared terminal only on its edges.
                     out += ind(indent) + "repeat\n";
-                    if (!emit_guard_to_effect(start, effect, stop, domain, indent + 1))
-                        return false;
-                    if (!emit_cfg(effect, stop, terminal, domain, indent + 1)) return false;
+                    ++oneshot_depth;
+                    const bool shared_effect_ok =
+                        emit_guard_to_effect(start, effect, stop, domain, indent + 1)
+                        && emit_cfg(effect, stop, terminal, domain, indent + 1);
+                    --oneshot_depth;
+                    if (!shared_effect_ok) return false;
                     out += ind(indent) + "until true\n";
                     return true;
                 }
@@ -18364,11 +18471,13 @@ inexact_selector_fallback:
                     const bool saved_private_return_guard = first_pass_private_return_guard;
                     first_pass_private_return_guard = !allow_private_return_arms;
                     out += ind(indent) + "repeat\n";
+                    ++oneshot_depth;
                     const bool guard_rendered =
                         emit_guard_to_effect(start, guard_return, guard_exit,
                                              domain, indent + 1)
                         && emit_cfg(guard_return, guard_exit, terminal,
                                     domain, indent + 1);
+                    --oneshot_depth;
                     first_pass_private_return_guard = saved_private_return_guard;
                     if (guard_rendered) {
                         out += ind(indent) + "until true\n";
@@ -18398,6 +18507,8 @@ inexact_selector_fallback:
                 // only the exact authoritative outside edge for the active loop.
                 if (next >= 0 && domain && !in_render_domain(domain, next)
                     && matches_current_loop_exit(next)) {
+                    if (oneshot_exit_guard && oneshot_depth > 0)
+                        return reject_render("LOOP_EXIT_IN_ONE_SHOT", start, stop, terminal);
                     out += ind(indent) + "break\n";
                     return true;
                 }
@@ -18407,6 +18518,8 @@ inexact_selector_fallback:
                 // let the caller own the canonical exit and enclosing continuation exactly once.
                 if (next >= 0 && domain && !in_render_domain(domain, next)
                     && transfers_to_enclosing_latch(next) && !escape_to(domain, next)) {
+                    if (oneshot_exit_guard && oneshot_depth > 0)
+                        return reject_render("LOOP_EXIT_IN_ONE_SHOT", start, stop, terminal);
                     out += ind(indent) + "break\n";
                     return true;
                 }
@@ -18417,11 +18530,15 @@ inexact_selector_fallback:
                 if (next == stop) return true;
                 if (next >= 0 && domain && !in_render_domain(domain, next)
                     && matches_current_loop_exit(next)) {
+                    if (oneshot_exit_guard && oneshot_depth > 0)
+                        return reject_render("LOOP_EXIT_IN_ONE_SHOT", start, stop, terminal);
                     out += ind(indent) + "break\n";
                     return true;
                 }
                 if (next >= 0 && domain && !in_render_domain(domain, next)
                     && transfers_to_enclosing_latch(next) && !escape_to(domain, next)) {
+                    if (oneshot_exit_guard && oneshot_depth > 0)
+                        return reject_render("LOOP_EXIT_IN_ONE_SHOT", start, stop, terminal);
                     out += ind(indent) + "break\n";
                     return true;
                 }
@@ -18463,6 +18580,8 @@ inexact_selector_fallback:
                         && trampoline.preds.size() == 1 && trampoline.preds.front() == start
                         && matches_current_loop_exit(next) && !loop_by_prep.count(outside);
                 }
+                if (oneshot_exit_guard && oneshot_depth > 0)
+                    return reject_render("LOOP_EXIT_IN_ONE_SHOT", start, stop, terminal);
                 LoopEscape* direct_escape = escape_to(domain, outside);
                 if (direct_escape) {
                     // A body test that jumps straight to the active loop's escape join (an empty
@@ -18481,6 +18600,36 @@ inexact_selector_fallback:
                     out += ind(indent + 1) + "break\n";
                     out += ind(indent) + "end\n";
                 } else {
+                    // LEGAL LOOP EXIT (render campaign 2026-10-10): a bare `break` is exact only
+                    // for an edge to the active loop's own exit (its canonical exit, a while's
+                    // header exit, an escape relay) or a proven enclosing-latch transfer. Any other
+                    // target leaving the domain (a second, unregistered exit of a `repeat` whose
+                    // first test returns, VentKidsBand p1) merged two destinations into one
+                    // `break`. RENOVICE_NO_CFG_LEGAL_EXIT_GUARD restores the unchecked spelling.
+                    bool legal = std::getenv("RENOVICE_NO_CFG_LEGAL_EXIT_GUARD") != nullptr
+                        || matches_current_loop_exit(outside)
+                        || transfers_to_enclosing_latch(outside);
+                    for (const st::Loop& active : authoritative_loops) {
+                        if (legal) break;
+                        if (&active.body != domain || active.kind != st::Loop::While) continue;
+                        const int registered = registered_while_outside(&active);
+                        if (registered >= 0) { legal = outside == registered; break; }
+                        std::set<int> exits;
+                        for (int member : active.body)
+                            for (int succ : {g->n[member].succ_true, g->n[member].succ_false})
+                                if (succ >= 0 && !active.body.count(succ)) exits.insert(succ);
+                        if (overlapping_for_prep_whiles.count(active.header)
+                            || interior_exit_whiles.count(active.header)) {
+                            legal = exits.size() == 1 && *exits.begin() == outside;
+                        } else {
+                            const st::Node& header = g->n[active.header];
+                            legal = outside == (active.body.count(header.succ_true)
+                                                ? header.succ_false : header.succ_true);
+                        }
+                        break;
+                    }
+                    if (!legal)
+                        return reject_render("ILLEGAL_LOOP_EXIT", start, stop, terminal);
                     out += ind(indent) + "if " + cond_of(start, outside == fallthrough)
                          + " then break end\n";
                 }
@@ -18497,8 +18646,11 @@ inexact_selector_fallback:
                     && can_reach(arm, terminal, terminal, domain))
                     arm_stop = terminal;
                 if (!emit_cfg(arm, arm_stop, terminal, domain, indent + 1)) return false;
-                if (arm_stop == terminal && terminal != stop)
+                if (arm_stop == terminal && terminal != stop) {
+                    if (oneshot_exit_guard && oneshot_depth > 0)
+                        return reject_render("LOOP_EXIT_IN_ONE_SHOT", start, stop, terminal);
                     out += ind(indent + 1) + "continue\n";
+                }
                 out += ind(indent) + "end\n";
                 return true;
             }
@@ -18956,6 +19108,7 @@ inexact_selector_fallback:
                         // those statements once after this repeat has finished.
                         const int plain_before = successful_plain_acyclic_dispatches;
                         out += ind(indent) + "repeat\n";
+                        ++oneshot_depth;
                         out += ind(indent + 1) + "if "
                             + cond_of(start, first == fallthrough) + " then\n";
                         const bool saved_return_policy = guard_allows_terminal_returns;
@@ -18963,10 +19116,11 @@ inexact_selector_fallback:
                         const bool guard_ok = emit_guard_to_effect(
                             first, second, terminal, domain, indent + 2);
                         guard_allows_terminal_returns = saved_return_policy;
-                        if (!guard_ok) return false;
+                        if (!guard_ok) { --oneshot_depth; return false; }
                         out += ind(indent + 1) + "end\n";
-                        if (!emit_cfg(second, terminal, terminal, domain, indent + 1))
-                            return false;
+                        const bool latch_ok = emit_cfg(second, terminal, terminal, domain, indent + 1);
+                        --oneshot_depth;
+                        if (!latch_ok) return false;
                         out += ind(indent) + "until true\n";
                         if (successful_plain_acyclic_dispatches > plain_before)
                             emitted_guard_repeat_with_plain_dispatch = true;
@@ -19001,8 +19155,11 @@ inexact_selector_fallback:
                                  triangle_reaches_local_boundary ? 1 : 0);
                 out += ind(indent) + "if " + cond_of(start, first == fallthrough) + " then\n";
                 if (!emit_cfg(first, second, terminal, domain, indent + 1)) return false;
-                if (terminal_triangle)
+                if (terminal_triangle) {
+                    if (oneshot_exit_guard && oneshot_depth > 0)
+                        return reject_render("LOOP_EXIT_IN_ONE_SHOT", start, stop, terminal);
                     out += ind(indent + 1) + "continue\n";
+                }
                 out += ind(indent) + "end\n";
                 return emit_cfg(second, stop, terminal, domain, indent);
                 }
