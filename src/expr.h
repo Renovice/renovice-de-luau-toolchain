@@ -40,7 +40,11 @@ enum class EK {
     Table,
     Vararg,
     Closure,
-    Unknown
+    Unknown,
+    // Constructor expression parse (2026-10-10): `if a then b else c` (a = condition, b, c = arms)
+    // and an explicitly parenthesized expression `(a)` (truncates a call/vararg to one value).
+    IfElse,
+    Group
 };
 
 struct Expr;
@@ -51,7 +55,12 @@ struct Expr {
     std::string text;              // Const/Global/Field name/Bin op/Un op
     int reg = -1, idx = -1;        // Reg index / Upval index / Closure proto
     EP a, b;                       // operands / object
+    EP c;                          // IfElse: else arm
     std::vector<EP> list;          // call args, concat parts, table items
+    // Table only: per item key kind, parallel to `list` when non-empty: 0 positional, 1 record
+    // `name = v` (name in keys[i]->text), 2 bracketed `[keys[i]] = v`. Empty = every item positional.
+    std::vector<int> keykind;
+    std::vector<EP> keys;
     int nres = 1;                  // Call: number of results (-1 = multret)
     bool multret = false;
 };
@@ -73,6 +82,7 @@ inline int prec(const Expr& e) {
         if (o == "^") return 8;
     }
     if (e.k == EK::Un) return 7;
+    if (e.k == EK::IfElse) return 0;             // lowest: parenthesized as any operand
     return 99;                                   // atoms
 }
 
@@ -183,9 +193,29 @@ inline std::string render(const EP& e) {
             if (e->list.empty() && e->text.empty()) return "{}";
             if (!e->text.empty()) return e->text;                  // template rendered by ir.h
             std::string s = "{";
-            for (size_t i = 0; i < e->list.size(); ++i) { if (i) s += ", "; s += render(e->list[i]); }
+            for (size_t i = 0; i < e->list.size(); ++i) {
+                if (i) s += ", ";
+                const int kind = i < e->keykind.size() ? e->keykind[i] : 0;
+                const EP key = i < e->keys.size() ? e->keys[i] : nullptr;
+                if (kind == 1 && key) {
+                    s += is_ident(key->text) ? key->text : "[" + ir::quote_lua(key->text) + "]";
+                    s += " = ";
+                } else if (kind == 2 && key) {
+                    s += "[" + render(key) + "] = ";
+                }
+                s += render(e->list[i]);
+            }
             return s + "}";
         }
+        case EK::IfElse: {
+            // A nested if-expression in any arm or the condition is parenthesized: the else arm
+            // otherwise extends as far right as possible.
+            auto arm = [](const EP& x) {
+                return (x && x->k == EK::IfElse) ? "(" + render(x) + ")" : render(x);
+            };
+            return "if " + arm(e->a) + " then " + arm(e->b) + " else " + arm(e->c);
+        }
+        case EK::Group:   return "(" + render(e->a) + ")";
         case EK::Vararg:  return "...";
         case EK::Closure:
             // `function<N|capture,capture,...>` — the captures let the inliner bind the sub-proto's
@@ -215,8 +245,9 @@ struct Stmt {
 inline bool expr_uses_reg(const EP& e, int reg) {
     if (!e) return false;
     if (e->k == EK::Reg && e->reg == reg) return true;
-    if (expr_uses_reg(e->a, reg) || expr_uses_reg(e->b, reg)) return true;
+    if (expr_uses_reg(e->a, reg) || expr_uses_reg(e->b, reg) || expr_uses_reg(e->c, reg)) return true;
     for (const EP& item : e->list) if (expr_uses_reg(item, reg)) return true;
+    for (const EP& key : e->keys) if (expr_uses_reg(key, reg)) return true;
     return false;
 }
 
@@ -577,6 +608,956 @@ inline bool scap_marker_wanted(const ir::IProto& ip, int pc) {
     return on && pc >= 0 && pc + 1 < (int)ip.code.size() && ip.code[(size_t)pc + 1].op != 0x29;
 }
 
+// =============================================================================================
+// CONSTRUCTOR EXPRESSION PARSE (2026-10-10, ctor agent; DEFECTS #90).
+//
+// A list constructor whose item evaluation contains control flow -- `{ if a then 100 else 0 }`,
+// `{ Ternary(x ~= nil, 100, 0) }`, `{ a or b.c }` -- compiles to NEWTABLE T before the branches and
+// SETLIST T after the join. The block-local reconstruction cannot see across the join, so the table
+// came out as `vT = {}`, the item diamond as if/else statements and `vT = {vI}` after the join: a
+// second NEWTABLE after the branch (CFG-ID `SETLIST -> NEWTABLE`). The only source that compiles to
+// NEWTABLE..branch..SETLIST is ONE constructor expression holding the branch, so the whole
+// instruction interval is parsed back into one expression tree here, mirroring the Luau compiler's
+// expression code generation (Compiler.cpp compileExprTable / compileExprAndOr / compileExprIfElse
+// / compileConditionValue / compileCompareJump). The mixed record+list shape of DEFECTS #51
+// (`{ k = v, ..., f() }`: NEWTABLE, SETTABLEKS..., SETLIST into the same table) is the same parse
+// with record items and is admitted too.
+//
+// Exactness rules (any violation refuses the parse; the established statement path is kept):
+//   - every value computed in the interval is consumed exactly once (no computation dropped or
+//     duplicated); reads of registers above the table that the interval did not define, writes at
+//     or below the table register, stores into anything but the table being built, statements,
+//     loops, closures and unknown opcodes refuse;
+//   - control flow is recognised only in the compiler's own value shapes: a comparison value
+//     `cmp -> L; LOADB R,0,1; L: LOADB R,1,0`, an and/or value `X->R; JUMPIF(NOT) R -> L; Y->R; L:`
+//     (same-operator chains left-associated, as the compiler's left operand path requires), and an
+//     if-expression `test -> E; X->T; JUMP L; E: Y->T; L:`; each shape is checked against the
+//     compiler's optimizations that would emit a different opcode for the printed source (ANDK/ORK,
+//     AND/OR, JUMPXEQK*, K-form arithmetic, the if-expression and/or rewrite, constant folding);
+//   - the rendered tree's left-to-right evaluation order equals the instruction order;
+//   - every register the interval writes (except the table) is dead after it;
+//   - item counts agree with NEWTABLE's array size; the last item is parenthesized when it is a
+//     single-value call/vararg (fixed SETLIST count) and left bare for a multret tail.
+// Admitted (eligible) only for a constructor that ends in a SETLIST into the table and contains a
+// branch, a record item before its last list item, or more than one SETLIST batch (more than 16
+// list items: the statement path merges later batches only when every item inlines, #75) --
+// shapes the statement path cannot always print as one constructor. Other constructors keep the
+// established path.
+// RENOVICE_NO_CTOR_EXPR restores the statement path everywhere; RENOVICE_CTOR_TRACE prints refusals.
+struct CtorParse {
+    int start = -1, end = -1;
+    EP expr;
+    bool branchy = false, mixed = false, eligible = false;
+    int fail = 0, fail_pc = -1;
+};
+
+class CtorParser {
+public:
+    explicit CtorParser(const ir::IProto& p) : ip(p) {}
+
+    bool parse(int n, CtorParse& out) {
+        out = CtorParse{};
+        out.start = n;
+        if (n < 0 || n >= (int)ip.code.size()) return false;
+        const ir::IInsn& t = ip.code[(size_t)n];
+        if (t.op != 0x2c && t.op != 0x4f) return false;
+        floor_reg = t.A;
+        int limit = -1;
+        if (!plausible(n, limit)) return false;
+        for (const ir::IInsn& in : ip.code)
+            if (in.op == 0x35 && in.A == 1 && (int)in.B == floor_reg) floor_captured = true;
+        int end = -1;
+        EP table;
+        Summary sum;
+        if (!parse_table(n, limit, end, table, &sum)) return finish(out, false);
+        out.end = end;
+        out.branchy = st.branchy;
+        out.mixed = sum.mixed;
+        out.eligible = sum.setlists > 0 && (st.branchy || sum.mixed || sum.setlists >= 2);
+        if (!out.eligible) return finish(out, false);
+        for (int r : st.written)
+            if (r != floor_reg && register_live_after(ip, end, r)) { bad(F_LIVE_AFTER, end); return finish(out, false); }
+        int last = -1;
+        if (!order_ok(table, last)) { bad(F_ORDER, end); return finish(out, false); }
+        if (!chains_ok(table, nullptr)) { bad(F_CHAIN, end); return finish(out, false); }
+        out.expr = table;
+        return finish(out, true);
+    }
+
+    enum Fail {
+        F_NONE, F_READ_TABLE, F_REUSE, F_MULTRET_SINGLE, F_UNDEF_TEMP, F_NOT_PENDING, F_WRITE_LOW,
+        F_WRITE_TABLE, F_DROPPED, F_OP, F_CLOSURE, F_CONST_OPERAND, F_STORE, F_SETLIST, F_KEY,
+        F_TEMPLATE, F_UNCOND, F_RANGE, F_BRANCH_SHAPE, F_COND, F_IFELSE_OPT, F_SUB, F_LIVE_AFTER,
+        F_ORDER, F_CHAIN, F_INCOMPLETE, F_CALL, F_NAMECALL
+    };
+
+private:
+    const ir::IProto& ip;
+    int floor_reg = -1;
+    bool floor_captured = false;
+    struct Slot { EP e; bool consumed = false, multret = false, self = false; int born = -1; };
+    struct Build {
+        int reg = -1, start = -1;
+        bool dup = false;
+        int array_expect = 0;
+        std::vector<int> tpl_keys;            // DUPTABLE template key constant indices
+        std::vector<uint32_t> tpl_vals;       // tag 8 payloads (0xffffffff = no constant)
+        std::vector<EP> tpl_stored;           // DUPTABLE: stored value per template position
+        int tpl_pos = 0;
+        std::vector<EP> values, keys;
+        std::vector<int> kinds;
+        int positional = 0, index_keys = 0, next_list = 1, setlists = 0;
+        bool last_multret = false, last_vararg = false, last_fixed = false;
+    };
+    struct State {
+        std::map<int, Slot> env;
+        std::vector<Build> building;
+        std::set<int> written;
+        size_t store_floor = 0;
+        bool branchy = false;
+        int fail = 0, fail_pc = -1;
+    };
+    struct Summary { int setlists = 0; bool mixed = false; };
+    State st;
+    // Nodes are keyed by address below; every keyed node is kept alive for the parser's lifetime so
+    // a node freed by a rollback can never lend its address (and stale facts) to a new one.
+    std::vector<EP> keep;
+    std::map<const Expr*, int> pcs;            // node -> completing instruction
+    std::map<const Expr*, int> chain_end;      // jump-built and/or node -> its end label
+    std::map<const Expr*, std::string> chain_op;
+    std::set<const Expr*> loadb_tested;        // comparison compiled as `LOADB R,b; cmp -> end`
+    std::set<const Expr*> fast_calls;          // builtin call: args, FASTCALL, then the function
+
+    // Cheap pre-filter and parse bound. The constructor can only extend until the first instruction
+    // that otherwise reads or rewrites the table (or ends straight-line flow: RETURN, loop control,
+    // a backward jump). Admission needs a SETLIST into the table inside that window and, before
+    // its last SETLIST, a branch or a keyed store into the table.
+    bool plausible(int n, int& limit) const {
+        const int T = floor_reg, count = (int)ip.code.size();
+        int last_setlist = -1, setlists = 0, q = n + 1;
+        std::vector<int> branches, keyed;
+        for (; q < count; ++q) {
+            const ir::IInsn& in = ip.code[(size_t)q];
+            const uint8_t op = in.op;
+            if (op == 0x29 || op == 0x47 || op == 0x0a || op == 0x1e || op == 0x30 || op == 0x1b || op == 0x0b) break;
+            if (in.branch && in.target <= q) break;
+            if (op == 0x3f && in.A == T) { last_setlist = q; ++setlists; continue; }
+            if ((op == 0x15 || op == 0x2e) && in.B == T && in.A != T) { keyed.push_back(q); continue; }
+            if (op == 0x2a && in.B == T && in.A != T && in.C != T) { keyed.push_back(q); continue; }
+            std::set<int> uses, defs;
+            if (!lv::register_effects(ip, in, uses, defs)) break;
+            if (uses.count(T) || defs.count(T)) break;
+            if (in.branch || (op == 0x04 && in.C)) branches.push_back(q);
+        }
+        limit = q;
+        if (last_setlist < 0) return false;
+        if (setlists >= 2) return true;
+        for (int b : branches) if (b < last_setlist) return true;
+        for (int k : keyed) if (k < last_setlist) return true;
+        return false;
+    }
+
+    bool finish(CtorParse& out, bool ok) {
+        out.fail = st.fail; out.fail_pc = st.fail_pc;
+        static const bool trace = std::getenv("RENOVICE_CTOR_TRACE") != nullptr;
+        if (trace && (!ok ? (st.fail != 0) : true))
+            std::fprintf(stderr, "CTOR_EXPR proto=%d pc=%d end=%d ok=%d eligible=%d branchy=%d mixed=%d fail=%d fail_pc=%d\n",
+                         ip.index, out.start, out.end, ok ? 1 : 0, out.eligible ? 1 : 0,
+                         out.branchy ? 1 : 0, out.mixed ? 1 : 0, st.fail, st.fail_pc);
+        return ok;
+    }
+    bool bad(int why, int pc) { if (!st.fail) { st.fail = why; st.fail_pc = pc; } return false; }
+
+    EP node(EK k) { return mk(k); }
+    EP konst(int i) {
+        if (i < 0 || i >= (int)ip.consts.size()) return mkconst("nil");
+        return mkconst(ir::value_text(ip.consts[(size_t)i]));
+    }
+    static bool is_call_like(const EP& e) {
+        return e && (e->k == EK::Call || e->k == EK::Method || e->k == EK::Vararg);
+    }
+    static bool is_relation(const std::string& o) {
+        return o == "==" || o == "~=" || o == "<" || o == "<=" || o == ">" || o == ">=";
+    }
+    // Luau isConditionFast: constants, comparisons and and/or are compiled as jumps when used as
+    // the left operand of and/or or as a condition.
+    static bool cond_fast(const EP& e) {
+        if (!e) return false;
+        if (e->k == EK::Const) return true;
+        if (e->k == EK::Bin && (is_relation(e->text) || e->text == "and" || e->text == "or")) return true;
+        if (e->k == EK::Group) return cond_fast(e->a);
+        return false;
+    }
+    bool is_chain(const EP& e) const { return e && chain_end.count(e.get()); }
+    int pc_of(const EP& e) const { auto it = pcs.find(e.get()); return it == pcs.end() ? -1 : it->second; }
+
+    bool building_reg(int r) const {
+        for (const Build& b : st.building) if (b.reg == r) return true;
+        return false;
+    }
+    // An operand read: a value computed in the interval is consumed; anything else must be a
+    // variable below the table (our output declares every register as a local).
+    EP read(int r, int pc) {
+        if (building_reg(r)) { bad(F_READ_TABLE, pc); return mkreg(r); }
+        auto it = st.env.find(r);
+        if (it != st.env.end()) {
+            Slot& s = it->second;
+            if (s.consumed) { bad(F_REUSE, pc); return mkreg(r); }
+            if (s.multret || s.self) { bad(F_MULTRET_SINGLE, pc); return mkreg(r); }
+            s.consumed = true;
+            return s.e;
+        }
+        if (r > floor_reg) { bad(F_UNDEF_TEMP, pc); return mkreg(r); }
+        return mkreg(r);
+    }
+    EP take(int r, int pc) {
+        auto it = st.env.find(r);
+        if (it == st.env.end() || it->second.consumed) { bad(F_NOT_PENDING, pc); return mkreg(r); }
+        return read(r, pc);
+    }
+    // `pc` is the defining instruction (pending-value age); `node_pc` the instruction the node
+    // stands for in the evaluation-order check (-1 for compound nodes: if-expression, and/or chain).
+    void def(int r, EP e, int pc, bool multret = false, bool self = false, int node_pc = -2) {
+        if (r <= floor_reg) { bad(F_WRITE_LOW, pc); return; }
+        if (building_reg(r)) { bad(F_WRITE_TABLE, pc); return; }
+        auto it = st.env.find(r);
+        if (it != st.env.end() && !it->second.consumed) { bad(F_DROPPED, pc); return; }
+        keep.push_back(e);
+        Slot s; s.e = e; s.multret = multret; s.self = self; s.born = pc;
+        st.env[r] = s;
+        st.written.insert(r);
+        const int at = node_pc == -2 ? pc : node_pc;
+        if (at >= 0) pcs.emplace(e.get(), at);
+    }
+    // Is `reg` written by an instruction reachable from `from` (loop back edges included)? Same
+    // walk as reconstruct_block's capture snapshot rule (#52); unknown effects answer yes.
+    bool register_written_after(int from, int reg) const {
+        const int n = (int)ip.code.size();
+        std::vector<char> seen((size_t)n, 0);
+        std::vector<int> todo{from + 1};
+        while (!todo.empty()) {
+            const int pc = todo.back(); todo.pop_back();
+            if (pc < 0 || pc >= n || seen[(size_t)pc]) continue;
+            seen[(size_t)pc] = 1;
+            const ir::IInsn& other = ip.code[(size_t)pc];
+            std::set<int> uses, defs;
+            if (!lv::register_effects(ip, other, uses, defs)) return true;
+            if (defs.count(reg) && other.op != 0x35) return true;
+            const int op2 = other.op;
+            if (op2 == 0x29) continue;
+            if (op2 == 0x40 || op2 == 0x25 || op2 == 0x30 || op2 == 0x1b || op2 == 0x0b) {
+                todo.push_back(other.target); continue;
+            }
+            if (other.branch) todo.push_back(other.target);
+            if (op2 == 0x04 && other.C) { todo.push_back(pc + 1 + other.C); continue; }
+            todo.push_back(pc + 1);
+        }
+        return false;
+    }
+    bool written_dead_after(int pc) const {
+        for (int r : st.written)
+            if (r != floor_reg && register_live_after(ip, pc, r)) return false;
+        return true;
+    }
+    int pending_multret_reg() const {
+        for (const auto& kv : st.env)
+            if (!kv.second.consumed && kv.second.multret) return kv.first;
+        return -1;
+    }
+    bool pending_born_after(int pc) const {
+        for (const auto& kv : st.env)
+            if (!kv.second.consumed && kv.second.born > pc) return true;
+        return false;
+    }
+
+    // Comparison as an expression. `value`: the jump is taken when the comparison holds (compare
+    // value, compileCompareJump not_=false); otherwise the jump is taken when the CONDITION is false
+    // (if-expression, compileConditionValue onlyTruth=false), so the printed condition is the inverse.
+    EP compare(const ir::IInsn& in, int pc, bool value) {
+        const uint8_t op = in.op;
+        const bool kform = op == 0x3a || op == 0x34 || op == 0x20 || op == 0x41;
+        if (kform) {
+            EP a = read(in.A, pc);
+            if (a->k == EK::Const) { bad(F_CONST_OPERAND, pc); return nullptr; }
+            const bool flag = (in.aux & 0x80000000u) != 0;      // set: taken when NOT equal
+            std::string kv;
+            if (op == 0x3a) kv = "nil";
+            else if (op == 0x34) kv = (in.aux & 1) ? "true" : "false";
+            else {
+                const int k = (int)(in.aux & 0x7fffffffu);
+                if (k < 0 || k >= (int)ip.consts.size()) { bad(F_COND, pc); return nullptr; }
+                kv = ir::value_text(ip.consts[(size_t)k]);
+            }
+            auto e = node(EK::Bin);
+            e->text = (flag == value) ? "~=" : "==";
+            e->a = a; e->b = mkconst(kv);
+            return e;
+        }
+        std::string rel; bool neg = false;
+        switch (op) {
+            case 0x37: rel = value ? "==" : "~="; break;
+            case 0x27: rel = value ? "~=" : "=="; break;
+            case 0x21: rel = "<";  neg = !value; break;
+            case 0x23: rel = "<="; neg = !value; break;
+            case 0x1c: if (value) { bad(F_COND, pc); return nullptr; } rel = "<";  break;
+            case 0x33: if (value) { bad(F_COND, pc); return nullptr; } rel = "<="; break;
+            default: bad(F_COND, pc); return nullptr;
+        }
+        EP a = read(in.A, pc), b = read((int)in.aux, pc);
+        if (st.fail) return nullptr;
+        if ((rel == "==" || rel == "~=") && (a->k == EK::Const || b->k == EK::Const)) {
+            bad(F_CONST_OPERAND, pc); return nullptr;              // the compiler would use JUMPXEQK*
+        }
+        const int pa = pc_of(a), pb = pc_of(b);
+        auto e = node(EK::Bin);
+        if (pa >= 0 && pb >= 0 && pb < pa) {
+            // Operands are evaluated left to right; `b > a` compiles to the VM's `a < b` with b
+            // evaluated first.
+            if (rel == "==" || rel == "~=") { bad(F_ORDER, pc); return nullptr; }
+            e->text = rel == "<" ? ">" : ">="; e->a = b; e->b = a;
+        } else {
+            e->text = rel; e->a = a; e->b = b;
+        }
+        if (!neg) return e;
+        auto n = node(EK::Un); n->text = "not"; n->a = e;
+        return n;
+    }
+
+    // The value tested by JUMPIF/JUMPIFNOT as an if-expression condition.
+    EP test_cond(const ir::IInsn& in, int pc) {
+        EP v = read(in.A, pc);
+        if (st.fail) return nullptr;
+        if (cond_fast(v) || (v->k == EK::Un && v->text == "not")) { bad(F_COND, pc); return nullptr; }
+        if (in.op == 0x18) return v;                                   // JUMPIFNOT: `if v`
+        auto n = node(EK::Un); n->text = "not"; n->a = v;              // JUMPIF: `if not v`
+        return n;
+    }
+
+    // Evaluate [s, e) as a nested value: it must leave exactly one new pending value, in `reg`
+    // (or, with reg == -1, in the register it chooses), consume nothing computed before it and
+    // store into no table built outside it.
+    bool sub_value(int s, int e, int& reg, EP& out) {
+        std::map<int, const Expr*> before;
+        for (const auto& kv : st.env) if (!kv.second.consumed) before[kv.first] = kv.second.e.get();
+        const size_t saved_floor = st.store_floor;
+        st.store_floor = st.building.size();
+        int pc = s;
+        while (pc < e && !st.fail) {
+            const int nx = step(pc, e);
+            if (nx < 0) break;
+            pc = nx;
+        }
+        st.store_floor = saved_floor;
+        if (st.fail) return false;
+        if (pc != e) return bad(F_SUB, s);
+        for (const auto& kv : before) {
+            auto it = st.env.find(kv.first);
+            if (it == st.env.end() || it->second.consumed || it->second.e.get() != kv.second) return bad(F_SUB, s);
+        }
+        int found = -1;
+        for (const auto& kv : st.env) {
+            if (kv.second.consumed) continue;
+            auto b = before.find(kv.first);
+            if (b != before.end() && b->second == kv.second.e.get()) continue;
+            if (found >= 0 || kv.second.multret || kv.second.self) return bad(F_SUB, s);
+            found = kv.first;
+        }
+        if (found < 0 || (reg >= 0 && found != reg)) return bad(F_SUB, s);
+        reg = found;
+        out = take(found, e - 1);
+        return !st.fail;
+    }
+
+    // `x op y` built from a value jump that ends at `label`. Same-operator chains with the same end
+    // are left-associated (`a or b or c`), the only spelling whose compilation keeps every operand
+    // but the last on the jump path. Validity is checked on the finished tree (chains_ok).
+    EP chain(const std::string& op, const EP& x, const EP& y, int label) {
+        if (is_chain(y) && chain_op[y.get()] == op && chain_end[y.get()] == label) {
+            EP left = chain(op, x, y->a, label);
+            auto e = node(EK::Bin); e->text = op; e->a = left; e->b = y->b;
+            keep.push_back(e);
+            chain_end[e.get()] = label; chain_op[e.get()] = op;
+            return e;
+        }
+        auto e = node(EK::Bin); e->text = op; e->a = x; e->b = y;
+        keep.push_back(e);
+        chain_end[e.get()] = label; chain_op[e.get()] = op;
+        return e;
+    }
+
+    int branch(int pc, int e) {
+        const ir::IInsn& in = ip.code[(size_t)pc];
+        const uint8_t op = in.op;
+        const int L = in.target;
+        const bool reg_test = op == 0x4b || op == 0x18;
+        const bool cond_op = reg_test || op == 0x37 || op == 0x27 || op == 0x21 || op == 0x1c
+                          || op == 0x23 || op == 0x33 || op == 0x3a || op == 0x34 || op == 0x20 || op == 0x41;
+        if (!cond_op) { bad(F_UNCOND, pc); return -1; }
+        if (L <= pc || L > e) { bad(F_RANGE, pc); return -1; }
+        st.branchy = true;
+        // comparison value
+        if (!reg_test && L == pc + 2 && pc + 2 < e) {
+            const ir::IInsn& f = ip.code[(size_t)pc + 1];
+            const ir::IInsn& t = ip.code[(size_t)pc + 2];
+            if (f.op == 0x04 && t.op == 0x04 && f.A == t.A && f.B == 0 && f.C == 1 && t.B == 1 && t.C == 0) {
+                EP v = compare(in, pc, true);
+                if (!v || st.fail) return -1;
+                def(f.A, v, pc + 2);
+                return st.fail ? -1 : pc + 3;
+            }
+        }
+        // The two remaining shapes are told apart by the instruction before the label: only an
+        // if-expression's then arm ends with a forward jump (over the else arm); an and/or value's
+        // right operand falls through to the label. No backtracking.
+        const ir::IInsn& j = ip.code[(size_t)L - 1];
+        const bool then_jump = L - 1 > pc && (j.op == 0x40 || j.op == 0x25) && j.branch && j.target >= L;
+        // `cmp or y` / `cmp and y` as a value with a comparison as the left operand
+        // (compileConditionValue with a target): `LOADB R,b` before the comparison's operands, the
+        // comparison jumps to the end (taken when it holds for `or`, b = true; when it fails for
+        // `and`, b = false), y is computed into R. Same-operator chains re-associate as above.
+        if (!reg_test && !then_jump) {
+            int r = -1, born = -1;
+            for (const auto& kv : st.env) {
+                const Slot& sl = kv.second;
+                if (sl.consumed || sl.multret || sl.self || sl.born >= pc || sl.born <= born) continue;
+                if (kv.first == in.A || kv.first == (int)(in.aux & 0xff)) continue;
+                r = kv.first; born = sl.born;
+            }
+            const ir::IInsn* lb = (r >= 0 && born >= 0) ? &ip.code[(size_t)born] : nullptr;
+            if (lb && lb->op == 0x04 && lb->C == 0 && (int)lb->A == r) {
+                const bool or_ = lb->B != 0;
+                EP x = compare(in, pc, or_);
+                if (!x || st.fail) return -1;
+                for (const auto& kv : st.env)
+                    if (!kv.second.consumed && kv.second.born > born) { bad(F_BRANCH_SHAPE, pc); return -1; }
+                take(r, pc);
+                loadb_tested.insert(x.get()); keep.push_back(x);
+                int reg = r;
+                EP y;
+                if (!sub_value(pc + 1, L, reg, y)) return -1;
+                EP v = chain(or_ ? "or" : "and", x, y, L);
+                def(r, v, L - 1, false, false, -1);
+                return st.fail ? -1 : L;
+            }
+        }
+        // `(x and y) or z` / `(x or y) and z` as a value (compileExprAndOr general path with a
+        // condition-fast left operand, compileConditionValue's else-jump branch): a test of x jumps
+        // to the right operand z when x decides nothing, y is computed into the target and tested
+        // with a jump past z, z follows. The left test uses condition polarity for `or` (jump when x
+        // is false) and value polarity for `and` (jump when x is true).
+        const bool split_left = !then_jump && L - 1 > pc && (j.op == 0x4b || j.op == 0x18)
+                             && j.branch && j.target > L && j.target <= e;
+        if (split_left) {
+            const int end = j.target;
+            const bool outer_or = j.op == 0x4b;
+            EP x;
+            if (reg_test) {
+                EP v = read(in.A, pc);
+                if (st.fail) return -1;
+                if (cond_fast(v) || (v->k == EK::Un && v->text == "not")) { bad(F_COND, pc); return -1; }
+                // jump taken when v is truthy (JUMPIF) or falsy (JUMPIFNOT)
+                const bool taken_truthy = op == 0x4b;
+                // `or`: x is the condition whose failure jumps; `and`: x is the value whose success jumps
+                const bool x_is_v = outer_or ? !taken_truthy : taken_truthy;
+                if (x_is_v) x = v;
+                else { auto n = node(EK::Un); n->text = "not"; n->a = v; x = n; }
+            } else {
+                x = compare(in, pc, !outer_or);
+                if (!x || st.fail) return -1;
+            }
+            int reg = j.A;
+            EP y;
+            if (!sub_value(pc + 1, L - 1, reg, y)) return -1;
+            // y is tested in the target: a plain value (a condition-fast y compiles to jumps instead)
+            if (cond_fast(y)) { bad(F_COND, L - 1); return -1; }
+            int reg2 = reg;
+            EP z;
+            if (!sub_value(L, end, reg2, z)) return -1;
+            auto inner = node(EK::Bin); inner->text = outer_or ? "and" : "or"; inner->a = x; inner->b = y;
+            auto v = node(EK::Bin); v->text = outer_or ? "or" : "and"; v->a = inner; v->b = z;
+            def(reg, v, end - 1, false, false, -1);
+            return st.fail ? -1 : end;
+        }
+        // and/or value on the target register
+        if (reg_test && !then_jump) {
+            auto it = st.env.find(in.A);
+            if (it != st.env.end() && !it->second.consumed && !it->second.multret && !it->second.self) {
+                EP x = take(in.A, pc);
+                int reg = in.A;
+                EP y;
+                if (!sub_value(pc + 1, L, reg, y)) return -1;
+                EP v = chain(op == 0x4b ? "or" : "and", x, y, L);
+                def(in.A, v, L - 1, false, false, -1);
+                return st.fail ? -1 : L;
+            }
+        }
+        // if-expression
+        if (then_jump) {
+            if (j.target <= e) {
+                const int end = j.target;
+                EP cond = reg_test ? test_cond(in, pc) : compare(in, pc, false);
+                if (!cond || st.fail) return -1;
+                const auto env_before = st.env;
+                int t1 = -1; EP x;
+                if (!sub_value(pc + 1, L - 1, t1, x)) return -1;
+                // The else arm starts from the state before the then arm (its own result removed).
+                auto then_env = st.env;
+                st.env = env_before;
+                for (const auto& kv : then_env)
+                    if (!st.env.count(kv.first)) { Slot s = kv.second; s.consumed = true; st.env[kv.first] = s; }
+                int t2 = t1; EP y;
+                if (!sub_value(L, end, t2, y)) return -1;
+                // compileExprIfElse rewrites `if c then c else v` / `if c then v else c` (c a local,
+                // v a local or constant) into OR/AND: such a source would not compile to jumps.
+                if (cond->k == EK::Reg) {
+                    auto simple = [](const EP& z) { return z->k == EK::Reg || z->k == EK::Const; };
+                    if ((x->k == EK::Reg && x->reg == cond->reg && simple(y))
+                        || (y->k == EK::Reg && y->reg == cond->reg && simple(x))) { bad(F_IFELSE_OPT, pc); return -1; }
+                }
+                auto v = node(EK::IfElse);
+                v->a = cond; v->b = x; v->c = y;
+                def(t2, v, end - 1, false, false, -1);
+                return st.fail ? -1 : end;
+            }
+        }
+        bad(F_BRANCH_SHAPE, pc);
+        return -1;
+    }
+
+    bool store_target(int table, int pc) {
+        if (st.building.empty() || st.building.back().reg != table || st.building.size() <= st.store_floor)
+            return bad(F_STORE, pc);
+        return true;
+    }
+    void add_item(Build& b, int kind, EP key, EP value) {
+        b.kinds.push_back(kind); b.keys.push_back(key); b.values.push_back(value);
+    }
+
+    int step(int pc, int e) {
+        const ir::IInsn& in = ip.code[(size_t)pc];
+        const uint8_t op = in.op;
+        if (in.branch) return branch(pc, e);
+        if (op == 0x12) { def(in.A, mkconst(std::to_string((int)(int16_t)in.Bx)), pc); }
+        else if (op == 0x4e) { def(in.A, konst(in.Bx), pc); }
+        else if (op == 0x0d) { def(in.A, mkconst("nil"), pc); }
+        else if (op == 0x04) {
+            if (in.C) { bad(F_OP, pc); return -1; }
+            def(in.A, mkconst(in.B ? "true" : "false"), pc);
+        }
+        else if (op == 0x14) {
+            auto it = st.env.find(in.B);
+            if (it != st.env.end() && !it->second.consumed) {
+                EP v = take(in.B, pc);
+                if (!st.fail) def(in.A, v, pc);
+            } else {
+                EP v = read(in.B, pc);
+                if (!st.fail) def(in.A, mkreg(v->reg), pc);
+            }
+        }
+        else if (op == 0x13) { auto v = node(EK::Upval); v->idx = in.B; def(in.A, v, pc); }
+        else if (op == 0x17 || op == 0x46) {
+            if (in.note.empty()) { bad(F_OP, pc); return -1; }
+            auto v = node(EK::Global); v->text = in.note; def(in.A, v, pc);
+        }
+        else if (op == 0x3d) {
+            auto v = node(EK::Field); v->a = read(in.B, pc); v->text = in.note;
+            if (in.note.empty()) { bad(F_OP, pc); return -1; }
+            def(in.A, v, pc);
+        }
+        else if (op == 0x01) {
+            auto v = node(EK::Index); v->a = read(in.B, pc); v->b = read(in.C, pc);
+            if (v->b && v->b->k == EK::Const) { bad(F_CONST_OPERAND, pc); return -1; }
+            def(in.A, v, pc);
+        }
+        else if (op == 0x44) {
+            auto v = node(EK::Index); v->a = read(in.B, pc); v->b = mkconst(std::to_string(in.C + 1));
+            def(in.A, v, pc);
+        }
+        else if (op == 0x2c || op == 0x4f) {
+            int end = -1; EP t;
+            if (!parse_table(pc, e, end, t, nullptr)) return -1;
+            def(in.A, t, end);
+            return st.fail ? -1 : end + 1;
+        }
+        else if (op == 0x16 || op == 0x42) {
+            // A function literal item. Its captures must name variables (registers below the table)
+            // or upvalues; a by-value capture of a register written again after the closure needs
+            // the #52 snapshot statement, which has no place inside an expression.
+            auto v = node(EK::Closure);
+            if (op == 0x42 && in.Bx < (int)ip.consts.size() && ip.consts[in.Bx].kind == ir::KKind::Closure)
+                v->idx = (int)ip.consts[in.Bx].sub;
+            else if (op == 0x16 && in.Bx < (int)ip.kids.size())
+                v->idx = (int)ip.kids[in.Bx];
+            else { bad(F_CLOSURE, pc); return -1; }
+            int q = pc + 1;
+            for (; q < e && ip.code[(size_t)q].op == 0x35; ++q) {
+                const ir::IInsn& c = ip.code[(size_t)q];
+                if (!v->text.empty()) v->text += ",";
+                if (c.A == 2) { v->text += "u" + std::to_string((int)c.B); continue; }
+                const int r = (int)c.B;
+                if (r > floor_reg || building_reg(r) || st.env.count(r)) { bad(F_CLOSURE, q); return -1; }
+                if (c.A == 0 && register_written_after(q, r)) { bad(F_CLOSURE, q); return -1; }
+                v->text += "v" + std::to_string(r);
+            }
+            def(in.A, v, pc);
+            return st.fail ? -1 : q;
+        }
+        else if (op == 0x35) { bad(F_CLOSURE, pc); return -1; }
+        else if (op == 0x4c) {
+            if (in.B == 0) def(in.A, node(EK::Vararg), pc, true);
+            else if (in.B == 2) def(in.A, node(EK::Vararg), pc);
+            else { bad(F_OP, pc); return -1; }
+        }
+        else if (op == 0x0e || op == 0x50 || op == 0x4d) {
+            auto v = node(EK::Un); v->text = (op == 0x0e) ? "-" : (op == 0x50 ? "not" : "#");
+            v->a = read(in.B, pc); def(in.A, v, pc);
+        }
+        else if (op == 0x28) {
+            auto v = node(EK::Concat);
+            for (int r = in.B; r <= in.C; ++r) {
+                EP item = take(r, pc);
+                // A nested concatenation operand would be unrolled into this CONCAT.
+                if (item->k == EK::Concat) { auto g = node(EK::Group); g->a = item; item = g; }
+                v->list.push_back(item);
+            }
+            def(in.A, v, pc);
+        }
+        else if (const char* bop = binop_for(op)) {
+            auto v = node(EK::Bin); v->text = bop;
+            const bool kc = (op==0x38||op==0x3e||op==0x09||op==0x32||op==0x3c||op==0x08||op==0x24||
+                             op==0x31||op==0x51);
+            const bool kb = (op==0x06||op==0x3b);
+            const bool logical = v->text == "and" || v->text == "or";
+            if (kb) { v->a = konst(in.B); v->b = read(in.C, pc); }
+            else if (kc) { v->a = read(in.B, pc); v->b = konst(in.C); }
+            else {
+                v->a = read(in.B, pc); v->b = read(in.C, pc);
+                if (!logical && (v->a->k == EK::Const || v->b->k == EK::Const)) { bad(F_CONST_OPERAND, pc); return -1; }
+                // AND/OR take the right operand as a local register (compileExprAndOr).
+                if (logical && pc_of(v->b) >= 0) { bad(F_CONST_OPERAND, pc); return -1; }
+            }
+            if (logical && cond_fast(v->a)) { bad(F_COND, pc); return -1; }
+            def(in.A, v, pc);
+        }
+        else if (op == 0x2d) {                                        // NAMECALL
+            auto v = node(EK::Method); v->a = read(in.B, pc); v->text = in.note;
+            if (in.note.empty()) { bad(F_NAMECALL, pc); return -1; }
+            def(in.A, v, pc);
+            def(in.A + 1, mkconst("self"), pc, false, true);
+        }
+        else if (op == 0x54) {                                        // CALL
+            auto fit = st.env.find(in.A);
+            if (fit == st.env.end() || fit->second.consumed || fit->second.multret) { bad(F_CALL, pc); return -1; }
+            const bool method = fit->second.e && fit->second.e->k == EK::Method;
+            EP fn = take(in.A, pc);
+            EP call;
+            if (method) {
+                call = std::make_shared<Expr>(*fn);
+                call->list.clear();
+                auto sit = st.env.find(in.A + 1);
+                if (sit == st.env.end() || sit->second.consumed || !sit->second.self) { bad(F_NAMECALL, pc); return -1; }
+                sit->second.consumed = true;
+            } else {
+                call = node(EK::Call); call->a = fn;
+            }
+            const int argbase = method ? in.A + 2 : in.A + 1;
+            const int nargs = (int)in.B - 1;
+            int argend;
+            bool multret_args = false;
+            if (nargs < 0) {
+                const int m = pending_multret_reg();
+                if (m < argbase) { bad(F_CALL, pc); return -1; }
+                argend = m + 1; multret_args = true;
+            } else {
+                argend = argbase + nargs - (method ? 1 : 0);
+            }
+            for (int r = argbase; r < argend; ++r) {
+                auto ait = st.env.find(r);
+                if (ait == st.env.end() || ait->second.consumed) { bad(F_CALL, pc); return -1; }
+                if (ait->second.multret && !(multret_args && r == argend - 1)) { bad(F_CALL, pc); return -1; }
+                ait->second.multret = false;
+                EP a = take(r, pc);
+                call->list.push_back(a);
+            }
+            if (!multret_args && !call->list.empty() && is_call_like(call->list.back())) {
+                auto g = node(EK::Group); g->a = call->list.back(); call->list.back() = g;
+            }
+            // A builtin call evaluates its arguments, then FASTCALL, then loads the function.
+            if (!method) {
+                int last_arg = -1;
+                for (const EP& a : call->list) last_arg = std::max(last_arg, max_pc(a));
+                const int fn_pc = pc_of(fn);
+                bool hinted = false;
+                for (int q = last_arg + 1; q < fn_pc && q >= 0; ++q) {
+                    const uint8_t o = ip.code[(size_t)q].op;
+                    if (o == 0x19 || o == 0x10 || o == 0x0c || o == 0x26 || o == 0x4a) hinted = true;
+                }
+                if (fn_pc > last_arg && last_arg >= 0 && hinted) { fast_calls.insert(call.get()); keep.push_back(call); }
+            }
+            const int nres = (int)in.C - 1;
+            if (nres == 1) def(in.A, call, pc);
+            else if (nres < 0) def(in.A, call, pc, true);
+            else { bad(F_CALL, pc); return -1; }
+        }
+        else if (op == 0x19 || op == 0x10 || op == 0x0c || op == 0x26 || op == 0x4a) { /* FASTCALL hint */ }
+        else if (op == 0x3f) {                                        // SETLIST
+            if (!store_target(in.A, pc)) return -1;
+            Build& b = st.building.back();
+            if ((int)in.aux != b.next_list) { bad(F_SETLIST, pc); return -1; }
+            const int cnt = (int)in.C - 1;
+            int last_reg;
+            if (cnt < 0) {
+                const int m = pending_multret_reg();
+                if (m < in.B) { bad(F_SETLIST, pc); return -1; }
+                last_reg = m;
+            } else {
+                last_reg = in.B + cnt - 1;
+            }
+            for (int r = in.B; r <= last_reg; ++r) {
+                auto it = st.env.find(r);
+                if (it == st.env.end() || it->second.consumed) { bad(F_SETLIST, pc); return -1; }
+                const bool tail = cnt < 0 && r == last_reg;
+                if (it->second.multret != tail) { bad(F_SETLIST, pc); return -1; }
+                it->second.multret = false;
+                EP v = take(r, pc);
+                if (st.fail) return -1;
+                add_item(b, 0, nullptr, v);
+                ++b.positional;
+                b.last_multret = tail;
+                b.last_vararg = tail && v->k == EK::Vararg;
+                b.last_fixed = !tail;
+            }
+            b.next_list += last_reg - in.B + 1;
+            ++b.setlists;
+            if (!b.dup && b.positional - (b.last_vararg ? 1 : 0) > b.array_expect) { bad(F_SETLIST, pc); return -1; }
+        }
+        else if (op == 0x15 || op == 0x2a || op == 0x2e) {            // SETFIELD / SETTABLE / SETTABLEN
+            if (!store_target(in.B, pc)) return -1;
+            Build& b = st.building.back();
+            EP key;
+            int kind = 2;
+            if (op == 0x15) {
+                if (in.note.empty()) { bad(F_KEY, pc); return -1; }
+                key = mkconst(in.note); kind = 1;
+            } else if (op == 0x2a) {
+                key = read(in.C, pc);
+                if (key->k == EK::Const) {
+                    // A string or small integer key would compile to SETTABLEKS / SETTABLEN.
+                    const std::string& t = key->text;
+                    bool small_int = !t.empty() && t.find_first_not_of("0123456789") == std::string::npos
+                                  && t.size() <= 3 && std::stoi(t) >= 1 && std::stoi(t) <= 256;
+                    if (small_int || (!t.empty() && t[0] == '"')) { bad(F_KEY, pc); return -1; }
+                }
+            } else {
+                key = mkconst(std::to_string(in.C + 1));
+            }
+            EP v = read(in.A, pc);
+            if (st.fail) return -1;
+            if (b.dup) {
+                if (op != 0x15) { bad(F_TEMPLATE, pc); return -1; }
+                // A constant record value printed inside the constructor is folded into the template
+                // by the compiler (no store); the stock store of a constant (`mSlot = 6` after
+                // DUPTABLE, RailjackLoadOut p83) has no constructor spelling.
+                if (v->k == EK::Const) { bad(F_TEMPLATE, pc); return -1; }
+                int at = -1;
+                for (int q = b.tpl_pos; q < (int)b.tpl_keys.size(); ++q) {
+                    const int k = b.tpl_keys[(size_t)q];
+                    if (k >= 0 && k < (int)ip.consts.size() && ip.consts[(size_t)k].str == in.note) { at = q; break; }
+                }
+                if (at < 0) { bad(F_TEMPLATE, pc); return -1; }
+                b.tpl_stored[(size_t)at] = v;
+                b.tpl_pos = at + 1;
+            } else {
+                add_item(b, kind, key, v);
+                if (op == 0x2e) ++b.index_keys;
+            }
+        }
+        else { bad(F_OP, pc); return -1; }
+        return st.fail ? -1 : pc + 1;
+    }
+
+    bool table_complete(const Build& b) const {
+        if (b.dup) return true;
+        const int list = b.positional - (b.last_vararg ? 1 : 0);
+        if (list == b.array_expect) return true;
+        return b.positional == 0 && b.index_keys == b.array_expect;
+    }
+
+    EP build_expr(const Build& b) {
+        auto t = node(EK::Table);
+        if (b.dup) {
+            for (size_t q = 0; q < b.tpl_keys.size(); ++q) {
+                const int k = b.tpl_keys[q];
+                if (k < 0 || k >= (int)ip.consts.size()) return nullptr;
+                EP v = b.tpl_stored[q];
+                if (!v) {
+                    const uint32_t payload = q < b.tpl_vals.size() ? b.tpl_vals[q] : 0xFFFFFFFFu;
+                    v = payload == 0xFFFFFFFFu ? mkconst("nil") : konst((int)payload);
+                }
+                t->list.push_back(v); t->keykind.push_back(1); t->keys.push_back(mkconst(ip.consts[(size_t)k].str));
+            }
+            return t;
+        }
+        bool keyed = false;
+        for (int k : b.kinds) if (k) keyed = true;
+        t->list = b.values;
+        if (keyed) { t->keykind = b.kinds; t->keys = b.keys; }
+        // Luau gives the LAST item multiple values only when it is a positional call/vararg; with a
+        // fixed SETLIST count it was a single value.
+        if (!t->list.empty() && b.kinds.back() == 0 && b.last_fixed && is_call_like(t->list.back())) {
+            auto g = node(EK::Group); g->a = t->list.back(); t->list.back() = g;
+        }
+        return t;
+    }
+
+    // Parse the constructor at `n`: step forward, keeping the LAST point where the table is
+    // complete and nothing computed inside it is pending; roll back to that point.
+    bool parse_table(int n, int e, int& end, EP& out, Summary* sum) {
+        const ir::IInsn& t = ip.code[(size_t)n];
+        Build b; b.reg = t.A; b.start = n; b.dup = t.op == 0x4f;
+        if (b.dup) {
+            if (t.Bx >= ip.consts.size()) { bad(F_TEMPLATE, n); return false; }
+            const ir::KVal& k = ip.consts[t.Bx];
+            if (!k.tpl_keys.empty()) for (uint64_t q : k.tpl_keys) { b.tpl_keys.push_back((int)q); b.tpl_vals.push_back(0xFFFFFFFFu); }
+            else for (const auto& it : k.tpl_items) { b.tpl_keys.push_back((int)it.first); b.tpl_vals.push_back(it.second); }
+            b.tpl_stored.assign(b.tpl_keys.size(), nullptr);
+            for (int key : b.tpl_keys)
+                if (key < 0 || key >= (int)ip.consts.size() || ip.consts[(size_t)key].str.empty()) { bad(F_TEMPLATE, n); return false; }
+        } else {
+            b.array_expect = (int)t.aux;
+        }
+        st.building.push_back(b);
+        const bool outermost = sum != nullptr;
+        State best; bool have = false; int best_next = -1;
+        int pc = n + 1;
+        while (true) {
+            const Build& cur = st.building.back();
+            if (!st.fail && table_complete(cur) && !pending_born_after(n)
+                && (!outermost || written_dead_after(pc - 1))) {
+                best = st; have = true; best_next = pc;
+                // Absorbing a later keyed store into the constructor is exact only when nothing can
+                // observe the table in between: never for a table captured by reference.
+                if (outermost && floor_captured) break;
+                if (cur.dup && cur.tpl_pos >= (int)cur.tpl_keys.size()) break;
+            }
+            if (pc >= e || st.fail) break;
+            const int nx = step(pc, e);
+            if (nx < 0 || st.fail) break;
+            pc = nx;
+        }
+        if (!have) { if (!st.fail) bad(F_INCOMPLETE, pc); return false; }
+        st = best;
+        Build fin = st.building.back();
+        st.building.pop_back();
+        end = best_next - 1;
+        out = build_expr(fin);
+        if (!out) { bad(F_TEMPLATE, n); return false; }
+        keep.push_back(out);
+        pcs[out.get()] = end;
+        if (sum) {
+            sum->setlists = fin.setlists;
+            int last_pos = -1, first_key = -1;
+            for (size_t q = 0; q < fin.kinds.size(); ++q) {
+                if (fin.kinds[q] == 0) last_pos = (int)q;
+                else if (first_key < 0) first_key = (int)q;
+            }
+            sum->mixed = first_key >= 0 && last_pos > first_key;
+        }
+        return true;
+    }
+
+    int max_pc(const EP& e) const {
+        if (!e) return -1;
+        int m = pc_of(e);
+        m = std::max(m, std::max(max_pc(e->a), std::max(max_pc(e->b), max_pc(e->c))));
+        for (const EP& item : e->list) m = std::max(m, max_pc(item));
+        for (const EP& key : e->keys) m = std::max(m, max_pc(key));
+        return m;
+    }
+    // Post-order evaluation order of every instruction-backed node must follow the instruction order.
+    bool order_ok(const EP& e, int& last) {
+        if (!e) return true;
+        if (fast_calls.count(e.get())) {
+            for (const EP& item : e->list) if (!order_ok(item, last)) return false;
+            if (!order_ok(e->a, last)) return false;
+        } else if (e->k == EK::Table) {
+            for (size_t q = 0; q < e->list.size(); ++q) {
+                if (q < e->keykind.size() && e->keykind[q] == 2 && !order_ok(e->keys[q], last)) return false;
+                if (!order_ok(e->list[q], last)) return false;
+            }
+        } else {
+            if (!order_ok(e->a, last) || !order_ok(e->b, last) || !order_ok(e->c, last)) return false;
+            for (const EP& item : e->list) if (!order_ok(item, last)) return false;
+        }
+        const int pc = pc_of(e);
+        if (pc >= 0) {
+            if (pc <= last) {
+                if (std::getenv("RENOVICE_CTOR_TRACE"))
+                    std::fprintf(stderr, "CTOR_ORDER proto=%d node_pc=%d after=%d node=%s\n", ip.index, pc, last,
+                                 render(e).substr(0, 120).c_str());
+                return false;
+            }
+            last = pc;
+        }
+        return true;
+    }
+
+    // Validate every maximal same-operator jump chain against compileExprAndOr / compileConditionValue:
+    // its first operand is computed into the target and tested, so it must not be a jump-compiled
+    // condition or constant; the middle operands are tested values too; a single `x op y` with a
+    // constant or local `y` would compile to ANDK/ORK/AND/OR.
+    bool chains_ok(const EP& e, const Expr* parent) {
+        if (!e) return true;
+        if (is_chain(e) && !(parent && chain_end.count(parent) && chain_op.at(parent) == chain_op.at(e.get())
+                             && chain_end.at(parent) == chain_end.at(e.get()) && parent->a.get() == e.get())) {
+            std::vector<EP> ops;
+            EP cur = e;
+            const std::string op = chain_op.at(e.get());
+            const int label = chain_end.at(e.get());
+            std::vector<EP> rights;
+            while (is_chain(cur) && chain_op.at(cur.get()) == op && chain_end.at(cur.get()) == label) {
+                rights.push_back(cur->b); cur = cur->a;
+            }
+            ops.push_back(cur);
+            for (auto it = rights.rbegin(); it != rights.rend(); ++it) ops.push_back(*it);
+            auto tested = [&](const EP& z) { return loadb_tested.count(z.get()) != 0; };
+            if (is_chain(ops[0]) || (cond_fast(ops[0]) && !tested(ops[0]))) return false;
+            for (size_t q = 1; q + 1 < ops.size(); ++q)
+                if (is_chain(ops[q]) || ((cond_fast(ops[q]) || ops[q]->k == EK::Const) && !tested(ops[q])))
+                    return false;
+            // A single `x op y` with a constant or local y compiles to ANDK/ORK/AND/OR, which the
+            // recompiler lowers to exactly this jump shape (transcode.h F3, #74): admitted, so our
+            // own output re-decompiles to the same constructor. DE's compiler emits those natively,
+            // so stock never carries this jump shape from such a source.
+        }
+        if (!chains_ok(e->a, e.get()) || !chains_ok(e->b, e.get()) || !chains_ok(e->c, e.get())) return false;
+        for (const EP& item : e->list) if (!chains_ok(item, e.get())) return false;
+        for (const EP& key : e->keys) if (!chains_ok(key, e.get())) return false;
+        return true;
+    }
+};
+
+// Cached per prototype CONTENT and start instruction (prototypes are annotated into temporaries
+// whose addresses recur).
+inline bool constructor_expression(const ir::IProto& ip, int n, CtorParse& out) {
+    static const bool off = std::getenv("RENOVICE_NO_CTOR_EXPR") != nullptr;
+    if (off || n < 0 || n >= (int)ip.code.size()) return false;
+    const uint8_t op = ip.code[(size_t)n].op;
+    if (op != 0x2c && op != 0x4f) return false;
+    static thread_local std::map<std::pair<uint64_t, int>, CtorParse> cache;
+    const auto key = std::make_pair(proto_code_fingerprint(ip) ^ ((uint64_t)ip.index << 40), n);
+    auto it = cache.find(key);
+    if (it == cache.end()) {
+        CtorParse parsed;
+        CtorParser parser(ip);
+        parser.parse(n, parsed);
+        if (cache.size() > 200000) cache.clear();
+        it = cache.emplace(key, parsed).first;
+    }
+    out = it->second;
+    return out.eligible && out.expr;
+}
+
 inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                               ProtoOut& out, BlockOut& bo) {
     RegEnv env;
@@ -602,6 +1583,23 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
             bo.stmts.push_back(s);
             env.set(a, mkreg(a));
         };
+
+        // ---- constructor expression (DEFECTS #90) --------------------------------------
+        // The whole NEWTABLE..last-store interval is one parsed expression. Applied only when the
+        // interval lies inside this block (the decompile CFG collapses an admitted branchy interval
+        // into one node, collapse_constructor_intervals in m6d_cmd.h); the statement keeps the
+        // single-batch convention `insn = last SETLIST/store` that the table-move retarget reads.
+        if (op == 0x2c || op == 0x4f) {
+            CtorParse cp;
+            if (constructor_expression(ip, i, cp) && cp.end <= last) {
+                Stmt s; s.k = SK::Assign; s.lhs = mkreg(in.A); s.rhs = cp.expr; s.insn = cp.end;
+                bo.stmts.push_back(s);
+                env.set(in.A, mkreg(in.A));
+                ++out.n_expr;
+                i = cp.end;
+                continue;
+            }
+        }
 
         // ---- pure value definitions -------------------------------------------------
         if      (op == 0x12) { def_(in.A, mkconst(std::to_string((int)(int16_t)in.Bx))); d = Disp::Expr; }
