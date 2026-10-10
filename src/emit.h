@@ -15666,12 +15666,28 @@ inexact_selector_fallback:
             // Both header successors then remain inside the loop; treating that
             // shape as a header-tested while rejects a valid source loop. Accept
             // only one unconditional backedge and one exact outside destination.
+            // PLAIN-HEADER WHILE (render campaign 2026-10-10): a `while true do` whose first block
+            // makes no test at all (statements, then the body) is the same interior-exit shape with
+            // a header that has one successor inside the loop; a one-block `while true do Sleep(1)
+            // end` is its own header and latch. 12 failing prototypes of the c62f1665 census were
+            // refused as UNSUPPORTED_WHILE_SHAPE. RENOVICE_NO_CFG_PLAIN_HEADER_WHILE restores it.
+            bool plain_header = false;
+            if (!std::getenv("RENOVICE_NO_CFG_PLAIN_HEADER_WHILE") && !header.is_branch
+                && !source_for_preps.count(loop.header) && !is_for_latch(loop.header)) {
+                const int next = header.succ_false >= 0 ? header.succ_false : header.succ_true;
+                const bool single = header.succ_true < 0 || header.succ_false < 0
+                    || header.succ_true == header.succ_false;
+                plain_header = single && next >= 0 && loop.body.count(next)
+                    && (loop.header != loop.latch
+                        || (next == loop.header && loop.body.size() == 1));
+            }
             if (std::getenv("RENOVICE_CFG_INTERIOR_EXIT_WHILE")
-                && header.is_branch && !header.is_uncond && renderable_cond(loop.header)
-                && true_inside && false_inside && latch_returns_to_header
+                && ((header.is_branch && !header.is_uncond && renderable_cond(loop.header)
+                     && true_inside && false_inside && loop.header != loop.latch)
+                    || plain_header)
+                && latch_returns_to_header
                 && latch.is_uncond && !latch.is_branch && body_backedges == 1
-                && loop.body.count(loop.header) && loop.body.count(loop.latch)
-                && loop.header != loop.latch) {
+                && loop.body.count(loop.header) && loop.body.count(loop.latch)) {
                 std::set<int> exits;
                 for (int member : loop.body) {
                     const st::Node& node = g->n[member];
@@ -15786,6 +15802,7 @@ inexact_selector_fallback:
         }
 
         std::vector<std::set<int>> postdom;
+        std::set<int> exitless_while_headers;   // EXITLESS INTERIOR WHILE: loops with no exit edge
         {
             // EXITLESS INTERIOR WHILE: blocks that cannot reach a RETURN have no post-dominators
             // (compute_postdom leaves them at the full set and ipostdom then names an arbitrary
@@ -15798,7 +15815,10 @@ inexact_selector_fallback:
                 for (int member : loop->body)
                     for (int succ : {g->n[member].succ_true, g->n[member].succ_false})
                         if (succ >= 0 && !loop->body.count(succ)) leaves = true;
-                if (!leaves) exitless_headers.push_back(header);
+                if (!leaves) {
+                    exitless_headers.push_back(header);
+                    exitless_while_headers.insert(header);
+                }
             }
             if (exitless_headers.empty()) {
                 st::compute_postdom(*const_cast<st::Graph*>(g), postdom);
@@ -16327,6 +16347,8 @@ inexact_selector_fallback:
             std::map<int, int> state;
             std::function<bool(int)> visit = [&](int block) -> bool {
                 if (block == follow || block == terminal) return true;
+                // EXITLESS INTERIOR WHILE: a path entering an exitless loop never returns
+                if (exitless_while_headers.count(block)) return true;
                 if (block < 0 || block >= (int)g->n.size()
                     || !in_render_domain(domain, block))
                     return false;
@@ -16364,6 +16386,8 @@ inexact_selector_fallback:
             std::map<int, int> state;
             std::function<bool(int)> visit = [&](int block) -> bool {
                 if (block == follow || block == terminal) return true;
+                if (exitless_while_headers.count(block) && in_render_domain(domain, block))
+                    return true;   // EXITLESS INTERIOR WHILE (as a RETURN)
                 if (domain && block >= 0 && !in_render_domain(domain, block)) {
                     for (const st::Loop& active : authoritative_loops) {
                         if (domain != &active.body || active.latch < 0
@@ -16523,6 +16547,7 @@ inexact_selector_fallback:
             std::map<int, int> state;
             std::function<bool(int)> visit = [&](int block) -> bool {
                 if (block == first || block == second) return true;
+                if (exitless_while_headers.count(block)) return false;   // as a RETURN
                 if (block < 0 || block >= (int)g->n.size()
                     || !in_render_domain(domain, block))
                     return false;
@@ -16631,6 +16656,8 @@ inexact_selector_fallback:
             std::function<bool(int)> visit = [&](int block) -> bool {
                 if (block == shared_return) return true;
                 if (block == loop_terminal || block == local_stop) return false;
+                if (exitless_while_headers.count(block) && in_render_domain(domain, block))
+                    return true;   // EXITLESS INTERIOR WHILE (as a RETURN)
                 if (block < 0 || block >= (int)g->n.size()
                     || !in_render_domain(domain, block))
                     return false;
@@ -17831,6 +17858,12 @@ inexact_selector_fallback:
                     out += ind(indent) + "end\n";
                     if (exits.empty()) return true;
                     const int outside = *exits.begin();
+                    // the only exit was a private RETURN printed inside the body (PLAIN-HEADER
+                    // WHILE): nothing follows the loop
+                    if (!std::getenv("RENOVICE_NO_CFG_PLAIN_HEADER_WHILE") && emitted.count(outside)
+                        && g->n[outside].is_return && g->n[outside].succ_true < 0
+                        && g->n[outside].succ_false < 0)
+                        return true;
                     return outside == stop || outside == terminal
                         || emit_cfg(outside, stop, terminal, domain, indent);
                 }
