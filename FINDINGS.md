@@ -6376,3 +6376,12 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+## 2026-10-10 - `* -> GETTABLEN` family is our register-table spill, not DE spilling
+
+Hypothesis: DE's compiler spills locals of >200-register functions into a table that stock reads by GETTABLEN.
+Finding: False. Stock reads plain upvalues; the GETTABLEN is in our rebuild (emitter `vT[N]` spill at a 195-name budget
+below Luau's real 200-local limit, plus a constant-key fold into GETTABLEN range). See DEFECTS #90-#92.
+Evidence: stock `ir-u44` (14 protos with maxstack >= 196, all single-block roots), `luau-compile` limit probes,
+agent-spill runs `work/agents/spill-runs/{q-before,q-final,s20-before,s20-final}`.
+Next Step: integrator full-corpus run of the agent/spill commit.

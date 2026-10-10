@@ -72,6 +72,16 @@ Behavior fixes the gate cannot see or cannot yet match (#51, #52):
                      cfg-identity does not compare MOVE/CAPTURE dataflow, so the legacy output PASSes
                      (blind spot); DEFAULT_CLOSES = the source repeats within 3 rounds.
 
+Register-pressure / constant-key fixes (2026-10-10, agent spill, cert/fixtures/spill_2026_10_10). All
+three defects are CFG-only (the legacy output behaves the same), so each records
+<F>_{RUNS,DEFAULT_BEHAVIOR_SAME,DEFAULT_CFG_IDENTITY,DEFAULT_CLOSES,LEGACY_CFG_FAILS,LEGACY_BEHAVIOR_SAME}:
+  register_key_index  RENOVICE_NO_INDEXN_KEY_GUARD (a register key 1..256 folded into `u[k]`: Luau
+                      emits GETTABLEN/SETTABLEN instead of the stock LOADN + GETTABLE/SETTABLE)
+  wide_root           RENOVICE_NO_EXACT_LOCAL_LIMIT (198 module locals: the fixed 195 budget spilled the
+                      root to `vT[N]`, every child read became GETUPVAL + GETTABLEN)
+  merged_root         RENOVICE_NO_STRAIGHT_LINE_REGISTER_MERGE (200 locals + a closure temporary above
+                      them: 201 names; the temporary shares a dead local's name instead of the spill)
+
 Gate normalization S5 (cfg_identity_cmd.h, #50), fixture or_block (original built with native ORK):
   OR_BLOCK_DEFAULT_BEHAVIOR_SAME / OR_BLOCK_DEFAULT_CFG_IDENTITY
   OR_BLOCK_LEGACY_GATE_FAILS  RENOVICE_CFGID_LEGACY_OR_BLOCK=1 reports the identical round trip as
@@ -124,7 +134,8 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INEXACT_HEAD_SELECTOR",
             "RENOVICE_NO_DAG_PRECISE_NESTED_EXIT", "RENOVICE_NO_DECISION_PREP_OWNER",
             "RENOVICE_NO_FORNLOOP_LATCH_KEY", "RENOVICE_NO_DAG_BREAK_ARM_EXIT",
-            "RENOVICE_NO_WHILE_PREP_GUARD")
+            "RENOVICE_NO_WHILE_PREP_GUARD", "RENOVICE_NO_INDEXN_KEY_GUARD",
+            "RENOVICE_NO_EXACT_LOCAL_LIMIT", "RENOVICE_NO_STRAIGHT_LINE_REGISTER_MERGE")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
@@ -237,10 +248,11 @@ def run(args, env=None, check=True):
     return proc
 
 
-def trace(path, temp, prelude=""):
+def trace(path, temp, prelude="", epilogue=""):
     """Run a source file under luau.exe. With a prelude, the source is loaded as a chunk AFTER the
-    prelude runs, so globals it reads already exist at load time (import resolution)."""
-    if prelude:
+    prelude runs, so globals it reads already exist at load time (import resolution). An epilogue
+    runs after the chunk (it reads the globals the chunk defined)."""
+    if prelude or epilogue:
         body = open(path, encoding="utf-8").read()
         level = 1
         while ("]" + "=" * level + "]") in body:
@@ -250,6 +262,7 @@ def trace(path, temp, prelude=""):
             stream.write(prelude)
             stream.write("local chunk = assert(loadstring([%s[%s]%s]))\nchunk()\n"
                          % ("=" * level, body, "=" * level))
+            stream.write(epilogue)
         path = driver
     proc = run([LUAU, path], check=False)
     text = proc.stdout.replace("\r\n", "\n")
@@ -424,6 +437,33 @@ def main():
                     checks[key + "_LEGACY_CFG_BLIND"] = cfg_verdict(original, legacy_rebuilt) == "PASS"
                     # the snapshot must re-decompile to itself (no new local per round)
                     checks[key + "_DEFAULT_CLOSES"] = closes_within(original, temp, name + ".close", 3)
+
+            spill_dir = os.path.join(HERE, "fixtures", "spill_2026_10_10")
+            make_prelude = "function Make(i) return i * 3 + 1 end\n"
+            wide_epilogue = "".join("print(Sum%d())\n" % k for k in range(0, 198, 33))
+            merged_epilogue = ("".join("print(Sum%d())\n" % k for k in range(1, 200, 40))
+                               + "print(Name())\n")
+            for name, switch, prelude, epilogue in (
+                    ("register_key_index", "RENOVICE_NO_INDEXN_KEY_GUARD", "", ""),
+                    ("wide_root", "RENOVICE_NO_EXACT_LOCAL_LIMIT", make_prelude, wide_epilogue),
+                    ("merged_root", "RENOVICE_NO_STRAIGHT_LINE_REGISTER_MERGE", make_prelude,
+                     merged_epilogue)):
+                fixture = os.path.join(spill_dir, name + ".luau")
+                key = name.upper()
+                expected = trace(fixture, temp, prelude, epilogue)
+                checks[key + "_RUNS"] = expected.count("\n") >= 2 and "<runtime error" not in expected
+                original = os.path.join(temp, name + ".original.lua_B")
+                run([DEC, "recompile", fixture, original])
+                source, rebuilt = round_trip(original, temp, name + ".default")
+                checks[key + "_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp, prelude, epilogue) == expected
+                checks[key + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+                checks[key + "_DEFAULT_CLOSES"] = closes_within(original, temp, name + ".close", 3)
+                legacy_env = base_env()
+                legacy_env[switch] = "1"
+                legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
+                checks[key + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
+                checks[key + "_LEGACY_BEHAVIOR_SAME"] = (trace(legacy_source, temp, prelude, epilogue)
+                                                         == expected)
 
             fixture = os.path.join(FIX, "or_block.luau")
             text = open(fixture, encoding="utf-8").read()

@@ -458,6 +458,28 @@ static size_t dead_tail_start(const de::Proto& proto, int* previous_op = nullptr
     return substantive ? offsets[first] : std::string::npos;
 }
 
+// Fill em::late_scope_locals() for one module before any of its prototypes is emitted: the
+// emitter's exact local-limit rule must count the locals added to a prototype's own scope AFTER its
+// emission. Orphan literal blocks are sequential `if false then` blocks, so the reserve is the
+// largest single block (its upvalue names + `_`). A dead-tail splice declares locals the emitter
+// cannot predict: unknown (-1, the rule fails closed). Requires compute_orphan_hosts first.
+static void compute_late_scope_locals(const de::Module& m) {
+    std::map<int, int>& reserved = em::late_scope_locals();
+    reserved.clear();
+    for (const auto& host : g_orphans_by_host) {
+        int widest = 0;
+        for (int orphan : host.second) {
+            const de::Proto& proto = m.protos[(size_t)orphan];
+            const int upvalues = proto.hdr.size() > 2 ? (uint8_t)proto.hdr[2] : 0;
+            widest = std::max(widest, upvalues + 1);
+        }
+        reserved[host.first] = widest;
+    }
+    if (std::getenv("RENOVICE_NO_DEAD_TAIL")) return;
+    for (size_t index = 0; index < m.protos.size(); ++index)
+        if (dead_tail_start(m.protos[index]) != std::string::npos) reserved[(int)index] = -1;
+}
+
 static bool splice_dead_tail(std::string& fn, const de::Proto& proto, int idx,
                              const std::vector<std::string>& pool) {
     if (std::getenv("RENOVICE_NO_DEAD_TAIL")) return false;
@@ -1106,19 +1128,27 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
     ir::IProto ip = ir_annotate(m.protos[root], root, pool, g_nb);
     if (!ip.ok) { why = std::string("annotate failed: ") + ip.why; return false; }
     bool ok = false;
+    // Orphan hosts depend only on the module; computed before the root is emitted so the emitter's
+    // local-limit rule can count the orphan locals added to the root afterwards.
+    compute_orphan_hosts(m, root);
+    compute_late_scope_locals(m);
     src = decompile_proto_text(ip, root, ok, why);
-    if (!ok) { why = std::string("emit problem: ") + why; return false; }
+    if (!ok) {
+        why = std::string("emit problem: ") + why;
+        g_orphans_by_host.clear(); em::late_scope_locals().clear();
+        return false;
+    }
     g_inline_fail.clear();
     splice_dead_tail(src, m.protos[root], root, pool);
-    compute_orphan_hosts(m, root);
     if (!append_orphan_literals(src, root, m)) {
         why = "orphan host has no insertion point before its closing end";
-        g_orphans_by_host.clear();
+        g_orphans_by_host.clear(); em::late_scope_locals().clear();
         return false;
     }
     compute_shared_protos(m);
     src = inline_closures(src, m, pool, 0);
     g_orphans_by_host.clear();          // module-scoped: never leak into another module's inlining
+    em::late_scope_locals().clear();
     g_shared_protos.clear();
     if (!g_inline_fail.empty()) {
         why = std::string("closure inline failed: ") + g_inline_fail;
