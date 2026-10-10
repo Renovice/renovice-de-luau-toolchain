@@ -85,11 +85,17 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "LOST_CONDITION": 0, "SEMANTIC_BEHAVIOR_SAME": 150,
             "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
-            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 98,
+            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 113,
             "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 16,
             "U43_CLASS_SWAPS": 7501,
             "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 82,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-10-10 (b) -- two-exit loops (DEFECTS #80-#81): Gate 14 98 -> 113 checks (fixtures
+#   escape_join_forgen, escape_join_loop_value, while_break_return_arms). The legacy controls of proper_prep_for,
+#   proper_exit_in_body and Gate 12 also switch off the new escape / while-arm rules, because those now structure
+#   the fixtures' loops before the old defect path is reached (verified: with the extra switch each control
+#   reproduces its defect again; without it the default output was already correct). Post 8ea2bc37.
 
 # BASELINE CHANGE OF 2026-10-10 -- shared prototypes and dead tails (DEFECTS #78-#79):
 #   U43 class swaps 7,245 -> 7,501 is an UNMASKING (PITFALLS B6/E6). Control, U43 first 300, production env, first

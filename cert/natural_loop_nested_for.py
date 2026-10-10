@@ -29,7 +29,9 @@ DEC = os.path.join(ROOT, "bin", "derecomp.exe")
 LUAU = os.path.join(ROOT, "bin", "luau.exe")
 FIXTURE = os.path.join(HERE, "fixtures", "natural_loop_nested_for.luau")
 LEGACY = ("RENOVICE_LEGACY_ENTRY_IN_LOOP", "RENOVICE_NO_LOOP_BODY_PROPER",
-          "RENOVICE_NO_PROVEN_WHILE_NATURAL", "RENOVICE_NO_FOR_CYCLE_WHOLE_PART")
+          "RENOVICE_NO_PROVEN_WHILE_NATURAL", "RENOVICE_NO_FOR_CYCLE_WHOLE_PART",
+          # 2026-10-10 (#81): the while break/return arms also structure this shape
+          "RENOVICE_NO_CFG_WHILE_LOOP_ARMS")
 MUTATIONS = {
     "BRANCH_SWAP": ("                if i == 1 then", "                elseif i == 2 then",
                     "                if i == 2 then", "                elseif i == 1 then"),

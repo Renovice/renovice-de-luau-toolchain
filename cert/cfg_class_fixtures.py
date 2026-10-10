@@ -31,6 +31,17 @@ Numeric-for fixes (2026-09-30, RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md):
                               inline into two-exit loops inside a Proper region; the harness compiles it
                               with luau-compile -O2 + transcode)
     + PROPER_PREP_FOR_LEGACY_NESTED_{CFG_FAILS,BEHAVIOR_DIFFERS}  RENOVICE_NO_PROPER_NESTED_LOOP_PARTS
+    (both legacy controls also set RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN: since #76 the CFG renderer owns
+    these two-exit loops and the Proper dispatcher is no longer reached)
+
+Two-exit loops (2026-10-09, cert/fixtures/twoexit_2026_10_09):
+  escape_join_forgen          RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN (#76; -O2 inlined `return true` in a
+                              generic for: the arm skips the exhaustion code `r = false`; legacy printed
+                              the arm outside the loop, IsA(nil))
+  escape_join_loop_value      RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN (#76; the arm reads the loop variable,
+                              three inlined searches in sequence; legacy returned nil for every lookup)
+  while_break_return_arms     RENOVICE_NO_CFG_WHILE_LOOP_ARMS  (#77; a while leaving by its header test,
+                              a break and a shared bare RETURN; legacy fallback duplicated the next for)
 
 Proper dispatcher fixes (proper campaign 2026-10-09):
   proper_exit_in_body         RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG (a loop-leaving edge inside a Proper
@@ -106,7 +117,9 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_CFGID_LEGACY_OR_BLOCK", "RENOVICE_NATIVE",
             "RENOVICE_NO_SETLIST_EXISTING_TABLE", "RENOVICE_NO_CAPTURE_SNAPSHOT",
             "RENOVICE_INNERMOST_LOOP_FIRST", "RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION",
-            "RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE")
+            "RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE",
+            "RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN", "RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST",
+            "RENOVICE_NO_CFG_WHILE_LOOP_ARMS")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control (innermost-loop-first, #68, is
@@ -118,20 +131,33 @@ DECOMPILER_FIXTURES = {
     "compound_exit_namecall": "RENOVICE_NO_LOOP_BODY_DAG",
     "for_body_order": "RENOVICE_NO_FOR_BODY_PART_ORDER",
     "nested_for_break": "RENOVICE_NO_PREP_HEADED_WHILE",
-    "proper_prep_for": "RENOVICE_NO_PROPER_PREP_FOR",
-    "proper_exit_in_body": "RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG",
+    # Space-separated switches are all set for the legacy control. Since the two-exit loop escape
+    # (2026-10-09, #80) the CFG renderer owns proper_prep_for's inlined two-exit loops, so the #48
+    # legacy control must switch the escape off as well to reach the Proper dispatcher again.
+    "proper_prep_for": "RENOVICE_NO_PROPER_PREP_FOR RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
+    # the while break/return arms (#81) also structure this fixture's loop, so its legacy controls
+    # switch them off too to reach the #76 Proper path
+    "proper_exit_in_body": "RENOVICE_NO_PROPER_EXIT_IN_BODY_DAG RENOVICE_NO_CFG_WHILE_LOOP_ARMS",
+    # Two-exit loops (2026-10-09, cert/fixtures/twoexit_2026_10_09, #80/#81)
+    "escape_join_forgen": "RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
+    "escape_join_loop_value": "RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
+    "while_break_return_arms": "RENOVICE_NO_CFG_WHILE_LOOP_ARMS",
 }
+FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
+                for name in ("escape_join_forgen", "escape_join_loop_value", "while_break_return_arms")}
 # Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation
 # [, behavior expectation]). cfg expectation "FAIL" = the gate must catch it; "PASS" = a recorded gate
 # blind spot. Behavior expectation (default "DIFFERS"); "SAME" = a CFG-only defect (an extra
-# operation stock never had, behavior-neutral).
+# operation stock never had, behavior-neutral). Space-separated switches are all set.
 EXTRA_LEGACY = (
     ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM", "FAIL"),
     ("nested_for_break", "ENTRY_NIL", "RENOVICE_NO_LOOP_ENTRY_NIL", "PASS"),
-    ("proper_prep_for", "NESTED", "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS", "FAIL"),
-    ("proper_exit_in_body", "EXIT_ARM_ONCE", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE", "FAIL", "SAME"),
+    ("proper_prep_for", "NESTED", "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
+     "FAIL"),
+    ("proper_exit_in_body", "EXIT_ARM_ONCE", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE RENOVICE_NO_CFG_WHILE_LOOP_ARMS", "FAIL", "SAME"),
 )
-O2_FIXTURES = {"proper_prep_for"}          # compiled with inlining, like the shipped modules
+O2_FIXTURES = {"proper_prep_for",          # compiled with inlining, like the shipped modules
+               "escape_join_forgen", "escape_join_loop_value"}
 LUAU_COMPILE = os.path.join(ROOT, "bin", "luau-compile.exe")
 IMPORT_PRELUDE = '_T = { RenoviceImportFixture = "stale", RenoviceOther = "other" }\n'
 # Globals for compound_exit_loop: gGameRules appears after the second Sleep, starts on its second
@@ -279,7 +305,7 @@ def main():
     try:
         with tempfile.TemporaryDirectory(prefix="renovice-cfg-class-") as temp:
             for name, opt_out in DECOMPILER_FIXTURES.items():
-                fixture = os.path.join(FIX, name + ".luau")
+                fixture = os.path.join(FIXTURE_DIRS.get(name, FIX), name + ".luau")
                 prelude = PRELUDES.get(name, "")
                 expected = trace(fixture, temp, prelude)
                 checks[name.upper() + "_RUNS"] = expected.count("\n") >= 2
@@ -300,7 +326,8 @@ def main():
                     if extra_name != name:
                         continue
                     extra_env = base_env()
-                    extra_env[switch] = "1"
+                    for switch_name in switch.split():
+                        extra_env[switch_name] = "1"
                     extra_source, extra_rebuilt = round_trip(original, temp,
                                                              "%s.legacy_%s" % (name, label.lower()),
                                                              extra_env)

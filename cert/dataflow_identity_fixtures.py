@@ -54,6 +54,11 @@ Fixed shape defects (CFG-ID sees the old form):
   <F>_FIXED_BEHAVIOR_SAME / <F>_FIXED_CFG_PASS / <F>_FIXED_DF_PASS / <F>_LEGACY_BEHAVIOR_DIFFERS / <F>_LEGACY_CFG_FAILS
   (the old index-store form also truncated a multret tail in a later batch to one value: the fixture's
   `select(2, 0, 36, 37)` tail lost 37)
+
+Fixed by the two-exit loop escape (2026-10-09, #76), decompiler opt-outs:
+  for_index_after_exit_o2  RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN       (moved up to cert/fixtures/dataflow_2026_10_09)
+  escape_pretest           RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST    (cert/fixtures/twoexit_2026_10_09, -O2;
+                           the construct starts at the inlined helper's guard)
 """
 import os
 import sys
@@ -68,7 +73,7 @@ FIX_DF = os.path.join(HERE, "fixtures", "dataflow_2026_10_09")
 FIX_OPEN = os.path.join(FIX_DF, "open_defects")
 # fixture -> how its behavior is observed: "source" (decompiled source) or "rebuilt" (the source
 # re-decompiled from the rebuilt bytecode: the defect is in recompile, the decompiled text is right)
-OPEN_DEFECTS = {"for_index_after_exit_o2": "source"}
+OPEN_DEFECTS = {}
 # Fixed open defects: fixture (in FIX_DF) -> (legacy opt-out, observation, stage the opt-out applies to)
 FIXED_DEFECTS = {
     "copy_fold_live_dest": ("RENOVICE_NO_COALESCE_LIVE_DEST_GUARD", "source", "decompile"),
@@ -78,12 +83,18 @@ FIXED_DEFECTS = {
     "call_move_live_multi": ("RENOVICE_NO_CALLMOVE_LIVE_SOURCE_GUARD", "source", "decompile"),
     # fixed by #64 (2026-10-09 batch 3)
     "loop_exit_test_register": ("RENOVICE_NO_WHILE_TAIL_TEST", "source", "decompile"),
+    # fixed by #76 (2026-10-09, two-exit loop escape joins)
+    "for_index_after_exit_o2": ("RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN", "source", "decompile"),
+    "escape_pretest": ("RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST", "source", "decompile"),
 }
+# fixtures outside FIX_DF
+FIXED_FOLDERS = {"escape_pretest": os.path.join(HERE, "fixtures", "twoexit_2026_10_09")}
 SHAPE_FIXED = {"setlist_batch_merge": "RENOVICE_NO_SETLIST_BATCH_MERGE"}
 # never inherit these from the caller's shell (PITFALLS A7)
 cc.OPT_OUTS = tuple(cc.OPT_OUTS) + tuple(sorted({switch for switch, _, _ in FIXED_DEFECTS.values()}
                                                  | set(SHAPE_FIXED.values())))
 cc.O2_FIXTURES.add("for_index_after_exit_o2")
+cc.O2_FIXTURES.add("escape_pretest")
 
 LEGACY = (("loop_carried_nil", "RENOVICE_NO_LOOP_NIL_HOIST"),
           ("nested_for_break", "RENOVICE_NO_LOOP_ENTRY_NIL"),
@@ -216,7 +227,7 @@ def main():
                 checks[key + "_DF_FAILS"] = df_verdict(original, rebuilt) == "FAIL"
                 checks[key + "_BEHAVIOR_DIFFERS"] = cc.trace(source, temp) != cc.trace(fixture, temp)
             for name, (switch, observe, stage) in FIXED_DEFECTS.items():
-                fixture = os.path.join(FIX_DF, name + ".luau")
+                fixture = os.path.join(FIXED_FOLDERS.get(name, FIX_DF), name + ".luau")
                 expected = cc.trace(fixture, temp)
                 original = os.path.join(temp, name + ".fixed_original.lua_B")
                 if observe == "rebuilt":

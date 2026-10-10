@@ -393,3 +393,24 @@ vs batch 6 `5ce9c9f8`): CFG-ID 4,533 -> 4,544, CONST-ID 5,389 -> 5,434, CFG-ID +
 30 -> 1 (StatsLib), prototype-aligned modules 5,435 -> 5,464, equal prototypes 77,432 -> 79,024 of 83,518; no module
 PASS -> FAIL on any gate, no prototype or closure loss. Gate 13 U43 swaps 7,245 -> 7,501 = unmasking (control in
 `cert/gates.py`). Open: mid-function dead code under a constant-false condition (~20 ranges, 10 modules).
+
+## 2026-10-10 — 44.1.1 campaign batch 8: two-exit loops (agent twoexit, 0387660 + dc71895; its #76/#77)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 80 | a loop whose body leaves for more than one place (typically an -O2 inlined `return v` inside a `for`: `r = v; JUMP join`, skipping the `r = d` after normal exhaustion) was rejected by `emit_cfg_for_function` (`START_OUTSIDE_DOMAIN`) and fell back to the legacy region emitter | the arm printed after the loop reading the loop variable out of scope (`IsA(nil)`), the `for` printed twice, a `return` printed as `break`, the loop index read after the loop (dataflow open defect `for_index_after_exit_o2`); 272 prototypes / 186 modules carry the shape (`derecomp loop-exit-scan`) | wave-1 agents tables, conditions, accessorder, dataflow; agent twoexit | loop escape joins in the CFG renderer: every private exit arm reaching one common join runs INSIDE the loop (loop variable in scope), sets a generated selector and breaks; the normal-exit code runs under `if __renovice_state_N ~= 1 then ... end`; the block may start at the loop setup, the while header or an earlier guard that also jumps to the normal exit; no placed wrapper is removed; an arm ending at a shared bare RETURN stays a return arm (`RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN`, `RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST`, A/B `RENOVICE_CFG_LOOP_ESCAPE_TO_RETURN=1`) |
+| 81 | a plain `while` loop's private break and return arms were printed as a bare `break` with blocks left unowned | InfestedPredatorFinisherSpores p3, the ExplosiveDissolve family | agent twoexit | render them as part of the while body; the header-test exit is a legal `break` target (`RENOVICE_NO_CFG_WHILE_LOOP_ARMS`) |
+
+New read-only tool `derecomp loop-exit-scan [--u44]`. Fixtures `cert/fixtures/twoexit_2026_10_09/` (escape_join_forgen,
+escape_join_loop_value, while_break_return_arms in Gate 14; escape_pretest and the formerly open for_index_after_exit_o2
+in the dataflow fixtures, now asserted fixed). Legacy controls of proper_prep_for, proper_exit_in_body and Gate 12 also
+switch the new rules off (they structure those fixtures' loops first). Integration note: the first integration build
+(`dc503fc5`) missed dc71895 (the cherry-pick stopped at a fixture conflict) and showed SongFragmentPickup PASS -> FAIL,
+exactly the case dc71895 fixes; the complete build restores it.
+
+Full 44.1.1 corpus (`work/u441-r8b-8ea2bc37`, binary `8ea2bc37`, vs batch 7 `909755e9`): CFG-ID 4,544 -> 4,672, CONST-ID
+5,434 -> 5,437, CFG-ID + dataflow 4,533 -> 4,667, dataflow FAIL among CFG-ID PASS 11 -> 5, compiler closure 5,446 ->
+5,449, no module PASS -> FAIL on any gate, no prototype or closure loss. `cert/gates.py 300 150`: ALL GATES PASS
+(ALIGNED 232; Gate 14 98 -> 113 checks, recorded). Open: 90 of the 186 shape modules fail for other renderer limits
+(`START_ALREADY_EMITTED`, `GUARD_CHAIN_NO_BOUNDARY_EDGE`, `while true` / interior-exit loops with several exits, an
+inlined return inside an if/elseif chain, escapes leaving two loops).

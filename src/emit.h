@@ -15523,13 +15523,371 @@ emit_conditional_region:
                 }
             }
         }
+        // LOOP ESCAPE JOINS (2026-10-09, two-exit campaign agent; DEFECTS #76). A source `for` can
+        // leave its body for a destination OTHER than its canonical exit (the FORNLOOP/FORGLOOP
+        // fallthrough). Luau -O2 inlines `local function F(t) for ... do if c then return v end end
+        // return d end` as `r = v; JUMP join` inside the body and `r = d` after the latch, so the
+        // found arm SKIPS the code that runs on normal exhaustion. Lua has no goto: the only exact
+        // spelling is to run the arm where it is (inside the loop, where its loop variables are in
+        // scope), record the escape in a generated selector and break, then guard the canonical
+        // exit code with that selector:
+        //     local __renovice_state_N = 0
+        //     for ... do ... if c then r = v; __renovice_state_N = 1; break end ... end
+        //     if __renovice_state_N ~= 1 then r = d end
+        //     <join>
+        // The selector is a dispatch-only register (constant definitions, equality tests), which
+        // the CFG-ID gate resolves statically. Admitted per loop only when every non-canonical,
+        // non-return exit arm is private to the loop (all predecessors in the natural body or the
+        // arm) and all of them reach the SAME single join; anything else keeps the previous
+        // fail-closed render rejection. Previously these prototypes fell back to the legacy region
+        // emitter, which printed the arms outside the loop (the arm read a loop variable out of
+        // scope, `IsA(nil)`) or claimed the loop twice. RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN=1 restores
+        // the rejection for A/B.
+        //
+        // The canonical exit C may also be entered BEFORE the loop: the inlined helper's own guard
+        // (`if t == nil then return d end`, or an `a and F(t)` operand) jumps straight to the
+        // `r = d` block. The construct then starts at the nearest block H dominating the prep and
+        // those entries; H .. prep is an acyclic private pre-test region whose only exits are the
+        // prep and C. The whole construct is printed as ONE lexical unit at H:
+        //     local __renovice_state_N = 0
+        //     <H .. loop, stopping at C>
+        //     if __renovice_state_N ~= 1 then <C .. join> end
+        //
+        // WHILE LOOP ARMS (DEFECTS #77). A plain header-tested source while renders only its natural
+        // body, so a statement-carrying `break` arm or a RETURN shared by two body tests was printed
+        // as a bare `break` and left unowned: the whole prototype fell back to the legacy region
+        // emitter (InfestedPredatorFinisherSpores p3: a return printed as `break`). Its private
+        // break/return arms join the render domain (`annex`), its header-test exit is a recognised
+        // `break` target, and an escape join is handled as for a `for`, headed at the while header.
+        // RENOVICE_NO_CFG_WHILE_LOOP_ARMS=1 restores the previous rendering for A/B.
+        struct LoopEscape {
+            const st::Loop* loop = nullptr;
+            int join = -1;                  // escape join, -1 when every arm is a break or a return
+            int canonical = -1;
+            int head = -1;                  // construct entry H (the prep / while header, or a pre-test)
+            std::set<int> arm;              // escape arm blocks (to the join)
+            std::set<int> annex;            // arm blocks outside the render domain of the loop body
+            std::set<int> pre;              // H .. entry (exclusive of the entry), the pre-test region
+            std::set<int> continuation;     // canonical exit .. join (exclusive), part of the construct
+            std::set<int> canonical_chain;  // the canonical exit and its pure JUMP relays
+            std::string selector;
+            bool used = false;
+            bool open = false;
+        };
+        std::map<const std::set<int>*, LoopEscape> loop_escapes;
+        std::map<int, LoopEscape*> escape_heads;   // construct head block -> its escape
+        if (!std::getenv("RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN")) {
+            const int block_count = (int)g->n.size();
+            const bool while_arms = !std::getenv("RENOVICE_NO_CFG_WHILE_LOOP_ARMS");
+            for (const st::Loop& loop : authoritative_loops) {
+                const bool is_for = loop.kind == st::Loop::ForNum || loop.kind == st::Loop::ForGen;
+                auto registered_while = while_by_header.find(loop.header);
+                // Only plain (header-tested) source whiles: the overlapping for-prep and interior-exit
+                // forms are rendered by their own paths, which require one exit.
+                const bool is_while = while_arms && loop.kind == st::Loop::While
+                    && registered_while != while_by_header.end()
+                    && registered_while->second == &loop
+                    && !overlapping_for_prep_whiles.count(loop.header)
+                    && !interior_exit_whiles.count(loop.header);
+                if ((!is_for && !is_while) || loop.latch < 0 || loop.latch >= block_count
+                    || loop.header < 0 || loop.header >= block_count)
+                    continue;
+                // Natural body: loop blocks that reach a back edge without leaving the loop. A
+                // generic for is headed AT its FORGLOOP latch, so seed from the back-edge sources.
+                // A while's authoritative body already is its natural body.
+                std::set<int> natural;
+                int canonical = -1;
+                if (is_for) {
+                    canonical = g->n[loop.latch].succ_false;
+                    natural.insert(loop.latch);
+                    std::vector<int> work{loop.latch};
+                    for (int pred : g->n[loop.header].preds)
+                        if (loop.body.count(pred) && g->n[pred].reach && natural.insert(pred).second)
+                            work.push_back(pred);
+                    while (!work.empty()) {
+                        const int block = work.back(); work.pop_back();
+                        if (block == loop.header) continue;
+                        for (int pred : g->n[block].preds)
+                            if (loop.body.count(pred) && g->n[pred].reach && natural.insert(pred).second)
+                                work.push_back(pred);
+                    }
+                    natural.insert(loop.header);
+                } else {
+                    natural = loop.body;
+                    const st::Node& header = g->n[loop.header];
+                    // the while renderer's own exit: the header test's outside successor
+                    canonical = loop.body.count(header.succ_true) ? header.succ_false : header.succ_true;
+                }
+                if (canonical < 0) continue;
+                // The canonical exit followed through pure single-JUMP relays.
+                std::set<int> canonical_chain;
+                for (int c = canonical, guard = 0; c >= 0 && c < block_count && guard < 16; ++guard) {
+                    if (!canonical_chain.insert(c).second) break;
+                    const st::Node& node = g->n[c];
+                    if (node.first != node.last || node.first < 0 || node.first >= (int)ip->code.size()
+                        || ip->code[node.first].op != 0x40 || node.succ_true < 0) break;
+                    c = node.succ_true;
+                }
+                LoopEscape escape;
+                escape.loop = &loop;
+                bool admissible = true;
+                for (int member : natural) {
+                    if (is_for && member == loop.latch) continue;
+                    if (!is_for && member == loop.header) continue;    // the while test itself
+                    for (int seed : {g->n[member].succ_true, g->n[member].succ_false}) {
+                        if (seed < 0 || natural.count(seed) || canonical_chain.count(seed)) continue;
+                        // Private arm: everything reachable from the seed without re-entering the
+                        // loop or the canonical exit, shrunk until every member is entered only from
+                        // the natural body or the arm itself.
+                        std::set<int> arm;
+                        std::vector<int> stack{seed};
+                        while (!stack.empty()) {
+                            const int block = stack.back(); stack.pop_back();
+                            if (block < 0 || block >= block_count || natural.count(block)
+                                || canonical_chain.count(block) || !g->n[block].reach
+                                || !arm.insert(block).second) continue;
+                            for (int next : {g->n[block].succ_true, g->n[block].succ_false})
+                                if (next >= 0) stack.push_back(next);
+                        }
+                        for (bool shrunk = true; shrunk;) {
+                            shrunk = false;
+                            for (int block : std::set<int>(arm)) {
+                                for (int pred : g->n[block].preds)
+                                    if (g->n[pred].reach && !natural.count(pred) && !arm.count(pred)) {
+                                        arm.erase(block); shrunk = true; break;
+                                    }
+                            }
+                            std::set<int> live;
+                            std::vector<int> pending;
+                            if (arm.count(seed)) pending.push_back(seed);
+                            while (!pending.empty()) {
+                                const int block = pending.back(); pending.pop_back();
+                                if (!arm.count(block) || !live.insert(block).second) continue;
+                                for (int next : {g->n[block].succ_true, g->n[block].succ_false})
+                                    if (next >= 0) pending.push_back(next);
+                            }
+                            if (live.size() != arm.size()) { arm.swap(live); shrunk = true; }
+                        }
+                        std::set<int> outs;
+                        for (int block : arm)
+                            for (int next : {g->n[block].succ_true, g->n[block].succ_false})
+                                if (next >= 0 && !arm.count(next)) outs.insert(next);
+                        if (arm.empty()) outs.insert(seed);
+                        // A while body renders only its natural blocks: its private return and
+                        // break arms join the render domain (a for's lexical body already holds
+                        // them). An arm that is itself a source loop or overlaps another loop's
+                        // body stays out (its own renderer owns it).
+                        bool arm_clean = true;
+                        for (int block : arm)
+                            if (loop_by_prep.count(block) || while_by_header.count(block)) arm_clean = false;
+                        bool to_canonical = true;
+                        for (int target : outs) if (!canonical_chain.count(target)) to_canonical = false;
+                        if (outs.empty() || to_canonical) {                // return-only / break arm
+                            if (!is_for && arm_clean) escape.annex.insert(arm.begin(), arm.end());
+                            continue;
+                        }
+                        // An arm ending at a SHARED bare RETURN (only value loads/moves before it)
+                        // is a return arm, not an escape: the block is duplicable and may lie
+                        // outside an enclosing loop as well (a nested for's `return` jumping to the
+                        // outer loop's exit RETURN, SongFragmentPickup p2), where a selector escape
+                        // cannot reach it. Keep the established rendering for those arms.
+                        if (outs.size() == 1) {
+                            const st::Node& target = g->n[*outs.begin()];
+                            bool bare_return = target.is_return && target.succ_true < 0
+                                && target.succ_false < 0;
+                            for (int pc = target.first; bare_return && pc < target.last; ++pc) {
+                                const uint8_t op = pc >= 0 && pc < (int)ip->code.size()
+                                    ? ip->code[pc].op : 0xff;
+                                if (op != 0x0d && op != 0x04 && op != 0x12 && op != 0x4e && op != 0x14)
+                                    bare_return = false;
+                            }
+                            if (bare_return && !std::getenv("RENOVICE_CFG_LOOP_ESCAPE_TO_RETURN")) {
+                                if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                                    std::fprintf(stderr, "CFG_FOR_LOOP_ESCAPE_RETURN_ARM pidx=%d latch=%d "
+                                                 "target=%d\n", pidx, loop.latch, *outs.begin());
+                                continue;
+                            }
+                        }
+                        if (outs.size() != 1 || natural.count(*outs.begin()) || !arm_clean
+                            || (escape.join >= 0 && escape.join != *outs.begin())) {
+                            admissible = false;
+                            break;
+                        }
+                        escape.join = *outs.begin();
+                        escape.arm.insert(arm.begin(), arm.end());
+                        for (int block : arm)
+                            if (!loop.body.count(block)) escape.annex.insert(block);
+                    }
+                    if (!admissible) break;
+                }
+                auto escape_reject = [&](const char* reason) {
+                    if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                        std::fprintf(stderr, "CFG_FOR_LOOP_ESCAPE_REJECT pidx=%d prep=%d latch=%d "
+                                     "canonical=%d join=%d reason=%s\n", pidx, loop.prep, loop.latch,
+                                     canonical, escape.join, reason);
+                };
+                if (!admissible) { escape_reject("ARM"); continue; }
+                escape.canonical = canonical;
+                escape.canonical_chain = canonical_chain;
+                if (escape.join < 0) {
+                    // Break/return arms only (while loops): no selector, just the render annex.
+                    if (!escape.annex.empty()) {
+                        if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                            std::fprintf(stderr, "CFG_FOR_LOOP_ARMS pidx=%d header=%d canonical=%d "
+                                         "annex=%zu\n", pidx, loop.header, canonical, escape.annex.size());
+                        loop_escapes.emplace(&loop.body, escape);
+                    }
+                    continue;
+                }
+                // The join is printed after the loop; it must not also be a lexical body block.
+                if (loop.body.count(escape.join)) { escape_reject("JOIN_IN_BODY"); continue; }
+                // The loop entry: the prep of a for, the header of a while (entered once from
+                // outside, re-entered only by its own back edges).
+                const int entry = is_for ? loop.prep : loop.header;
+                auto foreign_pred = [&](int pred) {
+                    return g->n[pred].reach && !loop.body.count(pred) && pred != loop.prep;
+                };
+                // The canonical-exit continuation C .. join is printed inside the selector guard,
+                // so the loop plus that continuation must be ONE region with the single outside
+                // edge `join` (plus RETURNs): C is entered only from the loop (entry, body), every
+                // other continuation block only from the continuation, and nothing leaves it except
+                // to the join. Every proof helper then treats the loop as exiting at the join.
+                {
+                    std::set<int> continuation;
+                    std::vector<int> pending{canonical};
+                    bool closed = true;
+                    while (!pending.empty() && closed) {
+                        const int block = pending.back(); pending.pop_back();
+                        if (block == escape.join || continuation.count(block)) continue;
+                        if (block < 0 || block >= block_count || !g->n[block].reach
+                            || loop.body.count(block) || block == loop.prep
+                            || escape.arm.count(block) || escape.annex.count(block)) { closed = false; break; }
+                        continuation.insert(block);
+                        for (int next : {g->n[block].succ_true, g->n[block].succ_false})
+                            if (next >= 0) pending.push_back(next);
+                    }
+                    if (!closed) { escape_reject("CONTINUATION_EXIT"); continue; }
+                    // Entries of C from outside the loop: the construct head H is the nearest
+                    // dominator of the loop entry that dominates all of them.
+                    std::set<int> outside_entries;
+                    for (int pred : g->n[canonical].preds)
+                        if (!continuation.count(pred) && foreign_pred(pred)
+                            && !escape.annex.count(pred))
+                            outside_entries.insert(pred);
+                    int head = entry;
+                    std::set<int> pre;
+                    if (!outside_entries.empty()) {
+                        if (std::getenv("RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST")) {
+                            escape_reject("PRETEST_DISABLED"); continue;
+                        }
+                        head = -1;
+                        for (int d = entry, guard = 0; d >= 0 && guard < block_count; ++guard) {
+                            bool all = true;
+                            for (int outside_entry : outside_entries)
+                                if (!st::dominates(*g, d, outside_entry)) { all = false; break; }
+                            if (all && d != entry) { head = d; break; }
+                            d = d < (int)g->idom.size() ? g->idom[d] : -1;
+                        }
+                        if (head < 0) { escape_reject("PRETEST_HEAD"); continue; }
+                        // H .. entry: acyclic, private, leaving only to the entry, C or a RETURN.
+                        std::map<int, int> color;
+                        bool valid = true;
+                        std::function<void(int)> walk = [&](int block) {
+                            if (!valid || block == entry || block == canonical) return;
+                            if (block < 0 || block >= block_count || !g->n[block].reach
+                                || loop.body.count(block) || continuation.count(block)
+                                || block == escape.join || escape.arm.count(block)
+                                || escape.annex.count(block)) { valid = false; return; }
+                            if (color[block] == 1) { valid = false; return; }
+                            if (color[block] == 2) return;
+                            color[block] = 1;
+                            pre.insert(block);
+                            for (int next : {g->n[block].succ_true, g->n[block].succ_false})
+                                if (next >= 0) walk(next);
+                            color[block] = 2;
+                        };
+                        walk(head);
+                        for (int block : pre) {
+                            if (!valid) break;
+                            if (block == head) continue;
+                            for (int pred : g->n[block].preds)
+                                if (g->n[pred].reach && !pre.count(pred)) { valid = false; break; }
+                        }
+                        for (int pred : g->n[entry].preds)
+                            if (valid && foreign_pred(pred) && !pre.count(pred)) valid = false;
+                        for (int outside_entry : outside_entries)
+                            if (!pre.count(outside_entry)) valid = false;
+                        if (!valid || escape_heads.count(head)) { escape_reject("PRETEST_REGION"); continue; }
+                    }
+                    for (int block : continuation) {
+                        if (!closed) break;
+                        for (int pred : g->n[block].preds) {
+                            if (!g->n[pred].reach || continuation.count(pred)) continue;
+                            if (block == canonical && (!foreign_pred(pred) || pre.count(pred)
+                                                       || escape.annex.count(pred)))
+                                continue;
+                            closed = false;
+                            break;
+                        }
+                    }
+                    if (!closed) { escape_reject("CONTINUATION_ENTRY"); continue; }
+                    if (escape_heads.count(head)) { escape_reject("HEAD_SHARED"); continue; }
+                    escape.continuation = continuation;
+                    escape.head = head;
+                    escape.pre = pre;
+                }
+                if (std::getenv("RENOVICE_CFG_FOR_TRACE") || std::getenv("RENOVICE_CFG_FOR_DEBUG"))
+                    std::fprintf(stderr,
+                                 "CFG_FOR_LOOP_ESCAPE pidx=%d prep=%d latch=%d canonical=%d join=%d "
+                                 "head=%d arm_blocks=%zu pre_blocks=%zu while=%d\n",
+                                 pidx, loop.prep, loop.latch, canonical, escape.join, escape.head,
+                                 escape.arm.size(), escape.pre.size(), is_while ? 1 : 0);
+                auto placed = loop_escapes.emplace(&loop.body, escape).first;
+                escape_heads[escape.head] = &placed->second;
+            }
+        }
         auto in_render_domain = [&](const std::set<int>* domain, int block) {
             if (!domain) return true;
             if (domain->count(block)) return true;
+            if (!loop_escapes.empty()) {
+                auto escape = loop_escapes.find(domain);
+                if (escape != loop_escapes.end()
+                    && (escape->second.arm.count(block) || escape->second.annex.count(block)))
+                    return true;
+            }
             if (!allow_private_return_arms) return false;
             auto annex = private_return_loop_arms.find(domain);
             return annex != private_return_loop_arms.end()
                 && annex->second.count(block);
+        };
+        // The registered escape of the loop whose body is `domain`, when `target` is its join and
+        // a source loop wrapper is open (a `break` is legal).
+        auto escape_to = [&](const std::set<int>* domain, int target) -> LoopEscape* {
+            if (!domain || target < 0 || loop_depth <= 0 || loop_escapes.empty()) return nullptr;
+            auto escape = loop_escapes.find(domain);
+            if (escape == loop_escapes.end() || escape->second.join != target
+                || !escape->second.open) return nullptr;
+            return &escape->second;
+        };
+        // Where control continues after a source for-loop construct as a whole: the escape join
+        // for a loop with a registered escape (its canonical-exit continuation is part of the
+        // construct), otherwise the latch's fallthrough.
+        auto loop_outside = [&](const st::Loop* loop) -> int {
+            if (!loop || loop->latch < 0 || loop->latch >= (int)g->n.size()) return -1;
+            if (!loop_escapes.empty()) {
+                auto escape = loop_escapes.find(&loop->body);
+                if (escape != loop_escapes.end() && escape->second.join >= 0)
+                    return escape->second.join;
+            }
+            return g->n[loop->latch].succ_false;
+        };
+        // The same for a source while with registered arms (the proof helpers otherwise require
+        // a unique outside edge): the escape join, else its canonical exit; -1 when unregistered.
+        auto registered_while_outside = [&](const st::Loop* loop) -> int {
+            if (!loop || loop_escapes.empty()) return -1;
+            auto escape = loop_escapes.find(&loop->body);
+            if (escape == loop_escapes.end()) return -1;
+            return escape->second.join >= 0 ? escape->second.join : escape->second.canonical;
         };
         auto duplicable_terminal_return = [&](int block) {
             if (block < 0 || block >= (int)g->n.size()) return false;
@@ -15680,7 +16038,7 @@ emit_conditional_region:
                         state[block] = 3;
                         return false;
                     }
-                    const bool ok = visit(g->n[latch].succ_false);
+                    const bool ok = visit(loop_outside(source_loop->second));
                     state[block] = ok ? 2 : 3;
                     return ok;
                 }
@@ -15693,6 +16051,8 @@ emit_conditional_region:
                             if (succ >= 0 && !natural->second->body.count(succ))
                                 exits.insert(succ);
                     }
+                    if (registered_while_outside(natural->second) >= 0)
+                        exits = {registered_while_outside(natural->second)};
                     if (exits.size() != 1) {
                         state[block] = 3;
                         return false;
@@ -15714,6 +16074,57 @@ emit_conditional_region:
                                  "follow=%d terminal=%d\n",
                                  pidx, start, block, node.succ_true, node.succ_false,
                                  follow, terminal);
+                return ok;
+            };
+            return visit(start);
+        };
+
+        // LOOP ESCAPE JOINS: the canonical-exit continuation `start` is printed inside
+        // `if selector ~= 1 then ... end` and the join after it, so every path from `start` must end
+        // at the join or a RETURN without passing the enclosing stop/terminal (unless that IS the
+        // join) and without a cycle. Source loops are collapsed to their outside edges (canonical
+        // exit plus a registered escape join); the active loop's own escape join is a legal exit.
+        auto escape_continuation_ok = [&](int start, int join, int stop, int terminal,
+                                          const std::set<int>* domain) {
+            std::map<int, int> state;
+            std::function<bool(int)> visit = [&](int block) -> bool {
+                if (block == join) return true;
+                if (block < 0 || block >= (int)g->n.size() || block == stop || block == terminal
+                    || !g->n[block].reach) return false;
+                if (!in_render_domain(domain, block)) {
+                    if (!domain || loop_depth <= 0) return false;
+                    auto outer = loop_escapes.find(domain);
+                    return outer != loop_escapes.end() && outer->second.join == block;
+                }
+                if (state[block] == 1 || state[block] == 3) return false;
+                if (state[block] == 2) return true;
+                state[block] = 1;
+                const st::Node& node = g->n[block];
+                bool ok = true;
+                if (node.is_return || (node.succ_true < 0 && node.succ_false < 0)) {
+                    ok = true;
+                } else if (overlap_active(block)) {
+                    ok = false;
+                } else if (loop_by_prep.count(block)) {
+                    const st::Loop* inner = loop_by_prep.at(block);
+                    ok = inner->latch >= 0 && inner->latch < (int)g->n.size()
+                        && visit(g->n[inner->latch].succ_false);
+                    auto inner_escape = loop_escapes.find(&inner->body);
+                    if (ok && inner_escape != loop_escapes.end() && inner_escape->second.join >= 0)
+                        ok = visit(inner_escape->second.join);
+                } else if (while_by_header.count(block)) {
+                    const st::Loop* inner = while_by_header.at(block);
+                    std::set<int> exits;
+                    for (int member : inner->body)
+                        for (int succ : {g->n[member].succ_true, g->n[member].succ_false})
+                            if (succ >= 0 && !inner->body.count(succ)) exits.insert(succ);
+                    if (registered_while_outside(inner) >= 0) exits = {registered_while_outside(inner)};
+                    ok = exits.size() == 1 && visit(*exits.begin());
+                } else {
+                    for (int succ : {node.succ_true, node.succ_false})
+                        if (succ >= 0) ok = visit(succ) && ok;
+                }
+                state[block] = ok ? 2 : 3;
                 return ok;
             };
             return visit(start);
@@ -15757,7 +16168,7 @@ emit_conditional_region:
                 if (source_loop != loop_by_prep.end()) {
                     const int latch = source_loop->second->latch;
                     const bool ok = latch >= 0 && latch < (int)g->n.size()
-                        && visit(g->n[latch].succ_false);
+                        && visit(loop_outside(source_loop->second));
                     state[block] = ok ? 2 : 3;
                     return ok;
                 }
@@ -15771,6 +16182,8 @@ emit_conditional_region:
                                 && !natural_loop->second->body.count(successor))
                                 exits.insert(successor);
                     }
+                    if (registered_while_outside(natural_loop->second) >= 0)
+                        exits = {registered_while_outside(natural_loop->second)};
                     const bool ok = exits.size() == 1 && visit(*exits.begin());
                     state[block] = ok ? 2 : 3;
                     return ok;
@@ -15869,7 +16282,7 @@ emit_conditional_region:
                         state[block] = 3;
                         return false;
                     }
-                    const int outside = g->n[latch].succ_false;
+                    const int outside = loop_outside(loop->second);
                     const bool ok = visit(outside);
                     state[block] = ok ? 2 : 3;
                     return ok;
@@ -15883,6 +16296,8 @@ emit_conditional_region:
                             if (succ >= 0 && !natural->second->body.count(succ))
                                 exits.insert(succ);
                     }
+                    if (registered_while_outside(natural->second) >= 0)
+                        exits = {registered_while_outside(natural->second)};
                     if (exits.size() != 1) {
                         state[block] = 3;
                         return false;
@@ -15964,6 +16379,7 @@ emit_conditional_region:
                             if (successor >= 0 && !loop.body.count(successor))
                                 exits.insert(successor);
                     }
+                    if (registered_while_outside(&loop) >= 0) exits = {registered_while_outside(&loop)};
                     if (exits.size() != 1)
                         return reject_render("GUARD_CHAIN_WHILE_EXIT_COUNT",
                                              block, effect, exit);
@@ -15975,12 +16391,20 @@ emit_conditional_region:
             if (block < 0 || block >= (int)g->n.size() || !g->n[block].reach
                 || !in_render_domain(domain, block) || emitted.count(block))
                 return reject_render("GUARD_CHAIN_INVALID_BLOCK", block, effect, exit);
+            // A loop escape construct (LOOP ESCAPE JOINS) is delegated whole, like a source loop,
+            // and the proof resumes at its join.
+            auto construct = escape_heads.find(block);
+            if (construct != escape_heads.end() && !construct->second->open) {
+                const int join = construct->second->join;
+                if (!emit_cfg(block, join, exit, domain, indent)) return false;
+                return emit_guard_to_effect(join, effect, exit, domain, indent);
+            }
             auto source_loop = loop_by_prep.find(block);
             if (source_loop != loop_by_prep.end()) {
                 const int latch = source_loop->second->latch;
                 if (latch < 0 || latch >= (int)g->n.size())
                     return reject_render("GUARD_CHAIN_INVALID_LOOP", block, effect, exit);
-                const int outside = g->n[latch].succ_false;
+                const int outside = loop_outside(source_loop->second);
                 // Stop the loop renderer at its authoritative outside edge, then let this proof
                 // decide whether that edge is the shared effect, the one-pass-repeat exit, or the
                 // next acyclic guard block. This keeps ownership single and prevents a nested loop
@@ -16250,6 +16674,7 @@ emit_conditional_region:
             std::set<int> nodes;
             std::set<int> atomic_loop_blocks;
             std::set<int> atomic_loop_preps;
+            std::map<int, int> atomic_exit;     // atomic loop prep / escape construct head -> exit
             std::map<int, int> color;
             bool valid = true;
             std::function<void(int)> collect = [&](int block) {
@@ -16268,14 +16693,38 @@ emit_conditional_region:
                 nodes.insert(block);
                 const st::Node& node = g->n[block];
                 auto source_loop = loop_by_prep.find(block);
-                if (loop_dispatch && source_loop != loop_by_prep.end()) {
+                auto construct = escape_heads.find(block);
+                if (loop_dispatch && construct != escape_heads.end()) {
+                    // A loop escape construct (LOOP ESCAPE JOINS) is one atomic child: its head,
+                    // pre-tests, loop, arms and guarded continuation, leaving only at the join.
+                    const LoopEscape& escape = *construct->second;
+                    const st::Loop* inner = nullptr;
+                    for (const auto& item : loop_escapes)
+                        if (&item.second == construct->second)
+                            for (const auto& prep_item : loop_by_prep)
+                                if (&prep_item.second->body == item.first) inner = prep_item.second;
+                    if (!inner) {
+                        valid = false;
+                    } else {
+                        atomic_loop_preps.insert(block);
+                        atomic_exit[block] = escape.join;
+                        atomic_loop_blocks.insert(inner->body.begin(), inner->body.end());
+                        atomic_loop_blocks.insert(inner->prep);
+                        atomic_loop_blocks.insert(escape.pre.begin(), escape.pre.end());
+                        atomic_loop_blocks.insert(escape.arm.begin(), escape.arm.end());
+                        atomic_loop_blocks.insert(escape.continuation.begin(), escape.continuation.end());
+                        atomic_loop_blocks.insert(escape.canonical);
+                        collect(escape.join);
+                    }
+                } else if (loop_dispatch && source_loop != loop_by_prep.end()) {
                     const st::Loop* inner = source_loop->second;
                     if (inner->latch < 0 || inner->latch >= (int)g->n.size()) {
                         valid = false;
                     } else {
                         atomic_loop_preps.insert(block);
+                        atomic_exit[block] = loop_outside(inner);
                         atomic_loop_blocks.insert(inner->body.begin(), inner->body.end());
-                        collect(g->n[inner->latch].succ_false);
+                        collect(loop_outside(inner));
                     }
                 } else if (source_loop != loop_by_prep.end()) {
                     valid = false;
@@ -16344,8 +16793,7 @@ emit_conditional_region:
             auto node_successors = [&](int block) {
                 std::set<int> successors;
                 if (atomic_loop_preps.count(block)) {
-                    const st::Loop* inner = loop_by_prep.at(block);
-                    const int outside = g->n[inner->latch].succ_false;
+                    const int outside = atomic_exit.at(block);
                     if (nodes.count(outside)) successors.insert(outside);
                     return successors;
                 }
@@ -16465,8 +16913,7 @@ emit_conditional_region:
                     return -1;
                 };
                 if (atomic_loop_preps.count(block)) {
-                    const st::Loop* inner = loop_by_prep.at(block);
-                    const int outside = g->n[inner->latch].succ_false;
+                    const int outside = atomic_exit.at(block);
                     if (!emit_cfg(block, outside, terminal, domain, body_indent)) {
                         if (std::getenv("RENOVICE_CFG_FOR_DEBUG"))
                             std::fprintf(stderr,
@@ -16633,8 +17080,17 @@ emit_conditional_region:
                 return reject_render("START_OUT_OF_RANGE", start, stop, terminal);
             if (!g->n[start].reach)
                 return reject_render("START_UNREACHABLE", start, stop, terminal);
-            if (!in_render_domain(domain, start))
+            if (!in_render_domain(domain, start)) {
+                // The escape join of the active loop (LOOP ESCAPE JOINS above): record the escape
+                // and leave the loop; the loop renderer resumes at the join after its `end`.
+                if (LoopEscape* escape = escape_to(domain, start)) {
+                    out += ind(indent) + escape->selector + " = 1\n";
+                    out += ind(indent) + "break\n";
+                    escape->used = true;
+                    return true;
+                }
                 return reject_render("START_OUTSIDE_DOMAIN", start, stop, terminal);
+            }
             auto transfers_to_enclosing_latch = [&](int target) {
                 if (!domain || target < 0) return false;
                 for (const st::Loop& enclosing : authoritative_loops) {
@@ -16653,6 +17109,13 @@ emit_conditional_region:
             };
             auto matches_current_loop_exit = [&](int target) {
                 if (!domain || target < 0) return false;
+                // A loop with registered break/return arms (LOOP ESCAPE JOINS): its canonical exit,
+                // including a source while's header-test exit, through pure JUMP relays.
+                if (!loop_escapes.empty()) {
+                    auto registered = loop_escapes.find(domain);
+                    if (registered != loop_escapes.end()
+                        && registered->second.canonical_chain.count(target)) return true;
+                }
                 for (const st::Loop& active : authoritative_loops) {
                     if (domain != &active.body || active.latch < 0
                         || active.latch >= (int)g->n.size()) continue;
@@ -16699,6 +17162,44 @@ emit_conditional_region:
                     && emitted == reachable)
                     return true;
                 return reject_render("START_ALREADY_EMITTED", start, stop, terminal);
+            }
+
+            // LOOP ESCAPE JOINS: the construct head opens the whole construct as one lexical unit.
+            // H .. loop is rendered up to the canonical exit C (every escape arm inside the loop
+            // records the escape and breaks), then C .. join only when no escape was taken.
+            {
+                auto head_item = escape_heads.find(start);
+                // A head that is also an active while header (a `while true` whose first statement
+                // is this construct) opens the while first; its body walk re-enters the head.
+                if (head_item != escape_heads.end() && !head_item->second->open
+                    && (!while_by_header.count(start)
+                        || while_by_header.at(start) == head_item->second->loop)) {
+                    LoopEscape& escape = *head_item->second;
+                    const int canonical = escape.canonical, join = escape.join;
+                    auto internal = [&](int block) {
+                        return block >= 0 && (block == canonical || escape.pre.count(block)
+                                              || escape.continuation.count(block)
+                                              || escape.arm.count(block));
+                    };
+                    if (internal(stop) || internal(terminal) || emitted.count(join)
+                        || emitted.count(canonical)
+                        || !escape_continuation_ok(canonical, join, stop, terminal, domain))
+                        return reject_render("LOOP_ESCAPE_CONTINUATION", start, stop, terminal);
+                    escape.open = true;
+                    escape.used = false;     // a rolled-back attempt may have rendered it before
+                    escape.selector = "__renovice_state_" + std::to_string(state_name_serial++);
+                    out += ind(indent) + "local " + escape.selector + " = 0\n";
+                    const bool head_rendered = emit_cfg(start, canonical, terminal, domain, indent);
+                    escape.open = false;
+                    if (!head_rendered) return false;
+                    if (!escape.used)
+                        return reject_render("LOOP_ESCAPE_UNUSED", start, stop, terminal);
+                    out += ind(indent) + "if " + escape.selector + " ~= 1 then\n";
+                    if (!emit_cfg(canonical, join, terminal, domain, indent + 1)) return false;
+                    out += ind(indent) + "end\n";
+                    return join == stop || join == terminal
+                        || emit_cfg(join, stop, terminal, domain, indent);
+                }
             }
 
             auto while_item = while_by_header.find(start);
@@ -16831,6 +17332,11 @@ emit_conditional_region:
                 auto moves = for_move_candidates.find(loop.prep);
                 if (moves != for_move_candidates.end())
                     suppress_insns.insert(moves->second.begin(), moves->second.end());
+                // LOOP ESCAPE JOINS: a loop with a registered escape is rendered only inside its
+                // construct (the hook at the construct head opens it and names the selector).
+                auto escape_item = loop_escapes.find(&loop.body);
+                if (escape_item != loop_escapes.end() && !escape_item->second.open)
+                    return reject_render("LOOP_ESCAPE_OUTSIDE_CONSTRUCT", start, stop, terminal);
                 emit_block(loop.prep, indent);
                 emitted.insert(loop.prep);
                 out += ind(indent) + header + "\n";
@@ -17258,7 +17764,7 @@ emit_conditional_region:
                 // reaches the same enclosing latch.  Spell only the local transfer as `break` and
                 // let the caller own the canonical exit and enclosing continuation exactly once.
                 if (next >= 0 && domain && !in_render_domain(domain, next)
-                    && transfers_to_enclosing_latch(next)) {
+                    && transfers_to_enclosing_latch(next) && !escape_to(domain, next)) {
                     out += ind(indent) + "break\n";
                     return true;
                 }
@@ -17273,7 +17779,7 @@ emit_conditional_region:
                     return true;
                 }
                 if (next >= 0 && domain && !in_render_domain(domain, next)
-                    && transfers_to_enclosing_latch(next)) {
+                    && transfers_to_enclosing_latch(next) && !escape_to(domain, next)) {
                     out += ind(indent) + "break\n";
                     return true;
                 }
@@ -17315,7 +17821,17 @@ emit_conditional_region:
                         && trampoline.preds.size() == 1 && trampoline.preds.front() == start
                         && matches_current_loop_exit(next) && !loop_by_prep.count(outside);
                 }
-                if (private_exit_trampoline) {
+                LoopEscape* direct_escape = escape_to(domain, outside);
+                if (direct_escape) {
+                    // A body test that jumps straight to the active loop's escape join (an empty
+                    // escape arm): record the escape, then leave the loop.
+                    out += ind(indent) + "if " + cond_of(start, outside == fallthrough)
+                         + " then\n";
+                    out += ind(indent + 1) + direct_escape->selector + " = 1\n";
+                    out += ind(indent + 1) + "break\n";
+                    out += ind(indent) + "end\n";
+                    direct_escape->used = true;
+                } else if (private_exit_trampoline) {
                     out += ind(indent) + "if " + cond_of(start, outside == fallthrough)
                          + " then\n";
                     emit_block(outside, indent + 1);
@@ -17432,7 +17948,7 @@ emit_conditional_region:
                         if (source_loop != loop_by_prep.end()) {
                             const int latch = source_loop->second->latch;
                             if (latch >= 0 && latch < (int)g->n.size())
-                                work.push_back(g->n[latch].succ_false);
+                                work.push_back(loop_outside(source_loop->second));
                             continue;
                         }
                         auto natural_loop = while_by_header.find(block);
@@ -17446,6 +17962,8 @@ emit_conditional_region:
                                         && !natural_loop->second->body.count(successor))
                                         loop_exits.insert(successor);
                             }
+                            if (registered_while_outside(natural_loop->second) >= 0)
+                                loop_exits = {registered_while_outside(natural_loop->second)};
                             if (loop_exits.size() == 1) work.push_back(*loop_exits.begin());
                             continue;
                         }

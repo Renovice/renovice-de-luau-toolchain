@@ -56,7 +56,8 @@ pass.
 | 4 (#68-#71) | 9dd6e06 | fd0d4c81 | 4,481 | 5,389 | 4,367 | 77,348 | 0 | ALL PASS |
 | 5 (#72-#75) | 4f6cb65 | 5713df5f | 4,515 | 5,389 | 4,501 | 77,410 | 0 | ALL PASS |
 | 6 (#76-#77) | c8b6042 | 5ce9c9f8 | 4,533 | 5,389 | 4,519 | 77,432 | 0 | ALL PASS (G14 91 -> 98) |
-| 7 (#78-#79) | (this) | 909755e9 | 4,544 | 5,434 | 4,533 | 79,024 of 83,518 | 0 | ALL PASS (G13 unmasking recorded) |
+| 7 (#78-#79) | 303c799 | 909755e9 | 4,544 | 5,434 | 4,533 | 79,024 of 83,518 | 0 | ALL PASS (G13 unmasking recorded) |
+| 8 (#80-#81) | (this) | 8ea2bc37 | 4,672 | 5,437 | 4,667 | 79,266 of 83,518 | 0 | ALL PASS (G14 98 -> 113) |
 
 CFG-ID 76.2% -> 82.4% of 5,478; CFG-ID + dataflow 74.4% -> 82.2% (dataflow FAIL among CFG-ID PASS 97 -> 14). Run folders: `work/u441-r1-49e0683e`,
 `work/u441-r2b-b5200665`, `work/u441-r3b-928298db`, `work/u441-r4b-fd0d4c81` (each with `transitions.json` and
