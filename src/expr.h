@@ -1004,35 +1004,6 @@ private:
         // right operand falls through to the label. No backtracking.
         const ir::IInsn& j = ip.code[(size_t)L - 1];
         const bool then_jump = L - 1 > pc && (j.op == 0x40 || j.op == 0x25) && j.branch && j.target >= L;
-        // `cmp or y` / `cmp and y` as a value with a comparison as the left operand
-        // (compileConditionValue with a target): `LOADB R,b` before the comparison's operands, the
-        // comparison jumps to the end (taken when it holds for `or`, b = true; when it fails for
-        // `and`, b = false), y is computed into R. Same-operator chains re-associate as above.
-        if (!reg_test && !then_jump) {
-            int r = -1, born = -1;
-            for (const auto& kv : st.env) {
-                const Slot& sl = kv.second;
-                if (sl.consumed || sl.multret || sl.self || sl.born >= pc || sl.born <= born) continue;
-                if (kv.first == in.A || kv.first == (int)(in.aux & 0xff)) continue;
-                r = kv.first; born = sl.born;
-            }
-            const ir::IInsn* lb = (r >= 0 && born >= 0) ? &ip.code[(size_t)born] : nullptr;
-            if (lb && lb->op == 0x04 && lb->C == 0 && (int)lb->A == r) {
-                const bool or_ = lb->B != 0;
-                EP x = compare(in, pc, or_);
-                if (!x || st.fail) return -1;
-                for (const auto& kv : st.env)
-                    if (!kv.second.consumed && kv.second.born > born) { bad(F_BRANCH_SHAPE, pc); return -1; }
-                take(r, pc);
-                loadb_tested.insert(x.get()); keep.push_back(x);
-                int reg = r;
-                EP y;
-                if (!sub_value(pc + 1, L, reg, y)) return -1;
-                EP v = chain(or_ ? "or" : "and", x, y, L);
-                def(r, v, L - 1, false, false, -1);
-                return st.fail ? -1 : L;
-            }
-        }
         // `(x and y) or z` / `(x or y) and z` as a value (compileExprAndOr general path with a
         // condition-fast left operand, compileConditionValue's else-jump branch): a test of x jumps
         // to the right operand z when x decides nothing, y is computed into the target and tested
@@ -1070,6 +1041,36 @@ private:
             auto v = node(EK::Bin); v->text = outer_or ? "or" : "and"; v->a = inner; v->b = z;
             def(reg, v, end - 1, false, false, -1);
             return st.fail ? -1 : end;
+        }
+        // `cmp or y` / `cmp and y` as a value with a comparison as the left operand
+        // (compileConditionValue with a target): `LOADB R,b` before the comparison's operands, the
+        // comparison jumps to the end (taken when it holds for `or`, b = true; when it fails for
+        // `and`, b = false), y is computed into R. Same-operator chains re-associate as above.
+        if (!reg_test && !then_jump && !split_left) {
+            int r = -1, born = -1;
+            for (const auto& kv : st.env) {
+                const Slot& sl = kv.second;
+                if (sl.consumed || sl.multret || sl.self || sl.born >= pc || sl.born <= born) continue;
+                const bool reg_cmp = op == 0x37 || op == 0x27 || op == 0x21 || op == 0x1c || op == 0x23 || op == 0x33;
+                if (kv.first == in.A || (reg_cmp && kv.first == (int)(in.aux & 0xff))) continue;
+                r = kv.first; born = sl.born;
+            }
+            const ir::IInsn* lb = (r >= 0 && born >= 0) ? &ip.code[(size_t)born] : nullptr;
+            if (lb && lb->op == 0x04 && lb->C == 0 && (int)lb->A == r) {
+                const bool or_ = lb->B != 0;
+                EP x = compare(in, pc, or_);
+                if (!x || st.fail) return -1;
+                for (const auto& kv : st.env)
+                    if (!kv.second.consumed && kv.second.born > born) { bad(F_BRANCH_SHAPE, pc); return -1; }
+                take(r, pc);
+                loadb_tested.insert(x.get()); keep.push_back(x);
+                int reg = r;
+                EP y;
+                if (!sub_value(pc + 1, L, reg, y)) return -1;
+                EP v = chain(or_ ? "or" : "and", x, y, L);
+                def(r, v, L - 1, false, false, -1);
+                return st.fail ? -1 : L;
+            }
         }
         // and/or value on the target register
         if (reg_test && !then_jump) {
