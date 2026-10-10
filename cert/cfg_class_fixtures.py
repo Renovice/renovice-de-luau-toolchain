@@ -49,6 +49,18 @@ Proper dispatcher fixes (proper campaign 2026-10-09):
     + PROPER_EXIT_IN_BODY_LEGACY_EXIT_ARM_ONCE_{CFG_FAILS,BEHAVIOR_SAME}  RENOVICE_NO_PROPER_EXIT_ARM_ONCE
                               (the dispatcher re-tested a break condition: an extra IF, behavior-neutral)
 
+Captured locals (captures campaign 2026-10-10, cert/fixtures/captures_2026_10_10, src/scoped_captures.h):
+  scoped_capture_loop         RENOVICE_NO_SCOPED_CAPTURE_LOCALS (a block-scoped local captured by
+                              reference was one flat function local: every loop iteration's closure
+                              shared it and later code overwrote it; CFG-ID lacked the CLOSEUPVALS)
+    + SCOPED_CAPTURE_LOOP_LEGACY_DUPLICATE_CAPTURE_{CFG_FAILS,BEHAVIOR_SAME}
+                              RENOVICE_NO_DUPLICATE_CAPTURE_SNAPSHOT (`local alias = base`: one register
+                              in two by-value upvalue slots was merged into one slot)
+    + SCOPED_CAPTURE_LOOP_LEGACY_MARKERS_ONLY_{CFG_FAILS,BEHAVIOR_DIFFERS}
+                              RENOVICE_SCOPED_CAPTURE_MARKERS_ONLY (the CLOSEUPVALS markers alone
+                              change nothing: the legacy defect is still there)
+    + SCOPED_CAPTURE_LOOP_DEFAULT_CLOSES  the source repeats within 3 rounds
+
 Compiler-closure fix (#49), fixture selector_residue:
   SELECTOR_RESIDUE_RUNS / _DEFAULT_BEHAVIOR_SAME / _DEFAULT_CFG_IDENTITY
   SELECTOR_RESIDUE_DEFAULT_CLOSES     the decompile->recompile source repeats within 3 rounds
@@ -124,7 +136,9 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INEXACT_HEAD_SELECTOR",
             "RENOVICE_NO_DAG_PRECISE_NESTED_EXIT", "RENOVICE_NO_DECISION_PREP_OWNER",
             "RENOVICE_NO_FORNLOOP_LATCH_KEY", "RENOVICE_NO_DAG_BREAK_ARM_EXIT",
-            "RENOVICE_NO_WHILE_PREP_GUARD")
+            "RENOVICE_NO_WHILE_PREP_GUARD",
+            "RENOVICE_NO_SCOPED_CAPTURE_LOCALS", "RENOVICE_SCOPED_CAPTURE_MARKERS_ONLY",
+            "RENOVICE_NO_DUPLICATE_CAPTURE_SNAPSHOT")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
@@ -152,14 +166,23 @@ DECOMPILER_FIXTURES = {
     # Loops campaign (#82-#89): Platform p2 break arm, VentKidsBand p1 innermost-first
     "loop_break_arm_join": "RENOVICE_NO_INEXACT_HEAD_SELECTOR",
     "innermost_nested_repeat": "RENOVICE_NO_INNERMOST_LOOP_FIRST",
+    # Captures campaign (2026-10-10, scoped_captures.h): per-iteration / per-block locals captured by
+    # reference shared one flat variable (AlignmentDisplay p9, DuelistPistolsPassive p4)
+    "scoped_capture_loop": "RENOVICE_NO_SCOPED_CAPTURE_LOCALS",
 }
 FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
                 for name in ("escape_join_forgen", "escape_join_loop_value", "while_break_return_arms")}
+FIXTURE_DIRS["scoped_capture_loop"] = os.path.join(HERE, "fixtures", "captures_2026_10_10")
 # Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation
 # [, behavior expectation]). cfg expectation "FAIL" = the gate must catch it; "PASS" = a recorded gate
 # blind spot. Behavior expectation (default "DIFFERS"); "SAME" = a CFG-only defect (an extra
 # operation stock never had, behavior-neutral). Space-separated switches are all set.
 EXTRA_LEGACY = (
+    # one register captured in two by-value slots (`local alias = base`, Luau binds both names to one
+    # register): legacy merged the slots, upvalue indices shifted (CFG-only, behavior-neutral)
+    ("scoped_capture_loop", "DUPLICATE_CAPTURE", "RENOVICE_NO_DUPLICATE_CAPTURE_SNAPSHOT", "FAIL", "SAME"),
+    # markers alone change nothing: the marker-only output is the legacy output
+    ("scoped_capture_loop", "MARKERS_ONLY", "RENOVICE_SCOPED_CAPTURE_MARKERS_ONLY", "FAIL"),
     # the break arm printed inside its loop (#83) covers #46's arm too
     ("nested_for_break", "BREAK_ARM", "RENOVICE_NO_FOR_BREAK_ARM RENOVICE_NO_INLINE_BREAK_ARM", "FAIL"),
     ("nested_for_break", "ENTRY_NIL", "RENOVICE_NO_LOOP_ENTRY_NIL", "PASS"),
@@ -351,6 +374,13 @@ def main():
                         checks[key + "_BEHAVIOR_SAME"] = trace(extra_source, temp, prelude) == expected
                     else:
                         checks[key + "_BEHAVIOR_DIFFERS"] = trace(extra_source, temp, prelude) != expected
+
+            # (captures campaign 2026-10-10) the scoped capture locals re-decompile to themselves
+            fixture = os.path.join(FIXTURE_DIRS["scoped_capture_loop"], "scoped_capture_loop.luau")
+            original = os.path.join(temp, "scoped_capture_loop.close.lua_B")
+            run([DEC, "recompile", fixture, original])
+            checks["SCOPED_CAPTURE_LOOP_DEFAULT_CLOSES"] = closes_within(original, temp,
+                                                                         "scoped_capture_loop.close", 3)
 
             fixture = os.path.join(FIX, "selector_residue.luau")
             expected = trace(fixture, temp)

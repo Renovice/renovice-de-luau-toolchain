@@ -21,6 +21,10 @@ literal is inlined, and every inlined copy references THE SAME prototype.
   <F>_MUTATION_EDITED_COPY_FAILS  one marked copy edited in the decompiled source: the copies no longer
                               compile identically, are NOT merged (recompile reports unequal=1) and the
                               gate FAILs
+  shared_main_snapshot        the inlined closure is created in the MAIN CHUNK from by-value snapshots
+                              (StatsLib): + SHARED_MAIN_SNAPSHOT_LEGACY_UNSHARE_PROTO_COUNT_FAILS with
+                              RENOVICE_NO_UNSHARED_SNAPSHOT_CLOSURE (Luau shares the snapshots' closure,
+                              DUPCLOSURE, and the merge refuses; src/scoped_captures.h)
 The legacy outputs behave the same in these fixtures (closure identity differs only for two DUPCLOSURE
 sites of one prototype inside one function, which the merge refuses; see shared_protos.h).
 
@@ -49,8 +53,9 @@ LUAU = os.path.join(ROOT, "bin", "luau.exe")
 LUAU_COMPILE = os.path.join(ROOT, "bin", "luau-compile.exe")
 FIX = os.path.join(HERE, "fixtures", "proto_shape_2026_10_09")
 OPT_OUTS = ("RENOVICE_NO_SHARED_PROTO_MARKER", "RENOVICE_NO_SHARED_PROTO_MERGE", "RENOVICE_NATIVE",
-            "RENOVICE_NO_DEAD_TAIL")
-SHARED_FIXTURES = ("shared_newclosure", "shared_dupclosure")
+            "RENOVICE_NO_DEAD_TAIL", "RENOVICE_NO_UNSHARED_SNAPSHOT_CLOSURE",
+            "RENOVICE_NO_CAPTURE_SNAPSHOT")
+SHARED_FIXTURES = ("shared_newclosure", "shared_dupclosure", "shared_main_snapshot")
 DEAD_TAIL_FIXTURES = ("dead_tail_loop", "dead_tail_return")
 CLOSURE = re.compile(r"(?:DUP|NEW)CLOSURE\s.*-> proto\[(\d+)\]")
 
@@ -213,6 +218,15 @@ def main():
         with tempfile.TemporaryDirectory(prefix="renovice-proto-shape-") as temp:
             for name in SHARED_FIXTURES:
                 shared_checks(name, temp, checks)
+            # (captures campaign 2026-10-10) the chunk-level snapshots of an inlined NEWCLOSURE must
+            # stay unshared; with RENOVICE_NO_UNSHARED_SNAPSHOT_CLOSURE Luau shares them (DUPCLOSURE),
+            # the merge refuses and the prototype count differs (StatsLib)
+            original = os.path.join(temp, "shared_main_snapshot.original.lua_B")
+            legacy_env = base_env(); legacy_env["RENOVICE_NO_UNSHARED_SNAPSHOT_CLOSURE"] = "1"
+            _, legacy = round_trip(original, temp, "shared_main_snapshot.legacy_unshare",
+                                   decompile_env=legacy_env)
+            legacy_cfg = verdict("cfg-identity", original, legacy)
+            checks["SHARED_MAIN_SNAPSHOT_LEGACY_UNSHARE_PROTO_COUNT_FAILS"] = legacy_cfg[1] != legacy_cfg[2]
             for name in DEAD_TAIL_FIXTURES:
                 dead_tail_checks(name, temp, checks)
     except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:

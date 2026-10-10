@@ -17,6 +17,7 @@
 #include <set>
 #include "expr.h"
 #include "structan.h"
+#include "scoped_captures.h"
 
 namespace em {
 
@@ -1376,7 +1377,13 @@ struct Emitter {
                 }
                 case ex::SK::Branch: break;                 // the structure owns control flow (but
                                                             // see the loop-exit check below)
-                case ex::SK::Local: case ex::SK::LoopCtl: case ex::SK::Comment: break;
+                case ex::SK::Comment:
+                    // CLOSEUPVALS marker for the scoped-capture pass (scoped_captures.h), consumed
+                    // and removed right after the prototype body is rendered.
+                    if (s.text == "RENOVICE_CLOSEUPVALS")
+                        out += ind(depth) + scap::marker_text(s.insn) + "\n";
+                    break;
+                case ex::SK::Local: case ex::SK::LoopCtl: break;
                 default: break;
             }
         }
@@ -18697,6 +18704,10 @@ inexact_selector_fallback:
             }
             body.swap(out);
         }
+        // Block-scoped locals captured by reference (scoped_captures.h): consumes every
+        // CLOSEUPVALS marker line before any other text pass sees the body.
+        scap::scope_captured_block_locals(body, *ip);
+        scap::unshare_snapshot_closures(body, *ip);
         if (std::getenv("RENOVICE_EMIT_RAW_BODY_TRACE"))
             std::fprintf(stderr, "RAW_BODY pidx=%d\n%sEND_RAW_BODY\n", pidx, body.c_str());
         // Luau inserts an implicit zero-result RETURN when source control can fall off the end of a
