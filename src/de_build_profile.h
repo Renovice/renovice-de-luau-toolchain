@@ -1,6 +1,7 @@
 #pragma once
 #include "de_container.h"
 #include "de_opcode_profile.h"
+#include <cstdlib>
 #include <cstring>
 #include <cstdio>
 #include <map>
@@ -49,6 +50,49 @@ inline std::string profile_walk_problem(const Module& module, bool u44) {
             if (branch.second < 0 || branch.second >= (long long)code.size() || !boundary[(size_t)branch.second])
                 return "proto " + std::to_string(index) + " branch at byte " + std::to_string(branch.first)
                      + " targets byte " + std::to_string(branch.second) + " (not an instruction boundary)";
+    }
+    return "";
+}
+
+// Input-profile routing (2026-10-10). A container valid ONLY under the U43 opcode numbering is U43
+// bytecode wherever it is found (the 44.1.1 cache ships 13 such stale modules, byte-identical to the
+// U43 corpus). A U44 entry point handles it through its own profile: U43 opcodes, U43 name-hash
+// seed, rebuilt as U43, gated against stock under U43. Detection is structural only
+// (profile_walk_problem), never by name. RENOVICE_NO_INPUT_PROFILE_ROUTING restores the batch-1
+// behavior (#54): a U44 entry point rejects such input with the exact reason.
+inline bool input_profile_routing_enabled() {
+    return !std::getenv("RENOVICE_NO_INPUT_PROFILE_ROUTING") && !std::getenv("RENOVICE_NO_INPUT_PROFILE_CHECK");
+}
+// True when the container is structurally valid under the U43 numbering and NOT under U44.
+inline bool is_u43_only_profile(const Module& module) {
+    return !profile_walk_problem(module, true).empty() && profile_walk_problem(module, false).empty();
+}
+
+// The opcode profile a stock-anchored gate reads both sides with. `requested_u44` is the gate's
+// `--u44` flag. With routing, a U43-only stock module is gated under U43, and the candidate must be
+// structurally valid under the same profile as stock: a rebuild in the other format is a different
+// container, never "the same program". Returns "" or the exact mismatch; `note` names a routed gate.
+inline std::string resolve_gate_profile(const std::string& stock_bytes, const std::string& candidate_bytes,
+                                        bool& u44, std::string& note) {
+    note.clear();
+    if (!u44 || !input_profile_routing_enabled()) return "";
+    Module stock, candidate;
+    try { stock = walk(stock_bytes); candidate = walk(candidate_bytes); }
+    catch (const std::exception&) { return ""; }     // container errors are the loader's to report
+    if (is_u43_only_profile(stock)) {
+        u44 = false;
+        const std::string problem = profile_walk_problem(candidate, false);
+        if (!problem.empty())
+            return "input profile mismatch: stock is U43-profile bytecode, candidate is not (U43 walk: "
+                   + problem + ")";
+        note = "stock=u43 candidate=u43 gate=u43";
+        return "";
+    }
+    if (profile_walk_problem(stock, true).empty()) {
+        const std::string problem = profile_walk_problem(candidate, true);
+        if (!problem.empty())
+            return "input profile mismatch: stock is U44-profile bytecode, candidate is not (U44 walk: "
+                   + problem + ")";
     }
     return "";
 }

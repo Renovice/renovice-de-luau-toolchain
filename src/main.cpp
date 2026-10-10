@@ -1427,6 +1427,30 @@ static bool reg_in_aux(uint8_t op){ return op==0x37||op==0x27||op==0x21||op==0x1
 // one: a U44 hash that happens to equal an unrelated U43 hash would otherwise render a wrong name
 // that recompiles to a different U44 hash. Legacy (U43) modes never set these.
 static bool g_input_profile_u44 = false;
+// Input-profile routing (de::input_profile_routing_enabled). A U44 entry point that is given a
+// module valid ONLY under the U43 opcode numbering decompiles it through its own profile: no opcode
+// lowering, names through the namebase under the U43 seed, and the same raw-hash source contract
+// (seed declaration + hash-class metadata) with the U43 seed. g_raw_hash_names marks that contract
+// independent of the opcode profile; g_source_seed is the seed the source declares.
+static bool g_input_profile_routed_u43 = false;
+static bool g_raw_hash_names = false;
+static uint32_t g_source_seed = de::NAMEHASH_SEED_U44;
+// Select the profile of a U44 entry point's input. Must run before the namebase is loaded.
+static void select_u44_entry_profile(const std::string& path) {
+    g_input_profile_u44 = true;
+    g_input_profile_routed_u43 = false;
+    g_source_seed = de::NAMEHASH_SEED_U44;
+    if (!de::input_profile_routing_enabled()) return;
+    try {
+        const std::string bytes = read_file(path);
+        if (bytes.empty() || !de::is_u43_only_profile(de::walk(bytes))) return;
+    } catch (const std::exception&) { return; }   // container errors are reported by the walk later
+    g_input_profile_u44 = false;
+    g_input_profile_routed_u43 = true;
+    g_source_seed = de::NAMEHASH_SEED_2026_06_19;
+    std::fprintf(stderr, "input profile: U43-profile bytecode, handled through the U43 profile "
+                 "(opcodes U43, name-hash seed %08x)\n", g_source_seed);
+}
 // (0 = global, 1 = field read) spellings that occur BOTH hashed and string-keyed in one module.
 // Their hashed occurrences render with the exact raw suffix so both classes survive the source.
 static std::set<std::pair<int, std::string>> g_u44_mixed_names;
@@ -1603,13 +1627,14 @@ static ir::IProto ir_annotate(const de::Proto& p, int pidx,
         } else if (k_aux_name(in.op)) {                            // NAMECALL
             const ir::KVal* k = kref(in, (int)(in.aux & 0xffff), "name");
             in.note = k ? k->str : "";
-            if (g_input_profile_u44 && k && k->kind == ir::KKind::NameHash && !ex::is_ident(in.note))
+            if ((g_input_profile_u44 || g_raw_hash_names) && k && k->kind == ir::KKind::NameHash
+                && !ex::is_ident(in.note))
                 in.note = raw_hash_alias(in.note, k->hash);
             std::snprintf(buf,sizeof buf,"R%d R%d :%s", in.A, in.B, in.note.c_str());
         } else if (k_aux_str(in.op)) {                              // GET/SETFIELD, GET/SETGLOBAL
             const ir::KVal* k = kref(in, (int)(in.aux & 0xffff), "str");
             in.note = k ? k->str : "";
-            if (g_input_profile_u44 && k && k->kind == ir::KKind::NameHash) {
+            if ((g_input_profile_u44 || g_raw_hash_names) && k && k->kind == ir::KKind::NameHash) {
                 const int name_class = u44_name_class(in.op);
                 if (!ex::is_ident(in.note)
                     || (name_class >= 0 && g_u44_mixed_names.count({name_class, in.note})))
@@ -1695,7 +1720,7 @@ static ir::NameBase g_nb;
 // reached by two different names is ambiguous and stays raw. A name that itself parses as a raw
 // `X__aabbccdd` spelling would recompile as that suffix rather than its own hash, so it stays raw.
 static long long g_u44_namebase_ambiguous = 0, g_u44_namebase_suffix_skipped = 0;
-static void ir_load_u44_namebase(const std::string& tsv) {
+static void ir_load_seeded_namebase(const std::string& tsv, uint32_t seed) {
     std::unordered_map<uint32_t, std::string> names;
     std::set<uint32_t> ambiguous;
     size_t i = 0;
@@ -1710,7 +1735,7 @@ static void ir_load_u44_namebase(const std::string& tsv) {
             uint32_t suffix = 0;
             if (de::parse_hash_suffix(name, suffix)) ++g_u44_namebase_suffix_skipped;
             else {
-                const uint32_t hash = de::de_name_hash(name, de::NAMEHASH_SEED_U44);
+                const uint32_t hash = de::de_name_hash(name, seed);
                 auto inserted = names.emplace(hash, name);
                 if (!inserted.second && inserted.first->second != name) ambiguous.insert(hash);
             }
@@ -1728,7 +1753,9 @@ static void ir_load_namebase() {
     if (g_nb.loaded) return;
     std::string t = read_file(exe_dir() + "\\..\\data\\namebase_merged.tsv");
     if (t.empty()) t = read_file("data/namebase_merged.tsv");
-    if (g_input_profile_u44) { ir_load_u44_namebase(t); return; }
+    if (g_input_profile_u44) { ir_load_seeded_namebase(t, de::NAMEHASH_SEED_U44); return; }
+    // A routed U43 module uses the same raw-hash contract under its own seed.
+    if (g_input_profile_routed_u43) { ir_load_seeded_namebase(t, de::NAMEHASH_SEED_2026_06_19); return; }
     g_nb.load(t);
 }
 
@@ -2903,6 +2930,21 @@ int main(int argc, char** argv) {
             if (!map.eof()) { std::fprintf(stderr, "profile: invalid source alias map\n"); return 1; }
         }
         de::active_namehash_seed = 0x768e5ed0u;
+        // Input-profile routing: a source decompiled from U43-profile bytecode by a U44 entry point
+        // declares the U43 seed (select_u44_entry_profile); it is rebuilt in its own format (U43
+        // opcodes and seed), the format of the stock module it came from. An alias map is a U43 ->
+        // U44 translation and never applies to it.
+        if (de::input_profile_routing_enabled() && argc < 5) {
+            uint32_t declared = 0;
+            bool has_declaration = false;
+            try { has_declaration = tc::parse_name_hash_seed_directive(read_file(argv[2]), declared); }
+            catch (const std::exception&) {}   // reported by cmd_recompile's own metadata parse
+            if (has_declaration && declared == de::NAMEHASH_SEED_2026_06_19) {
+                de::active_namehash_seed = de::NAMEHASH_SEED_2026_06_19;
+                std::printf("[derecomp] source declares the U43 name-hash seed %08x: built in the U43 profile\n",
+                            declared);
+            }
+        }
         return cmd_recompile(argc, argv);
     }
     if (mode == "recompile-u44-raw" && argc >= 4) {
@@ -2913,7 +2955,7 @@ int main(int argc, char** argv) {
     if (mode == "decompile-mod-u44" && argc >= 3) return cmd_decompile_mod_u44(argc, argv);
     if (mode == "semantic-ir-render-module-u44" && argc >= 4)
         return cmd_semantic_ir_render_module_u44(argc, argv);
-    if (mode == "ir-u44" && argc >= 3) { g_input_profile_u44 = true; return cmd_ir(argc, argv); }
+    if (mode == "ir-u44" && argc >= 3) { select_u44_entry_profile(argv[2]); return cmd_ir(argc, argv); }
     if (mode == "const-identity" && argc >= 4) return cmd_const_identity(argc, argv);
     if (mode == "cfg-identity" && argc >= 4) return cmd_cfg_identity(argc, argv);
     if (mode == "loop-exit-scan" && argc >= 3) return cmd_loop_exit_scan(argc, argv);
