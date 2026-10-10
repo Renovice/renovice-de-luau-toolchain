@@ -443,3 +443,33 @@ CFG-ID + dataflow 4,667 -> 4,817, equal prototypes 79,266 -> 79,485, compiler cl
 FAIL -> PASS); no module PASS -> FAIL on any gate, no prototype loss. Dataflow FAIL among CFG-ID PASS 5 -> 13 (newly
 CFG-passing modules with pre-existing dataflow differences; no module lost dataflow). `cert/gates.py 300 150`: all gates
 pass except the Gate 14 check count 113 -> 125 (all 125 pass; baseline moved with the record).
+
+## 2026-10-10 — 44.1.1 campaign wave 3: generic-for preparation shapes (agent forprep; numbers provisional)
+
+Population: the FORGPREP-first and LOAD-first CFG-ID labels of `work/u441-r9-c62f1665` (237 modules). Region trees
+(`RENOVICE_SATREE_PIDX`, `forprep_wave3/tools/forg_tree.py`): of the 114 prototypes whose first difference names
+FORGPREP, 112 are not rendered by the CFG renderer (`RENOVICE_CFG_FOR_DEBUG`) and fall back to the region emitter, which
+had no exact rendering of a generic `for` outside the plain `While{FORGLOOP, body}` shape.
+
+| # | defect | symptom | how found | fix (switch) |
+|---|---|---|---|---|
+| 90 | `natural_loop_body(start)` collects back edges into the BODY START; a generic for's dominance header is its FORGLOOP (FORGPREP jumps there), so the region emitter's break scope was EMPTY for every generic `for` | no body block was "inside the loop": exits printed no `break`, the #83 inline break arm was never placed; the arm ran after the loop through the selector, reading the loop variable out of scope (`found = nil`) — CFG-ID blind, dataflow FAIL | forprep; luau.exe `gfor_break_plain` under `RENOVICE_NO_CFG_FOR_RENDER`, `gfor_break_in_if` | the FORGLOOP's own natural loop when the start yields none and that FORGLOOP back-edges to the start (`RENOVICE_NO_GENERIC_FOR_BREAK_SCOPE`) |
+| 91 | IfThen(Seq(prep, loop), ARM) claimed the `for` when the prep was the head's first block, although the block entering ARM is inside the loop (a break arm) or after the complete loop | the conditional treated the whole head (loop body included) as setup: body printed once before the header, the arm became the body, the loop's region opened a second `for` (Vault p2, AimGravityFX p1); NemesisAssassinate p18: an earlier finished loop's header printed as an empty `for`, its `if IsPromotedToHost()` lost | forprep | only the prep itself or the loop's latch can make the conditional the loop's zero-trip gate (`RENOVICE_NO_BREAK_ARM_DECISION_OWNER`); NOT extended to compound break conditions (several deciding blocks): that reached the recorded-exit selector (CFG-ID PASS, dataflow FAIL), withdrawn |
+| 92 | a region claimed from its FORGLOOP by the prep-free latch scan emitted `parts[0]` (set order: the lowest-id part = the loop BODY) as setup before the header | `NaturalLoop{body, FORGLOOP}`: first body block printed before the `for` with nil loop variables, then an empty/partial `for` | forprep | such a region is latch-headed: no setup, every part is body (`RENOVICE_NO_GENERIC_LATCH_HEADED`) |
+| 93 | inside `reduce_loop_body_dag` the function entry is not in the cut graph, so `dominates_current` was false for every pair: the innermost-first pass never fired and region-id order headed a nested generic `for` at its body block, swallowing the prep and the enclosing loop's header | `while true do if IsNull(found) then for ... break ... end end end`: `for` printed twice, body hoisted (luau.exe `gfor_break_in_if`) | forprep | loop selection measures dominance from the cut body's root (`RENOVICE_NO_CUT_BODY_DOMINANCE`); #67 (moving `entry`) stays opt-in |
+| 94 | a generic header with several latches (`continue`s / if-without-else ending the body) was reduced one latch at a time into nested partial NaturalLoops; the three-latch special case kept its body unreduced | outer part printed outside the `for` (AimGravityFX p1, CapitalShipWeakPoints, KahlMissionThumper); three-latch bodies lost all `continue`s but one (`gfor_first_match` under `RENOVICE_NO_CFG_FOR_RENDER`) | forprep; luau.exe `gfor_multilatch_in_while` | one natural loop per generic FORGLOOP header (union of every dominance latch), body reduced by the loop-body DAG in GENERIC SINK MODE (FORGLOOP kept as the only sink, its out-edges cut, the body start as root); the three-latch path uses the same reduction (`RENOVICE_NO_GENERIC_MULTI_LATCH_UNION`) |
+| 95 | the terminal-search / terminal-arm rejections (EndOfMatch, ChatRedux rules) also rejected a conditional whose own unique decision block IS the claimed FORNPREP | the FORNPREP printed as the raw `if not ((step > 0 and i > n) or ...)` zero-trip guard around a latch-opened `for` (BountyHunterBadge p1; the LOAD -> LOAD residue of CFG_FOR_LOOP_FIXES_2026-09-30) | forprep; `nfor_return_arm` (CFG-only, behavior-neutral) | the deciding FORNPREP keeps its loop (`RENOVICE_NO_DECIDING_PREP_KEEPS_LOOP`) |
+
+Overlap note for the integrator: #93/#94 touch `reduce_loop_body_dag` (new sink mode, cut root) and loop selection in
+`src/structan.h`; #90-#92/#95 are in the `emit_region` loop-claim code of `src/emit.h`. `emit_cfg_for_function` is unchanged.
+
+Withdrawn on measurement: FORGLOOP-headed regions keyed as their latch by default (`RENOVICE_DIRECT_FORGLOOP_IDENTITY`
+for every region; fixes TennoHubHangar p2, repro `forprep_wave3/repro/gfor_before_while.luau`) — 8 CONST-ID PASS -> FAIL
+(lost NAMECALLs, RadialBlindAbility p13, AbilitiesLib p102) and 2 closure losses (Volt OverLoad x2).
+
+Still open (repros in `RESEARCH/CFG_CAMPAIGN_U441_2026-10-09/forprep_wave3/repro`): compound break condition
+(`if a or b then x = v; break end`, `gfor_compound_break_in_while`, ObjectivePickupScripts p1); a Proper-dispatcher
+escape arm that reads the loop variable after the loop (DaxFirePool p1, DragonGroundFirebreath p3, LasrianTank p11,
+VoidAngelCorruption p4, InfestLink p13, EmberBossInferno p7: CFG-ID PASS since this batch, dataflow FAIL
+`-D:FORGLOOP`, both before and after); escape-join selector residue of -O2 inlined two-exit numeric fors (LOAD -> LOAD
+`N:-1 -> N:0`, ToxinInoculation p8; CFG renderer).

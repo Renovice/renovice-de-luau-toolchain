@@ -169,11 +169,31 @@ struct Analyzer {
     // Dominance in the CURRENT reduced graph. A natural-loop back edge is p -> n only when n
     // dominates p; mutual reachability alone identifies every edge of a cycle and can select the
     // latch as the "header", which then absorbs preheaders and surrounding loop context.
-    bool dominates_current(int n, int p) const {
-        if (n == p || n == entry) return true;
-        if (!live.count(n) || !live.count(p) || !live.count(entry)) return false;
+    bool dominates_current(int n, int p) const { return dominates_from(entry, n, p); }
+    // LOOP SELECTION INSIDE A CUT BODY (forprep agent 2026-10-10). While reduce_loop_body_dag
+    // reduces a loop body, the function entry is not in the cut graph, so dominates_current() is
+    // false for every pair and the innermost-first pass (which admits only dominance back edges)
+    // never fires there. The established scan then takes candidates in region-id order without
+    // dominance: a nested generic `for` was headed at its BODY block (lower id than its FORGLOOP;
+    // the FORGLOOP -> body edge closes the cycle but is not a back edge) and its natural loop
+    // swallowed the prep and the enclosing loop's header (`while true do if IsNull(found) then
+    // for _, p in ipairs(t) do ... break ... end end ... end`: the `for` printed twice, the body
+    // hoisted out of it; luau.exe fixture gfor_break_in_if). Loop selection measures dominance
+    // from the cut body's own root -- its header, the only node left without predecessors -- and
+    // nothing else about the cut graph changes (moving `entry` itself is #67, still opt-in).
+    // RENOVICE_NO_CUT_BODY_DOMINANCE restores entry-based dominance for loop selection.
+    int cut_root = -1;
+    bool dominates_select(int n, int p) const {
+        static const bool cut_body_dominance = !std::getenv("RENOVICE_NO_CUT_BODY_DOMINANCE");
+        if (cut_body_dominance && cut_root >= 0 && !live.count(entry) && live.count(cut_root))
+            return dominates_from(cut_root, n, p);
+        return dominates_current(n, p);
+    }
+    bool dominates_from(int root, int n, int p) const {
+        if (n == p || n == root) return true;
+        if (!live.count(n) || !live.count(p) || !live.count(root)) return false;
         std::set<int> seen;
-        std::vector<int> todo{entry};
+        std::vector<int> todo{root};
         while (!todo.empty()) {
             int x = todo.back(); todo.pop_back();
             if (x == n || !seen.insert(x).second) continue;
@@ -306,14 +326,35 @@ struct Analyzer {
         if (succ[n].count(n)) return dag_reject(n, 2);
         std::vector<int> latches;
         for (int x : body) if (x != n && succ[x].count(n)) latches.push_back(x);
-        if (latches.size() != 1) return dag_reject(n, 3);
+        // GENERIC SINK MODE (forprep agent 2026-10-10, with ONE GENERIC LOOP, ALL ITS LATCHES).
+        // A generic `for` header is its FORGLOOP block: no statements, two successors (the body
+        // start and the normal exit), every latch jumps into it. Cutting the latch edges, as for a
+        // `while`, loses the decision of every latch but one (a `continue` edge would become a
+        // fall-through). Instead the FORGLOOP stays in the cut graph as the DAG's only SINK: its
+        // own out-edges are cut, the latch edges into it stay, and the body start is the root.
+        // Each `continue` is then an ordinary if-arm joining at the FORGLOOP, as stock compiles
+        // it, and the FORGLOOP block closes the body (the emitter prints the `for` from it).
+        int sink_root = -1;
+        const bool generic_sink = latches.size() >= 2 && regions[n].kind == RK::Basic
+            && regions[n].block >= 0 && regions[n].block < (int)block_edges.size()
+            && block_edges[regions[n].block].term == 0x1e
+            && !std::getenv("RENOVICE_NO_GENERIC_MULTI_LATCH_UNION");
+        if (generic_sink) {
+            for (int s2 : succ[n]) if (body.count(s2)) { if (sink_root >= 0) return dag_reject(n, 14); sink_root = s2; }
+            if (sink_root < 0 || sink_root == n) return dag_reject(n, 14);
+            for (int x : body) if (x != sink_root && x != n) {
+                bool has_pred = false;
+                for (int q : pred[x]) if (body.count(q)) has_pred = true;
+                if (!has_pred) return dag_reject(n, 14);
+            }
+        } else if (latches.size() != 1) return dag_reject(n, 3);
         // FOR-LATCH SINK (conditions campaign 2026-10-09): a numeric/generic `for` closes its
         // cycle with FORNLOOP/FORGLOOP, whose fall-through is the loop's normal exit. Once the
         // back edge and the exit are cut that latch is the DAG's sink exactly like a `while`
         // latch, and the for header text is printed from the latch by the emitter. Admitted when
         // the latch region's only loop-leaving edge is that FOR latch exit to the single out.
-        int for_latch_block = -1;
-        if (nsucc(latches[0]) != 1) {
+        int for_latch_block = generic_sink ? regions[n].block : -1;
+        if (!generic_sink && nsucc(latches[0]) != 1) {
             if (!for_loop_body_dag || nsucc(latches[0]) != 2 || main_out < 0
                 || !succ[latches[0]].count(main_out)) return dag_reject(n, 3);
             std::set<int> latch_blocks, head_blocks, out_blocks;
@@ -333,7 +374,7 @@ struct Analyzer {
         bool dropped_branch = false;
         for (int x : body) {
             int inner = 0;
-            for (int s : succ[x]) if (s != n && body.count(s)) ++inner;
+            for (int s : succ[x]) if ((s != n || generic_sink) && body.count(s)) ++inner;
             if (inner >= 2) { dropped_branch = true; break; }
         }
         if (!dropped_branch) return dag_reject(n, 4);
@@ -385,8 +426,11 @@ struct Analyzer {
         std::map<int, std::set<int>> cut_succ, cut_pred;
         for (int x : body) { cut_succ[x]; cut_pred[x]; }
         for (int x : body)
-            for (int s : succ[x])
-                if (s != n && body.count(s)) { cut_succ[x].insert(s); cut_pred[s].insert(x); }
+            for (int s : succ[x]) {
+                if (!body.count(s)) continue;
+                if (generic_sink ? x == n : s == n) continue;   // sink mode cuts the header's out-edges
+                cut_succ[x].insert(s); cut_pred[s].insert(x);
+            }
         succ.swap(cut_succ); pred.swap(cut_pred); live = body;
         // The cut body's only entry is the loop header: it alone has no predecessor left. Without
         // this the outer function entry (not in the cut graph) stayed `entry`, so a nested loop's
@@ -399,14 +443,17 @@ struct Analyzer {
         // RENOVICE_CUT_BODY_ENTRY=1 enables it until the Proper-headed inner loop case is resolved.
         if (std::getenv("RENOVICE_CUT_BODY_ENTRY")
             && (loop_body_dag_depth > 0 || !std::getenv("RENOVICE_CUT_BODY_ENTRY_NESTED_ONLY")))
-            entry = n;
+            entry = generic_sink ? sink_root : n;
         ++loop_body_dag_depth;
+        const int saved_cut_root = cut_root;
+        cut_root = generic_sink ? sink_root : n;
         const std::set<int> saved_header_blocks = dag_header_blocks;   // nested cut bodies stack
         dag_header_blocks.clear();
         region_block_set(n, dag_header_blocks);
         int guard = 0;
         while (live.size() > 1 && guard++ < 100000) if (!step()) break;
         dag_header_blocks = saved_header_blocks;
+        cut_root = saved_cut_root;
         --loop_body_dag_depth;
         const size_t live_left = live.size();
         int root = live.size() == 1 ? *live.begin() : -1;
@@ -731,6 +778,16 @@ struct Analyzer {
                 if (!entry_ok) continue;
                 std::vector<int> parts(body.begin(), body.end());
                 Region r; r.kind = RK::NaturalLoop; r.head = n; r.parts = parts;
+                // The three-latch body was collapsed with its interior UNREDUCED, so the emitter
+                // dropped every `continue` but one (`if IsNull(u) then continue end` ... before a
+                // final `break`: the guards' calls ran, the tests vanished; luau.exe fixture
+                // gfor_first_match under RENOVICE_NO_CFG_FOR_RENDER). Its FORGLOOP header is the
+                // generic sink of the loop-body DAG (GENERIC SINK MODE); keep the raw parts only
+                // when that reduction refuses. RENOVICE_NO_GENERIC_MULTI_LATCH_UNION restores it.
+                if (!std::getenv("RENOVICE_NO_GENERIC_MULTI_LATCH_UNION")) {
+                    const int body_root = reduce_loop_body_dag(n, body, outs);
+                    if (body_root >= 0) r.parts = {body_root};
+                }
                 int id = add(r); collapse(parts, id, outs); return true;
             }
             // No multi-latch header was ready. Preserve the established single-latch reduction below.
@@ -822,13 +879,14 @@ struct Analyzer {
         // keyed apart from its prep owner (DragonGroundBoss p43 duplicate `for`), and a selector
         // relay that never closed. RENOVICE_NO_INNERMOST_LOOP_FIRST restores the outer-first scan.
         static const bool innermost_first = !std::getenv("RENOVICE_NO_INNERMOST_LOOP_FIRST");
+        static const bool generic_multi_latch_union = !std::getenv("RENOVICE_NO_GENERIC_MULTI_LATCH_UNION");
         auto holds_inner_cycle = [&](const LoopCandidate& outer) -> bool {
             for (int n2 : outer.body) {
                 if (n2 == outer.n || !live.count(n2)) continue;
                 for (int p2 : pred[n2]) {
                     if (!outer.body.count(p2)) continue;
                     LoopCandidate inner;
-                    if (!dominates_current(n2, p2) || !natural_candidate(n2, p2, inner)
+                    if (!dominates_select(n2, p2) || !natural_candidate(n2, p2, inner)
                         || inner.body.count(outer.n)
                         || inner.body.size() >= outer.body.size() || !heads_cycle(n2, p2)) continue;
                     // A generic `for` is headed at its FORGLOOP, which is also its latch; the
@@ -857,7 +915,7 @@ struct Analyzer {
                 // Pass 0 admits only dominance back edges: `p -> n` of a generic for whose FORGPREP
                 // jumps to its FORGLOOP header is a cycle edge but not a back edge, and taking it
                 // headed the whole function at the inner FORGLOOP (gsearch fixture).
-                if (pass == 0 && (!dominates_current(n, p) || holds_inner_cycle(first))) continue;
+                if (pass == 0 && (!dominates_select(n, p) || holds_inner_cycle(first))) continue;
                 if (n != entry && first.body.count(entry) && !std::getenv("RENOVICE_LEGACY_ENTRY_IN_LOOP")) {
                     // The entry itself may be the clean head (2026-09-30): a function whose body
                     // starts with the loop, `while true do if c then ... end Sleep(0) end`. Region
@@ -882,6 +940,46 @@ struct Analyzer {
                     // Skip only this impossible candidate; the scan continues in the established
                     // order, so nested loops of the cycle still reduce before their parent.
                     if (clean_exists) continue;
+                }
+                // ONE GENERIC LOOP, ALL ITS LATCHES (forprep agent 2026-10-10). A generic `for` is
+                // headed at its FORGLOOP; every `continue` and every if-without-else that ends the
+                // body jumps there, so the header has several dominance latches. One latch at a
+                // time built nested partial NaturalLoops of ONE source loop -- NaturalLoop{body
+                // part, NaturalLoop{first block, FORGLOOP}} -- and the emitter, which can claim the
+                // `for` only once, printed the outer part outside the `for` (AimGravityFX p1:
+                // `if c:GetMesh() then ... if not IsNull(r) then found = c; break end end`; the
+                // body ran once before the loop with the loop variable nil). A natural loop is one
+                // per header: when the chosen back edge is a dominance back edge into a generic
+                // FORGLOOP header, the body is the union of every dominance latch's natural loop,
+                // reduced by the loop-body DAG with the FORGLOOP as its sink (below).
+                // RENOVICE_NO_GENERIC_MULTI_LATCH_UNION restores the one-latch candidate.
+                if (generic_multi_latch_union && regions[n].kind == RK::Basic
+                    && regions[n].block >= 0 && regions[n].block < (int)block_edges.size()
+                    && block_edges[regions[n].block].term == 0x1e && dominates_select(n, p)) {
+                    LoopCandidate merged = first;
+                    int merged_latches = 1;
+                    bool merge_ok = true;
+                    for (int p2 : pred[n]) {
+                        if (p2 == p || !live.count(p2) || !dominates_select(n, p2)) continue;
+                        LoopCandidate other;
+                        if (!natural_candidate(n, p2, other)) { merge_ok = false; break; }
+                        merged.body.insert(other.body.begin(), other.body.end());
+                        ++merged_latches;
+                    }
+                    if (merge_ok && merged_latches >= 2) {
+                        merged.outs.clear();
+                        for (int x : merged.body)
+                            for (int s2 : succ[x]) if (!merged.body.count(s2)) merged.outs.insert(s2);
+                        for (int x : merged.body) if (x != n)
+                            for (int q : pred[x]) if (!merged.body.count(q)) merge_ok = false;
+                        if (merge_ok && !(n != entry && merged.body.count(entry))) {
+                            if (std::getenv("RENOVICE_SASTEPS"))
+                                std::fprintf(stderr, "SA_GENERIC_MULTI_LATCH head=%d latches=%d body=%zu\n",
+                                             n, merged_latches, merged.body.size());
+                            collapse_loop(merged);
+                            return true;
+                        }
+                    }
                 }
                 collapse_loop(first);
                 return true;

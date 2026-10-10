@@ -124,7 +124,11 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INEXACT_HEAD_SELECTOR",
             "RENOVICE_NO_DAG_PRECISE_NESTED_EXIT", "RENOVICE_NO_DECISION_PREP_OWNER",
             "RENOVICE_NO_FORNLOOP_LATCH_KEY", "RENOVICE_NO_DAG_BREAK_ARM_EXIT",
-            "RENOVICE_NO_WHILE_PREP_GUARD")
+            "RENOVICE_NO_WHILE_PREP_GUARD",
+            "RENOVICE_NO_BREAK_ARM_DECISION_OWNER", "RENOVICE_NO_GENERIC_LATCH_HEADED",
+            "RENOVICE_NO_GENERIC_FOR_BREAK_SCOPE", "RENOVICE_NO_CUT_BODY_DOMINANCE",
+            "RENOVICE_NO_GENERIC_MULTI_LATCH_UNION", "RENOVICE_NO_DECIDING_PREP_KEEPS_LOOP",
+            "RENOVICE_NO_CFG_FOR_RENDER", "RENOVICE_DIRECT_FORGLOOP_IDENTITY")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
@@ -152,9 +156,19 @@ DECOMPILER_FIXTURES = {
     # Loops campaign (#82-#89): Platform p2 break arm, VentKidsBand p1 innermost-first
     "loop_break_arm_join": "RENOVICE_NO_INEXACT_HEAD_SELECTOR",
     "innermost_nested_repeat": "RENOVICE_NO_INNERMOST_LOOP_FIRST",
+    # For-prep fixes (forprep agent 2026-10-10, cert/fixtures/forprep_2026_10_10). Both fixtures sit
+    # inside an exitless `while true`, which the CFG renderer refuses, so the region emitter prints them.
+    # gfor_break_in_if: inner generic `for` with a break arm under an `if`; legacy headed the loop at
+    # its body block inside the cut body, printed the `for` twice and hoisted the body.
+    "gfor_break_in_if": "RENOVICE_NO_CUT_BODY_DOMINANCE",
+    # gfor_multilatch_in_while: the generic `for` has two latches (`if c.mesh then ... end` + break
+    # arm); legacy built nested partial NaturalLoops and printed the outer part before the `for`.
+    "gfor_multilatch_in_while": "RENOVICE_NO_GENERIC_MULTI_LATCH_UNION",
 }
 FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
                 for name in ("escape_join_forgen", "escape_join_loop_value", "while_break_return_arms")}
+FIXTURE_DIRS.update({name: os.path.join(HERE, "fixtures", "forprep_2026_10_10")
+                     for name in ("gfor_break_in_if", "gfor_multilatch_in_while", "nfor_return_arm")})
 # Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation
 # [, behavior expectation]). cfg expectation "FAIL" = the gate must catch it; "PASS" = a recorded gate
 # blind spot. Behavior expectation (default "DIFFERS"); "SAME" = a CFG-only defect (an extra
@@ -166,7 +180,19 @@ EXTRA_LEGACY = (
     ("proper_prep_for", "NESTED", "RENOVICE_NO_PROPER_NESTED_LOOP_PARTS RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN",
      "FAIL"),
     ("proper_exit_in_body", "EXIT_ARM_ONCE", "RENOVICE_NO_PROPER_EXIT_ARM_ONCE RENOVICE_NO_CFG_WHILE_LOOP_ARMS", "FAIL", "SAME"),
+    # forprep agent 2026-10-10: each region-emitter rule alone restores a wrong rendering of the same loop
+    ("gfor_break_in_if", "BREAK_ARM_DECISION_OWNER", "RENOVICE_NO_BREAK_ARM_DECISION_OWNER", "FAIL"),
+    ("gfor_break_in_if", "GENERIC_LATCH_HEADED", "RENOVICE_NO_GENERIC_LATCH_HEADED", "FAIL"),
+    # the empty generic break scope: the arm runs after the loop through the selector, reading the
+    # loop variable out of scope (found = nil); CFG-ID cannot see it (dataflow-identity FAILs it)
+    ("gfor_break_in_if", "GENERIC_FOR_BREAK_SCOPE", "RENOVICE_NO_GENERIC_FOR_BREAK_SCOPE", "PASS"),
 )
+# CFG-only fixes (behavior-neutral legacy output): fixture -> switch. Checks <F>_RUNS,
+# _DEFAULT_BEHAVIOR_SAME, _DEFAULT_CFG_IDENTITY, _LEGACY_CFG_FAILS, _LEGACY_BEHAVIOR_SAME.
+# nfor_return_arm (forprep agent 2026-10-10): `for i = n, 1, -1 do if t[i] <= v then ...; return end
+# end` after an exitless while arm (region emitter); legacy kept the raw FORNPREP zero-trip guard
+# `if not ((step > 0 and i > n) or ...) then` around a latch-opened `for` (BountyHunterBadge p1).
+CFG_ONLY_FIXTURES = {"nfor_return_arm": "RENOVICE_NO_DECIDING_PREP_KEEPS_LOOP"}
 O2_FIXTURES = {"proper_prep_for",          # compiled with inlining, like the shipped modules
                "escape_join_forgen", "escape_join_loop_value"}
 LUAU_COMPILE = os.path.join(ROOT, "bin", "luau-compile.exe")
@@ -351,6 +377,23 @@ def main():
                         checks[key + "_BEHAVIOR_SAME"] = trace(extra_source, temp, prelude) == expected
                     else:
                         checks[key + "_BEHAVIOR_DIFFERS"] = trace(extra_source, temp, prelude) != expected
+
+            for name, opt_out in CFG_ONLY_FIXTURES.items():
+                fixture = os.path.join(FIXTURE_DIRS.get(name, FIX), name + ".luau")
+                expected = trace(fixture, temp)
+                key = name.upper()
+                checks[key + "_RUNS"] = expected.count("\n") >= 2
+                original = os.path.join(temp, name + ".original.lua_B")
+                compile_fixture(fixture, name, original)
+                source, rebuilt = round_trip(original, temp, name + ".default")
+                checks[key + "_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
+                checks[key + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+                legacy_env = base_env()
+                for switch_name in opt_out.split():
+                    legacy_env[switch_name] = "1"
+                legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
+                checks[key + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
+                checks[key + "_LEGACY_BEHAVIOR_SAME"] = trace(legacy_source, temp) == expected
 
             fixture = os.path.join(FIX, "selector_residue.luau")
             expected = trace(fixture, temp)

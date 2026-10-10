@@ -1867,6 +1867,7 @@ struct Emitter {
                     return (li < 0 || li >= (int)ip->code.size()) ? -1 : (int)ip->code[li].op;
                 };
                 int latch_blk = -1;                 // set when the header came from a FORGLOOP latch
+                bool generic_latch_scan = false;    // ...found by the prep-free interior latch scan below
                 // A region whose OWN head is FORGLOOP reached `isfor=true` before the interior-latch
                 // scan below, so `latch_blk` stayed -1.  Body-start resolution then treated the
                 // FORGLOOP like a prep and used its exit edge, giving the same loop a second identity
@@ -1874,6 +1875,11 @@ struct Emitter {
                 // repair is limited to the analyzer-approved three-latch/single-loop topology.
                 bool approved_canonical_latch = A->multi_latch_for_headers.count(hb) != 0
                     || terminal_arm_loop_latches.count(hb);
+                // NOT DEFAULT (forprep agent 2026-10-10): applying this to every FORGLOOP-headed
+                // region fixed TennoHubHangar p2 (`for ... do <one block> end` before a `while true`
+                // printed an empty `for`, body after it) but dropped loop bodies elsewhere: 8 CONST-ID
+                // PASS -> FAIL (RadialBlindAbility p13, AbilitiesLib p102 lost NAMECALLs) and 2 closure
+                // losses on the queue+stride-20 sample. Open repro: RESEARCH/.../repro/gfor_before_while.
                 if ((std::getenv("RENOVICE_DIRECT_FORGLOOP_IDENTITY")
                      || (approved_canonical_latch
                          && !std::getenv("RENOVICE_NO_THREE_LATCH_SINGLE_LOOP")))
@@ -1908,7 +1914,8 @@ struct Emitter {
                         for (int b : blks) {
                             if (term_op(b) != 0x1e) continue;       // FORGLOOP only: the real latch
                             if (for_header(b, hdr)) {
-                                isfor = true; latch_blk = b; header_source_blk = b; break;
+                                isfor = true; latch_blk = b; header_source_blk = b;
+                                generic_latch_scan = true; break;
                             }
                         }
                 }
@@ -2128,6 +2135,36 @@ struct Emitter {
                 bool reject_single_loop_terminal_arm =
                     !std::getenv("RENOVICE_ALLOW_SINGLE_LOOP_TERMINAL_ARM_STEAL")
                     && nested_loop_arm_is_terminal && nested_terminal_arm_loop_count == 1;
+                // THE DECIDING FORNPREP KEEPS ITS LOOP (forprep agent 2026-10-10). The three
+                // rejections above protect a conditional that would steal a loop found deeper in
+                // one of its ARMS. When the conditional's own unique decision block IS the claimed
+                // FORNPREP (`setup; for i = n, 1, -1 do if t[i] <= v then ...; return end end`
+                // reduced as IfThen(Seq(setup, FORNPREP), loop)), the conditional is that loop's
+                // zero-trip gate (#65/#87 ownership): rejecting it printed the FORNPREP as the raw
+                // `if not ((step > 0 and i > n) or ...) then` test around a second, latch-opened
+                // `for` (BountyHunterBadge p1, the LOAD -> LOAD residue of
+                // CFG_FOR_LOOP_FIXES_2026-09-30; luau.exe fixture nfor_return_arm).
+                // RENOVICE_NO_DECIDING_PREP_KEEPS_LOOP restores the rejections.
+                if ((reject_terminal_search || reject_terminal_arm || reject_single_loop_terminal_arm)
+                    && isfor && term_op(header_source_blk) == 0x47
+                    && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse) && r.parts.size() >= 2
+                    && !std::getenv("RENOVICE_NO_DECIDING_PREP_KEEPS_LOOP")) {
+                    std::vector<int> decision_blocks; collect_blocks(r.parts[0], decision_blocks);
+                    std::set<int> arm_blocks;
+                    for (size_t q = 1; q < r.parts.size(); ++q) {
+                        std::vector<int> ab; collect_blocks(r.parts[q], ab);
+                        arm_blocks.insert(ab.begin(), ab.end());
+                    }
+                    int decision = -1, decisions = 0;
+                    for (int b : decision_blocks) {
+                        if (b < 0 || b >= (int)g->n.size()) continue;
+                        if (arm_blocks.count(g->n[b].succ_true) || arm_blocks.count(g->n[b].succ_false)) {
+                            decision = b; ++decisions;
+                        }
+                    }
+                    if (decisions == 1 && decision == header_source_blk)
+                        reject_terminal_search = reject_terminal_arm = reject_single_loop_terminal_arm = false;
+                }
                 if (reject_terminal_arm || reject_single_loop_terminal_arm) {
                     auto canonical_latch = prep2latch.find(header_source_blk);
                     if (canonical_latch != prep2latch.end())
@@ -2147,6 +2184,7 @@ struct Emitter {
                 // the head is a Seq that is its LAST block, not head_block() (CorpusBow p0: the head
                 // `setup; FORNPREP` IS the prep, the established zero-trip owner).
                 bool reject_any_arm_steal = false;
+                bool reject_break_arm_owner = false;
                 if (!std::getenv("RENOVICE_ALLOW_CONDITIONAL_PREP_STEAL")
                     && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse)
                     && r.parts.size() >= 2) {
@@ -2161,11 +2199,42 @@ struct Emitter {
                         }
                     }
                     reject_any_arm_steal = decisions == 1 && decision != header_source_blk;
+                    // BREAK-ARM DECISION IS NOT A ZERO-TRIP GATE (forprep agent 2026-10-10). The rule
+                    // above exempts a claim whose prep is the head's FIRST block (the established
+                    // `setup; FORNPREP` zero-trip owner). That exemption is wrong when the head is
+                    // Seq(prep, loop) and the block entering the arm sits INSIDE that loop's body:
+                    // the arm is the loop's break arm (`for _, p in ipairs(t) do if c then x = p;
+                    // break end end`, reduced as IfThen(Seq(prep, loop), ARM)), and a FORGPREP never
+                    // decides anything. The conditional then opened the `for` itself and treated the
+                    // whole head -- the loop body included -- as setup: the body printed once before
+                    // the header, the arm became the body, and the loop's own region opened a second
+                    // `for` (Vault p2, AimGravityFX p1; luau.exe fixture gfor_break_in_if). Rejected,
+                    // the conditional takes its normal composite-head path, which prints the arm
+                    // inside its loop (#83). RENOVICE_NO_BREAK_ARM_DECISION_OWNER restores the claim.
+                    if (decisions == 1 && decision != header_source_blk && isfor
+                        && header_source_blk == region_condition_block
+                        && !std::getenv("RENOVICE_NO_BREAK_ARM_DECISION_OWNER")) {
+                        // The same holds when the decision comes AFTER the complete loop: an
+                        // IfThenElse whose Seq head starts with an earlier, finished generic `for`
+                        // and decides at its last block (`for ... end; ...; if IsPromotedToHost()
+                        // then ... else ... end`, NemesisAssassinate p18 once the multi-latch loop
+                        // below it reduced) printed that earlier loop's header as an empty `for`
+                        // and lost its own test. Only the prep itself or the loop's latch decides.
+                        auto loop_latch = prep2latch.find(header_source_blk);
+                        if (loop_latch != prep2latch.end() && decision != loop_latch->second)
+                            reject_break_arm_owner = true;
+                    }
+                    // NOT EXTENDED to a compound break condition (`if tag == Exit or #t == 1 then r = p;
+                    // break end`, several decision blocks; ObjectivePickupScripts p1): rejecting that
+                    // claim reached the recorded-exit selector, which runs the arm AFTER the loop and
+                    // reads the loop variable out of scope (CFG-ID PASS, dataflow FAIL, r = nil).
+                    // Measured and withdrawn: the honest CFG FAIL stays until the arm can be printed
+                    // inside the loop under the compound condition.
                 }
                 if ((reject_terminal_search || reject_terminal_arm
                      || reject_single_loop_terminal_arm || reject_any_arm_steal) && isfor
                     && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse)
-                    && header_source_blk != region_condition_block
+                    && (header_source_blk != region_condition_block || reject_break_arm_owner)
                     )
                 {
                     isfor = false;
@@ -2822,7 +2891,21 @@ struct Emitter {
                     // produces reads of registers that have not been assigned yet — the source of
                     // `Normalize(nil)` (a register read before its initialiser). For those, open the
                     // header immediately and let every part be emitted as body.
-                    bool latch_headed = (hb >= 0 && term_op(hb) == 0x0a)
+                    // A GENERIC LOOP CLAIMED FROM ITS FORGLOOP has no setup either (forprep agent
+                    // 2026-10-10). The prep-free latch scan above admits a region that holds the
+                    // FORGLOOP latch and no prep: the region IS the loop, its preheader is outside.
+                    // Its parts are a set, so parts[0] is the lowest-id part -- the loop BODY
+                    // (`NaturalLoop{body, FORGLOOP}` headed at the FORGLOOP once innermost-first
+                    // reduction collapses the loop before its preheader). Emitting that part as
+                    // "setup" printed the first body block once before the header, with the
+                    // per-iteration variables still nil, and an empty or partial `for` after it
+                    // (Vault p2, AimGravityFX p1, luau.exe fixture gfor_break_in_if). Every part is
+                    // body; the header-first body order below then orders them.
+                    // RENOVICE_NO_GENERIC_LATCH_HEADED restores the setup emission.
+                    const bool generic_latch_headed = generic_latch_scan && prep_part < 0
+                        && latch_blk >= 0 && term_op(latch_blk) == 0x1e
+                        && !std::getenv("RENOVICE_NO_GENERIC_LATCH_HEADED");
+                    bool latch_headed = (hb >= 0 && term_op(hb) == 0x0a) || generic_latch_headed
                         || (!std::getenv("RENOVICE_NO_THREE_LATCH_SINGLE_LOOP") && latch_blk >= 0
                             && A->multi_latch_for_headers.count(latch_blk))
                         || (std::getenv("RENOVICE_SEMANTIC_PLAN_ARBITRATION")
@@ -3118,6 +3201,31 @@ struct Emitter {
                         }
                     }
                     std::set<int> nb = natural_loop_body(body_start);
+                    // GENERIC FOR BREAK SCOPE (forprep agent 2026-10-10). natural_loop_body(start)
+                    // collects back edges INTO `start`. A numeric for's body start is its dominance
+                    // header, but a generic for's is not: FORGPREP jumps to the FORGLOOP, so the
+                    // FORGLOOP is the header and the body start has no back edge. The scope was
+                    // therefore EMPTY for every generic `for` printed by the region emitter: no body
+                    // block was "inside the loop", so a branch leaving it never printed `break`
+                    // and an inline break arm (#83) was never placed (the arm then ran after the
+                    // loop through the selector, reading the loop variable out of scope:
+                    // `found = nil`, luau.exe fixture gfor_break_plain under
+                    // RENOVICE_NO_CFG_FOR_RENDER; Vault p2 inside `while true`). Use the FORGLOOP's
+                    // own natural loop when the start yields none and that FORGLOOP back-edges to
+                    // exactly this start. RENOVICE_NO_GENERIC_FOR_BREAK_SCOPE restores the empty scope.
+                    if (nb.empty() && body_start >= 0 && body_start < (int)g->n.size()
+                        && !std::getenv("RENOVICE_NO_GENERIC_FOR_BREAK_SCOPE")) {
+                        int generic_latch = -1;
+                        if (latch_blk >= 0 && term_op(latch_blk) == 0x1e) generic_latch = latch_blk;
+                        else {
+                            auto paired = prep2latch.find(header_source_blk);
+                            if (paired != prep2latch.end() && paired->second >= 0
+                                && term_op(paired->second) == 0x1e)
+                                generic_latch = paired->second;
+                        }
+                        if (generic_latch >= 0 && g->n[generic_latch].succ_true == body_start)
+                            nb = natural_loop_body(generic_latch);
+                    }
                     if (std::getenv("RENOVICE_SEMANTIC_PLAN_ARBITRATION")
                         || canonical_multi_latch_generic_body || canonical_second_generic_body
                         || exact_energized_outer || exact_authoritative_region_outer) {

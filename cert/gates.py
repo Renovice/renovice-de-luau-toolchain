@@ -85,11 +85,17 @@ BASELINE = {"ALIGNED": 123, "NAME-DIFF": 0, "realtrip_same": 150,
             "LOST_CONDITION": 0, "SEMANTIC_BEHAVIOR_SAME": 150,
             "SEMANTIC_BEHAVIOR_DIFFERENT": 0,
             "WARFRAME_API_SAME": 10, "WARFRAME_API_DIFFERENT": 0,
-            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 125,
+            "NATURAL_LOOP_CHECKS": 8, "CFG_CLASS_CHECKS": 146,
             "U43_STOCK_MODULES": 300, "U43_CONST_ID_PASS": 18, "U43_CFG_ID_PASS": 16,
             "U43_CLASS_SWAPS": 7501,
             "U44_STOCK_MODULES": 110, "U44_CONST_ID_PASS": 107, "U44_CFG_ID_PASS": 82,
             "U44_CLASS_SWAPS": 0}
+
+# BASELINE CHANGE OF 2026-10-10 (d) -- for-prep fixes (forprep agent, DEFECTS #90-#95, provisional numbers): Gate 14
+#   125 -> 146 checks (fixtures gfor_break_in_if incl. three extra legacy controls, gfor_multilatch_in_while,
+#   nfor_return_arm as a CFG-only fixture). Pre c62f1665 FAILs 6 of the new checks (every new default check);
+#   post 0350f81a passes 146/146 (work/agents/forprep-runs/g14-c62f1665-control.txt, g14-0350f81a-final.txt).
+#   The full gates.py run is left to the integrator.
 
 # BASELINE CHANGE OF 2026-10-10 (c) -- loop selection rework (DEFECTS #82-#89): Gate 14 113 -> 125 checks (fixtures
 #   loop_break_arm_join incl. closure checks, innermost_nested_repeat). Legacy controls entry_headed_loop,
