@@ -111,6 +111,7 @@ inline std::string render_postfix_base(const EP& child) {
         case EK::Index:
         case EK::Call:
         case EK::Method:
+        case EK::Group:
             return rendered;
         default:
             return "(" + rendered + ")";
@@ -1180,10 +1181,14 @@ private:
             auto v = node(EK::Field); v->a = read(in.B, pc); v->text = in.note;
             if (in.note.empty()) { bad(F_OP, pc); return -1; }
             // `G.x` / `G.a.x` compile to ONE GETIMPORT chain (compileExprIndexName, up to three
-            // names); stock GETIMPORT G + GETFIELD x (`_G.Name`: UIUtilities p0, SacrificeQuest-
-            // MemoryGame p33, a string key turned into a hashed import) has no expression spelling.
+            // names), so stock GETIMPORT G + GETFIELD x printed as `G.x` changed the program
+            // (`_G.Name`: UIUtilities p0, SacrificeQuestMemoryGame p33, a string key became a
+            // hashed import). A parenthesized base is no import root: `(G).x` compiles to exactly
+            // GETIMPORT G + GETFIELD x.
             if (v->a && v->a->k == EK::Global
-                && std::count(v->a->text.begin(), v->a->text.end(), '.') < 2) { bad(F_IMPORT_CHAIN, pc); return -1; }
+                && std::count(v->a->text.begin(), v->a->text.end(), '.') < 2) {
+                auto g = node(EK::Group); g->a = v->a; v->a = g;
+            }
             def(in.A, v, pc);
         }
         else if (op == 0x01) {
