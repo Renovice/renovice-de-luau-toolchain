@@ -35,6 +35,17 @@ then see our own lowering (backward JUMP).
                               live code never uses (declaration order must follow register order or the
                               names drift every round, CoHUpgrades) and creates a closure (BoonSelection)
   dead_tail_return            statements after `repeat return 2 until true` (a single RETURN)
+
+Interior dead code (src/m6e_cmd.h interior_dead_ranges / splice_interior_dead_ranges; wave 3, agent
+profiles, 2026-10-10). The originals are built with the U43 `recompile`.
+  <F>_RUNS / _DEFAULT_PROTO_COUNT / _DEFAULT_CFG_IDENTITY / _DEFAULT_CONST_IDENTITY / _DEFAULT_DATAFLOW /
+  _DEFAULT_BEHAVIOR_SAME / _DEFAULT_CLOSES   as above
+  <F>_DEFAULT_SPLICED         the decompiled source carries the `if true then break end` wrapper
+  <F>_LEGACY_CONST_FAILS      RENOVICE_NO_INTERIOR_DEAD_CODE: the range's constants are lost
+  interior_dead_ifexpr        `return if x and false then A else B` (KuvaPath, RailJackEnemyEffects)
+  interior_dead_after_return  statements after a mid-function return, live code after them, one of them
+                              in a loop body whose back-edge becomes unreachable (EndlessSpawnLib,
+                              InfBoomerangPods: closure needs the leading jump-to-return copy skipped)
 """
 import os
 import re
@@ -49,9 +60,10 @@ LUAU = os.path.join(ROOT, "bin", "luau.exe")
 LUAU_COMPILE = os.path.join(ROOT, "bin", "luau-compile.exe")
 FIX = os.path.join(HERE, "fixtures", "proto_shape_2026_10_09")
 OPT_OUTS = ("RENOVICE_NO_SHARED_PROTO_MARKER", "RENOVICE_NO_SHARED_PROTO_MERGE", "RENOVICE_NATIVE",
-            "RENOVICE_NO_DEAD_TAIL")
+            "RENOVICE_NO_DEAD_TAIL", "RENOVICE_NO_INTERIOR_DEAD_CODE")
 SHARED_FIXTURES = ("shared_newclosure", "shared_dupclosure")
 DEAD_TAIL_FIXTURES = ("dead_tail_loop", "dead_tail_return")
+INTERIOR_DEAD_FIXTURES = ("interior_dead_ifexpr", "interior_dead_after_return")
 CLOSURE = re.compile(r"(?:DUP|NEW)CLOSURE\s.*-> proto\[(\d+)\]")
 
 
@@ -207,6 +219,27 @@ def dead_tail_checks(name, temp, checks):
     checks[key + "_LEGACY_PROTO_COUNT_FAILS"] = legacy_cfg[1] != legacy_cfg[2]
 
 
+def interior_dead_checks(name, temp, checks):
+    fixture = os.path.join(FIX, name + ".luau")
+    key = name.upper()
+    expected = trace(fixture)
+    checks[key + "_RUNS"] = expected.count("\n") >= 1
+    original = os.path.join(temp, name + ".original.lua_B")
+    recompile(fixture, original)
+    source, rebuilt = round_trip(original, temp, name + ".default")
+    cfg = verdict("cfg-identity", original, rebuilt)
+    checks[key + "_DEFAULT_PROTO_COUNT"] = cfg[1] == cfg[2]
+    checks[key + "_DEFAULT_CFG_IDENTITY"] = cfg[0] == "PASS"
+    checks[key + "_DEFAULT_CONST_IDENTITY"] = verdict("const-identity", original, rebuilt)[0] == "PASS"
+    checks[key + "_DEFAULT_DATAFLOW"] = verdict("dataflow-identity", original, rebuilt)[0] == "PASS"
+    checks[key + "_DEFAULT_BEHAVIOR_SAME"] = trace(source) == expected
+    checks[key + "_DEFAULT_SPLICED"] = "if true then break end" in open(source, encoding="utf-8").read()
+    checks[key + "_DEFAULT_CLOSES"] = closes_within(original, temp, name + ".close", 3)
+    legacy_env = base_env(); legacy_env["RENOVICE_NO_INTERIOR_DEAD_CODE"] = "1"
+    _, legacy = round_trip(original, temp, name + ".legacy", decompile_env=legacy_env)
+    checks[key + "_LEGACY_CONST_FAILS"] = verdict("const-identity", original, legacy)[0] == "FAIL"
+
+
 def main():
     checks = {}
     try:
@@ -215,6 +248,8 @@ def main():
                 shared_checks(name, temp, checks)
             for name in DEAD_TAIL_FIXTURES:
                 dead_tail_checks(name, temp, checks)
+            for name in INTERIOR_DEAD_FIXTURES:
+                interior_dead_checks(name, temp, checks)
     except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
         print("FATAL %s" % error)
         return 2
