@@ -59,7 +59,8 @@ pass.
 | 7 (#78-#79) | 303c799 | 909755e9 | 4,544 | 5,434 | 4,533 | 79,024 of 83,518 | 0 | ALL PASS (G13 unmasking recorded) |
 | 8 (#80-#81) | 91e2659 | 8ea2bc37 | 4,672 | 5,437 | 4,667 | 79,266 of 83,518 | 0 | ALL PASS (G14 98 -> 113) |
 | 9 (#82-#89) | c01796c | c62f1665 | 4,830 | 5,437 | 4,817 | 79,485 of 83,518 | 0 | ALL PASS (G14 113 -> 125) |
-| 10 (#90-#92) | (this) | 0a075272 | 4,838 | 5,437 | 4,825 | 82,637 of 83,518 | 0 | ALL PASS (G14 125 -> 143) |
+| 10 (#90-#92) | 5a40038 | 0a075272 | 4,838 | 5,437 | 4,825 | 82,637 of 83,518 | 0 | ALL PASS (G14 125 -> 143) |
+| 11 (input-profile routing, interior dead code) | ddaedf3 | e3e8ea0d | 4,851 | 5,456 | 4,838 | 82,736 of 83,618 | 0 | ALL PASS; decompile 5,478 / 5,478 |
 
 CFG-ID 76.2% -> 88.2% of 5,478; CFG-ID + dataflow 74.4% -> 87.9%; CONST-ID 97.5% -> 99.3%; PROTO_COUNT 72 -> 1. Run folders: `work/u441-r1-49e0683e`,
 `work/u441-r2b-b5200665`, `work/u441-r3b-928298db`, `work/u441-r4b-fd0d4c81` (each with `transitions.json` and
