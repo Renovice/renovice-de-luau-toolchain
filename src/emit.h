@@ -295,6 +295,9 @@ struct Emitter {
     // arm entry block -> the loop-body block whose exit test enters it, the arm region, the loop.
     struct InlineBreakArm { int source = -1, arm = -1, used = 0; bool terminal = false; std::set<int> loop_blocks; };
     std::map<int, InlineBreakArm> inline_break_arms;
+    // Trial renderings of a conditional whose `for` claim #91 rejects (region ids), and the trials that
+    // reached an exact conditional rendering (inline break arm, composite-tail decision).
+    std::set<int> break_arm_trial, break_arm_trial_ok;
 
     bool escape_target_is_external(int target) const {
         return !escape_stack.empty() && target >= 0
@@ -1995,11 +1998,42 @@ struct Emitter {
                     // a duplicated loop header is redundant structure. Never trade the first for the
                     // second. The greedy scan is restored until the overlap can be fixed without
                     // dropping anything.
+                    // A GENERIC PREP WHOSE LOOP IS ALREADY A NESTED REGION (forprep agent 2026-10-10).
+                    // Once the inner generic loop reduces as its own NaturalLoop{body, FORGLOOP} (#93),
+                    // that region prints the `for` from its FORGLOOP (#92), and the prep before it is a
+                    // plain Basic sibling. The greedy scan below then let the ENCLOSING loop region claim
+                    // the inner prep: it printed the whole part (the inner loop included) as setup and
+                    // then a second, empty inner `for` keyed by the body start (Intel p20; every compile
+                    // cycle added another one). Skip such a prep; the nested region owns its loop.
+                    // RENOVICE_NO_NESTED_GENERIC_PREP_SKIP restores the scan.
+                    static const bool nested_generic_prep_skip = !std::getenv("RENOVICE_NO_NESTED_GENERIC_PREP_SKIP");
+                    auto owned_by_nested_loop = [&](int part, int prep) -> bool {
+                        auto paired = prep2latch.find(prep);
+                        if (paired == prep2latch.end() || paired->second < 0) return false;
+                        const int latch = paired->second;
+                        std::function<bool(int)> walk = [&](int rr) -> bool {
+                            if (rr < 0 || rr >= (int)A->regions.size()) return false;
+                            const sa::Region& R = A->regions[rr];
+                            if (R.kind == sa::RK::Basic) return false;
+                            if (R.kind == sa::RK::NaturalLoop || R.kind == sa::RK::While
+                                || R.kind == sa::RK::SelfLoop) {
+                                std::vector<int> rb; collect_blocks(rr, rb);
+                                const bool has_latch = std::find(rb.begin(), rb.end(), latch) != rb.end();
+                                const bool has_prep = std::find(rb.begin(), rb.end(), prep) != rb.end();
+                                if (has_latch && !has_prep) return true;
+                            }
+                            for (int child : R.parts) if (walk(child)) return true;
+                            return false;
+                        };
+                        return walk(part);
+                    };
                     for (size_t q = 0; q < r.parts.size() && !isfor; ++q) {
                         std::vector<int> pb; collect_blocks(r.parts[q], pb);
                         for (int b : pb) {
                             int o = term_op(b);
                             if (o != 0x47 && o != 0x0b && o != 0x30 && o != 0x1b) continue;
+                            if (nested_generic_prep_skip && o != 0x47 && owned_by_nested_loop(r.parts[q], b))
+                                continue;
                             if (for_header(b, hdr)) {
                                 isfor = true; prep_part = (int)q;
                                 hb = b;                  // the body starts at THIS block's fallthrough
@@ -2223,6 +2257,26 @@ struct Emitter {
                         auto loop_latch = prep2latch.find(header_source_blk);
                         if (loop_latch != prep2latch.end() && decision != loop_latch->second)
                             reject_break_arm_owner = true;
+                    }
+                    // EXACT OR NOT AT ALL (full-corpus measurement of 0350f81a). The rejected conditional
+                    // is rendered first as a trial; it is kept only when it reached an exact rendering
+                    // (the break arm printed inside its loop, or a composite-tail decision). Otherwise the
+                    // trial is discarded -- the whole emitter state restored -- and the claim stands as
+                    // before: the recorded-exit selector it would reach reads loop variables after the
+                    // loop and grows a relay per compile cycle (TeleportTo, ArachnoidCamperIndoorIceWave
+                    // stopped closing; our own `if not c then continue end; x = v; break` re-decompiled).
+                    if (reject_break_arm_owner && !break_arm_trial.count(id)) {
+                        const Emitter snapshot = *this;
+                        break_arm_trial.insert(id);
+                        std::string trial_text = capture(id, depth);
+                        const bool exact = break_arm_trial_ok.count(id) != 0;
+                        if (exact) {
+                            break_arm_trial.erase(id); break_arm_trial_ok.erase(id);
+                            out += trial_text;
+                            break;
+                        }
+                        *this = snapshot;
+                        reject_break_arm_owner = false;
                     }
                     // NOT EXTENDED to a compound break condition (`if tag == Exit or #t == 1 then r = p;
                     // break end`, several decision blocks; ObjectivePickupScripts p1): rejecting that
@@ -4018,7 +4072,10 @@ emit_conditional_region:
                             }
                         }
                     }
-                    if (emitted_two_arm_composite_tail) break;
+                    if (emitted_two_arm_composite_tail) {
+                        if (break_arm_trial.count(id)) break_arm_trial_ok.insert(id);
+                        break;
+                    }
                     // The same allocation-independent shape also occurs with one explicit arm: a
                     // structured Seq performs all prefix work, its unique final block chooses the
                     // arm versus the continuation after this IfThen, and the reducer stores the
@@ -4082,7 +4139,10 @@ emit_conditional_region:
                             }
                         }
                     }
-                    if (emitted_one_arm_composite_tail) break;
+                    if (emitted_one_arm_composite_tail) {
+                        if (break_arm_trial.count(id)) break_arm_trial_ok.insert(id);
+                        break;
+                    }
                     // A composite conditional head has no single opcode that `cond_of` can render.
                     // Flattening its arms is not a harmless fallback: it executes mutually exclusive
                     // paths sequentially, and an arm containing `return` makes every following part
@@ -4249,7 +4309,10 @@ emit_conditional_region:
                                 if (std::getenv("RENOVICE_ESCDBG"))
                                     std::fprintf(stderr, "INLINE_BREAK_ARM pidx=%d region=%d d=%d arm=%d used=%d\n",
                                                  pidx, id, d, arms[0], used);
-                                if (used == 1) { out += head_text; break; }
+                                if (used == 1) {
+                                    if (break_arm_trial.count(id)) break_arm_trial_ok.insert(id);
+                                    out += head_text; break;
+                                }
                             }
                         }
                         // The selector fallback records a FOR prep's zero-trip exit as the raw
@@ -4364,7 +4427,10 @@ emit_conditional_region:
                                 }
                             }
                         }
-                        if (emitted_composite_tail_decision) break;
+                        if (emitted_composite_tail_decision) {
+                            if (break_arm_trial.count(id)) break_arm_trial_ok.insert(id);
+                            break;
+                        }
                         bool every_arm_has_entry = !arms.empty();
                         for (const std::set<int>& t : arm_targets)
                             if (t.empty()) every_arm_has_entry = false;

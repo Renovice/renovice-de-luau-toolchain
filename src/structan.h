@@ -973,11 +973,20 @@ struct Analyzer {
                         for (int x : merged.body) if (x != n)
                             for (int q : pred[x]) if (!merged.body.count(q)) merge_ok = false;
                         if (merge_ok && !(n != entry && merged.body.count(entry))) {
+                            // Only an exactly reduced body is taken. When the sink-mode DAG refuses
+                            // (ControllerLayout p15: 16 latches, the cut body did not reduce), the raw
+                            // union NaturalLoop was dropped by the emitter -- a whole `if ... for ... end`
+                            // block vanished. The established one-latch candidate is kept then.
+                            const int body_root = reduce_loop_body_dag(n, merged.body, merged.outs);
                             if (std::getenv("RENOVICE_SASTEPS"))
-                                std::fprintf(stderr, "SA_GENERIC_MULTI_LATCH head=%d latches=%d body=%zu\n",
-                                             n, merged_latches, merged.body.size());
-                            collapse_loop(merged);
-                            return true;
+                                std::fprintf(stderr, "SA_GENERIC_MULTI_LATCH head=%d latches=%d body=%zu root=%d\n",
+                                             n, merged_latches, merged.body.size(), body_root);
+                            if (body_root >= 0) {
+                                std::vector<int> parts(merged.body.begin(), merged.body.end());
+                                Region r; r.kind = RK::NaturalLoop; r.head = n; r.parts = {body_root};
+                                int id = add(r); collapse(parts, id, merged.outs);
+                                return true;
+                            }
                         }
                     }
                 }

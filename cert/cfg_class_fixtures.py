@@ -128,7 +128,8 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_BREAK_ARM_DECISION_OWNER", "RENOVICE_NO_GENERIC_LATCH_HEADED",
             "RENOVICE_NO_GENERIC_FOR_BREAK_SCOPE", "RENOVICE_NO_CUT_BODY_DOMINANCE",
             "RENOVICE_NO_GENERIC_MULTI_LATCH_UNION", "RENOVICE_NO_DECIDING_PREP_KEEPS_LOOP",
-            "RENOVICE_NO_CFG_FOR_RENDER", "RENOVICE_DIRECT_FORGLOOP_IDENTITY")
+            "RENOVICE_NO_CFG_FOR_RENDER", "RENOVICE_DIRECT_FORGLOOP_IDENTITY",
+            "RENOVICE_NO_NESTED_GENERIC_PREP_SKIP")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
@@ -164,11 +165,15 @@ DECOMPILER_FIXTURES = {
     # gfor_multilatch_in_while: the generic `for` has two latches (`if c.mesh then ... end` + break
     # arm); legacy built nested partial NaturalLoops and printed the outer part before the `for`.
     "gfor_multilatch_in_while": "RENOVICE_NO_GENERIC_MULTI_LATCH_UNION",
+    # gfor_in_nfor_break: a generic search loop with a break inside a numeric `for` inside `while true`;
+    # the numeric loop region claimed the inner generic prep and printed a second, empty inner `for`.
+    "gfor_in_nfor_break": "RENOVICE_NO_NESTED_GENERIC_PREP_SKIP",
 }
 FIXTURE_DIRS = {name: os.path.join(HERE, "fixtures", "twoexit_2026_10_09")
                 for name in ("escape_join_forgen", "escape_join_loop_value", "while_break_return_arms")}
 FIXTURE_DIRS.update({name: os.path.join(HERE, "fixtures", "forprep_2026_10_10")
-                     for name in ("gfor_break_in_if", "gfor_multilatch_in_while", "nfor_return_arm")})
+                     for name in ("gfor_break_in_if", "gfor_multilatch_in_while", "nfor_return_arm",
+                                  "gfor_in_nfor_break")})
 # Additional opt-outs checked on an existing fixture: (fixture, check label, switch, cfg expectation
 # [, behavior expectation]). cfg expectation "FAIL" = the gate must catch it; "PASS" = a recorded gate
 # blind spot. Behavior expectation (default "DIFFERS"); "SAME" = a CFG-only defect (an extra
@@ -183,9 +188,10 @@ EXTRA_LEGACY = (
     # forprep agent 2026-10-10: each region-emitter rule alone restores a wrong rendering of the same loop
     ("gfor_break_in_if", "BREAK_ARM_DECISION_OWNER", "RENOVICE_NO_BREAK_ARM_DECISION_OWNER", "FAIL"),
     ("gfor_break_in_if", "GENERIC_LATCH_HEADED", "RENOVICE_NO_GENERIC_LATCH_HEADED", "FAIL"),
-    # the empty generic break scope: the arm runs after the loop through the selector, reading the
-    # loop variable out of scope (found = nil); CFG-ID cannot see it (dataflow-identity FAILs it)
-    ("gfor_break_in_if", "GENERIC_FOR_BREAK_SCOPE", "RENOVICE_NO_GENERIC_FOR_BREAK_SCOPE", "PASS"),
+    # the empty generic break scope: no break arm can be printed inside the loop; since the exact-or-
+    # nothing trial of #91 the conditional keeps its old claim and the old wrong output (before that
+    # trial the arm ran after the loop through the selector, CFG-ID blind, found = nil)
+    ("gfor_break_in_if", "GENERIC_FOR_BREAK_SCOPE", "RENOVICE_NO_GENERIC_FOR_BREAK_SCOPE", "FAIL"),
 )
 # CFG-only fixes (behavior-neutral legacy output): fixture -> switch. Checks <F>_RUNS,
 # _DEFAULT_BEHAVIOR_SAME, _DEFAULT_CFG_IDENTITY, _LEGACY_CFG_FAILS, _LEGACY_BEHAVIOR_SAME.
