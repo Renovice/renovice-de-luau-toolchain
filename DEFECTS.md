@@ -347,3 +347,16 @@ Rejected/kept opt-in: `RENOVICE_PROPER_HEADER_EXIT_GUARD=1` (keep a loop header'
 Proper) fixes VoidClone's closure but on the 442-module focus list turned 31 modules CFG-ID PASS -> FAIL;
 `RENOVICE_CUT_BODY_ENTRY=1` (#67) still costs AbilityAuraLib's closure with these fixes (Platform and KahlOrders p35
 no longer regress).
+
+Full 44.1.1 corpus (`work/agents/loops-runs/full_c331fd64`, binary `c331fd64`, commit `26a0bac` on `agent/loops`, vs
+`work/u441-r3b-928298db`): CFG-ID 4,465 -> 4,625 (+160, 0 PASS -> FAIL), CONST-ID 5,389 -> 5,389, dataflow 4,390 ->
+4,533 (0 PASS -> FAIL), CFG-ID + dataflow 4,351 -> 4,494, equal prototypes 77,326 -> 77,561 (no module loses one),
+compiler closure 5,446 -> 5,448 (+7: NovaDrop, MissileVolley, Snake, HexConquestReviveMechanic, AshBossAvatarScript,
+Platform, Stalker; -5, all attributed: Progress (L3), LasrianTankJumpAbility (L2 under innermost-first),
+SentientSummon (L4; a dispatcher `x == a or x == a` grows a disjunct per cycle), PveDeathMatch (innermost-first;
+closes with the opt-in selector), VoidClone (innermost-first; CFG-ID FAIL -> PASS, the loop-header Proper relay
+grows; closes with the opt-in header exit guard, which regresses 31 others)). Focus list (442 modules: r3b->r4 CFG
+changes, the regression modules, `--stride 20`) with `RENOVICE_NO_INNERMOST_LOOP_FIRST=1`: CFG-ID 234 -> 246, no PASS
+-> FAIL, no closure loss; innermost-first adds the rest (246 -> 338). Gate 14 (`cert/cfg_class_fixtures.py`) 103/103;
+`cert/dataflow_identity_fixtures.py` 94/96, the same two checks fail with the HEAD-equivalent binary (stale open
+witness `loop_exit_test_register`, already fixed at `6be6bec`). Not run: `cert/gates.py 300 150`.
