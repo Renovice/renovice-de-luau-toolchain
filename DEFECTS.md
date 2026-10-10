@@ -362,3 +362,17 @@ Full 44.1.1 corpus (`work/u441-r5-5713df5f`, binary `5713df5f`, vs batch 4 `fd0d
 dataflow 4,367 -> 4,501, dataflow FAIL among CFG-ID PASS 114 -> 14, no module PASS -> FAIL on any gate, no prototype or
 closure loss. `cert/gates.py 300 150`: ALL GATES PASS. Remaining: 24 SETTABLEN modules (a field store between batches
 blocks the merge), 2 truncated multi-value tails (DiegeticUpgradeCards p409, UIUtilities p158).
+## 2026-10-09 — two-exit loops (agent twoexit; numbers proposed, integrator assigns)
+
+| # | defect | symptom | how found | fix |
+|---|---|---|---|---|
+| 76 | a source `for` whose body leaves for a destination other than its canonical exit (-O2 inlined `return v`: `r = v; JUMP join` skipping the exhaustion code `r = d`) was rejected by the CFG renderer (`START_OUTSIDE_DOMAIN`); the legacy region emitter printed the arm after the loop or claimed the loop twice | ApproachAnim p1 `IsA(nil)`, the loop never tested; FishingLib p1 every lookup nil (loop variable read out of scope); `for_index_after_exit_o2` read the index start value (CFG-blind) | wave-1 agents tables/conditions/dataflow; census `derecomp loop-exit-scan` (272 protos / 186 modules) | LOOP ESCAPE JOINS in `emit_cfg_for_function`: private arms to one join run inside the loop, set a generated dispatch selector and break; `if sel ~= 1 then <C .. join> end`; the construct may start at a pre-test that also enters C (Bomber p4); arms ending at a shared bare RETURN stay return arms (`RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN`, `RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST`, `RENOVICE_CFG_LOOP_ESCAPE_TO_RETURN=1`) |
+| 77 | a plain while's statement-carrying break arm or a RETURN shared by two body tests was printed as a bare `break` and left unowned, so the prototype fell back to the legacy emitter | InfestedPredatorFinisherSpores p3: a return printed as `break` plus an escape test on the loop counter; legacy fallback duplicating a following `for` | wave-1 agent accessorder; fixture `while_break_return_arms` | the while's private break/return arms join its render domain, its header-test exit is a recognised `break` target (`RENOVICE_NO_CFG_WHILE_LOOP_ARMS`) |
+
+Full 44.1.1 corpus (`work/agents/twoexit-runs/full_v6`, binary `d1504afa`, vs batch 3 `928298db`, gate 928298db):
+CFG-ID 4,465 -> 4,596, CONST-ID 5,389 -> 5,391, dataflow 4,390 -> 4,518, CFG-ID + dataflow 4,351 -> 4,478, compiler
+closure 5,446 -> 5,449 (Illusion closes again), equal prototypes 77,326 -> 77,573; no module PASS -> FAIL on any gate
+(first pass or closed bytecode), no closure or prototype loss. Gate 14 106/106, dataflow fixtures 106/106 (fixtures in
+`cert/fixtures/twoexit_2026_10_09`; `for_index_after_exit_o2` moved to the fixed set). Rejected: `943b3d4` (escape to
+a shared bare RETURN outside an enclosing loop: SongFragmentPickup PASS -> FAIL). Details:
+`RESEARCH/CFG_TWO_EXIT_LOOPS_2026-10-09.md`.
