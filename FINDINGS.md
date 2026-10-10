@@ -6376,3 +6376,18 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+---
+
+## 2026-10-10 - Captured locals: block scope, duplicate by-value slots, unshared chunk snapshots (agent captures)
+
+Hypothesis: `CLOSEUPVALS -> *` is a block-scoped REF-captured local flattened to function scope (behavior-changing);
+`UPVALUE GETUPVAL -> GETUPVAL` and StatsLib's PROTO_COUNT are capture-binding defects.
+Finding: TRUE for CLOSEUPVALS (luau.exe `1 2` vs `2 2`); PARTIALLY TRUE for UPVALUE (3 of 16 modules are duplicate
+by-value slots, 12 are the vT spill frame, 1 is upvalue numbering order); TRUE for StatsLib (Luau shares top-level
+snapshot closures).
+Evidence: queue of 88 modules c62f1665 -> 46694dd9: CFG-ID 13 -> 39, CFG-ID + dataflow 0 -> 25, PROTO_COUNT 1 -> 0;
+full-corpus decompile diff 60 modules, no PASS -> FAIL; fixture gates PASS.
+Reason: Luau emits CLOSEUPVALS only for REF-captured block locals and shares closures of immutable top-level locals.
+Next Step: dispatcher shapes (definition and closure in different state blocks), the vT spill frame, FishInfo's
+text-order fold (emit.h). Details: `RESEARCH/CAPTURES_CAMPAIGN_2026-10-10.md`.
