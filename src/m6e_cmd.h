@@ -1423,6 +1423,8 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
     if (m.protos.empty()) { why = "no protos"; return false; }
     if (prototype_count) *prototype_count = m.protos.size();
     int root = (int)m.protos.size() - 1;              // the chunk is the LAST proto
+    // closure sharing differs between the main chunk and every other function (scoped_captures.h)
+    scap::main_proto_index() = root;
     ir::IProto ip = ir_annotate(m.protos[root], root, pool, g_nb);
     if (!ip.ok) { why = std::string("annotate failed: ") + ip.why; return false; }
     bool ok = false;

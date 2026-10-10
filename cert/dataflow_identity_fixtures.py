@@ -55,6 +55,11 @@ Fixed shape defects (CFG-ID sees the old form):
   (the old index-store form also truncated a multret tail in a later batch to one value: the fixture's
   `select(2, 0, 36, 37)` tail lost 37)
 
+Fixed shape defect of the captures campaign (2026-10-10), cert/fixtures/captures_2026_10_10:
+  scoped_capture_loop     RENOVICE_NO_SCOPED_CAPTURE_LOCALS       (block-scoped locals captured by
+                          reference became one flat local shared by every iteration's closure and
+                          overwritten by later code) + <F>_LEGACY_DF_FAILS
+
 Fixed by the two-exit loop escape (2026-10-09, #76), decompiler opt-outs:
   for_index_after_exit_o2  RENOVICE_NO_CFG_LOOP_ESCAPE_JOIN       (moved up to cert/fixtures/dataflow_2026_10_09)
   escape_pretest           RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST    (cert/fixtures/twoexit_2026_10_09, -O2;
@@ -88,8 +93,13 @@ FIXED_DEFECTS = {
     "escape_pretest": ("RENOVICE_NO_CFG_LOOP_ESCAPE_PRETEST", "source", "decompile"),
 }
 # fixtures outside FIX_DF
-FIXED_FOLDERS = {"escape_pretest": os.path.join(HERE, "fixtures", "twoexit_2026_10_09")}
-SHAPE_FIXED = {"setlist_batch_merge": "RENOVICE_NO_SETLIST_BATCH_MERGE"}
+FIXED_FOLDERS = {"escape_pretest": os.path.join(HERE, "fixtures", "twoexit_2026_10_09"),
+                 "scoped_capture_loop": os.path.join(HERE, "fixtures", "captures_2026_10_10")}
+SHAPE_FIXED = {"setlist_batch_merge": "RENOVICE_NO_SETLIST_BATCH_MERGE",
+               # captures campaign 2026-10-10: block-scoped REF-captured locals (scoped_captures.h);
+               # the legacy flat local is also a dataflow failure (CLOSURE REFWRITES / TAG)
+               "scoped_capture_loop": "RENOVICE_NO_SCOPED_CAPTURE_LOCALS"}
+SHAPE_LEGACY_DF_FAILS = {"scoped_capture_loop"}
 # never inherit these from the caller's shell (PITFALLS A7)
 cc.OPT_OUTS = tuple(cc.OPT_OUTS) + tuple(sorted({switch for switch, _, _ in FIXED_DEFECTS.values()}
                                                  | set(SHAPE_FIXED.values())))
@@ -256,7 +266,7 @@ def main():
                         checks[key + "_CFG_BLIND"] = cfg == "PASS"
                         checks[key + "_DF_FAILS"] = df == "FAIL"
             for name, switch in SHAPE_FIXED.items():
-                fixture = os.path.join(FIX_DF, name + ".luau")
+                fixture = os.path.join(FIXED_FOLDERS.get(name, FIX_DF), name + ".luau")
                 expected = cc.trace(fixture, temp)
                 original = os.path.join(temp, name + ".shape_original.lua_B")
                 cc.compile_fixture(fixture, name, original)
@@ -270,6 +280,8 @@ def main():
                 source, rebuilt = round_trip_staged(original, temp, name + ".shape_legacy", decompile_env=legacy_env)
                 checks[key + "_LEGACY_BEHAVIOR_DIFFERS"] = cc.trace(source, temp) != expected
                 checks[key + "_LEGACY_CFG_FAILS"] = cc.cfg_verdict(original, rebuilt) == "FAIL"
+                if name in SHAPE_LEGACY_DF_FAILS:
+                    checks[key + "_LEGACY_DF_FAILS"] = df_verdict(original, rebuilt) == "FAIL"
     except (OSError, RuntimeError) as error:
         print("FATAL %s" % error)
         return 2

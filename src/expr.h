@@ -570,6 +570,13 @@ inline bool merge_setlist_batch(std::vector<Stmt>& stmts, const ir::IProto& ip, 
     return true;
 }
 
+// Which CLOSEUPVALS get a marker statement for the emitter's scoped-capture pass (scoped_captures.h,
+// which includes this header). One followed by RETURN is compiler glue: RETURN closes every upvalue.
+inline bool scap_marker_wanted(const ir::IProto& ip, int pc) {
+    static const bool on = !std::getenv("RENOVICE_NO_SCOPED_CAPTURE_LOCALS");
+    return on && pc >= 0 && pc + 1 < (int)ip.code.size() && ip.code[(size_t)pc + 1].op != 0x29;
+}
+
 inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                               ProtoOut& out, BlockOut& bo) {
     RegEnv env;
@@ -791,10 +798,30 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                 }
                 return false;
             };
+            // DUPLICATE BY-VALUE CAPTURE (2026-10-10, captures campaign). Luau binds `local b = a`
+            // to a's register when neither local is ever written (Compiler.cpp compileStatLocal
+            // alias), so a closure reading both captures the SAME register in two upvalue slots:
+            // `CAPTURE VAL R0; CAPTURE VAL R0` (TouchInterface Window: MovieClip and its alias).
+            // Binding both slots to the one flat name `v0` merged them: the rebuilt closure had one
+            // upvalue fewer and every later upvalue index shifted (CFG-ID `UPVALUE GETUPVAL ->
+            // GETUPVAL`, dataflow `CLOSURE SLOT_COUNT`). Give every repeated by-value slot its own
+            // snapshot local, which keeps the slot count and order (a by-value slot of an unwritten
+            // register holds that register's value; the snapshot holds the same value).
+            // RENOVICE_NO_DUPLICATE_CAPTURE_SNAPSHOT restores the merged binding.
+            static const bool duplicate_capture_snapshot
+                = !std::getenv("RENOVICE_NO_DUPLICATE_CAPTURE_SNAPSHOT");
+            std::set<int> value_captured, repeated_registers;
+            for (int q = i + 1; q < (int)ip.code.size() && ip.code[q].op == 0x35; ++q)
+                if (ip.code[q].A == 0 && !value_captured.insert((int)ip.code[q].B).second)
+                    repeated_registers.insert((int)ip.code[q].B);
+            value_captured.clear();
             for (int q = i + 1; q < (int)ip.code.size() && ip.code[q].op == 0x35; ++q) {
                 if (!e->text.empty()) e->text += ",";
                 const ir::IInsn& c = ip.code[q];
-                if (capture_snapshot && c.A == 0 && register_written_elsewhere((int)c.B)) {
+                const bool repeated_value = duplicate_capture_snapshot && c.A == 0
+                                          && !value_captured.insert((int)c.B).second;
+                if ((capture_snapshot || repeated_value) && c.A == 0
+                    && (repeated_value || register_written_elsewhere((int)c.B))) {
                     // Name = prototype + ordinal of this CAPTURE among the prototype's CAPTUREs,
                     // so a re-decompile of our own output reproduces the same name.
                     int capture_ordinal = 0;
@@ -831,8 +858,12 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                         }
                         return true;
                     };
+                    // A register captured in several by-value slots keeps its own definition:
+                    // turning that copy into one slot's snapshot would unbind the other slots.
                     bool reused_copy = false;
-                    for (int k = (int)bo.stmts.size() - 1; k >= 0; --k) {
+                    const bool may_reuse_copy = !(duplicate_capture_snapshot
+                                                  && repeated_registers.count((int)c.B));
+                    for (int k = (int)bo.stmts.size() - 1; may_reuse_copy && k >= 0; --k) {
                         Stmt& prior = bo.stmts[(size_t)k];
                         if (prior.k == SK::Assign && prior.lhs && prior.lhs->k == EK::Reg
                             && prior.lhs->reg == (int)c.B && prior.rhs
@@ -1092,7 +1123,15 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
         // ---- carries no source meaning -------------------------------------------------
         else if (op == 0x19 || op == 0x10 || op == 0x0c || op == 0x26 || op == 0x4a) d = Disp::Skip; // FASTCALL*
         else if (op == 0x35) d = Disp::Skip;                                     // CAPTURE (part of closure)
-        else if (op == 0x39) d = Disp::Skip;                                     // CLOSEUPVALS (scope marker)
+        else if (op == 0x39) {                                                   // CLOSEUPVALS (scope marker)
+            // Keep the scope end visible to the emitter's scoped-capture pass (scoped_captures.h,
+            // RENOVICE_NO_SCOPED_CAPTURE_LOCALS): a comment statement printed as a marker line.
+            if (scap_marker_wanted(ip, i)) {
+                Stmt s; s.k = SK::Comment; s.text = "RENOVICE_CLOSEUPVALS"; s.insn = i;
+                bo.stmts.push_back(s);
+            }
+            d = Disp::Skip;
+        }
         else if (op == 0x11) d = Disp::Skip;                                     // PREPVARARGS (prologue)
 
         switch (d) {
