@@ -1931,7 +1931,18 @@ struct Emitter {
                 }
                 // RENOVICE_NOPREPSPLIT=1 restores the pre-fix behaviour, so a regression can be
                 // ATTRIBUTED rather than guessed at: rerun an oracle with and without it.
-                if (!isfor && !proven_while && !std::getenv("RENOVICE_NOPREPSPLIT")) {
+                // A WHILE REGION'S TEST IS ITS OWN (loops campaign 2026-10-09). A While region whose
+                // head is a renderable test that is not a FOR latch is a source while; a prep in its
+                // body belongs to a nested `for`. Taking it made the While a `for` claimant that lost
+                // the plan to the prep's own IfThen and was then emitted flat: `while not found do
+                // for ... end; Sleep(1) end` lost its loop (ColonistRescueSyndicateAssassins p2,
+                // reached once innermost-first reduction formed the While before its parent).
+                // proven_non_for_natural_loop is the NaturalLoop counterpart.
+                // RENOVICE_NO_WHILE_PREP_GUARD restores the scan for While regions.
+                const bool while_owns_test = r.kind == sa::RK::While && !r.parts.empty()
+                    && !std::getenv("RENOVICE_NO_WHILE_PREP_GUARD")
+                    && renderable_cond(head_block(r.parts[0])) && !is_for_latch(head_block(r.parts[0]));
+                if (!isfor && !proven_while && !while_owns_test && !std::getenv("RENOVICE_NOPREPSPLIT")) {
                     // Look ONLY at each part's HEAD block, never its whole subtree. `collect_blocks`
                     // recurses, so a parent region would find a prep belonging to a NESTED region and
                     // open a header for it — and then the child would open the very same loop again.
@@ -4077,9 +4088,27 @@ emit_conditional_region:
                                 InlineBreakArm ia; ia.source = d; ia.arm = arms[0];
                                 ia.loop_blocks = loop_region_blocks; ia.terminal = arm_exits.empty();
                                 inline_break_arms[arm_entry] = ia;
+                                // The scratch render must leave no trace when it is discarded: an
+                                // opened `for` stays in for_open (never erased), and the selector
+                                // re-render then refused to open that loop again and lost it
+                                // (HelminthTransmissions p1: the ipairs search vanished).
+                                const std::set<int> saved_for_open = for_open;
+                                const std::set<int> saved_suppress = suppress_insns;
+                                const std::set<int> saved_terminal_latches = terminal_arm_loop_latches;
+                                const int saved_state_serial = state_name_serial;
+                                const int saved_table_serial = lexical_table_serial;
+                                const int saved_fornprep_serial = raw_fornprep_serial;
                                 std::string head_text = capture(head, depth);
                                 const int used = inline_break_arms[arm_entry].used;
                                 inline_break_arms.erase(arm_entry);
+                                if (used != 1) {
+                                    for_open = saved_for_open;
+                                    suppress_insns = saved_suppress;
+                                    terminal_arm_loop_latches = saved_terminal_latches;
+                                    state_name_serial = saved_state_serial;
+                                    lexical_table_serial = saved_table_serial;
+                                    raw_fornprep_serial = saved_fornprep_serial;
+                                }
                                 if (std::getenv("RENOVICE_ESCDBG"))
                                     std::fprintf(stderr, "INLINE_BREAK_ARM pidx=%d region=%d d=%d arm=%d used=%d\n",
                                                  pidx, id, d, arms[0], used);
@@ -4102,6 +4131,12 @@ emit_conditional_region:
                                     inexact_head_decision = false;
                             }
                         }
+                        // OPT-IN (full-corpus run of 0040fc8e): even with the two guards above the
+                        // selector relay did not re-decompile to itself on 7 modules
+                        // (OraxiaWallToGround, VoidSink, JunctionMission, ...). When the break arm
+                        // cannot be printed inside its loop the previous rendering is kept;
+                        // RENOVICE_INEXACT_HEAD_SELECTOR=1 uses the (exact) selector instead.
+                        if (!std::getenv("RENOVICE_INEXACT_HEAD_SELECTOR")) inexact_head_decision = false;
                     }
                     if (!std::getenv("RENOVICE_NO_COMPOSITE_SELECTOR")
                         && A->regions[head].kind != sa::RK::Basic
@@ -4222,6 +4257,11 @@ emit_conditional_region:
                                         + std::to_string(state_name_serial++);
                             out += ind(depth) + "local " + ec.selector + " = -1\n";
                             const size_t head_start = out.size();
+                            const std::set<int> selector_saved_for_open = for_open;
+                            const std::set<int> selector_saved_suppress = suppress_insns;
+                            const std::set<int> selector_saved_terminal = terminal_arm_loop_latches;
+                            const int selector_saved_table_serial = lexical_table_serial;
+                            const int selector_saved_fornprep_serial = raw_fornprep_serial;
                             escape_stack.push_back(ec);
                             emit_region(head, depth + 1);
                             escape_stack.pop_back();
@@ -4244,6 +4284,12 @@ emit_conditional_region:
                                 }
                                 if (!every_arm_assigned) {
                                     out.resize(head_start - (ind(depth) + "local " + ec.selector + " = -1\n").size());
+                                    // The discarded render opened loops; leave no trace of it.
+                                    for_open = selector_saved_for_open;
+                                    suppress_insns = selector_saved_suppress;
+                                    terminal_arm_loop_latches = selector_saved_terminal;
+                                    lexical_table_serial = selector_saved_table_serial;
+                                    raw_fornprep_serial = selector_saved_fornprep_serial;
                                     goto inexact_selector_fallback;
                                 }
                             }

@@ -42,8 +42,8 @@ Break arm of a loop (loops campaign 2026-10-09), fixture loop_break_arm_join (Pl
   loop_break_arm_join         RENOVICE_NO_INEXACT_HEAD_SELECTOR (IfThen(loop, ARM) printed ARM after the
                               loop under the loop header's test: `reset1` logged for a normal exit)
   LOOP_BREAK_ARM_JOIN_DEFAULT_CLOSES        the arm printed inside its loop repeats within 3 rounds
-  LOOP_BREAK_ARM_JOIN_SELECTOR_NOT_CLOSED   RENOVICE_NO_INLINE_BREAK_ARM (exact selector relay) does
-                              not repeat within 5 rounds
+  LOOP_BREAK_ARM_JOIN_SELECTOR_NOT_CLOSED   RENOVICE_NO_INLINE_BREAK_ARM + RENOVICE_INEXACT_HEAD_SELECTOR
+                              (the exact selector relay, opt-in) does not repeat within 5 rounds
 
 Innermost-first loop selection (loops campaign 2026-10-09), fixture innermost_nested_repeat (VentKidsBand p1):
   innermost_nested_repeat     RENOVICE_NO_INNERMOST_LOOP_FIRST (outer-first selection headed one cycle at
@@ -111,7 +111,8 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_CFGID_LEGACY_OR_BLOCK", "RENOVICE_NATIVE",
             "RENOVICE_NO_SETLIST_EXISTING_TABLE", "RENOVICE_NO_CAPTURE_SNAPSHOT",
             "RENOVICE_NO_INEXACT_HEAD_SELECTOR", "RENOVICE_NO_INLINE_BREAK_ARM",
-            "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INNERMOST_LOOP_FIRST")
+            "RENOVICE_NO_INNERMOST_LOOP_FIRST", "RENOVICE_INNERMOST_LOOP_FIRST",
+            "RENOVICE_INEXACT_HEAD_SELECTOR")
 DECOMPILER_FIXTURES = {
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Loops campaign 2026-10-09: innermost-first selection also takes the clean header first, so
@@ -345,6 +346,7 @@ def main():
                                                                          "loop_break_arm_join.close", 3)
             selector_env = base_env()
             selector_env["RENOVICE_NO_INLINE_BREAK_ARM"] = "1"
+            selector_env["RENOVICE_INEXACT_HEAD_SELECTOR"] = "1"     # the opt-in selector fallback
             selector_env["RENOVICE_NO_INNERMOST_LOOP_FIRST"] = "1"   # outer-first: the selector spans the outer loop
             checks["LOOP_BREAK_ARM_JOIN_SELECTOR_NOT_CLOSED"] = not closes_within(
                 original, temp, "loop_break_arm_join.selector_close", 5, selector_env)
