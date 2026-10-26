@@ -337,6 +337,63 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
     return out;
 }
 
+// Split-exit loops (structan.h split_exit_condition): mark every exit arm of a source for loop whose
+// straight-line code reads one of the loop's user variables before writing it. Generic for: A+3 ..
+// A+2+nvars of the FORGLOOP latch; numeric for: A+2 of the FORNLOOP latch. Exits to the latch's
+// normal successor are not arms.
+static void mark_loop_value_exit_arms(const ir::IProto& ip, const st::Graph& g, sa::Analyzer& A) {
+    for (const st::Loop& loop : st::find_loops(g)) {
+        if ((loop.kind != st::Loop::ForGen && loop.kind != st::Loop::ForNum) || loop.latch < 0
+            || loop.latch >= (int)g.n.size()) continue;
+        const int li = g.n[loop.latch].last;
+        if (li < 0 || li >= (int)ip.code.size()) continue;
+        const ir::IInsn& latch = ip.code[li];
+        std::set<int> vars;
+        if (latch.op == 0x1e) { const int nv = (int)(latch.aux & 0xFF); for (int k = 0; k < nv; ++k) vars.insert(latch.A + 3 + k); }
+        else if (latch.op == 0x0a) vars.insert(latch.A + 2);
+        else continue;
+        const int normal = g.n[loop.latch].succ_false;
+        // Blocks that reach the latch inside the lexical body iterate; every other body block is a
+        // break arm (find_loops keeps those in the lexical body), and so is an exit target.
+        std::set<int> iterating{loop.latch};
+        std::vector<int> work{loop.latch};
+        while (!work.empty()) {
+            const int x = work.back(); work.pop_back();
+            for (int p : g.n[x].preds)
+                if (loop.body.count(p) && iterating.insert(p).second) work.push_back(p);
+        }
+        std::set<int> arms;
+        for (int b : loop.body) {
+            if (!iterating.count(b)) arms.insert(b);
+            for (int t : {g.n[b].succ_true, g.n[b].succ_false})
+                if (t >= 0 && t < (int)g.n.size() && !loop.body.count(t) && t != normal) arms.insert(t);
+        }
+        for (int s : arms) {
+            {
+                std::set<int> live(vars);
+                int cur = s, guard = 0;
+                bool reads = false;
+                while (cur >= 0 && cur < (int)g.n.size() && !live.empty() && !reads && guard++ < 64) {
+                    for (int pc = g.n[cur].first; pc <= g.n[cur].last && pc < (int)ip.code.size(); ++pc) {
+                        std::set<int> uses, defs;
+                        if (!lv::register_effects(ip, ip.code[pc], uses, defs)) { reads = true; break; }
+                        for (int u : uses) if (live.count(u)) { reads = true; break; }
+                        if (reads) break;
+                        for (int d : defs) live.erase(d);
+                    }
+                    if (reads || g.n[cur].is_branch || g.n[cur].succ_true >= 0) break;
+                    const int next = g.n[cur].succ_false;
+                    if (next < 0 || next >= (int)g.n.size() || g.n[next].preds.size() != 1) break;
+                    cur = next;
+                }
+                if (reads) A.loop_value_exit_arms.insert(s);
+                if (std::getenv("RENOVICE_SPLITDBG"))
+                    std::fprintf(stderr, "LOOP_VALUE_EXIT latch=%d arm=%d reads=%d\n", loop.latch, s, reads ? 1 : 0);
+            }
+        }
+    }
+}
+
 static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok, std::string& why) {
     ok = false;
     st::Graph g;
@@ -344,6 +401,7 @@ static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok,
     if (g.n.empty()) { why = "empty proto"; return ""; }
     st::compute_dom(g);
     sa::Analyzer A; A.build(g);
+    mark_loop_value_exit_arms(ip, g, A);
     int steps = 0;
     if (!A.reduce(steps)) { why = "did not reduce to one region"; return ""; }
     em::Emitter E; E.ip = &ip; E.g = &g; E.A = &A; E.pidx = idx;
@@ -459,6 +517,7 @@ static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
     if (g.n.empty()) { why = "empty proto"; return ""; }
     st::compute_dom(g);
     sa::Analyzer A; A.build(g);
+    mark_loop_value_exit_arms(ip, g, A);
     int steps = 0;
     if (!A.reduce(steps)) { why = "did not reduce"; return ""; }
     em::Emitter E; E.ip = &ip; E.g = &g; E.A = &A; E.pidx = idx;

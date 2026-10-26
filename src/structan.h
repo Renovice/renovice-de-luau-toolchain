@@ -47,8 +47,13 @@ struct Analyzer {
     std::map<int, std::set<int>> original_loop_bodies;
     // Per-block branch facts copied from the CFG in build(): the loop-body DAG repair below must
     // know, at BLOCK level, whether an edge that leaves a loop is a conditional two-way branch.
-    struct BlockEdges { int t = -1, f = -1; bool branch = false; int term = 0; };
+    struct BlockEdges { int t = -1, f = -1; bool branch = false; int term = 0; bool relay = false; };
     std::vector<BlockEdges> block_edges;
+    // Exit-arm blocks of a source for loop that READ one of its user variables before writing it
+    // (filled by the caller from the IR, see mark_loop_value_exit_arms in m6e_cmd.h). The escape
+    // selector that renders a split-exit loop prints such an arm after `end`, where the loop variable
+    // is out of scope, so split_exit_condition leaves those loops alone.
+    std::set<int> loop_value_exit_arms;
     int entry = 0;
 
     void build(const st::Graph& g) {
@@ -59,6 +64,8 @@ struct Analyzer {
         for (size_t i = 0; i < g.n.size(); ++i) {
             block_edges[i].t = g.n[i].succ_true; block_edges[i].f = g.n[i].succ_false;
             block_edges[i].branch = g.n[i].is_branch; block_edges[i].term = g.n[i].term;
+            // A lone JUMP: control passes through without any statement (split_exit_condition).
+            block_edges[i].relay = g.n[i].first == g.n[i].last && g.n[i].term == 0x40;
             Region r; r.kind = RK::Basic; r.block = (int)i;
             regions.push_back(r);
             if (g.n[i].reach) live.insert((int)i);
@@ -199,6 +206,73 @@ struct Analyzer {
         if (r < 0 || r >= (int)regions.size()) return;
         if (regions[r].kind == RK::Basic) { out.insert(regions[r].block); return; }
         for (int part : regions[r].parts) region_block_set(part, out);
+    }
+    // SPLIT-EXIT CONDITION HEADS (2026-10-09, tables agent). An if/else region prints its head as ONE
+    // condition, so the head's edges into the arms must leave from ONE block. A multi-exit loop whose
+    // break arm skips the loop's normal-exit code (an -O2 inlined `for ... do if c then return v end
+    // end return d` becomes `r = v; JUMP join` inside the body and `r = d` after FORGLOOP) reduces to a
+    // node whose two successors are entered from DIFFERENT blocks (the break test and the latch). As
+    // an IfThenElse head the emitter cannot spell it: it printed the body outside the loop and both
+    // arms inside a second `for` (44.1.1 ApproachAnim p1: `IsA(nil)`, the loop never tested).
+    // True when more than one block of `n` has a CFG edge into the blocks of `arms` and all of them lie
+    // inside one loop of `n`.
+    // RENOVICE_NO_SPLIT_EXIT_CONDITION_GUARD restores the previous reductions for A/B.
+    bool split_exit_condition(int n, const std::vector<int>& arms) const {
+        static const bool disabled = std::getenv("RENOVICE_NO_SPLIT_EXIT_CONDITION_GUARD") != nullptr;
+        if (disabled || n < 0 || n >= (int)regions.size() || regions[n].kind == RK::Basic) return false;
+        std::set<int> head_blocks, arm_blocks;
+        region_block_set(n, head_blocks);
+        for (int a : arms) region_block_set(a, arm_blocks);
+        // Only a split made by the exits of ONE loop: every source block lies inside a single
+        // (outermost) loop-kind region of the head, i.e. the arms are that loop's break exit and its
+        // normal exit. Broader versions routed unrelated split heads to the Proper dispatcher, which
+        // dropped whole branches: any head with a loop source (44.1.1 ChatRedux p536, 13 sources
+        // across an elseif chain, lost its `"song-"` arm; CONST-ID string loss).
+        std::vector<std::set<int>> loops;
+        std::function<void(int)> collect_loops = [&](int r) {
+            if (r < 0 || r >= (int)regions.size()) return;
+            const RK k = regions[r].kind;
+            if (k == RK::SelfLoop || k == RK::While || k == RK::NaturalLoop) {
+                loops.emplace_back(); region_block_set(r, loops.back()); return;
+            }
+            for (int part : regions[r].parts) collect_loops(part);
+        };
+        collect_loops(n);
+        std::set<int> source_blocks;
+        for (int b : head_blocks) {
+            if (b < 0 || b >= (int)block_edges.size()) continue;
+            const BlockEdges& e = block_edges[b];
+            if ((e.t >= 0 && arm_blocks.count(e.t)) || (e.f >= 0 && arm_blocks.count(e.f))) source_blocks.insert(b);
+        }
+        const int sources = (int)source_blocks.size();
+        // An arm that reads the loop's variable after leaving it cannot be rendered by the escape
+        // selector (`c2v6 = nil; r = c2v6`: 44.1.1 FishingLib p1, fixture inl_chain); keep the old
+        // reduction (a visible CFG-ID failure) instead of a gate-invisible wrong value.
+        for (int b : arm_blocks) if (loop_value_exit_arms.count(b)) return false;
+        // An arm that is only a JUMP relay skips no code: `for ... do if c then X break end end` whose
+        // post-loop block is a bare JUMP to the join renders exactly as an if/else (44.1.1 ChatRedux
+        // p536, numeric for). Only a split that bypasses real statements needs the dispatcher.
+        for (int a : arms) {
+            std::set<int> one; region_block_set(a, one);
+            bool relay_only = !one.empty();
+            for (int b : one)
+                if (b < 0 || b >= (int)block_edges.size() || !block_edges[b].relay) { relay_only = false; break; }
+            if (relay_only) return false;
+        }
+        bool loop_source = false;
+        for (const std::set<int>& lb : loops) {
+            bool all = true;
+            for (int b : source_blocks) if (!lb.count(b)) { all = false; break; }
+            if (all) { loop_source = true; break; }
+        }
+        if (sources > 1 && loop_source && std::getenv("RENOVICE_SPLITDBG")) {
+            std::fprintf(stderr, "SPLIT_EXIT_HEAD region=%d kind=%d sources=%d head_blocks=", n, (int)regions[n].kind, sources);
+            for (int b : head_blocks) std::fprintf(stderr, "%d,", b);
+            std::fprintf(stderr, " arm_blocks=");
+            for (int b : arm_blocks) std::fprintf(stderr, "%d,", b);
+            std::fprintf(stderr, "\n");
+        }
+        return sources > 1 && loop_source;
     }
     bool region_has_loop(int r) const {
         if (r < 0 || r >= (int)regions.size()) return false;
@@ -405,7 +479,7 @@ struct Analyzer {
                     if (j < 0) j = ts;
                     else if (j != ts) { ok = false; break; }      // arms must agree on the join
                 }
-                if (ok && arms.size() >= 2) {
+                if (ok && arms.size() >= 2 && !split_exit_condition(n, arms)) {
                     std::vector<int> parts; parts.push_back(n);
                     for (int t : arms) parts.push_back(t);
                     std::set<int> outs; if (j >= 0) outs.insert(j);
@@ -456,7 +530,8 @@ struct Analyzer {
                 }
                 // IF-THEN-ELSE: both arms private to n and converging on one block
                 int as_, bs_;
-                if (npred(a)==1 && npred(b)==1 && one_succ(a,as_) && one_succ(b,bs_) && as_==bs_
+                const bool split_head = split_exit_condition(n, {a, b});
+                if (!split_head && npred(a)==1 && npred(b)==1 && one_succ(a,as_) && one_succ(b,bs_) && as_==bs_
                     && a!=n && b!=n && as_!=a && as_!=b) {
                     Region r; r.kind = RK::IfThenElse; r.head = n; r.parts = {n, a, b};
                     int id = add(r); collapse({n,a,b}, id, {as_}); return true;
@@ -480,7 +555,7 @@ struct Analyzer {
                     int as2 = -1, bs2 = -1;
                     bool at = (nsucc(a) == 0), bt = (nsucc(b) == 0);
                     bool aj = one_succ(a, as2), bj = one_succ(b, bs2);
-                    if (npred(a)==1 && npred(b)==1 && a!=n && b!=n) {
+                    if (!split_head && npred(a)==1 && npred(b)==1 && a!=n && b!=n) {
                         if (at && bt) {                                   // both arms return
                             Region r; r.kind = RK::IfThenElse; r.head = n; r.parts = {n,a,b};
                             int id = add(r); collapse({n,a,b}, id, {}); return true;

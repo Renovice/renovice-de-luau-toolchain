@@ -732,11 +732,22 @@ inline void reconstruct_block(const ir::IProto& ip, int first, int last,
                 if (existing_table_setlist && cnt >= 0 && setlist_table_observed(ip, i, in.A)) {
                     if (std::getenv("RENOVICE_SETLIST_TRACE"))
                         std::fprintf(stderr, "SETLIST_EXISTING pc=%d A=%d count=%d\n", i, (int)in.A, cnt);
+                    // The item list was built above and fold_pure_setup_move already REMOVED each
+                    // item's setup MOVE from bo.stmts, folding its source into tbl->list. Reading the
+                    // register again (env.get) then names a register nothing assigns any more: the
+                    // implicit-nil pass printed `vR = nil; vA[k] = vR` and every list element of
+                    // `{ k = v, a, b }` became nil (44.1.1 DarkKuvaEximusShootPatternsLib p1, pattern
+                    // positions; fixture setlist_mixed `#t` 4 -> 0). Store the folded items.
+                    // RENOVICE_NO_SETLIST_EXISTING_FOLDED_ITEMS restores the register reads for A/B.
+                    static const bool folded_items = !std::getenv("RENOVICE_NO_SETLIST_EXISTING_FOLDED_ITEMS");
                     for (int r = in.B; r < vend; ++r) {
                         auto ix = mk(EK::Index);
                         ix->a = mkreg(in.A);
                         ix->b = mkconst(std::to_string((in.aux ? (int)in.aux : 1) + (r - in.B)));
-                        Stmt s; s.k = SK::Assign; s.lhs = ix; s.rhs = env.get(r); s.insn = i;
+                        const size_t item = (size_t)(r - in.B);
+                        EP value = (folded_items && item < tbl->list.size() && tbl->list[item])
+                            ? tbl->list[item] : env.get(r);
+                        Stmt s; s.k = SK::Assign; s.lhs = ix; s.rhs = value; s.insn = i;
                         bo.stmts.push_back(s);
                     }
                 } else {
