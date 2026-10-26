@@ -6376,3 +6376,18 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+## 2026-10-09 - LOAD-first-mismatch family (agent loadorder, worktree prototype, NOT integrated)
+
+Hypothesis: the `LABEL LOAD -> *` first mismatches (382 modules, 44.1.1) are symptoms of a few
+structural/emitter mechanisms, not register-order noise.
+Finding: Partially true. Measured mechanisms (queue = families/A_load_order.txt, base 701a2adf):
+innermost-loop-first in structan.h (+15 modules PASS, 37 fewer-failing; costs 2 compiler-closure
+modules on the stride-20 control), composite-tail terminal-block exemption (+5..7), While-region
+proven-loop + preceding-for entry (+3), top-level-only relation inverse (+2, real semantic bug),
+gate S6 LOADB-skip constant defs (+2, 1 proto regression in ThemedMainMenu). Build 87e406b3:
+queue 0 -> 27 PASS, failing protos 2039 -> 1973; stride-20 CFG-ID 209 -> 217, 0 PASS->FAIL,
+compiler-closed 270 -> 268. Open: multi-chunk SETLIST (29/31 LOAD->SETTABLEN protos), for bodies with
+break arms inside while loops (fixture open_for_break_arms_in_while_ppd), generic-for inner loops.
+Evidence: work/agents/loadorder-runs/{base,fixD,fixD_*,stride20-*}, fixtures/ there.
+Next Step: integrator re-measures the patches in work/agents/loadorder-runs/*.patch.
