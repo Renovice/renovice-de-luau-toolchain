@@ -6376,3 +6376,21 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+## 2026-10-09 - B_access_order queue (agent accessorder): five generic mechanisms
+
+Hypothesis: the B_access_order first-mismatch labels (GETIMPORT/GETUPVAL/NAMECALL -> ...) are symptoms of a few
+generic mechanisms, not access-order defects of their own.
+Finding: Partially true. Five mechanisms fixed generically in branch agent/accessorder (not integrated):
+M1 composite-tail decision vetoed by a head RETURN block (inverted `continue` guard, RENOVICE_NO_COMPOSITE_TAIL_RETURN_SKIP),
+M2 call-coalesce folded a MOVE source that was rewritten before the call (wrong argument value,
+RENOVICE_NO_CALLCOALESCE_SOURCE_GUARD), M4 numeric-for body DAG rejected for its FORNLOOP latch (`if a and b() then break end`
+lost `a`, RENOVICE_NO_FOR_LOOP_BODY_DAG), M5 `local __renovice_unused_condition_N = __renovice_state_K == <int>` residue
+(RENOVICE_KEEP_UNUSED_SELECTOR_CONDITION), gate S6 dispatch-aware dead-load liveness (RENOVICE_CFGID_LEGACY_DISPATCH_LIVENESS).
+Evidence: queue 361 modules CFG-ID PASS 0 -> 20 (baseline gate) / 39 (S6 gate), 0 PASS->FAIL, 0 CONST-ID loss; stride-20
+control 216 -> 219 / 223, 0 PASS->FAIL. Diagnosed, not fixed: multi-batch SETLIST (index-17 stores, 24 queue modules),
+loop bodies with return arms (116 queue modules carry the shape), no-op truthiness test gate gap (6 modules).
+GETIMPORT<->GETUPVAL "~6 protos per module" labels are mostly proto-count-mismatch modules (58/75, 62/71): same-index
+comparison of different functions (PITFALLS C2), not a mechanism of this queue.
+Reason: each fix has a minimal luau-compile fixture whose opt-out FAILs CFG-ID (M1/M2/M4 also differ in luau.exe behavior).
+Next Step: integrator re-measures on the full corpus; then the loop return-arm design (inline return exits).

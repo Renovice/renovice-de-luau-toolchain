@@ -236,6 +236,32 @@ inline void fold_pure_setup_move(std::vector<Stmt>& statements, EP& value) {
     if (candidate < 0) return;
     for (int q = candidate + 1; q < (int)statements.size(); ++q)
         if (stmt_uses_reg(statements[q], reg)) return;
+    // The fold reads the copy's SOURCE register at the use instead of at the MOVE. That is the
+    // same value only if no later statement in this block rewrites the source. An inlined call
+    // result built in a scratch register (`vB = {..}; vA = vB; vB = scaleAmount; f(vA, vB)`)
+    // otherwise passed scaleAmount twice and lost the table. RENOVICE_NO_CALLCOALESCE_SOURCE_GUARD
+    // restores the unguarded fold for A/B.
+    static const bool unguarded = std::getenv("RENOVICE_NO_CALLCOALESCE_SOURCE_GUARD") != nullptr;
+    const EP& source = statements[candidate].rhs;
+    if (!unguarded && source && source->k == EK::Reg) {
+        const int src = source->reg;
+        const std::string word = "v" + std::to_string(src);
+        for (int q = candidate + 1; q < (int)statements.size(); ++q) {
+            const Stmt& later = statements[q];
+            if (later.k != SK::Assign || !later.lhs) continue;
+            if (later.lhs->k == EK::Reg && later.lhs->reg == src) return;
+            for (int target : later.call_targets) if (target == src) return;
+            if (later.lhs->k == EK::Const) {           // multi-target `vA, vB` text: fail closed
+                const std::string& t = later.lhs->text;
+                for (size_t at = t.find(word); at != std::string::npos; at = t.find(word, at + 1)) {
+                    const size_t end = at + word.size();
+                    const bool left = at == 0 || !std::isalnum((unsigned char)t[at - 1]);
+                    const bool right = end >= t.size() || !std::isalnum((unsigned char)t[end]);
+                    if (left && right) return;
+                }
+            }
+        }
+    }
     value = statements[candidate].rhs;
     statements.erase(statements.begin() + candidate);
 }
