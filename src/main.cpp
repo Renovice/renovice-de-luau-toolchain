@@ -1432,11 +1432,35 @@ static std::string raw_hash_alias(const std::string& name, uint32_t hash) {
     return (ex::is_ident(name) ? name : std::string("Name")) + suffix;
 }
 // Every decompiler entry point that accepts U44 input reads through here.
+// A U44 entry point must not reinterpret a module that is not U44 bytecode. The 44.1.1 cache still
+// ships 13 stale U43-profile modules; read with the U44 table their AUX words decode as "opcodes"
+// 86/87/90 or as a garbled CFG. Detect the profile structurally (de::profile_walk_problem) and fail
+// with the exact reason. RENOVICE_NO_INPUT_PROFILE_CHECK restores the unchecked lowering.
+static std::string g_input_profile_failure;
 static std::string read_de_input(const std::string& path) {
+    g_input_profile_failure.clear();
     std::string bytes = read_file(path);
     if (!g_input_profile_u44 || bytes.empty()) return bytes;
+    if (!std::getenv("RENOVICE_NO_INPUT_PROFILE_CHECK")) {
+        try {
+            const de::Module module = de::walk(bytes);
+            const std::string as_u44 = de::profile_walk_problem(module, true);
+            if (!as_u44.empty()) {
+                const std::string as_u43 = de::profile_walk_problem(module, false);
+                g_input_profile_failure = as_u43.empty()
+                    ? "input is U43-profile bytecode, not U44 (U44 walk: " + as_u44 + ")"
+                    : "input is valid under neither opcode profile (U44 walk: " + as_u44
+                      + "; U43 walk: " + as_u43 + ")";
+                std::fprintf(stderr, "u44 input profile: %s\n", g_input_profile_failure.c_str());
+                return std::string();
+            }
+        } catch (const std::exception&) {
+            // Container errors are reported by the caller's own walk below.
+        }
+    }
     try { return de::change_build_profile(bytes, false); }
     catch (const std::exception& e) {
+        g_input_profile_failure = std::string("u44 input profile: ") + e.what();
         std::fprintf(stderr, "u44 input profile: %s\n", e.what());
         return std::string();
     }

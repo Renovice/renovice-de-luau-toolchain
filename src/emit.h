@@ -15088,6 +15088,17 @@ emit_conditional_region:
         if (has_source_for && has_source_while && while_by_header.size() > 1
             && !std::getenv("RENOVICE_CFG_ALLOW_MIXED_FOR_WHILE"))
             return reject_setup("MIXED_FOR_WHILE_FAMILIES");
+        // An overlapping for-prep while is treated as one outer loop by the path proofs only while
+        // its outer lookup is ACTIVE. The renderer removes the lookup while it walks that loop's own
+        // body (so the shared block re-enters through its source-for owner); a proof running inside
+        // that walk must see the shared block the same way. Reading the removed lookup with `at()`
+        // threw std::out_of_range and killed the whole module (Jade_Abilities_Chaos p14).
+        // RENOVICE_NO_OVERLAP_ACTIVE_LOOKUP restores the previous lookup for A/B comparison.
+        auto overlap_active = [&](int block) -> bool {
+            if (!overlapping_for_prep_whiles.count(block)) return false;
+            if (std::getenv("RENOVICE_NO_OVERLAP_ACTIVE_LOOKUP")) return true;
+            return while_by_header.count(block) != 0;
+        };
         for (size_t block = 0; block < g->n.size(); ++block) {
             if (!g->n[block].reach || loop_by_prep.count((int)block)
                 || while_by_header.count((int)block)) continue;
@@ -15327,7 +15338,7 @@ emit_conditional_region:
                     state[block] = 2;
                     return true;
                 }
-                if (overlapping_for_prep_whiles.count(block)) {
+                if (overlap_active(block)) {
                     const st::Loop* outer = while_by_header.at(block);
                     std::set<int> exits;
                     for (int member : outer->body) {
@@ -15410,7 +15421,7 @@ emit_conditional_region:
                     state[block] = 3;
                     return false;
                 }
-                if (overlapping_for_prep_whiles.count(block)) {
+                if (overlap_active(block)) {
                     const st::Loop* outer = while_by_header.at(block);
                     std::set<int> exits;
                     for (int member : outer->body) {
@@ -15516,7 +15527,7 @@ emit_conditional_region:
                     state[block] = 2;
                     return true;
                 }
-                if (overlapping_for_prep_whiles.count(block)) {
+                if (overlap_active(block)) {
                     const st::Loop* outer = while_by_header.at(block);
                     std::set<int> exits;
                     for (int member : outer->body) {
@@ -17083,7 +17094,7 @@ emit_conditional_region:
                         if (current.is_return
                             || (current.succ_true < 0 && current.succ_false < 0))
                             continue;
-                        if (overlapping_for_prep_whiles.count(block)) {
+                        if (overlap_active(block)) {
                             const st::Loop* outer = while_by_header.at(block);
                             std::set<int> loop_exits;
                             for (int member : outer->body) {

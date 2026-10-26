@@ -6376,3 +6376,11 @@ with 1 PASS->FAIL (WaveDefend, proto order from round 2, attributed to #48). Gat
 
 Next step: the redundant zero-trip guard around latch-opened `for` loops (LOAD -> LOAD residue), the
 compound-break-condition for body (open repro). Details: `RESEARCH/CFG_FOR_LOOP_FIXES_2026-09-30.md`.
+
+## 2026-10-09 - Proto-count / stage-failure / const-only diagnosis (agent "protos", 44.1.1)
+
+Hypothesis: the 72 proto-count, 14 stage-failure and 7 const-only modules come from a few general mechanisms.
+Finding: TRUE. Shared protos made by O2 inlining (29), orphan protos from folded dead code (42), dead code the decompiler drops (BoonSelection plus 7 const-only), 13 stale U43-profile modules (opcodes 86/87/90 are GETTABLEKS AUX bytes read off a desynced walk, not opcodes), and a map::at crash (Chaos p14, emit.h overlap lookup).
+Evidence: work/agents/protos-runs/ (profile_partition_u441.tsv, proto_refs_corpus_u441.tsv, dead_census_u441.tsv, before_*/after_final_* results). Final worktree binary 722358b8...8033. Queue: CONST-ID 0->47, CONST+CFG 0->19, decompile 79->80. Stride-20 control: 208->210 both-pass, 0 gate regressions.
+Reason: measured before/after with cert/u44_rawhash_roundtrip.py against stock bytecode. One-pass/closed fixed point regressed on 3 dead-tail modules, so the dead-tail part needs register-faithful tails before it ships.
+Next Step: integrator re-measures the M2/M4/M5/M6 patches. Decide M3 (O2 plus un-inlining, or gate alignment by closure-site tree).
