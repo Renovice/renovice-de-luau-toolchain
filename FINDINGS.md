@@ -6400,3 +6400,11 @@ Reason: Luau emits CLOSEUPVALS only for REF-captured block locals and shares clo
 DEFECTS #93-#95 (batch 12).
 Next Step: dispatcher shapes (definition and closure in different state blocks), the vT spill frame, FishInfo's
 text-order fold (emit.h). Details: `RESEARCH/CAPTURES_CAMPAIGN_2026-10-10.md`.
+
+## 2026-11-02 - CFG-ID failure clusters on client 2026.10.22.13.12 (read-only measurement)
+
+Hypothesis: the remaining CFG-ID failures are dominated by one structuring mechanism.
+Finding: TRUE. Baseline at HEAD dca27be / bin/derecomp.14c22656.exe on the new 5,481-module corpus: CONST-ID 5,460, CFG-ID 4,921, CFG-ID+dataflow 4,907 (r12: 4,877 on 5,478). Of the 560 FAIL modules, 346 fail only on stock loops with 2+ exit targets or dispatcher fallbacks; DISPATCHER_MULTI_EXIT_FOR alone accounts for 207 only-class modules.
+Evidence: work/failure-clusters-2026-11-02/ (CLUSTERS.md, clusters.json, shapes.json, repro/).
+Reason: per-prototype classification of all 749 failing prototypes on the gate's own --dump models.
+Next Step: multi-exit escape rendering (integrator for emit.h/structan.h), with a fixture first. Details: RESEARCH/FAILURE_CLUSTERS_2026-11-02.md.
