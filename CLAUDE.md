@@ -213,6 +213,15 @@ uses). Put a **minimum-n guard** on any "too few distinct values" rule — `IDIV
 - `src/ir.h` is read-only analysis and must stay separate from the byte-exact writer in
   `de_container.h`. Nothing in the decompiler may perturb the 5382/5382 round-trip.
 
+## Iterating on a fix: quick gate first, full corpus once
+
+`python cert/quickgate.py <stock-dir> [--class "LABEL LOAD"] [--exe bin/derecomp.candidate.exe]` runs
+the candidate on the baseline's CFG-ID failures (or one class) plus a fixed tripwire sample of
+passing modules (~1,400 modules, ~2 min vs ~22 min) and lists FIXED / BROKEN per module against the
+last full run. Exit 1 on any pass -> fail. It is first-pass only: a fix is still proven by ONE full
+`u44_rawhash_roundtrip.py ... --dataflow` run before merge, then
+`python cert/quickgate.py <stock-dir> --promote <run>/results-u44.json` makes it the new baseline.
+
 ## Read these first
 
 `DEFECTS.md` — every defect found, its bug class, and which check catches it.
