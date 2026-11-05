@@ -19172,7 +19172,7 @@ inexact_selector_fallback:
                     false, std::getenv("RENOVICE_CFG_EXPANDED_BOUNDARY_RETRY") != nullptr);
             }
             if (!cfg_rendered && try_cfg
-                && std::getenv("RENOVICE_CFG_EXPANDED_GUARD_TERMINAL_RETRY")) {
+                && !std::getenv("RENOVICE_NO_CFG_EXPANDED_GUARD_TERMINAL_RETRY")) {
                 // Private terminal and effect-free continuation vocabulary is
                 // needed only after the earlier complete-ownership proofs fail.
                 // Preserve their successful renderings and retry the entire
