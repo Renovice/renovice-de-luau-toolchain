@@ -17405,6 +17405,16 @@ inexact_selector_fallback:
                              "CFG_FOR_ENTER pidx=%d start=%d stop=%d terminal=%d indent=%d emitted=%d\n",
                              pidx, start, stop, terminal, indent,
                              emitted.count(start) ? 1 : 0);
+            // ARM TO THE LATCH (2026-11-02, multi-exit loops). An arm that starts AT the current
+            // loop's terminal (its latch) while the enclosing construct still has a continuation
+            // (`stop`) that is not the latch skips that continuation: the source is `continue`.
+            // Rendering it empty made the arm fall through into the continuation (HardModeDaily p4
+            // inserted every item). RENOVICE_NO_CFG_LATCH_CONTINUE restores the empty arm.
+            static const bool latch_continue = !std::getenv("RENOVICE_NO_CFG_LATCH_CONTINUE");
+            if (latch_continue && start >= 0 && start == terminal && stop >= 0 && stop != terminal) {
+                out += ind(indent) + "continue\n";
+                return true;
+            }
             if (start < 0 || start == stop || start == terminal) return true;
             if (start >= (int)g->n.size())
                 return reject_render("START_OUT_OF_RANGE", start, stop, terminal);
