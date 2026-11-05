@@ -16666,6 +16666,111 @@ inexact_selector_fallback:
         // source loop to it. The guard helper still owns only the acyclic path *between* loops;
         // the authoritative loop renderer owns the loop body and returns at its exact exit.
         std::function<bool(int, int, int, const std::set<int>*, int)> emit_cfg;
+        // OR CHAIN TO A SHARED RETURN (2026-11-05, multi-exit loops). Luau compiles
+        // `if A or f(x) then return end` as: test A -> R; r = f(x); test r -> R; R: RETURN. The
+        // second test's block owns a statement, so build_graph cannot fold it into one predicate
+        // and the loop fell back to a dispatcher (TauDropshipAvatar p9). Render the chain as one
+        // `or` when every later block is exactly `r = EXPR` + one test of r, r is dead after the
+        // test, each later block's only predecessor is the previous link, and every predecessor
+        // of the shared terminal RETURN R is a link. Sets next_out to the block after the chain
+        // (unchanged when the shape does not apply). Shared by the main renderer and the guard
+        // chain helper. RENOVICE_NO_CFG_OR_RETURN_CHAIN disables it.
+        std::function<bool(int, const std::set<int>*, int, int&)> try_or_return_chain =
+            [&](int start, const std::set<int>* domain, int indent, int& next_out) -> bool {
+            static const bool or_return_chain = !std::getenv("RENOVICE_NO_CFG_OR_RETURN_CHAIN");
+            if (!or_return_chain || start < 0 || start >= (int)g->n.size()) return true;
+            const st::Node& node = g->n[start];
+            if (!node.is_branch || node.is_uncond || node.succ_true < 0 || node.succ_false < 0
+                || !renderable_cond(start))
+                return true;
+            const int taken = node.succ_true;
+            const int fallthrough = node.succ_false;
+                // Only a BARE return (one RETURN instruction, nothing else). A shared return that
+                // owns statements is typically the code after a loop reached through break arms;
+                // pulling it inside the loop changes the layout (PVP_HealthSpawner p0 regressed).
+                auto terminal_return = [&](int b) {
+                    return b >= 0 && b < (int)g->n.size() && g->n[b].reach && g->n[b].is_return
+                        && g->n[b].succ_true < 0 && g->n[b].succ_false < 0 && !emitted.count(b)
+                        && g->n[b].first == g->n[b].last;
+                };
+                for (int ret : {taken, fallthrough}) {
+                    if (!terminal_return(ret)) continue;
+                    std::vector<std::string> terms{cond_of(start, ret == fallthrough)};
+                    std::vector<int> links{start};
+                    int next = ret == taken ? fallthrough : taken;
+                    while (next >= 0 && next < (int)g->n.size() && !emitted.count(next)
+                           && in_render_domain(domain, next)) {
+                        const st::Node& link = g->n[next];
+                        if (!link.reach || !link.is_branch || link.is_uncond
+                            || (link.succ_true != ret && link.succ_false != ret)
+                            || link.preds.size() != 1 || link.preds.front() != links.back()
+                            || n_chain_len(next) != 1 || link.branch_predicate
+                            || !renderable_cond(next) || link.last < 0
+                            || link.last >= (int)ip->code.size())
+                            break;
+                        ex::ProtoOut po; ex::BlockOut bo; bo.first = link.first; bo.last = link.last;
+                        ex::reconstruct_block(*ip, link.first, link.last, po, bo);
+                        std::vector<const ex::Stmt*> visible;
+                        for (const ex::Stmt& s : bo.stmts)
+                            if (s.k != ex::SK::Branch && !suppress_insns.count(s.insn)
+                                && !link.chain_setup_insns.count(s.insn))
+                                visible.push_back(&s);
+                        if (visible.size() != 1 || visible[0]->k != ex::SK::Assign
+                            || !visible[0]->lhs || visible[0]->lhs->k != ex::EK::Reg
+                            || !visible[0]->rhs)
+                            break;
+                        const int reg = visible[0]->lhs->reg;
+                        if (!register_liveness_ready) {
+                            register_liveness = lv::analyze(*ip, *g);
+                            register_liveness_ready = true;
+                        }
+                        if (!register_liveness.known || !register_liveness.converged
+                            || next >= (int)register_liveness.live_out.size()
+                            || register_liveness.live_out[next].count(reg))
+                            break;
+                        const std::string name = ex::render(visible[0]->lhs);
+                        std::string term = cond_of(next, ret == link.succ_false);
+                        const std::string value = "(" + ex::render(visible[0]->rhs) + ")";
+                        size_t uses = 0, at = 0;
+                        auto word = [&](size_t p) {
+                            return p < term.size()
+                                && (std::isalnum((unsigned char)term[p]) || term[p] == '_');
+                        };
+                        while ((at = term.find(name, at)) != std::string::npos) {
+                            if ((at > 0 && word(at - 1)) || word(at + name.size())) {
+                                at += name.size();
+                                continue;
+                            }
+                            term.replace(at, name.size(), value);
+                            at += value.size();
+                            ++uses;
+                        }
+                        if (uses != 1) break;
+                        terms.push_back(term);
+                        links.push_back(next);
+                        next = link.succ_true == ret ? link.succ_false : link.succ_true;
+                    }
+                    if (links.size() < 2) continue;
+                    bool owned = true;
+                    for (int p : g->n[ret].preds)
+                        if (std::find(links.begin(), links.end(), p) == links.end()) owned = false;
+                    if (!owned) continue;
+                    std::string condition = terms.front();
+                    for (size_t i = 1; i < terms.size(); ++i)
+                        condition = "(" + condition + " or " + terms[i] + ")";
+                    if (std::getenv("RENOVICE_CFG_FOR_TRACE"))
+                        std::fprintf(stderr, "CFG_OR_RETURN_CHAIN pidx=%d start=%d links=%zu ret=%d next=%d\n",
+                                     pidx, start, links.size(), ret, next);
+                    for (size_t i = 1; i < links.size(); ++i) emitted.insert(links[i]);
+                    out += ind(indent) + "if " + condition + " then\n";
+                    emit_block(ret, indent + 1);
+                    emitted.insert(ret);
+                    out += ind(indent) + "end\n";
+                    next_out = next;
+                    return true;
+                }
+                return true;
+        };
         std::function<bool(int, int, int, const std::set<int>*, int)> emit_guard_to_effect;
         std::function<bool(int, int, int, const std::set<int>*, int)> emit_acyclic_dispatch;
         bool consume_guard_dispatch_effect = false;
@@ -18132,6 +18237,20 @@ inexact_selector_fallback:
             const int fallthrough = node.succ_false;
             const bool taken_inside = taken == stop || in_render_domain(domain, taken);
             const bool fall_inside = fallthrough == stop || in_render_domain(domain, fallthrough);
+            // OR CHAIN TO A SHARED RETURN (2026-11-05, multi-exit loops). Luau compiles
+            // `if A or f(x) then return end` as: test A -> R; r = f(x); test r -> R; R: RETURN. The
+            // second test's block owns a statement, so build_graph cannot fold it into one predicate
+            // and the loop fell back to a dispatcher (TauDropshipAvatar p9). Render the chain as one
+            // `or` when every later block is exactly `r = EXPR` + one test of r, r is dead after the
+            // test, each later block's only predecessor is the previous link, and every predecessor
+            // of the shared terminal RETURN R is a link. RENOVICE_NO_CFG_OR_RETURN_CHAIN disables it.
+            {
+                int chain_next = -2;
+                if (!try_or_return_chain(start, domain, indent, chain_next)) return false;
+                if (chain_next != -2)
+                    return chain_next == stop || chain_next == terminal
+                        || emit_cfg(chain_next, stop, terminal, domain, indent);
+            }
             if (taken_inside != fall_inside) {
                 const int outside = taken_inside ? fallthrough : taken;
                 const int inside = taken_inside ? taken : fallthrough;
