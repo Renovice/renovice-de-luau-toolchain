@@ -12,6 +12,9 @@
 #include <set>
 #include <map>
 #include <sstream>
+#include <chrono>
+#include <unordered_set>
+#include <cstring>
 #include "luau_bc.h"
 #include "de_container.h"
 #include "de_namehash.h"
@@ -1720,6 +1723,12 @@ static ir::NameBase g_nb;
 // reached by two different names is ambiguous and stays raw. A name that itself parses as a raw
 // `X__aabbccdd` spelling would recompile as that suffix rather than its own hash, so it stays raw.
 static long long g_u44_namebase_ambiguous = 0, g_u44_namebase_suffix_skipped = 0;
+// Optional load filter: every 32-bit value that occurs anywhere in the input module. A name whose
+// hash is not among them cannot be referenced by that module, so skipping it changes no lookup and
+// no ambiguity verdict (colliding names share the hash and are kept or skipped together). Loading
+// the full 0.9M-name table per process was most of a single-module decompile's wall time.
+static std::unordered_set<uint32_t>* g_nb_filter = nullptr;
+
 static void ir_load_seeded_namebase(const std::string& tsv, uint32_t seed) {
     std::unordered_map<uint32_t, std::string> names;
     std::set<uint32_t> ambiguous;
@@ -1736,6 +1745,7 @@ static void ir_load_seeded_namebase(const std::string& tsv, uint32_t seed) {
             if (de::parse_hash_suffix(name, suffix)) ++g_u44_namebase_suffix_skipped;
             else {
                 const uint32_t hash = de::de_name_hash(name, seed);
+                if (g_nb_filter && !g_nb_filter->count(hash)) { i = e + 1; continue; }
                 auto inserted = names.emplace(hash, name);
                 if (!inserted.second && inserted.first->second != name) ambiguous.insert(hash);
             }

@@ -90,7 +90,18 @@ static bool u44_scan_names(const std::string& path, U44NameScan& scan) {
 static bool u44_prepare(const std::string& path, std::string& failure) {
     select_u44_entry_profile(path);
     g_raw_hash_names = true;
+    static std::unordered_set<uint32_t> module_words;
+    if (!std::getenv("RENOVICE_FULL_NAMEBASE")) {
+        const std::string bytes = read_de_input(path);
+        for (size_t at = 0; at + 4 <= bytes.size(); ++at) {
+            uint32_t word;
+            std::memcpy(&word, bytes.data() + at, 4);
+            module_words.insert(word);
+        }
+        if (!bytes.empty()) g_nb_filter = &module_words;
+    }
     ir_load_namebase();
+    g_nb_filter = nullptr;
     g_u44_mixed_names.clear();
     U44NameScan scan;
     if (!u44_scan_names(path, scan)) { failure = scan.failure; return false; }
@@ -177,15 +188,42 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
         return 1;
     }
     std::string failure, source, header;
+    auto stamp = [](const char* what) {
+        static auto last = std::chrono::steady_clock::now();
+        const auto now = std::chrono::steady_clock::now();
+        if (std::getenv("RENOVICE_TIMING"))
+            std::fprintf(stderr, "TIMING step=%s ms=%.1f\n", what,
+                         std::chrono::duration<double, std::milli>(now - last).count());
+        last = now;
+    };
+    if (std::getenv("RENOVICE_TIMING")) {
+        FILETIME created, exited, kernel, user, now;
+        GetProcessTimes(GetCurrentProcess(), &created, &exited, &kernel, &user);
+        GetSystemTimeAsFileTime(&now);
+        auto as64 = [](const FILETIME& f) { return ((unsigned long long)f.dwHighDateTime << 32) | f.dwLowDateTime; };
+        std::fprintf(stderr, "TIMING since_process_start_ms=%.1f\n", (as64(now) - as64(created)) / 10000.0);
+    }
+    stamp("start");
     if (!u44_prepare(argv[2], failure)) {
         std::fprintf(stderr, "decompile-mod-u44: %s\n", failure.c_str()); return 1;
     }
+    stamp("u44_prepare");
     if (!decompile_module_source(argv[2], source, failure)) {
         std::fprintf(stderr, "decompile-mod-u44: %s\n", failure.c_str()); return 1;
     }
+    if (std::getenv("RENOVICE_TIMING")) {
+        auto t = proto_timings();
+        double total = 0; for (auto& x : t) total += x.ms;
+        std::sort(t.begin(), t.end(), [](const ProtoTiming& l, const ProtoTiming& r) { return l.ms > r.ms; });
+        std::fprintf(stderr, "TIMING protos=%zu render_ms=%.1f (nested renders counted in parents too)\n", t.size(), total);
+        for (size_t k = 0; k < t.size() && k < 6; ++k)
+            std::fprintf(stderr, "TIMING proto=%d ms=%.1f\n", t[k].idx, t[k].ms);
+    }
+    stamp("decompile_module_source");
     if (!u44_source_header(argv[2], header, failure)) {
         std::fprintf(stderr, "decompile-mod-u44: %s\n", failure.c_str()); return 1;
     }
+    stamp("u44_source_header");
     source = header + source;
     if (!std::getenv("RENOVICE_NO_SC_EXPR_FOLD") && !std::getenv("RENOVICE_SC_EXPR_FOLD_CHILD")
         && !std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")) {
@@ -235,6 +273,12 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
     } else {
         std::printf("%s\n", source.c_str());
     }
+    // The output is written; tearing down the process-wide analysis tables (name base, caches)
+    // only costs time. Flush and leave without running static destructors.
+    stamp("selection_and_write");
+    std::fflush(stdout);
+    std::fflush(stderr);
+    if (!std::getenv("RENOVICE_FULL_TEARDOWN")) _exit(0);
     return 0;
 }
 

@@ -1379,9 +1379,23 @@ static std::string decompile_proto_anon_once(const ir::IProto& ip, int idx,
     return fn;
 }
 
+// RENOVICE_TIMING: per-prototype render time (diagnostic only).
+struct ProtoTiming { double ms = 0; int idx = -1; };
+static std::vector<ProtoTiming>& proto_timings() { static std::vector<ProtoTiming> t; return t; }
+struct ProtoTimer {
+    int idx; std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+    explicit ProtoTimer(int i) : idx(i) {}
+    ~ProtoTimer() {
+        if (!std::getenv("RENOVICE_TIMING")) return;
+        proto_timings().push_back({std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - start).count(), idx});
+    }
+};
+
 // A folded short-circuit setup exists only inside its rendered condition. When a fallback path did
 // not render every folded test, rebuild that one prototype without folds.
 static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok, std::string& why) {
+    ProtoTimer timer(idx);
     bool complete = true;
     std::string src = decompile_proto_text_once(ip, idx, ok, why, complete);
     if (complete) return src;
@@ -1394,6 +1408,7 @@ static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok,
 
 static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
                                         bool& ok, std::string& why) {
+    ProtoTimer timer(idx);
     bool complete = true;
     std::string src = decompile_proto_anon_once(ip, idx, ok, why, complete);
     if (complete) return src;
