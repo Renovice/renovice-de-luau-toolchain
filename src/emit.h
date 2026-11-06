@@ -1337,8 +1337,169 @@ struct Emitter {
             }
             return !live.count(reg);
         };
+        // UPVALUE ORDER FOLD (2026-11-06). Luau numbers a closure's upvalues in the order their
+        // locals first appear in the SOURCE TEXT. `u = <expr reading w>` names u before w, but its
+        // bytecode reads w (GETUPVAL) before writing u (SETUPVAL). Rendered through temporaries
+        // (`t = w; u = t`) w comes first in the text and the rebuilt closure numbers w before u
+        // (main-chunk modules: CAPTURE order and every later load shift). When this SETUPVAL is
+        // the first reference to its upvalue and the temporaries feeding it read a higher-numbered
+        // upvalue for the first time, render the whole chain as one assignment. Each temporary
+        // must be defined once in the chain, read once, and be dead after the SETUPVAL.
+        // RENOVICE_NO_SETUPVAL_FOLD disables it.
+        std::set<size_t> folded_into_setupval;
+        if (!std::getenv("RENOVICE_NO_SETUPVAL_FOLD")) {
+            std::map<int, int> first_upval_use;
+            for (int pc = 0; pc < (int)ip->code.size(); ++pc) {
+                const ir::IInsn& in = ip->code[(size_t)pc];
+                if (in.op == 0x13 || in.op == 0x53) first_upval_use.emplace((int)in.B, pc);
+            }
+            std::function<void(const ex::EP&, std::vector<int>&)> regs_read =
+                [&](const ex::EP& e, std::vector<int>& out_regs) {
+                    if (!e) return;
+                    if (e->k == ex::EK::Reg) out_regs.push_back(e->reg);
+                    regs_read(e->a, out_regs); regs_read(e->b, out_regs); regs_read(e->c, out_regs);
+                    for (const auto& item : e->list) regs_read(item, out_regs);
+                    for (const auto& key : e->keys) regs_read(key, out_regs);
+                };
+            for (size_t si = 0; si < bo.stmts.size(); ++si) {
+                ex::Stmt& set = bo.stmts[si];
+                if (set.k != ex::SK::Assign || !set.lhs || set.lhs->k != ex::EK::Upval
+                    || !set.rhs || set.rhs->k != ex::EK::Reg || set.insn < 0) continue;
+                const int target = set.lhs->idx;
+                auto first = first_upval_use.find(target);
+                if (first == first_upval_use.end() || first->second > set.insn) continue;
+                // contiguous chain of temporaries feeding the stored register
+                std::set<int> needed{set.rhs->reg};
+                std::vector<size_t> chain;
+                for (size_t k = si; k-- > 0;) {
+                    const ex::Stmt& t = bo.stmts[k];
+                    if (t.k != ex::SK::Assign || !t.lhs || t.lhs->k != ex::EK::Reg || !t.rhs
+                        || !needed.count(t.lhs->reg) || folded_into_setupval.count(k)
+                        || suppress_insns.count(t.insn) || n.chain_setup_insns.count(t.insn)) break;
+                    needed.erase(t.lhs->reg);
+                    std::vector<int> reads; regs_read(t.rhs, reads);
+                    needed.insert(reads.begin(), reads.end());
+                    chain.push_back(k);
+                }
+                if (chain.empty()) continue;
+                std::reverse(chain.begin(), chain.end());
+                // the target must not be referenced before this statement's own chain
+                if (first->second < bo.stmts[chain.front()].insn) continue;
+                // the fold is needed only if the chain reads a higher upvalue for the first time
+                bool reorders = false;
+                for (size_t k : chain)
+                    for (int pc = bo.stmts[k].insn; pc >= 0 && pc < set.insn; ++pc) {
+                        const ir::IInsn& in = ip->code[(size_t)pc];
+                        if (in.op == 0x13 && (int)in.B > target
+                            && first_upval_use[(int)in.B] == pc) reorders = true;
+                        break;
+                    }
+                if (!reorders) continue;
+                // exactness per VALUE (a temporary register may be reused along the chain): every
+                // value the chain writes is read exactly once before it is overwritten, and no
+                // chain register is live after the SETUPVAL
+                bool exact = true;
+                std::map<int, int> pending;
+                for (size_t k : chain) {
+                    std::vector<int> reads; regs_read(bo.stmts[k].rhs, reads);
+                    for (int r : reads) {
+                        auto it = pending.find(r);
+                        if (it != pending.end() && ++it->second > 1) exact = false;
+                    }
+                    const int defined = bo.stmts[k].lhs->reg;
+                    auto it = pending.find(defined);
+                    if (it != pending.end() && it->second != 1) exact = false;
+                    pending[defined] = 0;
+                }
+                {
+                    auto it = pending.find(set.rhs->reg);
+                    if (it != pending.end()) ++it->second;
+                }
+                for (const auto& v : pending)
+                    if (v.second != 1 || !register_dead_after(set.insn, v.first)) exact = false;
+                if (!exact) continue;
+                std::map<int, ex::EP> value;
+                std::function<ex::EP(const ex::EP&)> substitute = [&](const ex::EP& e) -> ex::EP {
+                    if (!e) return e;
+                    if (e->k == ex::EK::Reg) {
+                        auto known = value.find(e->reg);
+                        return known != value.end() ? known->second : e;
+                    }
+                    ex::EP copy = std::make_shared<ex::Expr>(*e);
+                    copy->a = substitute(e->a); copy->b = substitute(e->b); copy->c = substitute(e->c);
+                    for (auto& item : copy->list) item = substitute(item);
+                    for (auto& key : copy->keys) key = substitute(key);
+                    // A single-result call placed as the LAST argument would pass every result
+                    // (`f(a, g())`); parentheses keep it to one value, like the temporary did.
+                    if ((copy->k == ex::EK::Call || copy->k == ex::EK::Method) && !copy->list.empty()) {
+                        ex::EP& last = copy->list.back();
+                        if (last && (last->k == ex::EK::Call || last->k == ex::EK::Method)
+                            && !last->multret && last->nres == 1) {
+                            ex::EP group = ex::mk(ex::EK::Group);
+                            group->a = last;
+                            last = group;
+                        }
+                    }
+                    if (copy->k == ex::EK::Field && copy->a && copy->a->k == ex::EK::Global
+                        && !std::getenv("RENOVICE_NO_IMPORT_CHAIN_GUARD")) {
+                        copy->k = ex::EK::Index;
+                        copy->b = ex::mkconst("\"" + copy->text + "\"");
+                        copy->text.clear();
+                    }
+                    return copy;
+                };
+                // Each chain statement's value is tagged with its instruction; walking the folded
+                // tree in Luau evaluation order must meet those instructions in increasing order,
+                // otherwise the one-statement spelling would evaluate them in another order.
+                std::map<const ex::Expr*, int> origin;
+                for (size_t k : chain) {
+                    ex::EP folded_value = substitute(bo.stmts[k].rhs);
+                    origin[folded_value.get()] = bo.stmts[k].insn;
+                    value[bo.stmts[k].lhs->reg] = folded_value;
+                }
+                ex::EP folded_rhs = substitute(set.rhs);
+                std::vector<int> order;
+                bool order_known = true;
+                std::function<void(const ex::EP&)> walk = [&](const ex::EP& e) {
+                    if (!e || !order_known) return;
+                    switch (e->k) {
+                        case ex::EK::Call: case ex::EK::Method:
+                            walk(e->a);
+                            for (const auto& item : e->list) walk(item);
+                            break;
+                        case ex::EK::Bin: case ex::EK::Index:
+                            walk(e->a); walk(e->b); break;
+                        case ex::EK::Un: case ex::EK::Field: case ex::EK::Group:
+                            walk(e->a); break;
+                        case ex::EK::Concat:
+                            for (const auto& item : e->list) walk(item);
+                            break;
+                        case ex::EK::Const: case ex::EK::Reg: case ex::EK::Upval: case ex::EK::Global:
+                            break;
+                        default:
+                            order_known = false; return;
+                    }
+                    auto tagged = origin.find(e.get());
+                    if (tagged != origin.end()) order.push_back(tagged->second);
+                };
+                // post-order: a value's own instruction executes after its operands
+                walk(folded_rhs);
+                for (size_t q = 1; q < order.size(); ++q)
+                    if (order[q] <= order[q - 1]) order_known = false;
+                if (!order_known || order.size() != chain.size()) {
+                    value.clear();
+                    continue;
+                }
+                set.rhs = folded_rhs;
+                folded_into_setupval.insert(chain.begin(), chain.end());
+                if (std::getenv("RENOVICE_SETUPVAL_FOLD_TRACE"))
+                    std::fprintf(stderr, "SETUPVAL_FOLD pidx=%d pc=%d upval=%d chain=%zu\n",
+                                 pidx, set.insn, target, chain.size());
+            }
+        }
         for (size_t stmt_index = 0; stmt_index < bo.stmts.size(); ++stmt_index) {
             const ex::Stmt& s = bo.stmts[stmt_index];
+            if (folded_into_setupval.count(stmt_index)) continue;
             if (suppress_insns.count(s.insn) || n.chain_setup_insns.count(s.insn)) continue;
             // Preserve an empty table's exact allocation point without leaking its compiler-only
             // argument slot into the function-wide local declaration.  Rendering the table directly
