@@ -6418,3 +6418,17 @@ compile to JUMPXEQKN where stock loads a register; a renderer path that drops me
 loses the folded setup (SwiftDethAbility p7 `c8v8.visible`); upvalue/GETUPVAL label shifts.
 Rejected: excluding constant-only setups (24 fixed / 24 broken; constant folds are net positive).
 Next: per-shape gating of the 27 breakers with the quick gate, then one full run.
+
+## 2026-11-06 — Short-circuit expression fold is DEFAULT (with bytecode-checked selection)
+
+Follow-up to the entry above. Fixes: global-root field reads spelled `_T["X"]` inside folds (IMPORT-CHAIN
+GUARD), folds only on unmerged straight-line test blocks, one dependency chain per fold, no fold with
+two folded comparison operands, fold completeness checked against the final text. Per module,
+decompile-mod-u44 renders with and without folds, rebuilds both and keeps the folded source only when
+CFG-equal protos strictly increase and hash/string/key-use/dataflow counts do not drop
+(RENOVICE_NO_SC_EXPR_FOLD_SELECT skips the selection; RENOVICE_NO_SC_EXPR_FOLD disables the fold).
+Full corpus rt_full8 vs rt_full6: CFG-ID 4,960 -> 4,989, CFG-ID + dataflow 4,946 -> 4,975, CONST-ID
+5,461 -> 5,464, closed CFG-ID 4,848 -> 4,870, closed CONST-ID 5,450 -> 5,453, 0 modules lost (the one
+apparent closed loss closes at pass 1). TRUE with selection; the fold alone still regresses (renderer
+defects it exposes, e.g. VoidClone loses a loop-break statement). Cost: ~3x decompile time on modules
+the fold changes (full run 1,290 s -> 2,494 s).

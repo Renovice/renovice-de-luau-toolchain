@@ -416,6 +416,33 @@ struct Emitter {
 
     static std::string R(int r) { char b[24]; std::snprintf(b, sizeof b, "v%d", r); return b; }
 
+    // Folded short-circuit tests whose setup expression was rendered into a condition. A folded
+    // setup is suppressed as a statement, so every one must reach a rendered condition.
+    // Checked against the FINAL text: a discarded scratch render may also have rendered it.
+    mutable std::map<int, std::set<std::string>> fold_tests_rendered;
+    bool folds_complete(const std::string& text) const {
+        // The fold exists to let the structured renderers own short-circuit chains. A prototype
+        // that still falls back to the integer-state selector gains nothing from it; keep that
+        // fallback on the unfolded graph it was measured on.
+        bool any_fold = false;
+        for (const st::Node& node : g->n)
+            if (node.reach && !node.chain_expr_setup.empty()) any_fold = true;
+        if (any_fold && std::getenv("RENOVICE_SC_EXPR_FOLD_NO_STATE")
+            && text.find("__renovice_state_") != std::string::npos)
+            return false;
+        for (const st::Node& node : g->n)
+            if (node.reach)
+                for (const auto& entry : node.chain_expr_setup) {
+                    auto rendered = fold_tests_rendered.find(entry.first);
+                    if (rendered == fold_tests_rendered.end()) return false;
+                    bool present = false;
+                    for (const std::string& spelling : rendered->second)
+                        if (text.find(spelling) != std::string::npos) present = true;
+                    if (!present) return false;
+                }
+        return true;
+    }
+
     std::string cond_reg(const st::Node* node, int test_insn, int reg) const {
         if (node) {
             auto test = node->chain_loadn_literals.find(test_insn);
@@ -437,6 +464,14 @@ struct Emitter {
                     }
                     ex::EP copy = std::make_shared<ex::Expr>(*e);
                     copy->a = substitute(e->a); copy->b = substitute(e->b); copy->c = substitute(e->c);
+                    // GETIMPORT root + GETFIELD stays two instructions only when spelled
+                    // `_T["Name"]`; `_T.Name` compiles to one two-part GETIMPORT (IMPORT-CHAIN GUARD).
+                    if (copy->k == ex::EK::Field && copy->a && copy->a->k == ex::EK::Global
+                        && !std::getenv("RENOVICE_NO_IMPORT_CHAIN_GUARD")) {
+                        copy->k = ex::EK::Index;
+                        copy->b = ex::mkconst("\"" + copy->text + "\"");
+                        copy->text.clear();
+                    }
                     for (auto& item : copy->list) item = substitute(item);
                     for (auto& key : copy->keys) key = substitute(key);
                     return copy;
@@ -448,6 +483,7 @@ struct Emitter {
                 if (folded != value.end()) {
                     const ex::EK kind = folded->second->k;
                     const std::string text = ex::render(folded->second);
+                    fold_tests_rendered[test_insn].insert(text);
                     return kind == ex::EK::Bin || kind == ex::EK::Un || kind == ex::EK::IfElse
                         ? "(" + text + ")" : text;
                 }

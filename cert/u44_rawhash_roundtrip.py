@@ -121,7 +121,8 @@ def dataflow_gate(exe, stock, cand, u44, cwd):
 
 def one(stock, args):
     u44 = args.profile == "u44"
-    decomp = "decompile-mod-u44" if u44 else "decompile-mod"
+    # RENOVICE_RT_DECOMP selects an alternative module renderer (A/B, e.g. semantic-ir-render-module-u44).
+    decomp = os.environ.get("RENOVICE_RT_DECOMP") or ("decompile-mod-u44" if u44 else "decompile-mod")
     recomp = "recompile-u44" if u44 else "recompile"
     res = {"module": stock.name}
     work = Path(tempfile.mkdtemp(prefix="u44rt-", dir=args.tmp))

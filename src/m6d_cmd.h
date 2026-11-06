@@ -16,6 +16,9 @@ static long long g_sclive_blocked=0, g_sclive_exact=0, g_sclive_unknown=0;
 static long long g_sclive_nodef=0, g_sclive_multidef=0, g_sclive_nonsingle=0;
 static long long g_sclive_earlyuse=0, g_sclive_liveout=0;
 static std::map<std::string, long long> g_sclive_exact_shapes;
+// Set by m6e while re-rendering one prototype whose output did not place every folded test.
+static bool g_sc_expr_fold_suspend = false;
+
 static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     std::vector<Blk> bl; std::string why;
     std::string code = ir_code_bytes(ip);
@@ -68,7 +71,7 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     // blocks unreachable. This is instrumentation-only for now; no merge consults it unless a future
     // flag-backed candidate is added after the measured population is understood.
     lv::Analysis sc_liveness;
-    const bool sc_expr_fold = std::getenv("RENOVICE_SC_EXPR_FOLD") != nullptr;
+    const bool sc_expr_fold = !std::getenv("RENOVICE_NO_SC_EXPR_FOLD") && !g_sc_expr_fold_suspend;
     bool need_sc_liveness = std::getenv("RENOVICE_SCLIVE")
                          || std::getenv("RENOVICE_SC_LOADN_FOLD") || sc_expr_fold;
     if (need_sc_liveness) sc_liveness = lv::analyze(ip, g);
@@ -160,6 +163,9 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
             if (sc_expr_fold && (andlike0 || orlike0) && !fold_loadn
                 && F.first >= 0 && F.last > F.first && F.last < (int)ip.code.size()
                 && F.chain_expr_setup.empty() && F.chain_loadn_literals.empty()
+                // F must still be one original straight-line block: a merged node's first..last
+                // spans other blocks, and its liveness row is not the original block's.
+                && F.chain.empty() && !F.branch_predicate
                 && sc_liveness.known && sc_liveness.converged
                 && (size_t)f < sc_liveness.live_out.size()) {
                 bool exact = true;
@@ -201,9 +207,53 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                     }
                     std::set<int> test_uses, test_defs;
                     lv::register_effects(ip, ip.code[F.last], test_uses, test_defs);
-                    for (int reg : test_uses)
+                    int folded_operands = 0;
+                    for (int reg : test_uses) {
                         if (def_count.count(reg) && !assigned.count(reg)) fold_expr = false;
+                        if (def_count.count(reg)) ++folded_operands;
+                    }
+                    // Comparison renderers may spell `a < b` as `b > a`-style operand order; with
+                    // both operands folded that reorders their evaluation. Keep one folded operand.
+                    if (folded_operands > 1) fold_expr = false;
+                    // One dependency chain only (`a.b.c`, `#t`, `f(x)`): each setup instruction
+                    // reads the previous one's result and no other setup value. Independent
+                    // subexpressions can render in an evaluation order the bytecode did not use.
+                    for (int q = F.first + 1; q < F.last && fold_expr; ++q) {
+                        std::set<int> uses, defs, prev_uses, prev_defs;
+                        lv::register_effects(ip, ip.code[q], uses, defs);
+                        lv::register_effects(ip, ip.code[q - 1], prev_uses, prev_defs);
+                        int setup_reads = 0; bool reads_previous = false;
+                        for (int reg : uses) {
+                            if (def_count.count(reg) && def_at[reg] < q) ++setup_reads;
+                            if (prev_defs.count(reg)) reads_previous = true;
+                        }
+                        if (!reads_previous || setup_reads != 1) fold_expr = false;
+                    }
+                    // Experimental: a literal comparand compiles to a constant compare where stock
+                    // loads a register.
+                    if (std::getenv("RENOVICE_SC_EXPR_FOLD_NO_LOADN_CMP") && F.last == F.first + 1
+                        && (ip.code[F.first].name == "LOADN" || ip.code[F.first].name == "LOADK")
+                        && test_uses.size() > 1)
+                        fold_expr = false;
                 }
+                std::string fold_shape;
+                for (int q = F.first; q <= F.last; ++q) {
+                    if (q > F.first) fold_shape += q == F.last ? ">" : "+";
+                    fold_shape += ip.code[q].name;
+                }
+                fold_shape += andlike0 ? "/and" : "/or";
+                if (fold_expr) {
+                    if (const char* allow = std::getenv("RENOVICE_SC_EXPR_FOLD_ONLY")) {
+                        const std::string list = std::string(",") + allow + ",";
+                        if (list.find("," + fold_shape + ",") == std::string::npos) fold_expr = false;
+                    }
+                    if (const char* deny = std::getenv("RENOVICE_SC_EXPR_FOLD_DENY")) {
+                        const std::string list = std::string(",") + deny + ",";
+                        if (list.find("," + fold_shape + ",") != std::string::npos) fold_expr = false;
+                    }
+                }
+                if (fold_expr && std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
+                    std::fprintf(stderr, "SC_EXPR_FOLD proto=%d shape=%s\n", ip.index, fold_shape.c_str());
                 if (fold_expr) {
                     F.chain_expr_setup[F.last] = {F.first, F.last - 1};
                     for (int q = F.first; q < F.last; ++q) F.chain_setup_insns.insert(q);

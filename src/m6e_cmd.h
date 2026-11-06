@@ -1147,7 +1147,9 @@ static void proper_text_diag(const std::string& text, int idx) {
     std::fprintf(stderr, "PDIAG_TEXT pidx=%d selectors=%zu\n", idx, names.size());
 }
 
-static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok, std::string& why) {
+static std::string decompile_proto_text_once(const ir::IProto& ip, int idx, bool& ok, std::string& why,
+                                             bool& folds_complete) {
+    folds_complete = true;
     ok = false;
     st::Graph g;
     if (!build_graph(ip, g)) { why = "cfg build failed"; return ""; }
@@ -1259,14 +1261,16 @@ static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok,
                          P.plan_claim.size(), E.plan_winner.size());
     }
     std::string src = E.emit_function(nm);
+    folds_complete = E.folds_complete(src);
     if (E.bad) { why = E.why; return src; }
     proper_text_diag(src, idx);
     ok = true;
     return src;
 }
 
-static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
-                                        bool& ok, std::string& why) {
+static std::string decompile_proto_anon_once(const ir::IProto& ip, int idx,
+                                             bool& ok, std::string& why, bool& folds_complete) {
+    folds_complete = true;
     ok = false;
     st::Graph g;
     if (!build_graph(ip, g)) { why = "cfg build failed"; return ""; }
@@ -1365,6 +1369,7 @@ static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
                          P.plan_claim.size(), E.plan_winner.size());
     }
     std::string fn = E.emit_function("");
+    folds_complete = E.folds_complete(fn);
     if (E.bad) { why = E.why; return fn; }
     // emit_function("") yields "function (params)...end"; drop the space to get the anonymous form.
     size_t sp = fn.find("function (");
@@ -1372,6 +1377,31 @@ static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
     proper_text_diag(fn, idx);
     ok = true;
     return fn;
+}
+
+// A folded short-circuit setup exists only inside its rendered condition. When a fallback path did
+// not render every folded test, rebuild that one prototype without folds.
+static std::string decompile_proto_text(const ir::IProto& ip, int idx, bool& ok, std::string& why) {
+    bool complete = true;
+    std::string src = decompile_proto_text_once(ip, idx, ok, why, complete);
+    if (complete) return src;
+    const bool saved = g_sc_expr_fold_suspend;
+    g_sc_expr_fold_suspend = true;
+    src = decompile_proto_text_once(ip, idx, ok, why, complete);
+    g_sc_expr_fold_suspend = saved;
+    return src;
+}
+
+static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
+                                        bool& ok, std::string& why) {
+    bool complete = true;
+    std::string src = decompile_proto_anon_once(ip, idx, ok, why, complete);
+    if (complete) return src;
+    const bool saved = g_sc_expr_fold_suspend;
+    g_sc_expr_fold_suspend = true;
+    src = decompile_proto_anon_once(ip, idx, ok, why, complete);
+    g_sc_expr_fold_suspend = saved;
+    return src;
 }
 
 static int cmd_decompile(int argc, char** argv) {

@@ -45,6 +45,10 @@ GATES = [
     ("CFG-ID", lambda r: verdict(r, "cfgIdentity")),
     ("dataflow", lambda r: verdict(r, "dataflowIdentity")),
 ]
+CLOSED_GATES = [
+    ("closed CONST-ID", lambda r: verdict(r, "closedConstIdentity") if "closedConstIdentity" in r else verdict(r, "constIdentity")),
+    ("closed CFG-ID", lambda r: verdict(r, "closedCfgIdentity") if "closedCfgIdentity" in r else verdict(r, "cfgIdentity")),
+]
 
 
 def load_results(path):
@@ -65,6 +69,7 @@ def main():
     ap.add_argument("--exe", default=str(ROOT / "bin" / "derecomp.exe"))
     ap.add_argument("--jobs", type=int, default=None)
     ap.add_argument("--out", default=str(STATE / "last"))
+    ap.add_argument("--closed", action="store_true", help="also run the fixed-point passes and gate closed CONST/CFG-ID")
     args = ap.parse_args()
 
     STATE.mkdir(parents=True, exist_ok=True)
@@ -110,7 +115,7 @@ def main():
           flush=True)
 
     cmd = [sys.executable, str(ROOT / "cert" / "u44_rawhash_roundtrip.py"), args.stock, str(out / "run"),
-           "--list", str(lst), "--exe", args.exe, "--first-pass-only"]
+           "--list", str(lst), "--exe", args.exe] + ([] if args.closed else ["--first-pass-only"])
     if has_df:
         cmd.append("--dataflow")
     if args.jobs:
@@ -128,7 +133,8 @@ def main():
         if m not in new:
             continue
         b, n = base[m], new[m]
-        lost = [name for name, g in GATES if (name != "dataflow" or has_df) and g(b) and not g(n)]
+        gates = GATES + (CLOSED_GATES if args.closed else [])
+        lost = [name for name, g in gates if (name != "dataflow" or has_df) and g(b) and not g(n)]
         if lost:
             broken.append((m, lost, list((n.get("cfgIdentity") or {}).get("classes") or {})[:3]))
         if not verdict(b, "cfgIdentity") and verdict(n, "cfgIdentity") and (not has_df or verdict(n, "dataflowIdentity")):

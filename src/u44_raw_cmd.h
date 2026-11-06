@@ -120,6 +120,47 @@ static bool u44_source_header(const std::string& path, std::string& header, std:
     return true;
 }
 
+// SHORT-CIRCUIT FOLD SELECTION (RENOVICE_SC_EXPR_FOLD). The fold changes which renderer owns a
+// prototype, and the downstream renderers/canonicalizers still have shape-specific limits. The
+// input bytecode is the authority: render the module with and without the fold, rebuild both, and
+// keep the folded source only when it is at least as faithful on every identity gate and strictly
+// better on control flow. Child processes run with RENOVICE_SC_EXPR_FOLD_CHILD so this never nests.
+static std::string sc_fold_run(const std::string& args) {
+    char self[MAX_PATH]; const DWORD self_len = GetModuleFileNameA(nullptr, self, MAX_PATH);
+    std::string cmd = "\"\"" + std::string(self, self_len) + "\" " + args + " 2>&1\"";
+    std::string out;
+    FILE* pipe = _popen(cmd.c_str(), "r");
+    if (!pipe) return out;
+    char buf[4096];
+    while (std::fgets(buf, sizeof buf, pipe)) out += buf;
+    _pclose(pipe);
+    return out;
+}
+static long sc_fold_field(const std::string& text, const std::string& key) {
+    const size_t at = text.find(key + "=");
+    if (at == std::string::npos) return -1;
+    return std::strtol(text.c_str() + at + key.size() + 1, nullptr, 10);
+}
+struct ScFoldScore { long cfg = -1, hash = -1, str = -1, key = -1, df = -1; bool built = false; };
+static ScFoldScore sc_fold_score(const std::string& input, const std::string& source_path,
+                                 const std::string& bytecode_path) {
+    ScFoldScore score;
+    const std::string q = "\"";
+    sc_fold_run("recompile-u44 " + q + source_path + q + " " + q + bytecode_path + q);
+    if (!fs::exists(long_path(bytecode_path))) return score;
+    score.built = true;
+    const std::string pair = q + input + q + " " + q + bytecode_path + q + " --u44";
+    const std::string cfg = sc_fold_run("cfg-identity " + pair);
+    const std::string con = sc_fold_run("const-identity " + pair);
+    const std::string df = sc_fold_run("dataflow-identity " + pair);
+    score.cfg = sc_fold_field(cfg, "cfg_equal");
+    score.hash = sc_fold_field(con, "hash_equal");
+    score.str = sc_fold_field(con, "string_equal");
+    score.key = sc_fold_field(con, "keyuse_equal");
+    score.df = sc_fold_field(df, "df_equal");
+    return score;
+}
+
 static int cmd_decompile_mod_u44(int argc, char** argv) {
     if (std::getenv("RENOVICE_COMPILER_CANONICALIZE")) {
         std::fprintf(stderr, "decompile-mod-u44: compiler canonicalization is U43-only\n");
@@ -136,6 +177,35 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
         std::fprintf(stderr, "decompile-mod-u44: %s\n", failure.c_str()); return 1;
     }
     source = header + source;
+    if (!std::getenv("RENOVICE_NO_SC_EXPR_FOLD") && !std::getenv("RENOVICE_SC_EXPR_FOLD_CHILD")
+        && !std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")) {
+        _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");
+        _putenv("RENOVICE_NO_SC_EXPR_FOLD=1");         // the base child renders without the fold
+        char tmp_dir[MAX_PATH]; GetTempPathA(MAX_PATH, tmp_dir);
+        char stem[MAX_PATH]; GetTempFileNameA(tmp_dir, "scf", 0, stem);
+        const std::string base_src = std::string(stem) + ".base.luau";
+        const std::string fold_src = std::string(stem) + ".fold.luau";
+        const std::string q = "\"";
+        sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + base_src + q);
+        const std::string base = read_file(base_src);
+        if (!base.empty() && base != source && write_file(fold_src, source)) {
+            const ScFoldScore f = sc_fold_score(argv[2], fold_src, std::string(stem) + ".fold.lua_B");
+            const ScFoldScore b = sc_fold_score(argv[2], base_src, std::string(stem) + ".base.lua_B");
+            const bool not_worse = f.built && f.hash >= b.hash && f.str >= b.str && f.key >= b.key
+                                && f.df >= b.df && f.cfg >= b.cfg;
+            const bool better = f.cfg > b.cfg;
+            if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
+                std::fprintf(stderr, "SC_EXPR_FOLD_SELECT cfg %ld/%ld df %ld/%ld str %ld/%ld -> %s\n",
+                             f.cfg, b.cfg, f.df, b.df, f.str, b.str,
+                             not_worse && better ? "fold" : "base");
+            if (!(not_worse && better)) source = base;
+        } else if (!base.empty()) {
+            source = base;
+        }
+        for (const char* suffix : {".base.luau", ".fold.luau", ".base.lua_B", ".fold.lua_B", ""}) {
+            std::error_code ec; fs::remove(long_path(std::string(stem) + suffix), ec);
+        }
+    }
     if (argc >= 4) {
         if (!write_file(argv[3], source)) {
             std::fprintf(stderr, "decompile-mod-u44: cannot write %s\n", argv[3]); return 1;
