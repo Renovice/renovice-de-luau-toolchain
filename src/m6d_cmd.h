@@ -18,11 +18,34 @@ static long long g_sclive_earlyuse=0, g_sclive_liveout=0;
 static std::map<std::string, long long> g_sclive_exact_shapes;
 // Set by m6e while re-rendering one prototype whose output did not place every folded test.
 static bool g_sc_expr_fold_suspend = false;
-static int g_sc_expr_fold_applied = 0;
+static int g_sc_expr_fold_applied = 0;      // folds applied in this process (selection skips when 0)
 static bool g_sc_expr_fold_strict = false;   // narrow candidate rules (selection alternative)
 // Wide candidate rules are allowed only inside decompile-mod-u44 with bytecode selection active;
 // every other entry point (fixtures, decompile-mod, plan tools) keeps the narrow rules.
-static bool g_sc_expr_fold_wide = false;   // folds applied in this process (selection skips when 0)
+static bool g_sc_expr_fold_wide = false;
+// Per-prototype fold level chosen by the bytecode selection (RENOVICE_SC_EXPR_FOLD_LEVELS =
+// "proto:level,..."; 0 = no fold, 1 = narrow, 2 = wide). Unlisted prototypes keep the defaults.
+static const std::map<int, int>& sc_fold_levels() {
+    static std::map<int, int> levels;
+    static bool parsed = false;
+    if (!parsed) {
+        parsed = true;
+        if (const char* text = std::getenv("RENOVICE_SC_EXPR_FOLD_LEVELS")) {
+            std::string spec(text);
+            size_t at = 0;
+            while (at < spec.size()) {
+                size_t comma = spec.find(',', at);
+                if (comma == std::string::npos) comma = spec.size();
+                const std::string item = spec.substr(at, comma - at);
+                const size_t colon = item.find(':');
+                if (colon != std::string::npos)
+                    levels[std::atoi(item.substr(0, colon).c_str())] = std::atoi(item.substr(colon + 1).c_str());
+                at = comma + 1;
+            }
+        }
+    }
+    return levels;
+}
 
 static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     std::vector<Blk> bl; std::string why;
@@ -76,7 +99,12 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     // blocks unreachable. This is instrumentation-only for now; no merge consults it unless a future
     // flag-backed candidate is added after the measured population is understood.
     lv::Analysis sc_liveness;
-    const bool sc_expr_fold = !std::getenv("RENOVICE_NO_SC_EXPR_FOLD") && !g_sc_expr_fold_suspend;
+    const auto proto_level = sc_fold_levels().find(ip.index);
+    const int fold_level = proto_level == sc_fold_levels().end() ? -1 : proto_level->second;
+    const bool sc_expr_fold = !std::getenv("RENOVICE_NO_SC_EXPR_FOLD") && !g_sc_expr_fold_suspend
+                           && fold_level != 0;
+    const bool fold_wide = fold_level == 2 || (fold_level < 0 && g_sc_expr_fold_wide);
+    const bool fold_strict_forced = fold_level == 1 || (fold_level < 0 && g_sc_expr_fold_strict);
     bool need_sc_liveness = std::getenv("RENOVICE_SCLIVE")
                          || std::getenv("RENOVICE_SC_LOADN_FOLD") || sc_expr_fold;
     if (need_sc_liveness) sc_liveness = lv::analyze(ip, g);
@@ -213,7 +241,7 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                             exact = false;
                 }
                 // The narrow candidate keeps the original rule: each setup register written once.
-                if (!g_sc_expr_fold_wide || g_sc_expr_fold_strict
+                if (!fold_wide || fold_strict_forced
                     || std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")
                     || std::getenv("RENOVICE_SC_EXPR_FOLD_STRICT"))
                     for (const auto& entry : def_count)
@@ -246,7 +274,7 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                     // rejected anyway, so wider candidates cost nothing.
                     const bool strict = std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT") != nullptr
                                      || std::getenv("RENOVICE_SC_EXPR_FOLD_STRICT") != nullptr
-                                     || g_sc_expr_fold_strict || !g_sc_expr_fold_wide;
+                                     || fold_strict_forced || !fold_wide;
                     if (strict && folded_operands > 1) fold_expr = false;
                     // One dependency chain only (`a.b.c`, `#t`, `f(x)`): each setup instruction
                     // reads the previous one's result and no other setup value. Independent

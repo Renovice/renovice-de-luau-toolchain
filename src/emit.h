@@ -17682,6 +17682,18 @@ inexact_selector_fallback:
                     && !std::getenv("RENOVICE_CFG_REJECT_OWNERSHIP_NOOP")
                     && emitted == reachable)
                     return true;
+                if (std::getenv("RENOVICE_CFG_FOR_DEBUG")) {
+                    const st::Node& node = g->n[start];
+                    int stmts = node.last - node.first;
+                    std::fprintf(stderr,
+                                 "CFG_SAE pidx=%d block=%d return=%d branch=%d uncond=%d preds=%zu "
+                                 "insns=%d term=0x%02x lastop=0x%02x\n",
+                                 pidx, start, node.is_return ? 1 : 0, node.is_branch ? 1 : 0,
+                                 node.is_uncond ? 1 : 0, node.preds.size(), stmts + 1,
+                                 (unsigned)node.term,
+                                 node.last >= 0 && node.last < (int)ip->code.size()
+                                     ? (unsigned)ip->code[node.last].op : 0u);
+                }
                 return reject_render("START_ALREADY_EMITTED", start, stop, terminal);
             }
 

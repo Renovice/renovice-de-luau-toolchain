@@ -155,6 +155,7 @@ static long sc_fold_field(const std::string& text, const std::string& key) {
 struct ScFoldScore {
     long cfg = -1, hash = -1, str = -1, key = -1, df = -1, protos = -1, df_protos = -1;
     bool built = false;
+    std::set<int> bad;   // prototypes any identity gate reports (`proto N ...` lines)
     // Every identity count equals the prototype count: nothing can beat this rendering.
     bool perfect() const {
         return built && protos > 0 && cfg == protos && hash == protos && str == protos
@@ -182,6 +183,14 @@ static ScFoldScore sc_fold_score(const std::string& input, const std::string& so
     score.df = sc_fold_field(df, "df_equal");
     score.protos = sc_fold_field(cfg, "protos_stock");
     score.df_protos = sc_fold_field(df, "protos_stock");
+    size_t line = 0;
+    while (line < all.size()) {
+        size_t end = all.find('\n', line);
+        if (end == std::string::npos) end = all.size();
+        if (all.compare(line, 6, "proto ") == 0)
+            score.bad.insert(std::atoi(all.c_str() + line + 6));
+        line = end + 1;
+    }
     return score;
 }
 
@@ -267,6 +276,8 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
             ScFoldScore n;
             if (!narrow.empty() && narrow != source && write_file(narrow_src, narrow))
                 n = sc_fold_score(argv[2], narrow_src, std::string(stem) + ".narrow.lua_B");
+            else if (narrow == source)
+                n = f;
             if (n.perfect()) {
                 source = narrow; chosen = "narrow";
             } else {
@@ -279,9 +290,43 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
                         && c.df >= b.df && c.cfg > b.cfg;
                 };
                 const bool wide_ok = qualifies(f), narrow_ok = qualifies(n);
-                if (wide_ok && (!narrow_ok || f.cfg >= n.cfg)) { chosen = "fold"; }
-                else if (narrow_ok) { source = narrow; chosen = "narrow"; }
+                long best_cfg = b.cfg;
+                if (wide_ok && (!narrow_ok || f.cfg >= n.cfg)) { chosen = "fold"; best_cfg = f.cfg; }
+                else if (narrow_ok) { source = narrow; chosen = "narrow"; best_cfg = n.cfg; }
                 else if (!base.empty()) { source = base; chosen = "base"; }
+                // Per-prototype mix: each prototype takes the first fold level (none, narrow, wide)
+                // under which no identity gate reports it. One fold level can fix one function and
+                // disturb another in the same module; the module-wide choice cannot express that.
+                if (b.built && b.protos > 0 && !std::getenv("RENOVICE_NO_SC_EXPR_FOLD_MIX")) {
+                    std::string spec;
+                    bool uses_fold = false;
+                    for (long proto = 0; proto < b.protos; ++proto) {
+                        int level = 0;
+                        if (b.bad.count((int)proto)) {
+                            if (n.built && !n.bad.count((int)proto)) level = 1;
+                            else if (f.built && !f.bad.count((int)proto)) level = 2;
+                        }
+                        if (level) uses_fold = true;
+                        spec += (spec.empty() ? "" : ",") + std::to_string(proto) + ":" + std::to_string(level);
+                    }
+                    if (uses_fold) {
+                        const std::string mix_src = std::string(stem) + ".mix.luau";
+                        _putenv(("RENOVICE_SC_EXPR_FOLD_LEVELS=" + spec).c_str());
+                        sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + mix_src + q);
+                        _putenv("RENOVICE_SC_EXPR_FOLD_LEVELS=");
+                        const std::string mix = read_file(mix_src);
+                        if (!mix.empty()) {
+                            const ScFoldScore m = sc_fold_score(argv[2], mix_src,
+                                                                std::string(stem) + ".mix.lua_B");
+                            if (qualifies(m) && m.cfg > best_cfg) { source = mix; chosen = "mix"; best_cfg = m.cfg; }
+                            if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
+                                std::fprintf(stderr, "SC_EXPR_FOLD_SELECT mix cfg %ld\n", m.cfg);
+                        }
+                        std::error_code mix_ec;
+                        fs::remove(long_path(mix_src), mix_ec);
+                        fs::remove(long_path(std::string(stem) + ".mix.lua_B"), mix_ec);
+                    }
+                }
                 if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
                     std::fprintf(stderr, "SC_EXPR_FOLD_SELECT cfg wide %ld narrow %ld base %ld -> %s\n",
                                  f.cfg, n.cfg, b.cfg, chosen);
