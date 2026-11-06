@@ -1413,6 +1413,8 @@ static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
     bool complete = true;
     std::string src = decompile_proto_anon_once(ip, idx, ok, why, complete);
     if (complete) return src;
+    if (const char* dump = std::getenv("RENOVICE_SC_EXPR_FOLD_DUMP"))
+        if (std::atoi(dump) == idx) std::fprintf(stderr, "%s\n", src.c_str());
     const bool saved = g_sc_expr_fold_suspend;
     g_sc_expr_fold_suspend = true;
     src = decompile_proto_anon_once(ip, idx, ok, why, complete);

@@ -165,8 +165,32 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
             // is GUARDED by B's test — merging hoists it out of the guard and it runs unconditionally.
             // `t and t.x and t.x.y` became `v1 = v0.x` executed before the `t` check, so it indexed
             // nil. A short-circuit chain is only sound when the later tests have no side effects.
+            // A successor of F that is nothing but one JUMP, reached only from F, is the same
+            // destination as that JUMP's target (Luau places one between a `while` condition's
+            // last test and the loop exit). Comparing through it lets `a and b.c` loop conditions
+            // merge. RENOVICE_NO_SC_JUMP_THROUGH keeps the literal successor.
+            auto jump_through = [&](int target, int& bypassed) {
+                bypassed = -1;
+                if (std::getenv("RENOVICE_NO_SC_JUMP_THROUGH")) return target;
+                if (target < 0 || target >= (int)g.n.size()) return target;
+                const st::Node& J = g.n[target];
+                if (!J.reach || !J.is_uncond || J.is_branch || J.first != J.last || J.first < 0
+                    || J.first >= (int)ip.code.size() || ip.code[J.first].op != 0x40
+                    || J.preds.size() != 1 || J.preds[0] != f || J.succ_true < 0) return target;
+                bypassed = target;
+                return J.succ_true;
+            };
+            int bypass_true = -1, bypass_false = -1;
+            const int f_true = jump_through(F.succ_true, bypass_true);
+            const int f_false = jump_through(F.succ_false, bypass_false);
             bool andlike0 = (B.succ_true == F.succ_true);
             bool orlike0  = (B.succ_true == F.succ_false);
+            int bypassed_jump = -1;
+            if (std::getenv("RENOVICE_SC_PAIR_TRACE")) std::fprintf(stderr, "SC_PAIR proto=%d B=%zu F=%d Bt=%d Ft=%d Ff=%d ft=%d ff=%d bt=%d bf=%d\n", ip.index, i, f, B.succ_true, F.succ_true, F.succ_false, f_true, f_false, bypass_true, bypass_false);
+            if (!andlike0 && !orlike0) {
+                if (B.succ_true == f_true && bypass_true >= 0) { andlike0 = true; bypassed_jump = bypass_true; }
+                else if (B.succ_true == f_false && bypass_false >= 0) { orlike0 = true; bypassed_jump = bypass_false; }
+            }
             bool fold_loadn = false;
             if (std::getenv("RENOVICE_SC_LOADN_FOLD") && andlike0
                 && sc_liveness.known && sc_liveness.converged
@@ -439,6 +463,12 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
             B.chain_setup_insns.insert(F.chain_setup_insns.begin(), F.chain_setup_insns.end());
             B.succ_true  = F.succ_true;                        // B inherits F's exits
             B.succ_false = F.succ_false;
+            if (bypassed_jump >= 0) {                          // the bypassed JUMP-only block
+                if (B.succ_true == bypassed_jump) B.succ_true = g.n[bypassed_jump].succ_true;
+                if (B.succ_false == bypassed_jump) B.succ_false = g.n[bypassed_jump].succ_true;
+                g.n[bypassed_jump].reach = false;
+                g.n[bypassed_jump].succ_true = g.n[bypassed_jump].succ_false = -1;
+            }
             B.last       = F.last;                             // and F's instructions
             B.term       = F.term;
             F.reach = false; F.succ_true = F.succ_false = -1;  // F no longer exists on its own

@@ -430,15 +430,53 @@ struct Emitter {
         if (any_fold && std::getenv("RENOVICE_SC_EXPR_FOLD_NO_STATE")
             && text.find("__renovice_state_") != std::string::npos)
             return false;
+        if (any_fold && std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
+            std::fprintf(stderr, "SC_EXPR_FOLD_CHECK pidx=%d\n", pidx);
         for (const st::Node& node : g->n)
             if (node.reach)
                 for (const auto& entry : node.chain_expr_setup) {
                     auto rendered = fold_tests_rendered.find(entry.first);
                     if (rendered == fold_tests_rendered.end()) return false;
+                    // Upvalue placeholders (`u<N>`) and register names (`v<N>`) are renamed after
+                    // rendering (captured-local names, register coloring); compare the fragments
+                    // between them, in order.
+                    auto appears = [&](const std::string& spelling) {
+                        std::vector<std::string> fragments;
+                        std::string current;
+                        for (size_t at = 0; at < spelling.size();) {
+                            const bool boundary = at == 0 || !(std::isalnum((unsigned char)spelling[at - 1])
+                                                               || spelling[at - 1] == '_');
+                            if (boundary && (spelling[at] == 'u' || spelling[at] == 'v') && at + 1 < spelling.size()
+                                && std::isdigit((unsigned char)spelling[at + 1])) {
+                                size_t end = at + 1;
+                                while (end < spelling.size() && std::isdigit((unsigned char)spelling[end])) ++end;
+                                if (end == spelling.size() || !(std::isalnum((unsigned char)spelling[end])
+                                                                 || spelling[end] == '_')) {
+                                    fragments.push_back(current); current.clear(); at = end; continue;
+                                }
+                            }
+                            current += spelling[at++];
+                        }
+                        fragments.push_back(current);
+                        size_t from = 0;
+                        for (const std::string& fragment : fragments) {
+                            if (fragment.empty()) continue;
+                            const size_t found = text.find(fragment, from);
+                            if (found == std::string::npos) return false;
+                            from = found + fragment.size();
+                        }
+                        return true;
+                    };
                     bool present = false;
                     for (const std::string& spelling : rendered->second)
-                        if (text.find(spelling) != std::string::npos) present = true;
-                    if (!present) return false;
+                        if (appears(spelling)) present = true;
+                    if (!present) {
+                        if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
+                            for (const std::string& spelling : rendered->second)
+                                std::fprintf(stderr, "SC_EXPR_FOLD_MISSING pidx=%d test=%d spelling=%s\n",
+                                             pidx, entry.first, spelling.c_str());
+                        return false;
+                    }
                 }
         return true;
     }
@@ -17061,8 +17099,18 @@ inexact_selector_fallback:
                 }
             }
             if (block < 0 || block >= (int)g->n.size() || !g->n[block].reach
-                || !in_render_domain(domain, block) || emitted.count(block))
+                || !in_render_domain(domain, block) || emitted.count(block)) {
+                if (std::getenv("RENOVICE_CFG_FOR_DEBUG") && block >= 0 && block < (int)g->n.size())
+                    std::fprintf(stderr,
+                                 "CFG_GIB pidx=%d block=%d reach=%d in_domain=%d emitted=%d preds=%zu "
+                                 "branch=%d return=%d header=%d\n",
+                                 pidx, block, g->n[block].reach ? 1 : 0,
+                                 in_render_domain(domain, block) ? 1 : 0,
+                                 emitted.count(block) ? 1 : 0, g->n[block].preds.size(),
+                                 g->n[block].is_branch ? 1 : 0, g->n[block].is_return ? 1 : 0,
+                                 while_by_header.count(block) || loop_by_prep.count(block) ? 1 : 0);
                 return reject_render("GUARD_CHAIN_INVALID_BLOCK", block, effect, exit);
+            }
             // A loop escape construct (LOOP ESCAPE JOINS) is delegated whole, like a source loop,
             // and the proof resumes at its join.
             auto construct = escape_heads.find(block);
