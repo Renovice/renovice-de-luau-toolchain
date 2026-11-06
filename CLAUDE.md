@@ -213,14 +213,30 @@ uses). Put a **minimum-n guard** on any "too few distinct values" rule — `IDIV
 - `src/ir.h` is read-only analysis and must stay separate from the byte-exact writer in
   `de_container.h`. Nothing in the decompiler may perturb the 5382/5382 round-trip.
 
-## Iterating on a fix: quick gate first, full corpus once
+## ★ DEFAULT WORKFLOW: fast tiers, slow check per batch (user rule, 2026-11-06)
 
-`python cert/quickgate.py <stock-dir> [--class "LABEL LOAD"] [--exe bin/derecomp.candidate.exe]` runs
-the candidate on the baseline's CFG-ID failures (or one class) plus a fixed tripwire sample of
-passing modules (~1,400 modules, ~2 min vs ~22 min) and lists FIXED / BROKEN per module against the
-last full run. Exit 1 on any pass -> fail. It is first-pass only: a fix is still proven by ONE full
-`u44_rawhash_roundtrip.py ... --dataflow` run before merge, then
-`python cert/quickgate.py <stock-dir> --promote <run>/results-u44.json` makes it the new baseline.
+Never re-run the slow complete corpus check for every change. Work in tiers:
+
+| tier | command | scope | time |
+|---|---|---|---|
+| 1. while iterating on a fix | `python cert/quickgate.py <stock> [--class "..."] [--exe bin/derecomp.candidate.exe]` | baseline CFG-ID failures (or one class) + fixed tripwire sample + `work/me/canary.txt` | ~2.5 min |
+| 2. before committing each fix | `python cert/quickgate.py <stock> --all` | every module, first pass | ~6.5 min |
+| 3. once per BATCH of fixes / before merging to main / after a change that touches every module | `python cert/quickgate.py <stock> --all --closed` (or `u44_rawhash_roundtrip.py ... --dataflow`) | every module incl. compiler-closed passes | ~22 min |
+
+Rules:
+- One commit per fix (tier 2 green: 0 BROKEN, fixtures `cert/cfg_class_fixtures.py` and
+  `cert/dataflow_identity_fixtures.py` PASS). Read the fixture output BEFORE committing.
+- If tier 3 finds a regression, bisect over the batch's commits; do not re-run tier 3 per change.
+- After a tier-3 run, `python cert/quickgate.py <stock> --promote <run>/results-u44.json` makes it
+  the baseline every tier compares against. Add any module a tier-3 run caught to `work/me/canary.txt`.
+- Build test binaries to a temp name (`bin/derecomp.candidate.exe`); `build.bat` for the final build.
+- Time with Windows-native timing (PowerShell `Measure-Command`), not Git Bash `time` (inflated).
+  `RENOVICE_TIMING=1` prints per-step and per-prototype time.
+
+Speed facts (2026-11-06): one decompile is ~140 ms of real work; startup used to load the whole
+922k-name base (fixed: only names whose hash occurs in the input load). Short-circuit fold
+selection renders alternatives in CHILD processes (an in-process re-render inherits state and differs).
+`u44_rawhash_roundtrip.py --reuse` exists but saves nothing: the gates are cheap, decompiling is the cost.
 
 ## Read these first
 
