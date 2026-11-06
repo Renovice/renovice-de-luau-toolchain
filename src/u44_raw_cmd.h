@@ -169,9 +169,12 @@ static ScFoldScore sc_fold_score(const std::string& input, const std::string& so
     if (!fs::exists(long_path(bytecode_path))) return score;
     score.built = true;
     const std::string pair = q + input + q + " " + q + bytecode_path + q + " --u44";
-    const std::string cfg = sc_fold_run("cfg-identity " + pair);
-    const std::string con = sc_fold_run("const-identity " + pair);
-    const std::string df = sc_fold_run("dataflow-identity " + pair);
+    const std::string all = sc_fold_run("identity-all " + pair);
+    const size_t con_at = all.find("CONST_IDENTITY");
+    const size_t df_at = all.find("DATAFLOW_IDENTITY");
+    const std::string cfg = all.substr(0, std::min(con_at, all.size()));
+    const std::string con = con_at == std::string::npos ? std::string() : all.substr(con_at);
+    const std::string df = df_at == std::string::npos ? std::string() : all.substr(df_at);
     score.cfg = sc_fold_field(cfg, "cfg_equal");
     score.hash = sc_fold_field(con, "hash_equal");
     score.str = sc_fold_field(con, "string_equal");
@@ -227,8 +230,7 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
     source = header + source;
     if (!std::getenv("RENOVICE_NO_SC_EXPR_FOLD") && !std::getenv("RENOVICE_SC_EXPR_FOLD_CHILD")
         && !std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")) {
-        _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");
-        _putenv("RENOVICE_NO_SC_EXPR_FOLD=1");         // the base child renders without the fold
+        _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");      // children never select again
         char tmp_dir[MAX_PATH]; GetTempPathA(MAX_PATH, tmp_dir);
         char stem[MAX_PATH]; GetTempFileNameA(tmp_dir, "scf", 0, stem);
         const std::string base_src = std::string(stem) + ".base.luau";
@@ -241,26 +243,51 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
         if (any_fold && write_file(fold_src, source)) {
             f = sc_fold_score(argv[2], fold_src, std::string(stem) + ".fold.lua_B");
         }
-        std::string base;
+        // Candidates in order: wide fold (already rendered), narrow fold, no fold. A fold
+        // candidate is kept only when it is not worse than the unfolded render on any identity
+        // count and strictly better on control flow; among those the higher control-flow count wins.
+        const char* chosen = "fold";
         if (any_fold && !f.perfect()) {
-            sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + base_src + q);
-            base = read_file(base_src);
-        }
-        if (f.perfect()) {
-            if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
-                std::fprintf(stderr, "SC_EXPR_FOLD_SELECT perfect -> fold\n");
-        } else if (!base.empty() && base != source) {
-            const ScFoldScore b = sc_fold_score(argv[2], base_src, std::string(stem) + ".base.lua_B");
-            const bool not_worse = f.built && f.hash >= b.hash && f.str >= b.str && f.key >= b.key
-                                && f.df >= b.df && f.cfg >= b.cfg;
-            const bool better = f.cfg > b.cfg;
-            if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
-                std::fprintf(stderr, "SC_EXPR_FOLD_SELECT cfg %ld/%ld df %ld/%ld str %ld/%ld -> %s\n",
-                             f.cfg, b.cfg, f.df, b.df, f.str, b.str,
-                             not_worse && better ? "fold" : "base");
-            if (!(not_worse && better)) source = base;
-        } else if (!base.empty()) {
-            source = base;
+            // Alternatives render in a fresh child process: a second render inside this process
+            // inherits emitter/analysis state from the first and is not the same output.
+            auto render = [&](bool strict, bool suspend) {
+                const std::string out_path = std::string(stem) + (suspend ? ".base.luau" : ".narrow.luau");
+                _putenv(strict ? "RENOVICE_SC_EXPR_FOLD_STRICT=1" : "RENOVICE_SC_EXPR_FOLD_STRICT=");
+                _putenv(suspend ? "RENOVICE_NO_SC_EXPR_FOLD=1" : "RENOVICE_NO_SC_EXPR_FOLD=");
+                sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + out_path + q);
+                _putenv("RENOVICE_SC_EXPR_FOLD_STRICT=");
+                _putenv("RENOVICE_NO_SC_EXPR_FOLD=");
+                return read_file(out_path);
+            };
+            const std::string narrow = render(true, false);
+            const std::string narrow_src = std::string(stem) + ".narrow.luau";
+            ScFoldScore n;
+            if (!narrow.empty() && narrow != source && write_file(narrow_src, narrow))
+                n = sc_fold_score(argv[2], narrow_src, std::string(stem) + ".narrow.lua_B");
+            if (n.perfect()) {
+                source = narrow; chosen = "narrow";
+            } else {
+                const std::string base = render(false, true);
+                if (!base.empty()) write_file(base_src, base);
+                const ScFoldScore b = base.empty() ? ScFoldScore()
+                    : sc_fold_score(argv[2], base_src, std::string(stem) + ".base.lua_B");
+                auto qualifies = [&](const ScFoldScore& c) {
+                    return c.built && b.built && c.hash >= b.hash && c.str >= b.str && c.key >= b.key
+                        && c.df >= b.df && c.cfg > b.cfg;
+                };
+                const bool wide_ok = qualifies(f), narrow_ok = qualifies(n);
+                if (wide_ok && (!narrow_ok || f.cfg >= n.cfg)) { chosen = "fold"; }
+                else if (narrow_ok) { source = narrow; chosen = "narrow"; }
+                else if (!base.empty()) { source = base; chosen = "base"; }
+                if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
+                    std::fprintf(stderr, "SC_EXPR_FOLD_SELECT cfg wide %ld narrow %ld base %ld -> %s\n",
+                                 f.cfg, n.cfg, b.cfg, chosen);
+            }
+            std::error_code ec;
+            fs::remove(long_path(narrow_src), ec);
+            fs::remove(long_path(std::string(stem) + ".narrow.lua_B"), ec);
+        } else if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE") && any_fold) {
+            std::fprintf(stderr, "SC_EXPR_FOLD_SELECT perfect -> fold\n");
         }
         for (const char* suffix : {".base.luau", ".fold.luau", ".base.lua_B", ".fold.lua_B", ""}) {
             std::error_code ec; fs::remove(long_path(std::string(stem) + suffix), ec);

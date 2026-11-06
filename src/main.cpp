@@ -2967,6 +2967,14 @@ int main(int argc, char** argv) {
         return cmd_semantic_ir_render_module_u44(argc, argv);
     if (mode == "ir-u44" && argc >= 3) { select_u44_entry_profile(argv[2]); return cmd_ir(argc, argv); }
     if (mode == "const-identity" && argc >= 4) return cmd_const_identity(argc, argv);
+    // All three identity gates in one process (fold selection; output = the three reports in order).
+    if (mode == "identity-all" && argc >= 4) {
+        char cfg_mode[] = "cfg-identity", const_mode[] = "const-identity", df_mode[] = "dataflow-identity";
+        argv[1] = cfg_mode; cmd_cfg_identity(argc, argv); std::fflush(stdout);
+        argv[1] = const_mode; cmd_const_identity(argc, argv); std::fflush(stdout);
+        argv[1] = df_mode; cmd_dataflow_identity(argc, argv); std::fflush(stdout);
+        return 0;
+    }
     if (mode == "cfg-identity" && argc >= 4) return cmd_cfg_identity(argc, argv);
     if (mode == "loop-exit-scan" && argc >= 3) return cmd_loop_exit_scan(argc, argv);
     if (mode == "dataflow-identity" && argc >= 4) return cmd_dataflow_identity(argc, argv);

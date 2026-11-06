@@ -8,6 +8,7 @@
 #pragma once
 
 // Emit one proto as an ANONYMOUS function expression, for inlining at a closure site.
+static int g_inline_serial = 0;   // inlined-closure prefix serial (`c<N>v`), reset per module
 static std::string decompile_proto_anon(const ir::IProto& ip, int idx,
                                         bool& ok, std::string& why);
 
@@ -970,7 +971,7 @@ static std::string inline_closures(const std::string& src, const de::Module& m,
         // `u<i>` and so are untouched here, and the parent names substituted afterwards are
         // parent-scoped by construction.
         {
-            static int serial = 0; ++serial;
+            int serial = ++g_inline_serial;
             if (std::getenv("RENOVICE_INLINE_TRACE"))
                 std::fprintf(stderr, "INLINE_SERIAL serial=%d proto=%d depth=%d\n",
                              serial, sub, depth);
@@ -1460,6 +1461,7 @@ static int cmd_decompile(int argc, char** argv) {
 // corpus batch command so promotion scans do not launch one process per file.
 static bool decompile_module_source(const std::string& path, std::string& src, std::string& why,
                                     size_t* prototype_count = nullptr) {
+    g_inline_serial = 0;   // inlined-closure register prefixes restart per module render
     g_primary_ability_loop_scope = is_primary_ability_module_path(path);
     std::string b = read_de_input(path);
     if (b.empty() && !g_input_profile_failure.empty()) { why = g_input_profile_failure; return false; }

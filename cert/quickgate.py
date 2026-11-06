@@ -65,6 +65,8 @@ def main():
                     help="only baseline CFG failures whose class label contains this substring (repeatable)")
     ap.add_argument("--targets", default=None, help="extra module names, one per line")
     ap.add_argument("--no-targets", action="store_true", help="tripwires only")
+    ap.add_argument("--all", action="store_true",
+                    help="every module of the baseline (routine full check, first pass unless --closed)")
     ap.add_argument("--tripwire-stride", type=int, default=12)
     ap.add_argument("--exe", default=str(ROOT / "bin" / "derecomp.exe"))
     ap.add_argument("--jobs", type=int, default=None)
@@ -106,6 +108,8 @@ def main():
         tripwires |= {l.strip() for l in canary.read_text(encoding="utf-8").splitlines() if l.strip() in base}
     tripwires -= targets
 
+    if args.all:
+        tripwires = set(base) - targets
     selection = sorted(targets | tripwires)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)

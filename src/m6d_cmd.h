@@ -18,7 +18,8 @@ static long long g_sclive_earlyuse=0, g_sclive_liveout=0;
 static std::map<std::string, long long> g_sclive_exact_shapes;
 // Set by m6e while re-rendering one prototype whose output did not place every folded test.
 static bool g_sc_expr_fold_suspend = false;
-static int g_sc_expr_fold_applied = 0;   // folds applied in this process (selection skips when 0)
+static int g_sc_expr_fold_applied = 0;
+static bool g_sc_expr_fold_strict = false;   // narrow candidate rules (selection alternative)   // folds applied in this process (selection skips when 0)
 
 static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     std::vector<Blk> bl; std::string why;
@@ -184,14 +185,35 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                         if (!def_at.count(reg)) def_at[reg] = q;
                     }
                 }
-                for (const auto& entry : def_count) {
-                    if (!exact) break;
-                    const int reg = entry.first;
-                    auto use_it = first_use.find(reg);
-                    if (entry.second != 1 || use_count[reg] != 1 || use_it == first_use.end()
-                        || use_it->second <= def_at[reg] || sc_liveness.live_out[f].count(reg))
-                        exact = false;
+                // Per VALUE, not per register: Luau reuses a temporary register inside one
+                // expression (`t[i] <= 0` loads 0 into the register that held `t`). Every value the
+                // setup defines must be read exactly once, after its definition and before the
+                // register is redefined, and no setup value may be live out of F.
+                if (exact) {
+                    std::map<int, int> pending;          // register -> reads of its current setup value
+                    for (int q = F.first; q <= F.last && exact; ++q) {
+                        std::set<int> uses, defs;
+                        lv::register_effects(ip, ip.code[q], uses, defs);
+                        for (int reg : uses) {
+                            auto value = pending.find(reg);
+                            if (value != pending.end() && ++value->second > 1) exact = false;
+                        }
+                        if (q < F.last)
+                            for (int reg : defs) {
+                                auto value = pending.find(reg);
+                                if (value != pending.end() && value->second == 0) exact = false;
+                                pending[reg] = 0;
+                            }
+                    }
+                    for (const auto& value : pending)
+                        if (value.second != 1 || sc_liveness.live_out[f].count(value.first))
+                            exact = false;
                 }
+                // The narrow candidate keeps the original rule: each setup register written once.
+                if ((g_sc_expr_fold_strict || std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")
+                     || std::getenv("RENOVICE_SC_EXPR_FOLD_STRICT")))
+                    for (const auto& entry : def_count)
+                        if (entry.second != 1 || use_count[entry.first] != 1) exact = false;
                 fold_expr = exact && !def_count.empty();
                 if (fold_expr) {
                     // The emitter renders the folded value from expression reconstruction, so that
@@ -215,11 +237,17 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                     }
                     // Comparison renderers may spell `a < b` as `b > a`-style operand order; with
                     // both operands folded that reorders their evaluation. Keep one folded operand.
-                    if (folded_operands > 1) fold_expr = false;
+                    // Without the per-module bytecode selection (decompile-mod-u44) the two rules
+                    // below keep the fold conservative; with it, a fold that renders worse is
+                    // rejected anyway, so wider candidates cost nothing.
+                    const bool strict = std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT") != nullptr
+                                     || std::getenv("RENOVICE_SC_EXPR_FOLD_STRICT") != nullptr
+                                     || g_sc_expr_fold_strict;
+                    if (strict && folded_operands > 1) fold_expr = false;
                     // One dependency chain only (`a.b.c`, `#t`, `f(x)`): each setup instruction
                     // reads the previous one's result and no other setup value. Independent
                     // subexpressions can render in an evaluation order the bytecode did not use.
-                    for (int q = F.first + 1; q < F.last && fold_expr; ++q) {
+                    for (int q = F.first + 1; strict && q < F.last && fold_expr; ++q) {
                         std::set<int> uses, defs, prev_uses, prev_defs;
                         lv::register_effects(ip, ip.code[q], uses, defs);
                         lv::register_effects(ip, ip.code[q - 1], prev_uses, prev_defs);
