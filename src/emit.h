@@ -4394,13 +4394,27 @@ emit_conditional_region:
                                 for (int b : loop_region_blocks)
                                     for (int s : {g->n[b].succ_true, g->n[b].succ_false})
                                         if (s >= 0 && !loop_region_blocks.count(s)) loop_exits.insert(s);
+                                // e is a sibling arm when every path from it stays outside the
+                                // loop, never returns, and ends at x (one block, or an if/else
+                                // inside the arm before its break).
                                 auto sibling_to = [&](int e, int x) {
                                     if (e == x || loop_region_blocks.count(e) || e < 0
                                         || e >= (int)g->n.size()) return false;
-                                    const st::Node& en = g->n[e];
-                                    if (en.is_branch || en.is_return) return false;
-                                    const int next = en.succ_true >= 0 ? en.succ_true : en.succ_false;
-                                    return next == x;
+                                    std::set<int> seen;
+                                    std::vector<int> work{e};
+                                    while (!work.empty()) {
+                                        const int b = work.back(); work.pop_back();
+                                        if (b == x) continue;
+                                        if (b < 0 || b >= (int)g->n.size() || loop_region_blocks.count(b)
+                                            || head_set.count(b)) return false;
+                                        if (!seen.insert(b).second) continue;
+                                        if (seen.size() > 32) return false;
+                                        const st::Node& bn = g->n[b];
+                                        if (bn.is_return || (bn.succ_true < 0 && bn.succ_false < 0)) return false;
+                                        for (int s : {bn.succ_true, bn.succ_false})
+                                            if (s >= 0) work.push_back(s);
+                                    }
+                                    return true;
                                 };
                                 for (int x : loop_exits) {
                                     if (!other_exits.count(x)) continue;
