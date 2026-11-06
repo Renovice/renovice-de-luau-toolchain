@@ -4382,6 +4382,34 @@ emit_conditional_region:
                                 for (int s : {g->n[b].succ_true, g->n[b].succ_false})
                                     if (s >= 0 && !arm_entries.count(s)) arm_exits.insert(s);
                             bool loop_exit_is_x = false;
+                            // SIBLING BREAK ARMS (2026-11-06). Another break arm of the same loop is
+                            // an exit of this head too: a block outside the loop region whose only
+                            // successor is the loop's exit X. `if a then ...; break elseif b then
+                            // ...; break end` has two of them; each is inlined by its own head.
+                            // Drop such siblings from other_exits when they lead to the same X.
+                            // RENOVICE_NO_SIBLING_BREAK_ARMS keeps the single-exit rule.
+                            if (loops_with_d == 1 && other_exits.size() > 1
+                                && !std::getenv("RENOVICE_NO_SIBLING_BREAK_ARMS")) {
+                                std::set<int> loop_exits;
+                                for (int b : loop_region_blocks)
+                                    for (int s : {g->n[b].succ_true, g->n[b].succ_false})
+                                        if (s >= 0 && !loop_region_blocks.count(s)) loop_exits.insert(s);
+                                auto sibling_to = [&](int e, int x) {
+                                    if (e == x || loop_region_blocks.count(e) || e < 0
+                                        || e >= (int)g->n.size()) return false;
+                                    const st::Node& en = g->n[e];
+                                    if (en.is_branch || en.is_return) return false;
+                                    const int next = en.succ_true >= 0 ? en.succ_true : en.succ_false;
+                                    return next == x;
+                                };
+                                for (int x : loop_exits) {
+                                    if (!other_exits.count(x)) continue;
+                                    bool all_siblings = true;
+                                    for (int e : other_exits)
+                                        if (e != x && !sibling_to(e, x)) all_siblings = false;
+                                    if (all_siblings) { other_exits = {x}; break; }
+                                }
+                            }
                             if (loops_with_d == 1 && other_exits.size() == 1) {
                                 const int x = *other_exits.begin();
                                 for (int b : loop_region_blocks)
