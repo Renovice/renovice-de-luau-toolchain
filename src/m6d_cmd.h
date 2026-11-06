@@ -18,6 +18,7 @@ static long long g_sclive_earlyuse=0, g_sclive_liveout=0;
 static std::map<std::string, long long> g_sclive_exact_shapes;
 // Set by m6e while re-rendering one prototype whose output did not place every folded test.
 static bool g_sc_expr_fold_suspend = false;
+static int g_sc_expr_fold_applied = 0;   // folds applied in this process (selection skips when 0)
 
 static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     std::vector<Blk> bl; std::string why;
@@ -256,6 +257,7 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                     std::fprintf(stderr, "SC_EXPR_FOLD proto=%d shape=%s\n", ip.index, fold_shape.c_str());
                 if (fold_expr) {
                     F.chain_expr_setup[F.last] = {F.first, F.last - 1};
+                    ++g_sc_expr_fold_applied;
                     for (int q = F.first; q < F.last; ++q) F.chain_setup_insns.insert(q);
                 }
             }

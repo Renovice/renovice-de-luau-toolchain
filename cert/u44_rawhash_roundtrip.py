@@ -145,11 +145,6 @@ def one(stock, args):
             res["error"] = "recompile: " + out[-300:]; return res
         rc2, _ = run(args.exe, [recomp, s1, b1r], work)
         res["deterministic"] = rc2 == 0 and b1r.read_bytes() == b1.read_bytes()
-        res["constIdentity"] = gate(args.gate_exe, stock, b1, u44, work)
-        res["cfgIdentity"] = cfg_gate(args.gate_exe, stock, b1, u44, work)
-        if args.dataflow:
-            res["dataflowIdentity"] = dataflow_gate(args.gate_exe, stock, b1, u44, work)
-        res["byteIdentical"] = b1.read_bytes() == stock.read_bytes()
         # one-pass and compiler-closed fixed points (skipped with --first-pass-only)
         sources, binaries = [s1.read_bytes()], [b1]
         closed_at = None
@@ -169,6 +164,28 @@ def one(stock, args):
                 closed_at = k - 1; binaries.append(bk); break
             sources.append(text); binaries.append(bk)
         res["closedAtPass"] = closed_at
+        # INCREMENTAL (--reuse). Every gate is a pure function of (input bytecode, rebuilt bytecode,
+        # gate binary). When the whole source chain s1..sN is byte-identical to the baseline run's,
+        # the rebuilt binaries are too, so the baseline verdicts are copied instead of recomputed.
+        res["sourceShas"] = [hashlib.sha256(text).hexdigest() for text in sources]
+        base = args.reuse_rows.get(stock.name) if args.reuse_rows else None
+        if (base and base.get("sourceShas") == res["sourceShas"]
+                and base.get("closedAtPass") == closed_at
+                and (not args.dataflow or "dataflowIdentity" in base)):
+            for key in ("constIdentity", "cfgIdentity", "dataflowIdentity", "byteIdentical",
+                        "sourceFixedPoint", "bytecodeFixedPoint", "closedConstIdentity",
+                        "closedCfgIdentity", "closedByteIdentical"):
+                if key in base:
+                    res[key] = base[key]
+            if not args.dataflow:
+                res.pop("dataflowIdentity", None)
+            res["reused"] = True
+            return res
+        res["constIdentity"] = gate(args.gate_exe, stock, b1, u44, work)
+        res["cfgIdentity"] = cfg_gate(args.gate_exe, stock, b1, u44, work)
+        if args.dataflow:
+            res["dataflowIdentity"] = dataflow_gate(args.gate_exe, stock, b1, u44, work)
+        res["byteIdentical"] = b1.read_bytes() == stock.read_bytes()
         if closed_at is not None and closed_at > 1:
             final = binaries[closed_at - 1]
             res["closedConstIdentity"] = gate(args.gate_exe, stock, final, u44, work)
@@ -204,7 +221,13 @@ def main():
                     help="also run dataflow-identity on the first rebuild (reported only; not in the exit status)")
     ap.add_argument("--first-pass-only", action="store_true",
                     help="skip the fixed-point/compiler-closed passes (release-gate sampling)")
+    ap.add_argument("--reuse", default=None,
+                    help="baseline results-u44.json: copy gate verdicts for modules whose whole source "
+                         "chain is unchanged (only valid while the identity gate code is unchanged)")
     args = ap.parse_args()
+    args.reuse_rows = {}
+    if args.reuse:
+        args.reuse_rows = {r["module"]: r for r in json.load(open(args.reuse, encoding="utf-8"))["results"]}
     args.exe = str(Path(args.exe).resolve())
     args.gate_exe = str(Path(args.gate_exe).resolve()) if args.gate_exe else args.exe
     Path(args.out).mkdir(parents=True, exist_ok=True)
@@ -226,6 +249,7 @@ def main():
     summary = {
         "profile": args.profile, "firstPassOnly": args.first_pass_only, "exe": args.exe, "exeSha256": sha(args.exe), "gateExeSha256": sha(args.gate_exe),
         "stockDir": str(Path(args.stock).resolve()), "modules": n,
+        "reused": count(lambda r: r.get("reused")),
         "decompile": count(lambda r: r.get("decompile")),
         "recompile": count(lambda r: r.get("recompile")),
         "deterministic": count(lambda r: r.get("deterministic")),

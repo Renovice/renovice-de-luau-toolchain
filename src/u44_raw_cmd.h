@@ -141,7 +141,15 @@ static long sc_fold_field(const std::string& text, const std::string& key) {
     if (at == std::string::npos) return -1;
     return std::strtol(text.c_str() + at + key.size() + 1, nullptr, 10);
 }
-struct ScFoldScore { long cfg = -1, hash = -1, str = -1, key = -1, df = -1; bool built = false; };
+struct ScFoldScore {
+    long cfg = -1, hash = -1, str = -1, key = -1, df = -1, protos = -1, df_protos = -1;
+    bool built = false;
+    // Every identity count equals the prototype count: nothing can beat this rendering.
+    bool perfect() const {
+        return built && protos > 0 && cfg == protos && hash == protos && str == protos
+            && key == protos && df == df_protos;
+    }
+};
 static ScFoldScore sc_fold_score(const std::string& input, const std::string& source_path,
                                  const std::string& bytecode_path) {
     ScFoldScore score;
@@ -158,6 +166,8 @@ static ScFoldScore sc_fold_score(const std::string& input, const std::string& so
     score.str = sc_fold_field(con, "string_equal");
     score.key = sc_fold_field(con, "keyuse_equal");
     score.df = sc_fold_field(df, "df_equal");
+    score.protos = sc_fold_field(cfg, "protos_stock");
+    score.df_protos = sc_fold_field(df, "protos_stock");
     return score;
 }
 
@@ -186,10 +196,22 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
         const std::string base_src = std::string(stem) + ".base.luau";
         const std::string fold_src = std::string(stem) + ".fold.luau";
         const std::string q = "\"";
-        sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + base_src + q);
-        const std::string base = read_file(base_src);
-        if (!base.empty() && base != source && write_file(fold_src, source)) {
-            const ScFoldScore f = sc_fold_score(argv[2], fold_src, std::string(stem) + ".fold.lua_B");
+        // Cheap path first: without any fold the base render is identical, and a folded render
+        // that already reproduces every identity of the input cannot be improved on.
+        const bool any_fold = g_sc_expr_fold_applied > 0;
+        ScFoldScore f;
+        if (any_fold && write_file(fold_src, source)) {
+            f = sc_fold_score(argv[2], fold_src, std::string(stem) + ".fold.lua_B");
+        }
+        std::string base;
+        if (any_fold && !f.perfect()) {
+            sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + base_src + q);
+            base = read_file(base_src);
+        }
+        if (f.perfect()) {
+            if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
+                std::fprintf(stderr, "SC_EXPR_FOLD_SELECT perfect -> fold\n");
+        } else if (!base.empty() && base != source) {
             const ScFoldScore b = sc_fold_score(argv[2], base_src, std::string(stem) + ".base.lua_B");
             const bool not_worse = f.built && f.hash >= b.hash && f.str >= b.str && f.key >= b.key
                                 && f.df >= b.df && f.cfg >= b.cfg;
