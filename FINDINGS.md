@@ -6432,3 +6432,16 @@ Full corpus rt_full8 vs rt_full6: CFG-ID 4,960 -> 4,989, CFG-ID + dataflow 4,946
 apparent closed loss closes at pass 1). TRUE with selection; the fold alone still regresses (renderer
 defects it exposes, e.g. VoidClone loses a loop-break statement). Cost: ~3x decompile time on modules
 the fold changes (full run 1,290 s -> 2,494 s).
+
+## 2026-11-06 — Main-chunk capture kind (REJECTED experiment)
+
+Hypothesis: the 30 failing main chunks with `LABEL LOAD -> LOAD` fail because by-value captures of
+module locals (`local x = require(...)`, CAPTURE VAL) are rendered as flat `vR` written twice
+(`v0 = require; v0 = v0(v1)`), which Luau captures by reference.
+Evidence: AtlasCustomHud p14 stock CAPTURE VAL R0/R2, candidate CAPTURE REF R0/R2; snapshotting them
+(`local __renovice_capture_14_7 = v0`) restores VAL but the upvalue order still differs (stock
+captures R13 before R0; candidate R0 before R13), so the module still fails.
+Result: snapshotting every by-value capture of a multiply-written register (RENOVICE_CAPTURE_SNAPSHOT_MULTIDEF,
+quickgate vs rt_full10): 58 fixed / 65 broken -> FALSE as a general rule; reverted.
+Next: the capture ORDER (first textual reference inside the closure body) must match before the
+capture-kind snapshot can help; investigate how upvalue slots are ordered by the emitter.
