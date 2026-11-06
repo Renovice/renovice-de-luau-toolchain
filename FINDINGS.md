@@ -6445,3 +6445,17 @@ Result: snapshotting every by-value capture of a multiply-written register (RENO
 quickgate vs rt_full10): 58 fixed / 65 broken -> FALSE as a general rule; reverted.
 Next: the capture ORDER (first textual reference inside the closure body) must match before the
 capture-kind snapshot can help; investigate how upvalue slots are ordered by the emitter.
+
+## 2026-11-06 — Upvalue order fold (c68cb1c): main-chunk capture-order failures
+
+Hypothesis: failing main chunks (`LABEL LOAD -> LOAD`, 30 of 42 failing root prototypes) fail because a
+child closure's upvalue slots are numbered differently, shifting CAPTURE order and every later instruction.
+Evidence: work/gc/uporder.py over 12 failing main chunks — every child whose stock upvalue first-use
+order is non-monotonic differs from ours. Luau numbers upvalues by first appearance in SOURCE TEXT;
+`v13 = v0.AdjustDualWieldComponent(mMovie, "ArmorBuff", v14, v13, v12, v11)` names v13 first but its
+bytecode reads U7/U8 (GETUPVAL) before SETUPVAL U6, and our temporaries put those reads first in text.
+Result: TRUE. A SETUPVAL that is its upvalue's first text reference and whose temporary chain reads a
+higher upvalue for the first time is rendered as one assignment (per-value single use, dead after,
+evaluation order checked against instruction order, single-result last-argument calls parenthesized).
+All-module first pass vs rt_full10: 94 fixed / 0 broken; CFG-ID 5,083 / 5,481. Fixtures pass.
+Rejected on the way: snapshotting all by-value captures of multiply-written registers (58/65).
