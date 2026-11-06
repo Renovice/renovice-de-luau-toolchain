@@ -207,6 +207,9 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
         std::fprintf(stderr, "TIMING since_process_start_ms=%.1f\n", (as64(now) - as64(created)) / 10000.0);
     }
     stamp("start");
+    g_sc_expr_fold_wide = !std::getenv("RENOVICE_NO_SC_EXPR_FOLD")
+                       && !std::getenv("RENOVICE_SC_EXPR_FOLD_CHILD")
+                       && !std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT");
     if (!u44_prepare(argv[2], failure)) {
         std::fprintf(stderr, "decompile-mod-u44: %s\n", failure.c_str()); return 1;
     }

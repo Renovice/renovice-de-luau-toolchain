@@ -19,7 +19,10 @@ static std::map<std::string, long long> g_sclive_exact_shapes;
 // Set by m6e while re-rendering one prototype whose output did not place every folded test.
 static bool g_sc_expr_fold_suspend = false;
 static int g_sc_expr_fold_applied = 0;
-static bool g_sc_expr_fold_strict = false;   // narrow candidate rules (selection alternative)   // folds applied in this process (selection skips when 0)
+static bool g_sc_expr_fold_strict = false;   // narrow candidate rules (selection alternative)
+// Wide candidate rules are allowed only inside decompile-mod-u44 with bytecode selection active;
+// every other entry point (fixtures, decompile-mod, plan tools) keeps the narrow rules.
+static bool g_sc_expr_fold_wide = false;   // folds applied in this process (selection skips when 0)
 
 static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     std::vector<Blk> bl; std::string why;
@@ -210,8 +213,9 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                             exact = false;
                 }
                 // The narrow candidate keeps the original rule: each setup register written once.
-                if ((g_sc_expr_fold_strict || std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")
-                     || std::getenv("RENOVICE_SC_EXPR_FOLD_STRICT")))
+                if (!g_sc_expr_fold_wide || g_sc_expr_fold_strict
+                    || std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")
+                    || std::getenv("RENOVICE_SC_EXPR_FOLD_STRICT"))
                     for (const auto& entry : def_count)
                         if (entry.second != 1 || use_count[entry.first] != 1) exact = false;
                 fold_expr = exact && !def_count.empty();
@@ -242,7 +246,7 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                     // rejected anyway, so wider candidates cost nothing.
                     const bool strict = std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT") != nullptr
                                      || std::getenv("RENOVICE_SC_EXPR_FOLD_STRICT") != nullptr
-                                     || g_sc_expr_fold_strict;
+                                     || g_sc_expr_fold_strict || !g_sc_expr_fold_wide;
                     if (strict && folded_operands > 1) fold_expr = false;
                     // One dependency chain only (`a.b.c`, `#t`, `f(x)`): each setup instruction
                     // reads the previous one's result and no other setup value. Independent
