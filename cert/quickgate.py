@@ -65,6 +65,8 @@ def main():
                     help="only baseline CFG failures whose class label contains this substring (repeatable)")
     ap.add_argument("--targets", default=None, help="extra module names, one per line")
     ap.add_argument("--no-targets", action="store_true", help="tripwires only")
+    ap.add_argument("--no-tripwires", action="store_true",
+                    help="targets only (fast screening of many candidates; re-check winners with tripwires)")
     ap.add_argument("--all", action="store_true",
                     help="every module of the baseline (routine full check, first pass unless --closed)")
     ap.add_argument("--tripwire-stride", type=int, default=12)
@@ -110,6 +112,8 @@ def main():
 
     if args.all:
         tripwires = set(base) - targets
+    if args.no_tripwires:
+        tripwires = set()
     selection = sorted(targets | tripwires)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)

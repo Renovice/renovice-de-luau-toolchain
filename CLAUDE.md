@@ -219,14 +219,15 @@ Never re-run the slow complete corpus check for every change. Work in tiers:
 
 | tier | command | scope | time |
 |---|---|---|---|
-| 1. while iterating on a fix | `python cert/quickgate.py <stock> [--class "..."] [--exe bin/derecomp.candidate.exe]` | baseline CFG-ID failures (or one class) + fixed tripwire sample + `work/me/canary.txt` | ~2.5 min |
-| 2. before committing each fix | `python cert/quickgate.py <stock> --all` | every module, first pass | ~6.5 min |
-| 3. once per BATCH of fixes / before merging to main / after a change that touches every module | `python cert/quickgate.py <stock> --all --closed` (or `u44_rawhash_roundtrip.py ... --dataflow`) | every module incl. compiler-closed passes | ~22 min |
+| 0. trying an idea / screening switches | `RENOVICE_NO_SC_EXPR_FOLD_SELECT=1 python cert/quickgate.py <stock> --baseline <last --all results> --no-tripwires` | current failures only, one render each; compare against the same fast mode without the change | ~1 min |
+| 1. per fix, before committing | `python cert/quickgate.py <stock> [--exe bin/derecomp.candidate.exe]` | baseline CFG-ID failures + tripwire sample + `work/me/canary.txt` | ~3 min |
+| 2. every 3-4 fixes (a batch) | `python cert/quickgate.py <stock> --all` + both fixture suites | every module, first pass | ~7 min |
+| 3. before merging to main / after a change touching every module | `python cert/quickgate.py <stock> --all --closed` | every module incl. compiler-closed passes | ~25 min |
 
 Rules:
-- One commit per fix (tier 2 green: 0 BROKEN, fixtures `cert/cfg_class_fixtures.py` and
-  `cert/dataflow_identity_fixtures.py` PASS). Read the fixture output BEFORE committing.
-- If tier 3 finds a regression, bisect over the batch's commits; do not re-run tier 3 per change.
+- One commit per fix (tier 1 green: 0 BROKEN). Tier 2 every few fixes, with the fixture suites
+  `cert/cfg_class_fixtures.py` and `cert/dataflow_identity_fixtures.py`; read their output.
+- If tier 2 or 3 finds a regression, bisect over the batch's commits; never re-run them per change.
 - After a tier-3 run, `python cert/quickgate.py <stock> --promote <run>/results-u44.json` makes it
   the baseline every tier compares against. Add any module a tier-3 run caught to `work/me/canary.txt`.
 - Build test binaries to a temp name (`bin/derecomp.candidate.exe`); `build.bat` for the final build.
