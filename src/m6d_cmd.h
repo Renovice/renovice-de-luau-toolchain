@@ -68,8 +68,9 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     // blocks unreachable. This is instrumentation-only for now; no merge consults it unless a future
     // flag-backed candidate is added after the measured population is understood.
     lv::Analysis sc_liveness;
+    const bool sc_expr_fold = std::getenv("RENOVICE_SC_EXPR_FOLD") != nullptr;
     bool need_sc_liveness = std::getenv("RENOVICE_SCLIVE")
-                         || std::getenv("RENOVICE_SC_LOADN_FOLD");
+                         || std::getenv("RENOVICE_SC_LOADN_FOLD") || sc_expr_fold;
     if (need_sc_liveness) sc_liveness = lv::analyze(ip, g);
     // A condition merge rewrites CFG node identity before loop structuring. Even when the value fold
     // is expression-correct, merging a loop header/body/latch/prep can change the later loop forest
@@ -150,7 +151,65 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                     F.chain_setup_insns.insert(F.first);
                 }
             }
-            if (F.first != F.last) {
+            // EXPRESSION FOLD. F's statements may join the condition when they form one private
+            // expression feeding F's test: every setup instruction defines registers, each defined
+            // once, read exactly once after its definition inside F, and none live out of F. Then
+            // `v = b.c; if v` is the compiler's own lowering of `... or b.c`, and short-circuit
+            // evaluation keeps the read under B's test exactly as before.
+            bool fold_expr = false;
+            if (sc_expr_fold && (andlike0 || orlike0) && !fold_loadn
+                && F.first >= 0 && F.last > F.first && F.last < (int)ip.code.size()
+                && F.chain_expr_setup.empty() && F.chain_loadn_literals.empty()
+                && sc_liveness.known && sc_liveness.converged
+                && (size_t)f < sc_liveness.live_out.size()) {
+                bool exact = true;
+                std::map<int, int> def_at, def_count, use_count, first_use;
+                for (int q = F.first; q <= F.last && exact; ++q) {
+                    std::set<int> uses, defs;
+                    if (!lv::register_effects(ip, ip.code[q], uses, defs)) { exact = false; break; }
+                    if (q < F.last && defs.empty()) exact = false;
+                    for (int reg : uses) {
+                        ++use_count[reg];
+                        if (!first_use.count(reg)) first_use[reg] = q;
+                    }
+                    if (q < F.last) for (int reg : defs) {
+                        ++def_count[reg];
+                        if (!def_at.count(reg)) def_at[reg] = q;
+                    }
+                }
+                for (const auto& entry : def_count) {
+                    if (!exact) break;
+                    const int reg = entry.first;
+                    auto use_it = first_use.find(reg);
+                    if (entry.second != 1 || use_count[reg] != 1 || use_it == first_use.end()
+                        || use_it->second <= def_at[reg] || sc_liveness.live_out[f].count(reg))
+                        exact = false;
+                }
+                fold_expr = exact && !def_count.empty();
+                if (fold_expr) {
+                    // The emitter renders the folded value from expression reconstruction, so that
+                    // reconstruction must yield one register assignment for every value the test
+                    // reads from the setup. Anything else (a bare call statement, a store) stays put.
+                    ex::ProtoOut po; ex::BlockOut bo; bo.first = F.first; bo.last = F.last - 1;
+                    ex::reconstruct_block(ip, bo.first, bo.last, po, bo);
+                    std::set<int> assigned;
+                    for (const ex::Stmt& s : bo.stmts) {
+                        if (s.k != ex::SK::Assign || !s.lhs || s.lhs->k != ex::EK::Reg || !s.rhs) {
+                            fold_expr = false; break;
+                        }
+                        assigned.insert(s.lhs->reg);
+                    }
+                    std::set<int> test_uses, test_defs;
+                    lv::register_effects(ip, ip.code[F.last], test_uses, test_defs);
+                    for (int reg : test_uses)
+                        if (def_count.count(reg) && !assigned.count(reg)) fold_expr = false;
+                }
+                if (fold_expr) {
+                    F.chain_expr_setup[F.last] = {F.first, F.last - 1};
+                    for (int q = F.first; q < F.last; ++q) F.chain_setup_insns.insert(q);
+                }
+            }
+            if (F.first != F.last && !fold_expr) {
                 // Count it ONLY when the shape is otherwise a valid short-circuit, so the number
                 // means "merges this rule alone is refusing", not "blocks that failed anyway".
                 if (andlike0 || orlike0) {
@@ -260,6 +319,8 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
             if (F.chain.empty()) B.chain.push_back(F.last);
             else { for (size_t q = 0; q < F.chain.size(); ++q) B.chain.push_back(F.chain[q]);
                    for (size_t q = 0; q + 1 < F.chain.size(); ++q) B.chain_and.push_back(F.chain_and[q]); }
+            for (const auto& setup_entry : F.chain_expr_setup)
+                B.chain_expr_setup[setup_entry.first] = setup_entry.second;
             for (const auto& test_entry : F.chain_loadn_literals)
                 for (const auto& reg_entry : test_entry.second)
                     B.chain_loadn_literals[test_entry.first][reg_entry.first] = reg_entry.second;
@@ -334,6 +395,7 @@ static void collapse_constructor_intervals(const ir::IProto& ip, st::Graph& g) {
         H.succ_true = J.succ_true; H.succ_false = J.succ_false;
         H.chain = J.chain; H.chain_and = J.chain_and; H.branch_predicate = J.branch_predicate;
         H.chain_loadn_literals = J.chain_loadn_literals;
+        H.chain_expr_setup = J.chain_expr_setup;
         H.chain_setup_insns.insert(J.chain_setup_insns.begin(), J.chain_setup_insns.end());
         for (int b : inner) { g.n[b].reach = false; g.n[b].succ_true = g.n[b].succ_false = -1; }
         rebuild_preds();                     // a later interval in the merged head reads these

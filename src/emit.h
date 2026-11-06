@@ -423,6 +423,35 @@ struct Emitter {
                 auto literal = test->second.find(reg);
                 if (literal != test->second.end()) return std::to_string(literal->second);
             }
+            auto setup = node->chain_expr_setup.find(test_insn);
+            if (setup != node->chain_expr_setup.end()) {
+                ex::ProtoOut po; ex::BlockOut bo;
+                bo.first = setup->second.first; bo.last = setup->second.second;
+                ex::reconstruct_block(*ip, bo.first, bo.last, po, bo);
+                std::map<int, ex::EP> value;
+                std::function<ex::EP(const ex::EP&)> substitute = [&](const ex::EP& e) -> ex::EP {
+                    if (!e) return e;
+                    if (e->k == ex::EK::Reg) {
+                        auto known = value.find(e->reg);
+                        return known != value.end() ? known->second : e;
+                    }
+                    ex::EP copy = std::make_shared<ex::Expr>(*e);
+                    copy->a = substitute(e->a); copy->b = substitute(e->b); copy->c = substitute(e->c);
+                    for (auto& item : copy->list) item = substitute(item);
+                    for (auto& key : copy->keys) key = substitute(key);
+                    return copy;
+                };
+                for (const ex::Stmt& s : bo.stmts)
+                    if (s.k == ex::SK::Assign && s.lhs && s.lhs->k == ex::EK::Reg && s.rhs)
+                        value[s.lhs->reg] = substitute(s.rhs);
+                auto folded = value.find(reg);
+                if (folded != value.end()) {
+                    const ex::EK kind = folded->second->k;
+                    const std::string text = ex::render(folded->second);
+                    return kind == ex::EK::Bin || kind == ex::EK::Un || kind == ex::EK::IfElse
+                        ? "(" + text + ")" : text;
+                }
+            }
         }
         return R(reg);
     }
@@ -448,17 +477,17 @@ struct Emitter {
                 ? "not (" + CR(in.A) + " <= " + CR((int)in.aux) + ")"
                 : CR((int)in.aux) + " < " + CR(in.A);
             // JUMPXEQKNIL aux bit31 is the NOT flag: SET means "branch when NOT equal to nil".
-            case 0x3a: return R(in.A) + ((in.aux & 0x80000000u) ? " ~= nil" : " == nil");
+            case 0x3a: return CR(in.A) + ((in.aux & 0x80000000u) ? " ~= nil" : " == nil");
             // All four JUMPXEQK forms use bit31 as the NOT flag. This is covered by native-emission
             // ground truth for both polarities and by the real BindingsUtil 0x41 specimen: bit clear
             // branches on equality; bit set branches on inequality.
-            case 0x34: return R(in.A) + ((in.aux & 0x80000000u) ? " ~= " : " == ")
+            case 0x34: return CR(in.A) + ((in.aux & 0x80000000u) ? " ~= " : " == ")
                               + ((in.aux & 1) ? "true" : "false");
             case 0x20: case 0x41: {                                       // compare against a const
                 int k = (int)(in.aux & 0x7fffffffu);
                 std::string kv = (k >= 0 && k < (int)ip->consts.size())
                                  ? ir::value_text(ip->consts[k]) : "nil";
-                return R(in.A) + ((in.aux & 0x80000000u) ? " ~= " : " == ") + kv;
+                return CR(in.A) + ((in.aux & 0x80000000u) ? " ~= " : " == ") + kv;
             }
             // FORNPREP reaches here when its block is NOT the head of a region (e.g. inside a Proper
             // linearisation), where `for_header` never gets a chance. It IS expressible: the branch is
@@ -494,14 +523,14 @@ struct Emitter {
                 ? "not (" + CR(in.A) + " <= " + CR((int)in.aux) + ")"
                 : CR((int)in.aux) + " < " + CR(in.A);
             case 0x33: return CR(in.A) + " <= " + CR((int)in.aux);
-            case 0x3a: return R(in.A) + ((in.aux & 0x80000000u) ? " == nil" : " ~= nil");
-            case 0x34: return R(in.A) + ((in.aux & 0x80000000u) ? " == " : " ~= ")
+            case 0x3a: return CR(in.A) + ((in.aux & 0x80000000u) ? " == nil" : " ~= nil");
+            case 0x34: return CR(in.A) + ((in.aux & 0x80000000u) ? " == " : " ~= ")
                               + ((in.aux & 1) ? "true" : "false");
             case 0x20: case 0x41: {
                 int k = (int)(in.aux & 0x7fffffffu);
                 std::string kv = (k >= 0 && k < (int)ip->consts.size())
                                  ? ir::value_text(ip->consts[k]) : "nil";
-                return R(in.A) + ((in.aux & 0x80000000u) ? " == " : " ~= ") + kv;
+                return CR(in.A) + ((in.aux & 0x80000000u) ? " == " : " ~= ") + kv;
             }
             default: return "not (" + one_cond(in, node, test_insn) + ")";
         }
@@ -8980,6 +9009,17 @@ inexact_selector_fallback:
                 continue;
             const std::string left = condition.substr(0, split);
             const std::string right = condition.substr(split + 4);
+            // Both operands must be complete expressions; a folded member such as `(a.b) == nil`
+            // can place ` or ` inside a parenthesized group.
+            auto balanced = [](const std::string& text) {
+                int depth = 0;
+                for (char ch : text) {
+                    if (ch == '(') ++depth;
+                    else if (ch == ')' && --depth < 0) return false;
+                }
+                return depth == 0;
+            };
+            if (!balanced(left) || !balanced(right)) continue;
             std::string inverted_left;
             if (right.empty() || !invert_equality(left, inverted_left)) continue;
             size_t close = lines.size();

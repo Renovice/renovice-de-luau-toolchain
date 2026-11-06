@@ -68,6 +68,10 @@ struct Node {
     // to one test prevents a register reused by an earlier chain member from receiving the literal.
     std::map<int, std::map<int, int>> chain_loadn_literals;
     std::set<int> chain_setup_insns;   // exact LOADN materialisations represented by those literals
+    // Short-circuit expression fold: test instruction -> [first, last] of the later test's private
+    // setup, rendered as an expression inside the condition (`a or b.c`). Same liveness proof as
+    // the LOADN fold; the setup still runs only when short-circuit evaluation reaches that test.
+    std::map<int, std::pair<int, int>> chain_expr_setup;
 };
 
 struct Graph {

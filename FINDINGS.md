@@ -6400,3 +6400,21 @@ Reason: Luau emits CLOSEUPVALS only for REF-captured block locals and shares clo
 DEFECTS #93-#95 (batch 12).
 Next Step: dispatcher shapes (definition and closure in different state blocks), the vT spill frame, FishInfo's
 text-order fold (emit.h). Details: `RESEARCH/CAPTURES_CAMPAIGN_2026-10-10.md`.
+
+## 2026-11-06 — Guard-chain group: short-circuit expression fold (opt-in experiment)
+
+Hypothesis: most GUARD_CHAIN_NO_BOUNDARY_EDGE failures are short-circuit conditions whose later test
+first loads a value (`a or b.c`); the m6d short-circuit merge refuses any test block with statements,
+so the chain stays split and the CFG renderer cannot place it.
+Evidence: `work/gc/survey.py` over the 521 CFG-ID failures (676 failing protos): 211 protos reject
+with GUARD_CHAIN_NO_BOUNDARY_EDGE; 104 of them have join == exit with both arms reaching effect and
+exit (CardUtilitiesRedux p9: blocks 16/17/18 = `(c16 or not c17) and c18`, block 17 holds a load).
+Implementation: `RENOVICE_SC_EXPR_FOLD=1` folds a later test's private setup (single-def, single-use,
+not live-out, reconstructed as register assignments) into the merged predicate; constant-compare
+tests now render through cond_reg; the `if (a or b) then/else` text rewrite requires balanced operands.
+Result (cert/quickgate.py vs rt_full6): FIXED 39, BROKEN 27 -> PARTIALLY TRUE, kept OPT-IN.
+Default build unchanged (quickgate 0/0). Known breakers: folded literal comparands (`x == (3)`)
+compile to JUMPXEQKN where stock loads a register; a renderer path that drops merged conditions
+loses the folded setup (SwiftDethAbility p7 `c8v8.visible`); upvalue/GETUPVAL label shifts.
+Rejected: excluding constant-only setups (24 fixed / 24 broken; constant folds are net positive).
+Next: per-shape gating of the 27 breakers with the quick gate, then one full run.
