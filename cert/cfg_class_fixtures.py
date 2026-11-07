@@ -157,7 +157,8 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_DUPLICATE_CAPTURE_SNAPSHOT",
             "RENOVICE_NO_CTOR_EXPR", "RENOVICE_NO_SC_FOLD_FASTCALL_HINT",
             "RENOVICE_NO_SC_MERGED_CHAIN_PURE", "RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD",
-            "RENOVICE_NO_OWN_LATCH_FOR_BODY")
+            "RENOVICE_NO_OWN_LATCH_FOR_BODY",
+            "RENOVICE_NO_DEGENERATE_FOR")
 DECOMPILER_FIXTURES = {
     # (2026-11-07) a FASTCALL hint first in a short-circuit test's setup refused the condition fold
     "fastcall_condition_chain": "RENOVICE_NO_SC_FOLD_FASTCALL_HINT",
@@ -167,6 +168,8 @@ DECOMPILER_FIXTURES = {
     "compound_if_head_for": "RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD",
     # (2026-11-07) only a loop's OWN for-latch makes it a for body; a nested latch kept the while
     "nested_for_latch_while": "RENOVICE_NO_OWN_LATCH_FOR_BODY",
+    # (2026-11-07) `for ... do break end`: latch back edge on its own exit, dead body
+    "degenerate_for_break": "RENOVICE_NO_DEGENERATE_FOR",
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
     # default again since #82) also takes the clean header first, so the control switches both off.
@@ -329,7 +332,8 @@ def df_verdict(original, candidate, env=None):
 
 # Fixtures decompiled through the shipped-module path (decompile-mod-u44: per-module short-circuit fold
 # selection), because the plain path keeps the strict fold that never folds a call condition.
-U44_DECOMPILE_FIXTURES = {"fastcall_condition_chain", "merged_chain_break", "compound_if_head_for", "nested_for_latch_while"}
+LEGACY_MAY_NOT_DECOMPILE = {"degenerate_for_break"}
+U44_DECOMPILE_FIXTURES = {"fastcall_condition_chain", "merged_chain_break", "compound_if_head_for", "nested_for_latch_while", "degenerate_for_break"}
 
 
 def round_trip(bytecode, temp, tag, env=None):
@@ -395,7 +399,15 @@ def main():
                 legacy_env = base_env()
                 for switch_name in opt_out.split():
                     legacy_env[switch_name] = "1"
-                legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
+                try:
+                    legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
+                except RuntimeError:
+                    # The legacy control may not decompile at all (degenerate_for_break: "did not
+                    # reduce"); that failure is the defect the control demonstrates.
+                    if name not in LEGACY_MAY_NOT_DECOMPILE:
+                        raise
+                    checks[name.upper() + "_LEGACY_DECOMPILE_FAILS"] = True
+                    continue
                 checks[name.upper() + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
                 checks[name.upper() + "_LEGACY_BEHAVIOR_DIFFERS"] = trace(legacy_source, temp, prelude) != expected
                 for extra in EXTRA_LEGACY:

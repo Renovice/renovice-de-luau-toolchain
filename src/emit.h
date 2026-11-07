@@ -753,11 +753,35 @@ struct Emitter {
     //   generic  FORGLOOP A : A+0=generator A+1=state A+2=control, loop vars at A+3.., aux=#vars.
     //
     // The two are asymmetric — the same trap as the FORGPREP/FORNPREP conditionality asymmetry.
+    // A degenerate generic for (`for ... do break end`: FORGLOOP back edge == its exit) is printed only by
+    // emit_block at its latch; no region may open it from the PREP or the latch.
+    bool degenerate_for_latch(int latch) const {
+        if (latch < 0 || latch >= (int)g->n.size()) return false;
+        const int li = g->n[latch].last;
+        return li >= 0 && li < (int)ip->code.size() && ip->code[li].op == 0x1e
+            && ip->code[li].target == li + 1 && !std::getenv("RENOVICE_NO_DEGENERATE_FOR");
+    }
+    bool degenerate_numeric_prep(int prep) const {
+        if (prep < 0 || prep >= (int)g->n.size() || std::getenv("RENOVICE_NO_DEGENERATE_FOR")) return false;
+        const int li = g->n[prep].last;
+        if (li < 0 || li >= (int)ip->code.size() || ip->code[li].op != 0x47) return false;
+        const int exit_pc = ip->code[li].target, latch = exit_pc - 1;
+        return latch > li && latch < (int)ip->code.size() && ip->code[latch].op == 0x0a
+            && ip->code[latch].A == ip->code[li].A && ip->code[latch].target == exit_pc;
+    }
+    bool allow_degenerate_header = false;
     bool for_header(int blk, std::string& hdr) {
         if (blk < 0 || blk >= (int)g->n.size()) return false;
         int li = g->n[blk].last;
         if (li < 0 || li >= (int)ip->code.size()) return false;
         const ir::IInsn& in = ip->code[li];
+        if (!allow_degenerate_header) {
+            if (degenerate_for_latch(blk)) return false;
+            const auto paired = prep2latch.find(blk);
+            if ((in.op == 0x30 || in.op == 0x1b || in.op == 0x0b) && paired != prep2latch.end()
+                && degenerate_for_latch(paired->second)) return false;
+            if (degenerate_numeric_prep(blk)) return false;
+        }
         int a = in.A;
         int source[3] = {a, a + 1, a + 2};
         std::vector<int> move_insns;
@@ -1855,6 +1879,24 @@ struct Emitter {
                 // `if X then end` compiles to "jump past the empty arm unless X": X is the negation
                 // of the jump condition, which reproduces the stock opcode polarity.
                 out += ind(depth) + "if " + cond_of(blk, true) + " then end\n";
+        }
+        // DEGENERATE GENERIC FOR (2026-11-07). `for k, v in it do break end` compiles to a FORGLOOP
+        // whose back edge is its own exit (both edges reach one block; the dead body is removed from
+        // the graph in m6d build_graph). No loop region owns it, so print it here, at its latch:
+        // the iterator still runs once and the frame registers are the loop's.
+        // RENOVICE_NO_DEGENERATE_FOR restores the old graph and drops this print.
+        static const bool degenerate_for = !std::getenv("RENOVICE_NO_DEGENERATE_FOR");
+        if (degenerate_for && n.last >= 0 && n.last < (int)ip->code.size() && !n.is_branch
+            && ((ip->code[n.last].op == 0x1e && ip->code[n.last].target == n.last + 1)
+                || degenerate_numeric_prep(blk))) {
+            std::string hdr;
+            allow_degenerate_header = true;
+            const bool have_header = for_header(blk, hdr);
+            allow_degenerate_header = false;
+            if (have_header) {
+                for (int q : for_move_candidates[blk]) suppress_insns.insert(q);
+                out += ind(depth) + hdr + "\n" + ind(depth + 1) + "break\n" + ind(depth) + "end\n";
+            }
         }
     }
 

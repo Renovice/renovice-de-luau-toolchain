@@ -101,6 +101,49 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                 if (s >= 0 && s < (int)g.n.size()) g.n[s].preds.push_back((int)i);
     };
     rebuild_preds();
+    // DEGENERATE GENERIC FOR (2026-11-07). `for k, v in it do break end`: Luau sends the FORGLOOP's
+    // back edge to the loop exit (both latch edges reach one block) and lays the `break` out as a dead
+    // body between the PREP and the latch (a JUMP or the RETURN it jumps to). Nothing enters that body
+    // (FORGPREP jumps straight to the latch), but the block list still marks it reachable, so it stayed
+    // a live, predecessor-less region and the prototype did not reduce. Mark the dead body unreachable;
+    // the emitter prints the loop as `for ... do break end` at its PREP (emit.h).
+    // RENOVICE_NO_DEGENERATE_FOR restores the old graph.
+    if (!std::getenv("RENOVICE_NO_DEGENERATE_FOR")) {
+        bool changed = false;
+        for (size_t p = 0; p < g.n.size(); ++p) {
+            const st::Node& P = g.n[p];
+            if (!P.reach || !(P.term == 0x30 || P.term == 0x1b || P.term == 0x0b)) continue;
+            const int l = P.succ_true;
+            if (l < 0 || l >= (int)g.n.size()) continue;
+            const st::Node& L = g.n[l];
+            if (L.term != 0x1e || L.succ_true < 0 || L.succ_true != L.succ_false) continue;
+            for (size_t b = 0; b < g.n.size(); ++b)
+                if (g.n[b].first > P.last && g.n[b].last < L.first && g.n[b].preds.empty()) {
+                    g.n[b].reach = false; g.n[b].succ_true = g.n[b].succ_false = -1; changed = true;
+                }
+            // The latch has no loop left: one edge to the exit, not a branch (no region may claim it).
+            st::Node& LL = g.n[l];
+            LL.is_branch = false; LL.is_uncond = true; LL.succ_false = -1; changed = true;
+        }
+        // Numeric form `for i = a, b do break end`: FORNPREP falls into a body that only jumps to the
+        // exit, and the FORNLOOP latch just before the exit is dead with its back edge on the exit.
+        // The PREP keeps one edge (to the exit); the body and the latch leave the graph.
+        for (size_t p = 0; p < g.n.size(); ++p) {
+            st::Node& P = g.n[p];
+            if (!P.reach || P.term != 0x47 || !P.is_branch || P.succ_true < 0) continue;
+            const int exit_pc = g.n[P.succ_true].first;
+            const int li = exit_pc - 1;
+            if (li <= P.last || li >= (int)ip.code.size()) continue;
+            const ir::IInsn& latch = ip.code[li];
+            if (latch.op != 0x0a || latch.A != ip.code[P.last].A || latch.target != exit_pc) continue;
+            for (size_t b = 0; b < g.n.size(); ++b)
+                if (g.n[b].first > P.last && g.n[b].last <= li) {
+                    g.n[b].reach = false; g.n[b].succ_true = g.n[b].succ_false = -1;
+                }
+            P.is_branch = false; P.is_uncond = true; P.succ_false = -1; changed = true;
+        }
+        if (changed) rebuild_preds();
+    }
     // Snapshot liveness on the original CFG, before short-circuit merging rewrites edges and marks
     // blocks unreachable. This is instrumentation-only for now; no merge consults it unless a future
     // flag-backed candidate is added after the measured population is understood.

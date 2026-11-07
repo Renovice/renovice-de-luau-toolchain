@@ -6499,5 +6499,5 @@ selector hoists the body test before the loop (`if v == key` on nil). Hypothesis
 the scratch capture inherits planning/for-ownership state that suppresses the latch-headed body.
 Next: trace emit_block calls inside capture(head) for block d.
 
-OPEN (low, 0 of 259 failing modules): degenerate `for ... do break end` (FORGLOOP both edges to
-the exit) does not reduce (cert/fixtures/open_2026_11_07/degenerate_for_break.luau).
+FIXED (#100, same day): degenerate `for ... do break end`, generic and numeric (0 shipped modules;
+all-1107e unchanged at 5,222 CFG-ID, 0 broken; fixture degenerate_for_break).
