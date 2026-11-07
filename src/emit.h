@@ -2135,6 +2135,19 @@ struct Emitter {
                 // `proven_while`: the PREP overrides; `proven_loop`: header-first part order only.
                 const bool proven_while = proven_loop && proven_prep_override;
                 bool isfor = !proven_while && for_header(hb, hdr);
+                // A generic FORGPREP jumps unconditionally, so it is never the decision of an
+                // IfThen/IfThenElse. When such a region's head is COMPOUND (`for ... end; if c then`)
+                // its first block is that earlier loop's prep: opening a `for` there printed the loop
+                // twice and dropped `c` (DoppelgangerStomp p3). The composite-tail path below finds the
+                // real decision. RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD restores the old reading.
+                if (isfor && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse)
+                    && head >= 0 && A->regions[head].kind != sa::RK::Basic
+                    && hb >= 0 && hb < (int)g->n.size() && g->n[hb].last >= 0
+                    && g->n[hb].last < (int)ip->code.size()
+                    && (ip->code[g->n[hb].last].op == 0x0b || ip->code[g->n[hb].last].op == 0x30
+                        || ip->code[g->n[hb].last].op == 0x1b)
+                    && !std::getenv("RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD"))
+                    isfor = false;
                 // A for-latch region carries no condition of its own — emit its statements flat and
                 // let the enclosing `for` drive the iteration.
                 if (!proven_while && !isfor && is_for_latch(hb) && r.kind != sa::RK::IfThen
@@ -2278,11 +2291,18 @@ struct Emitter {
                     // a duplicated loop header is redundant structure. Never trade the first for the
                     // second. The greedy scan is restored until the overlap can be fixed without
                     // dropping anything.
+                    // A generic FORGPREP inside the COMPOUND head of an IfThen/IfThenElse belongs to
+                    // a complete earlier loop (`for ... end; if c then`): its jump is unconditional,
+                    // so it is never the conditional's decision (DoppelgangerStomp p3).
+                    const bool compound_if_head = !std::getenv("RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD")
+                        && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse)
+                        && !r.parts.empty() && A->regions[r.parts[0]].kind != sa::RK::Basic;
                     for (size_t q = 0; q < r.parts.size() && !isfor; ++q) {
                         std::vector<int> pb; collect_blocks(r.parts[q], pb);
                         for (int b : pb) {
                             int o = term_op(b);
                             if (o != 0x47 && o != 0x0b && o != 0x30 && o != 0x1b) continue;
+                            if (q == 0 && compound_if_head && o != 0x47) continue;
                             if (for_header(b, hdr)) {
                                 isfor = true; prep_part = (int)q;
                                 hb = b;                  // the body starts at THIS block's fallthrough
