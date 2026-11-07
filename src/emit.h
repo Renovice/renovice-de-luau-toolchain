@@ -1741,7 +1741,14 @@ struct Emitter {
         bool emitted_loop_continue = false;
         bool emit_loop_continue = std::getenv("RENOVICE_EMIT_LOOP_CONTINUE") != nullptr
             || loop_continue_enabled;
-        if (!cfg_domain_controls_owned && !emitted_region_escape && emit_loop_continue
+        // A block whose other edge enters a registered inline break arm prints that arm itself
+        // (`if c then ARM break end`, below); taking its latch edge as `continue` first left the arm
+        // to the selector, which printed it after the loop where the loop variables are out of scope
+        // (CheckLevelTag p1 shape: `print("hit", k)` read nil). RENOVICE_NO_INLINE_ARM_OVER_CONTINUE
+        // restores continue-first.
+        const bool inline_arm_pending = !std::getenv("RENOVICE_NO_INLINE_ARM_OVER_CONTINUE")
+            && (inline_break_arms.count(n.succ_true) || inline_break_arms.count(n.succ_false));
+        if (!cfg_domain_controls_owned && !emitted_region_escape && emit_loop_continue && !inline_arm_pending
             && loop_depth > 0 && loop_control_blocks.count(blk) && renderable_cond(blk))
         {
             bool t_continue = loop_continue_targets.count(n.succ_true) != 0;
@@ -3198,7 +3205,15 @@ struct Emitter {
                             && A->multi_latch_for_headers.count(latch_blk))
                         || (std::getenv("RENOVICE_SEMANTIC_PLAN_ARBITRATION")
                             && latch_blk == hb && hb >= 0 && term_op(hb) == 0x1e
-                            && block2loop.count(hb));
+                            && block2loop.count(hb))
+                        // A generic header taken from the region's FORGLOOP latch by the latch scan
+                        // (the region holds no prep: its PREP and setup precede it) is all body +
+                        // latch. Emitting parts[0] as setup put the body above the `for`
+                        // (CheckLevelTag p1: `if v == key then X() break end` ran once, on nil).
+                        // RENOVICE_NO_GENERIC_LATCH_HEADED restores the old reading.
+                        || (!std::getenv("RENOVICE_NO_GENERIC_LATCH_HEADED") && latch_blk >= 0
+                            && term_op(latch_blk) == 0x1e && prep_part < 0
+                            && r.kind == sa::RK::NaturalLoop);
                     // A reduced latch-headed numeric loop may have three sibling pieces in reverse
                     // structural order: [latch+normal-exit, body, preheader/entry].  Dojo p9 is the
                     // proof specimen. Locate the unique FORNPREP paired with this latch and emit its
@@ -3489,6 +3504,21 @@ struct Emitter {
                         }
                     }
                     std::set<int> nb = natural_loop_body(body_start);
+                    // A generic for's PREP jumps straight to its FORGLOOP latch, so the body start
+                    // never dominates the latch and its natural body is empty: loop_blocks stayed the
+                    // outer scope and a body exit could not be printed inside the loop (the inline
+                    // break arm was refused, CheckLevelTag p1). The latch is the dominance header;
+                    // take its natural body. RENOVICE_NO_GENERIC_LATCH_BODY restores the empty set.
+                    if (nb.empty() && !std::getenv("RENOVICE_NO_GENERIC_LATCH_BODY")) {
+                        int latch = latch_blk;
+                        if (latch < 0) {
+                            const auto paired = prep2latch.find(header_source_blk);
+                            if (paired != prep2latch.end()) latch = paired->second;
+                        }
+                        if (latch >= 0 && latch < (int)g->n.size() && term_op(latch) == 0x1e
+                            && g->n[latch].succ_true == body_start)
+                            nb = natural_loop_body(latch);
+                    }
                     if (std::getenv("RENOVICE_SEMANTIC_PLAN_ARBITRATION")
                         || canonical_multi_latch_generic_body || canonical_second_generic_body
                         || exact_energized_outer || exact_authoritative_region_outer) {
