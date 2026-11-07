@@ -367,7 +367,63 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                     for (int q = F.first; q < F.last; ++q) F.chain_setup_insns.insert(q);
                 }
             }
-            if (F.first != F.last && !fold_expr) {
+            // A MERGED chain node (`b and c` already collapsed) spans its tests' instructions; it is
+            // still a pure test when every instruction it holds is one of its chain tests or setup
+            // already folded into them. Refusing it left `(not a or (b and c)) and d` as two nodes,
+            // which rendered `if (a and (not b or not c)) or d then break end` inside
+            // `repeat ... until true`: the loop break became a skip (SwiftDethAbility p7).
+            // RENOVICE_NO_SC_MERGED_CHAIN_PURE restores the refusal.
+            // The chain's FIRST test may still carry its own setup (`x:Name()` before `if not ...`):
+            // only later tests' setup was folded when the chain formed. It joins the condition under
+            // the same per-value rule as the expression fold below (each value defined once, read
+            // once by the next setup instruction or the test, none live out of F), recorded only when
+            // the merge goes ahead.
+            bool merged_pure = false;
+            int head_setup_first = -1, head_setup_last = -1;
+            if (!F.chain.empty() && !std::getenv("RENOVICE_NO_SC_MERGED_CHAIN_PURE")) {
+                std::set<int> owned(F.chain.begin(), F.chain.end());
+                owned.insert(F.chain_setup_insns.begin(), F.chain_setup_insns.end());
+                for (const auto& setup_entry : F.chain_expr_setup)
+                    for (int q = setup_entry.second.first; q <= setup_entry.second.second; ++q) owned.insert(q);
+                const int head_test = F.chain.front();
+                if (F.first < head_test && !F.chain_expr_setup.count(head_test) && sc_expr_fold
+                    && sc_liveness.known && sc_liveness.converged && (size_t)f < sc_liveness.live_out.size()) {
+                    bool exact = true;
+                    std::map<int, int> pending;
+                    for (int q = F.first; q <= head_test && exact; ++q) {
+                        std::set<int> uses, defs;
+                        if (!lv::register_effects(ip, ip.code[q], uses, defs)) { exact = false; break; }
+                        if (q < head_test && defs.empty() && !(q == F.first && fastcall_hint_fold && is_fastcall_hint(ip.code[q].op)))
+                            exact = false;
+                        for (int reg : uses) {
+                            auto value = pending.find(reg);
+                            if (value != pending.end() && ++value->second > 1) exact = false;
+                        }
+                        if (q < head_test)
+                            for (int reg : defs) {
+                                auto value = pending.find(reg);
+                                if (value != pending.end() && value->second == 0) exact = false;
+                                pending[reg] = 0;
+                            }
+                    }
+                    for (const auto& value : pending)
+                        if (value.second != 1 || sc_liveness.live_out[f].count(value.first)) exact = false;
+                    if (exact && !pending.empty()) {
+                        ex::ProtoOut po; ex::BlockOut bo; bo.first = F.first; bo.last = head_test - 1;
+                        ex::reconstruct_block(ip, bo.first, bo.last, po, bo);
+                        for (const ex::Stmt& st_ : bo.stmts)
+                            if (st_.k != ex::SK::Assign || !st_.lhs || st_.lhs->k != ex::EK::Reg || !st_.rhs) { exact = false; break; }
+                    }
+                    if (exact && !pending.empty()) {
+                        head_setup_first = F.first; head_setup_last = head_test - 1;
+                        for (int q = F.first; q < head_test; ++q) owned.insert(q);
+                    }
+                }
+                merged_pure = true;
+                for (int q = F.first; q <= F.last && merged_pure; ++q)
+                    if (!owned.count(q)) merged_pure = false;
+            }
+            if (F.first != F.last && !fold_expr && !merged_pure) {
                 // Count it ONLY when the shape is otherwise a valid short-circuit, so the number
                 // means "merges this rule alone is refusing", not "blocks that failed anyway".
                 if (andlike0 || orlike0) {
@@ -479,6 +535,10 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                    for (size_t q = 0; q + 1 < F.chain.size(); ++q) B.chain_and.push_back(F.chain_and[q]); }
             for (const auto& setup_entry : F.chain_expr_setup)
                 B.chain_expr_setup[setup_entry.first] = setup_entry.second;
+            if (head_setup_first >= 0) {
+                B.chain_expr_setup[F.chain.front()] = {head_setup_first, head_setup_last};
+                for (int q = head_setup_first; q <= head_setup_last; ++q) B.chain_setup_insns.insert(q);
+            }
             for (const auto& test_entry : F.chain_loadn_literals)
                 for (const auto& reg_entry : test_entry.second)
                     B.chain_loadn_literals[test_entry.first][reg_entry.first] = reg_entry.second;
