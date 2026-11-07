@@ -2226,7 +2226,14 @@ struct Emitter {
                 // repair is limited to the analyzer-approved three-latch/single-loop topology.
                 bool approved_canonical_latch = A->multi_latch_for_headers.count(hb) != 0
                     || terminal_arm_loop_latches.count(hb);
-                if ((std::getenv("RENOVICE_DIRECT_FORGLOOP_IDENTITY")
+                // A While region headed at its own FORGLOOP (`for ... do body end` reduced as
+                // While(latch, body), e.g. before an endless loop: TennoHubHangar p2) took the latch's
+                // EXIT as the body start and printed the body after an empty `for`. The direct
+                // identity is exact there; broader regions keep the approved-topology rule (the
+                // global switch broke 5 modules). RENOVICE_NO_WHILE_FORGLOOP_IDENTITY opts out.
+                const bool while_headed_latch = !std::getenv("RENOVICE_NO_WHILE_FORGLOOP_IDENTITY")
+                    && r.kind == sa::RK::While;
+                if ((std::getenv("RENOVICE_DIRECT_FORGLOOP_IDENTITY") || while_headed_latch
                      || (approved_canonical_latch
                          && !std::getenv("RENOVICE_NO_THREE_LATCH_SINGLE_LOOP")))
                     && isfor && term_op(hb) == 0x1e)
@@ -3213,7 +3220,12 @@ struct Emitter {
                         // RENOVICE_NO_GENERIC_LATCH_HEADED restores the old reading.
                         || (!std::getenv("RENOVICE_NO_GENERIC_LATCH_HEADED") && latch_blk >= 0
                             && term_op(latch_blk) == 0x1e && prep_part < 0
-                            && r.kind == sa::RK::NaturalLoop);
+                            && r.kind == sa::RK::NaturalLoop)
+                        // The same holds for a While region headed at the FORGLOOP latch itself
+                        // (`for i, x in ipairs(a) do t[i] = x end` before an endless loop: the body
+                        // printed after an empty `for`, reading nil loop variables; TennoHubHangar p2).
+                        || (!std::getenv("RENOVICE_NO_GENERIC_LATCH_HEADED") && r.kind == sa::RK::While
+                            && hb >= 0 && term_op(hb) == 0x1e && prep_part < 0);
                     // A reduced latch-headed numeric loop may have three sibling pieces in reverse
                     // structural order: [latch+normal-exit, body, preheader/entry].  Dojo p9 is the
                     // proof specimen. Locate the unique FORNPREP paired with this latch and emit its
