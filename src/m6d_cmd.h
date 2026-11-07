@@ -232,16 +232,23 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                 && sc_liveness.known && sc_liveness.converged
                 && (size_t)f < sc_liveness.live_out.size()) {
                 bool exact = true;
+                int setup_calls = 0;
+                for (int q = F.first; q < F.last; ++q) if (ip.code[q].name == "CALL") ++setup_calls;
+                const bool single_call_operand = setup_calls == 1 && F.last - 1 >= F.first
+                                              && ip.code[F.last - 1].name == "CALL";
                 std::map<int, int> def_at, def_count, use_count, first_use;
                 for (int q = F.first; q <= F.last && exact; ++q) {
                     std::set<int> uses, defs;
                     if (!lv::register_effects(ip, ip.code[q], uses, defs)) { exact = false; break; }
                     // A FASTCALL hint (builtin fast path before the call it guards) defines and reads
                     // nothing the expression sees; the expression builder skips it too (expr.h).
-                    // Admitted only as F's FIRST instruction (`IsNull(x)` as the whole operand): a hint
-                    // inside a longer chain (`IsNull(string.find(tostring(...)))`, AimGravityFX p1)
-                    // folds into a tree whose rendering reorders the import loads.
-                    if (q < F.last && defs.empty() && !(q == F.first && fastcall_hint_fold && is_fastcall_hint(ip.code[q].op))) exact = false;
+                    // Admitted when the operand is ONE builtin call: the hint is F's first instruction
+                    // (`IsNull(x)`) or F's setup holds exactly one CALL, its last instruction
+                    // (`IsNull(g.x)`: argument loads, hint, function load, call). A hint inside a
+                    // chain of calls (`IsNull(string.find(tostring(...)))`, AimGravityFX p1) folds
+                    // into a tree whose rendering reorders the import loads.
+                    if (q < F.last && defs.empty() && !((q == F.first || single_call_operand)
+                                                        && fastcall_hint_fold && is_fastcall_hint(ip.code[q].op))) exact = false;
                     for (int reg : uses) {
                         ++use_count[reg];
                         if (!first_use.count(reg)) first_use[reg] = q;
