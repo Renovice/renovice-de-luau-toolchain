@@ -6482,3 +6482,22 @@ Result: TRUE for the cause, UNRESOLVED for a fix: no source spelling compiles to
 compiler, so the nested constructor cannot be printed as one expression. The output is the same program
 (only construction order differs). Next: identify DE's Luau version / template rule, or accept as a
 compiler-version gap.
+
+## 2026-11-07 — Loop-region fixes #98/#99; open: break arm before an infinite tail
+
+Measured (tier 2, all-1107d): CFG-ID 5,222 / 5,481 first pass, CONST-ID 5,469, 0 broken.
+#98 (generic FORGPREP never a conditional's decision or a nested loop's owner) and #99 (only a
+loop's own for-latch suppresses its while wrapper) fixed lost `if`/`while` wrappers; repros and
+fixtures `compound_if_head_for`, `nested_for_latch_while` (legacy controls change program output).
+
+OPEN (repro cert/fixtures/open_2026_11_07/for_break_arm_infinite_tail.luau, CheckLevelTag p1):
+`for k, v in pairs(t) do if v == key then X() break end end` followed by an infinite `while true`.
+Reduced as IfThen(Seq(prep, NaturalLoop), arm). The inline break-arm scratch render
+(INLINE_BREAK_ARM, emit.h) prints the `for` with an EMPTY body in both this and the passing
+finite-tail variant (used=0 in every fold mode), so the selector renders; with an infinite tail the
+selector hoists the body test before the loop (`if v == key` on nil). Hypothesis (unconfirmed):
+the scratch capture inherits planning/for-ownership state that suppresses the latch-headed body.
+Next: trace emit_block calls inside capture(head) for block d.
+
+OPEN (low, 0 of 259 failing modules): degenerate `for ... do break end` (FORGLOOP both edges to
+the exit) does not reduce (cert/fixtures/open_2026_11_07/degenerate_for_break.luau).
