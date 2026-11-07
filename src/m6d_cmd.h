@@ -7,6 +7,12 @@
 // emit at all. Every failure is therefore counted and named rather than silently flattened.
 #pragma once
 
+// FASTCALL* hints (DE U44 opcodes, the same set expr.h skips): a builtin fast path in front of its call.
+static inline bool is_fastcall_hint(uint8_t op) { return op == 0x19 || op == 0x10 || op == 0x0c || op == 0x26 || op == 0x4a; }
+// RENOVICE_NO_SC_FOLD_FASTCALL_HINT restores the refusal (a condition `while not IsNull(a) and ...` lost
+// its tests: NpcSwitchTeleportAbility p5, cert fixture fastcall_condition_chain).
+static const bool fastcall_hint_fold = !std::getenv("RENOVICE_NO_SC_FOLD_FASTCALL_HINT");
+
 // Build the richer CFG that structuring needs: predecessors, and the branch-taken successor kept
 // distinct from the fallthrough (build_cfg's flat successor list loses that distinction).
 static long long g_cov_ok=0, g_cov_bad=0, g_cov_missing=0, g_cov_dupd=0;
@@ -230,7 +236,12 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                 for (int q = F.first; q <= F.last && exact; ++q) {
                     std::set<int> uses, defs;
                     if (!lv::register_effects(ip, ip.code[q], uses, defs)) { exact = false; break; }
-                    if (q < F.last && defs.empty()) exact = false;
+                    // A FASTCALL hint (builtin fast path before the call it guards) defines and reads
+                    // nothing the expression sees; the expression builder skips it too (expr.h).
+                    // Admitted only as F's FIRST instruction (`IsNull(x)` as the whole operand): a hint
+                    // inside a longer chain (`IsNull(string.find(tostring(...)))`, AimGravityFX p1)
+                    // folds into a tree whose rendering reorders the import loads.
+                    if (q < F.last && defs.empty() && !(q == F.first && fastcall_hint_fold && is_fastcall_hint(ip.code[q].op))) exact = false;
                     for (int reg : uses) {
                         ++use_count[reg];
                         if (!first_use.count(reg)) first_use[reg] = q;
@@ -304,9 +315,13 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                     // reads the previous one's result and no other setup value. Independent
                     // subexpressions can render in an evaluation order the bytecode did not use.
                     for (int q = F.first + 1; strict && q < F.last && fold_expr; ++q) {
+                        if (fastcall_hint_fold && is_fastcall_hint(ip.code[q].op)) continue;
+                        int prev = q - 1;
+                        while (prev > F.first && is_fastcall_hint(ip.code[prev].op)) --prev;
+                        if (is_fastcall_hint(ip.code[prev].op)) continue;   // first real setup instruction
                         std::set<int> uses, defs, prev_uses, prev_defs;
                         lv::register_effects(ip, ip.code[q], uses, defs);
-                        lv::register_effects(ip, ip.code[q - 1], prev_uses, prev_defs);
+                        lv::register_effects(ip, ip.code[prev], prev_uses, prev_defs);
                         int setup_reads = 0; bool reads_previous = false;
                         for (int reg : uses) {
                             if (def_count.count(reg) && def_at[reg] < q) ++setup_reads;

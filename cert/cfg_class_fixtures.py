@@ -155,8 +155,10 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_EXACT_LOCAL_LIMIT", "RENOVICE_NO_STRAIGHT_LINE_REGISTER_MERGE",
             "RENOVICE_NO_SCOPED_CAPTURE_LOCALS", "RENOVICE_SCOPED_CAPTURE_MARKERS_ONLY",
             "RENOVICE_NO_DUPLICATE_CAPTURE_SNAPSHOT",
-            "RENOVICE_NO_CTOR_EXPR")
+            "RENOVICE_NO_CTOR_EXPR", "RENOVICE_NO_SC_FOLD_FASTCALL_HINT")
 DECOMPILER_FIXTURES = {
+    # (2026-11-07) a FASTCALL hint first in a short-circuit test's setup refused the condition fold
+    "fastcall_condition_chain": "RENOVICE_NO_SC_FOLD_FASTCALL_HINT",
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
     # default again since #82) also takes the clean header first, so the control switches both off.
@@ -317,10 +319,16 @@ def df_verdict(original, candidate, env=None):
     return "ERROR"
 
 
+# Fixtures decompiled through the shipped-module path (decompile-mod-u44: per-module short-circuit fold
+# selection), because the plain path keeps the strict fold that never folds a call condition.
+U44_DECOMPILE_FIXTURES = {"fastcall_condition_chain"}
+
+
 def round_trip(bytecode, temp, tag, env=None):
     source = os.path.join(temp, tag + ".luau")
     rebuilt = os.path.join(temp, tag + ".lua_B")
-    run([DEC, "decompile-mod", bytecode, source], env=env)
+    mode = "decompile-mod-u44" if tag.split(".")[0] in U44_DECOMPILE_FIXTURES else "decompile-mod"
+    run([DEC, mode, bytecode, source], env=env)
     run([DEC, "recompile", source, rebuilt])
     return source, rebuilt
 
