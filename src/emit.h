@@ -2291,18 +2291,37 @@ struct Emitter {
                     // a duplicated loop header is redundant structure. Never trade the first for the
                     // second. The greedy scan is restored until the overlap can be fixed without
                     // dropping anything.
-                    // A generic FORGPREP inside the COMPOUND head of an IfThen/IfThenElse belongs to
-                    // a complete earlier loop (`for ... end; if c then`): its jump is unconditional,
-                    // so it is never the conditional's decision (DoppelgangerStomp p3).
-                    const bool compound_if_head = !std::getenv("RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD")
-                        && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse)
+                    // A generic FORGPREP jumps unconditionally, so it is never an IfThen/IfThenElse's
+                    // decision: in a COMPOUND head it closes an earlier loop (`for ... end; if c then`),
+                    // in an arm it opens a nested one. Taking either printed the loop twice and dropped
+                    // the conditional's own test (DoppelgangerStomp p3). FORNPREP (a zero-trip gate)
+                    // keeps the scan.
+                    const bool generic_prep_guard = !std::getenv("RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD")
+                        && (r.kind == sa::RK::IfThen || r.kind == sa::RK::IfThenElse);
+                    const bool compound_if_head = generic_prep_guard
                         && !r.parts.empty() && A->regions[r.parts[0]].kind != sa::RK::Basic;
                     for (size_t q = 0; q < r.parts.size() && !isfor; ++q) {
                         std::vector<int> pb; collect_blocks(r.parts[q], pb);
                         for (int b : pb) {
                             int o = term_op(b);
                             if (o != 0x47 && o != 0x0b && o != 0x30 && o != 0x1b) continue;
-                            if (q == 0 && compound_if_head && o != 0x47) continue;
+                            if (o != 0x47 && ((q == 0 && compound_if_head) || (q > 0 && generic_prep_guard
+                                    && !std::getenv("RENOVICE_NO_ARM_GENERIC_PREP_GUARD"))))
+                                continue;
+                            // A loop region owns a generic prep only when that prep's FORGLOOP latch
+                            // jumps back to the region's head (or is it). A latch looping on another
+                            // block is a NESTED `for`: taking it turned `while c do ... for ... end
+                            // ... break ... end` into that `for`, dropping the while (DoppelgangerStomp
+                            // p3, second path).
+                            if (o != 0x47 && (r.kind == sa::RK::NaturalLoop || r.kind == sa::RK::While)
+                                && !std::getenv("RENOVICE_NO_NESTED_GENERIC_PREP_GUARD")) {
+                                auto latch = prep2latch.find(b);
+                                const int region_head = r.head >= 0 ? head_block(r.head) : region_condition_block;
+                                if (latch != prep2latch.end() && latch->second >= 0 && latch->second < (int)g->n.size()
+                                    && region_head >= 0 && latch->second != region_head
+                                    && g->n[latch->second].succ_true != region_head)
+                                    continue;
+                            }
                             if (for_header(b, hdr)) {
                                 isfor = true; prep_part = (int)q;
                                 hb = b;                  // the body starts at THIS block's fallthrough
