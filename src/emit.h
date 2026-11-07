@@ -2226,14 +2226,7 @@ struct Emitter {
                 // repair is limited to the analyzer-approved three-latch/single-loop topology.
                 bool approved_canonical_latch = A->multi_latch_for_headers.count(hb) != 0
                     || terminal_arm_loop_latches.count(hb);
-                // A While region headed at its own FORGLOOP (`for ... do body end` reduced as
-                // While(latch, body), e.g. before an endless loop: TennoHubHangar p2) took the latch's
-                // EXIT as the body start and printed the body after an empty `for`. The direct
-                // identity is exact there; broader regions keep the approved-topology rule (the
-                // global switch broke 5 modules). RENOVICE_NO_WHILE_FORGLOOP_IDENTITY opts out.
-                const bool while_headed_latch = !std::getenv("RENOVICE_NO_WHILE_FORGLOOP_IDENTITY")
-                    && r.kind == sa::RK::While;
-                if ((std::getenv("RENOVICE_DIRECT_FORGLOOP_IDENTITY") || while_headed_latch
+                if ((std::getenv("RENOVICE_DIRECT_FORGLOOP_IDENTITY")
                      || (approved_canonical_latch
                          && !std::getenv("RENOVICE_NO_THREE_LATCH_SINGLE_LOOP")))
                     && isfor && term_op(hb) == 0x1e)
@@ -2714,6 +2707,14 @@ struct Emitter {
                                 if (g->n[q].first == nxt) { bstart = (int)q; break; }
                         } else if (ho == 0x0a) {
                             bstart = g->n[hb].succ_true;   // FORNLOOP latch: back edge -> body start
+                        } else if (ho == 0x1e && r.kind == sa::RK::While && r.parts.size() == 2
+                                   && !std::getenv("RENOVICE_NO_WHILE_FORGLOOP_IDENTITY")) {
+                            // FORGLOOP latch head (a While(latch, body) region, e.g. a for before an
+                            // endless loop: TennoHubHangar p2): its back edge is the body start, not the
+                            // FORNPREP-style fallthrough (the loop EXIT), which printed the body after an
+                            // empty `for`. latch_blk stays unset: setting it also makes the latch a
+                            // `continue` target and rewrote and-chains as continues (CodexScanner p5).
+                            bstart = g->n[hb].succ_true;
                         } else {
                             bstart = g->n[hb].succ_false;                  // FORNPREP: fallthrough
                         }

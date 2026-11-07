@@ -167,7 +167,7 @@ DECOMPILER_FIXTURES = {
     # (2026-11-07) a merged short-circuit chain node is still a pure test for the next pair
     "merged_chain_break": "RENOVICE_NO_SC_MERGED_CHAIN_PURE",
     # (2026-11-07) a generic FORGPREP in an IfThen's compound head is an earlier loop, not the decision
-    "compound_if_head_for": "RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD",
+    "compound_if_head_for": "RENOVICE_NO_COMPOUND_HEAD_PREP_GUARD RENOVICE_NO_WHILE_FORGLOOP_IDENTITY",
     # (2026-11-07) only a loop's OWN for-latch makes it a for body; a nested latch kept the while
     "nested_for_latch_while": "RENOVICE_NO_OWN_LATCH_FOR_BODY",
     # (2026-11-07) `for ... do break end`: latch back edge on its own exit, dead body
@@ -339,6 +339,9 @@ def df_verdict(original, candidate, env=None):
 # Fixtures decompiled through the shipped-module path (decompile-mod-u44: per-module short-circuit fold
 # selection), because the plain path keeps the strict fold that never folds a call condition.
 LEGACY_MAY_NOT_DECOMPILE = {"degenerate_for_break"}
+# CFG-only defects (behavior-neutral): default CFG-ID PASS and behavior same; the legacy control must
+# fail CFG-ID with the same behavior. (fixture, opt-out switches)
+CFG_ONLY_FIXTURES = ()
 U44_DECOMPILE_FIXTURES = {"fastcall_condition_chain", "merged_chain_break", "compound_if_head_for", "nested_for_latch_while", "degenerate_for_break", "for_break_arm_loop_tail", "for_before_endless_loop"}
 
 
@@ -436,6 +439,21 @@ def main():
                         checks[key + "_BEHAVIOR_SAME"] = trace(extra_source, temp, prelude) == expected
                     else:
                         checks[key + "_BEHAVIOR_DIFFERS"] = trace(extra_source, temp, prelude) != expected
+
+            for name, opt_out in CFG_ONLY_FIXTURES:
+                fixture = os.path.join(FIX, name + ".luau")
+                expected = trace(fixture, temp)
+                original = os.path.join(temp, name + ".original.lua_B")
+                compile_fixture(fixture, name, original)
+                source, rebuilt = round_trip(original, temp, name + ".default")
+                checks[name.upper() + "_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
+                checks[name.upper() + "_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+                legacy_env = base_env()
+                for switch_name in opt_out.split():
+                    legacy_env[switch_name] = "1"
+                legacy_source, legacy_rebuilt = round_trip(original, temp, name + ".legacy", legacy_env)
+                checks[name.upper() + "_LEGACY_CFG_FAILS"] = cfg_verdict(original, legacy_rebuilt) == "FAIL"
+                checks[name.upper() + "_LEGACY_BEHAVIOR_SAME"] = trace(legacy_source, temp) == expected
 
             # (captures campaign 2026-10-10) the scoped capture locals re-decompile to themselves
             fixture = os.path.join(FIXTURE_DIRS["scoped_capture_loop"], "scoped_capture_loop.luau")

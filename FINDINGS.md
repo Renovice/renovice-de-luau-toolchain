@@ -6501,3 +6501,18 @@ Next: trace emit_block calls inside capture(head) for block d.
 
 FIXED (#100, same day): degenerate `for ... do break end`, generic and numeric (0 shipped modules;
 all-1107e unchanged at 5,222 CFG-ID, 0 broken; fixture degenerate_for_break).
+
+## 2026-11-07 — #102 refined; terminal-else layout rule rejected (for now)
+
+Measured (all-1107h): CFG-ID 5,254 / 5,481 (5,246 before), 9 fixed / 1 broken (FuneralForAFriend).
+#102 v1 (direct FORGLOOP identity for While regions) was pushed with a tier-1 pass but the full run
+found 3 losses: setting latch_blk also registers the latch as a `continue` target and rewrote
+and-chains as continues. v2 fixes only the body start. FuneralForAFriend p21 still fails: it passed
+before only via the per-prototype fold mix (SC_EXPR_FOLD_SELECT `mix`), and p21 fails at every forced
+fold level with both binaries. Lesson: tier 1's tripwire sample missed 3 + 2 losses; all five are now in
+work/me/canary.txt.
+
+REJECTED for now: "terminal JUMP-reached arm is the else" (structan: generalised IfThen, IF-THEN,
+one-terminal IfThenElse, N-way). Hypothesis TRUE for HarrowHeatInBubbles ApplyUpgrade (closure order
+p2/p3 restored, CFG-ID PASS), but the rule cost Discs and WaveDefend (net -1). Fixture kept as
+cert/fixtures/open_2026_11_07/terminal_else_order.luau. Next: find what distinguishes those two.
