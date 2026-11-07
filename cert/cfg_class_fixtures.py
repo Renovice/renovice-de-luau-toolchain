@@ -160,7 +160,8 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_OWN_LATCH_FOR_BODY",
             "RENOVICE_NO_DEGENERATE_FOR",
             "RENOVICE_NO_GENERIC_LATCH_HEADED",
-            "RENOVICE_NO_WHILE_FORGLOOP_IDENTITY")
+            "RENOVICE_NO_WHILE_FORGLOOP_IDENTITY",
+            "RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER")
 DECOMPILER_FIXTURES = {
     # (2026-11-07) a FASTCALL hint first in a short-circuit test's setup refused the condition fold
     "fastcall_condition_chain": "RENOVICE_NO_SC_FOLD_FASTCALL_HINT",
@@ -341,8 +342,8 @@ def df_verdict(original, candidate, env=None):
 LEGACY_MAY_NOT_DECOMPILE = {"degenerate_for_break"}
 # CFG-only defects (behavior-neutral): default CFG-ID PASS and behavior same; the legacy control must
 # fail CFG-ID with the same behavior. (fixture, opt-out switches)
-CFG_ONLY_FIXTURES = ()
-U44_DECOMPILE_FIXTURES = {"fastcall_condition_chain", "merged_chain_break", "compound_if_head_for", "nested_for_latch_while", "degenerate_for_break", "for_break_arm_loop_tail", "for_before_endless_loop"}
+CFG_ONLY_FIXTURES = (("terminal_else_order", "RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER"),)
+U44_DECOMPILE_FIXTURES = {"terminal_else_order", "fastcall_condition_chain", "merged_chain_break", "compound_if_head_for", "nested_for_latch_while", "degenerate_for_break", "for_break_arm_loop_tail", "for_before_endless_loop"}
 
 
 def round_trip(bytecode, temp, tag, env=None):

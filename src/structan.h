@@ -47,7 +47,7 @@ struct Analyzer {
     std::map<int, std::set<int>> original_loop_bodies;
     // Per-block branch facts copied from the CFG in build(): the loop-body DAG repair below must
     // know, at BLOCK level, whether an edge that leaves a loop is a conditional two-way branch.
-    struct BlockEdges { int t = -1, f = -1; bool branch = false; int term = 0; };
+    struct BlockEdges { int t = -1, f = -1; bool branch = false; int term = 0; int first = -1, last = -1; int npred = 0; };
     std::vector<BlockEdges> block_edges;
     int entry = 0;
 
@@ -59,6 +59,8 @@ struct Analyzer {
         for (size_t i = 0; i < g.n.size(); ++i) {
             block_edges[i].t = g.n[i].succ_true; block_edges[i].f = g.n[i].succ_false;
             block_edges[i].branch = g.n[i].is_branch; block_edges[i].term = g.n[i].term;
+            block_edges[i].first = g.n[i].first; block_edges[i].last = g.n[i].last;
+            block_edges[i].npred = (int)g.n[i].preds.size();
             Region r; r.kind = RK::Basic; r.block = (int)i;
             regions.push_back(r);
             if (g.n[i].reach) live.insert((int)i);
@@ -109,6 +111,51 @@ struct Analyzer {
         entry = 0;
     }
 
+    int region_first(int id) const {
+        if (id < 0 || id >= (int)regions.size()) return -1;
+        const Region& r = regions[id];
+        if (r.kind == RK::Basic) return r.block >= 0 && r.block < (int)block_edges.size() ? block_edges[r.block].first : -1;
+        int best = -1;
+        for (int p : r.parts) { int f = region_first(p); if (f >= 0 && (best < 0 || f < best)) best = f; }
+        return best;
+    }
+    void region_blocks(int id, std::vector<int>& out) const {
+        if (id < 0 || id >= (int)regions.size()) return;
+        if (regions[id].kind == RK::Basic) { out.push_back(regions[id].block); return; }
+        for (int p : regions[id].parts) region_blocks(p, out);
+    }
+    // `t` (terminating, Basic) is the JUMP-taken arm of n's decision block and n's other successor (the
+    // fall-through, laid out first) is private to n: the source is `if c then F else T end`, and the guard
+    // reading `if not c then T end; F` swaps source order (Luau numbers child functions in source order).
+    // RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER restores the guard reading.
+    bool terminal_jump_arm_is_else(int n, int t) {
+        if (std::getenv("RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER")) return false;
+        if (regions[t].kind != RK::Basic) return false;
+        const int tb = regions[t].block;
+        if (tb < 0 || tb >= (int)block_edges.size()) return false;
+        std::vector<int> nb; region_blocks(n, nb);
+        int decision = -1, count = 0;
+        for (int b : nb)
+            if (b >= 0 && b < (int)block_edges.size()
+                && (block_edges[b].t == tb || block_edges[b].f == tb)) { decision = b; ++count; }
+        if (count != 1) return false;
+        const BlockEdges& e = block_edges[decision];
+        if (!e.branch || e.t != tb || e.f < 0 || e.f == e.t) return false;
+        // The arm must be laid out AWAY from the decision. A terminal directly after the decision's
+        // last instruction is the guard's own position (`if a or b or c then return end` after the
+        // short-circuit merge: Discs p5, WaveDefend p48).
+        if (block_edges[tb].first == e.last + 1) return false;
+        // A terminal shared by several tests (`if a or b or c then return end` left unmerged) is the
+        // guard's body; only an arm with one predecessor in the CFG can be an `else`.
+        if (block_edges[tb].npred != 1) return false;
+        // A terminal reached from inside a loop it lies outside of is a loop EXIT (`while true do if
+        // IsNull(x) then return end ... end`), not an else: reading it as one deleted the loop
+        // (Discs p12).
+        for (const auto& loop : original_loop_bodies)
+            if (loop.second.count(decision) && !loop.second.count(tb)) return false;
+        for (int f : succ[n]) if (f != t) return npred(f) == 1;
+        return false;
+    }
     int add(Region r) { regions.push_back(r); int id = (int)regions.size()-1; live.insert(id); return id; }
 
     // Replace the set `parts` with a single new region `id`, rewiring edges around it.
@@ -492,6 +539,7 @@ struct Analyzer {
                     for (int x : touts) if (!succ[n].count(x)) { absorbable = false; break; }
                     if (touts.count(t)) absorbable = false; // self-loop: handled elsewhere
                     if (!absorbable) continue;
+                    if (touts.empty() && nsucc(n) == 2 && terminal_jump_arm_is_else(n, t)) continue;
                     std::set<int> outs;
                     for (int x : succ[n]) if (x != t) outs.insert(x);
                     for (int x : touts) if (x != t) outs.insert(x);
@@ -517,6 +565,12 @@ struct Analyzer {
                     if (j < 0) j = ts;
                     else if (j != ts) { ok = false; break; }      // arms must agree on the join
                 }
+                if (ok && j >= 0 && nsucc(n) == 2)
+                    for (int t : arms)
+                        if (nsucc(t) == 0 && terminal_jump_arm_is_else(n, t)) {
+                            const int jf = region_first(j), tf = region_first(t);
+                            if (jf >= 0 && tf >= 0 && jf < tf) ok = false;
+                        }
                 if (ok && arms.size() >= 2) {
                     std::vector<int> parts; parts.push_back(n);
                     for (int t : arms) parts.push_back(t);
@@ -582,6 +636,7 @@ struct Analyzer {
                     int ts;
                     bool joins     = one_succ(t, ts) && ts == f;
                     bool terminates = (nsucc(t) == 0);
+                    if (terminates && !joins && terminal_jump_arm_is_else(n, t)) continue;
                     if (npred(t)==1 && (joins || terminates) && t!=n && f!=n) {
                         Region r; r.kind = RK::IfThen; r.head = n; r.parts = {n, t};
                         int id = add(r); collapse({n,t}, id, {f}); return true;
@@ -597,6 +652,12 @@ struct Analyzer {
                             Region r; r.kind = RK::IfThenElse; r.head = n; r.parts = {n,a,b};
                             int id = add(r); collapse({n,a,b}, id, {}); return true;
                         }
+                        auto defer = [&](int term_arm, int join) {
+                            if (!terminal_jump_arm_is_else(n, term_arm)) return false;
+                            const int jf = region_first(join), tf = region_first(term_arm);
+                            return jf >= 0 && tf >= 0 && jf < tf;
+                        };
+                        if ((at && bj && defer(a, bs2)) || (bt && aj && defer(b, as2))) continue;
                         if (at && bj && bs2!=a && bs2!=b) {               // then returns, else joins
                             Region r; r.kind = RK::IfThenElse; r.head = n; r.parts = {n,a,b};
                             int id = add(r); collapse({n,a,b}, id, {bs2}); return true;

@@ -6512,7 +6512,8 @@ before only via the per-prototype fold mix (SC_EXPR_FOLD_SELECT `mix`), and p21 
 fold level with both binaries. Lesson: tier 1's tripwire sample missed 3 + 2 losses; all five are now in
 work/me/canary.txt.
 
-REJECTED for now: "terminal JUMP-reached arm is the else" (structan: generalised IfThen, IF-THEN,
+LATER FIXED (#103, same day, all-1107i: CFG-ID 5,255, 1 fixed / 0 broken): the rule needs the arm laid
+out away from the decision, one CFG predecessor, and not a loop exit. Was REJECTED: "terminal JUMP-reached arm is the else" (structan: generalised IfThen, IF-THEN,
 one-terminal IfThenElse, N-way). Hypothesis TRUE for HarrowHeatInBubbles ApplyUpgrade (closure order
 p2/p3 restored, CFG-ID PASS), but the rule cost Discs and WaveDefend (net -1). Fixture kept as
 cert/fixtures/open_2026_11_07/terminal_else_order.luau. Next: find what distinguishes those two.
