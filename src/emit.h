@@ -5192,6 +5192,18 @@ inexact_selector_fallback:
                     // the loop still becomes a `break` — which now breaks the `for`, as intended.
                     bool is_for_body = false;
                     for (int b : bl) if (is_for_latch(b)) { is_for_body = true; break; }
+                    // Only THIS loop's latch makes it a `for` iteration: one whose back edge returns to
+                    // the region's head (or that is the head). A latch looping on another block closes
+                    // a `for` NESTED in this loop; counting it deleted the outer `while`
+                    // (`while t() do for ... end; if c then X break end end`, DoppelgangerStomp p3).
+                    // RENOVICE_NO_OWN_LATCH_FOR_BODY restores the any-latch test.
+                    if (is_for_body && !std::getenv("RENOVICE_NO_OWN_LATCH_FOR_BODY")) {
+                        const int own_head = semantic_head_block(id);
+                        bool own_latch = false;
+                        for (int b : bl)
+                            if (is_for_latch(b) && (b == own_head || g->n[b].succ_true == own_head)) own_latch = true;
+                        if (own_head >= 0 && !own_latch) is_for_body = false;
+                    }
                     // A for-latch that belongs to a NESTED loop does not make a proven while/repeat
                     // the for's iteration: suppressing the wrapper deleted the outer loop.
                     if (proven_while) is_for_body = false;
