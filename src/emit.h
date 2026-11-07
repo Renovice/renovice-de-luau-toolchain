@@ -1880,7 +1880,11 @@ struct Emitter {
             const bool truthiness = op == 0x4b || op == 0x18;
             const bool loop_op = op == 0x0a || op == 0x1e || op == 0x47 || op == 0x0b
                 || op == 0x30 || op == 0x1b;
-            if (!truthiness && !loop_op)
+            // An empty truthiness test is kept by luau-compile too (`if _T.flag then end` compiles to
+            // GETIMPORT; JUMPIFNOT -> next), so dropping it changed the bytecode (BossVorSweepBeam p1).
+            // RENOVICE_NO_EMPTY_TRUTHY_IF keeps dropping it.
+            static const bool empty_truthy_if = !std::getenv("RENOVICE_NO_EMPTY_TRUTHY_IF");
+            if ((!truthiness || empty_truthy_if) && !loop_op)
                 // One line: the unused-boolean canonicalizer rewrites a two-line empty `if` into
                 // `local unused = cmp`, a boolean diamond the stock jump does not have.
                 // `if X then end` compiles to "jump past the empty arm unless X": X is the negation
@@ -18808,6 +18812,27 @@ inexact_selector_fallback:
                 std::fprintf(stderr,
                              "CFG_FOR_BRANCH pidx=%d start=%d taken=%d fallthrough=%d follow=%d stop=%d terminal=%d\n",
                              pidx, start, taken, fallthrough, follow, stop, terminal);
+            // A terminal `return` block "post-dominates" a test when the other arm never reaches the
+            // function exit (it loops inside an endless outer loop: `while true do for ... do if a then
+            // if b then return end ... end end end`). It is not a join: the other arm runs on to this
+            // loop's latch. Spell it as the guard it is and continue with the other arm; taking it as
+            // the follow printed `if not b then <arm> end; return` and the loop returned on its first
+            // iteration (GenericSpawnSentinel p3). RENOVICE_NO_CFG_TERMINAL_FOLLOW_GUARD opts out.
+            if ((follow == taken || follow == fallthrough) && terminal >= 0 && follow != terminal
+                && follow != stop && !std::getenv("RENOVICE_NO_CFG_TERMINAL_FOLLOW_GUARD")) {
+                const st::Node& fn = g->n[follow];
+                const int other = follow == taken ? fallthrough : taken;
+                if ((fn.is_return || (fn.succ_true < 0 && fn.succ_false < 0))
+                    && fn.preds.size() == 1 && fn.preds.front() == start && !emitted.count(follow)
+                    && can_reach(other, terminal, terminal, domain)) {
+                    out += ind(indent) + "if " + cond_of(start, follow == fallthrough) + " then\n";
+                    emit_block(follow, indent + 1);
+                    emitted.insert(follow);
+                    out += ind(indent) + "end\n";
+                    return other == stop || other == terminal
+                        || emit_cfg(other, stop, terminal, domain, indent);
+                }
+            }
             if (follow == taken || follow == fallthrough) {
                 const int arm = follow == taken ? fallthrough : taken;
                 out += ind(indent) + "if " + cond_of(start, arm == fallthrough) + " then\n";

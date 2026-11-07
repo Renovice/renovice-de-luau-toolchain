@@ -161,7 +161,9 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_DEGENERATE_FOR",
             "RENOVICE_NO_GENERIC_LATCH_HEADED",
             "RENOVICE_NO_WHILE_FORGLOOP_IDENTITY",
-            "RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER")
+            "RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER",
+            "RENOVICE_NO_EMPTY_TRUTHY_IF",
+            "RENOVICE_NO_CFG_TERMINAL_FOLLOW_GUARD")
 DECOMPILER_FIXTURES = {
     # (2026-11-07) a FASTCALL hint first in a short-circuit test's setup refused the condition fold
     "fastcall_condition_chain": "RENOVICE_NO_SC_FOLD_FASTCALL_HINT",
@@ -177,6 +179,8 @@ DECOMPILER_FIXTURES = {
     "for_break_arm_loop_tail": "RENOVICE_NO_GENERIC_LATCH_HEADED",
     # (2026-11-07) While region headed at its own FORGLOOP: body start is the back-edge target
     "for_before_endless_loop": "RENOVICE_NO_WHILE_FORGLOOP_IDENTITY",
+    # (2026-11-07) a return block post-dominating through an endless loop is a guard, not the join
+    "loop_return_guard_endless": "RENOVICE_NO_CFG_TERMINAL_FOLLOW_GUARD",
     "terminal_self_loop": "RENOVICE_NO_TERMINAL_SELF_LOOP",
     # Space-separated switches are all set for the legacy control. Innermost-first selection (#68,
     # default again since #82) also takes the clean header first, so the control switches both off.
@@ -343,7 +347,7 @@ LEGACY_MAY_NOT_DECOMPILE = {"degenerate_for_break"}
 # CFG-only defects (behavior-neutral): default CFG-ID PASS and behavior same; the legacy control must
 # fail CFG-ID with the same behavior. (fixture, opt-out switches)
 CFG_ONLY_FIXTURES = (("terminal_else_order", "RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER"),)
-U44_DECOMPILE_FIXTURES = {"terminal_else_order", "fastcall_condition_chain", "merged_chain_break", "compound_if_head_for", "nested_for_latch_while", "degenerate_for_break", "for_break_arm_loop_tail", "for_before_endless_loop"}
+U44_DECOMPILE_FIXTURES = {"terminal_else_order", "fastcall_condition_chain", "merged_chain_break", "compound_if_head_for", "nested_for_latch_while", "degenerate_for_break", "for_break_arm_loop_tail", "for_before_endless_loop", "loop_return_guard_endless"}
 
 
 def round_trip(bytecode, temp, tag, env=None):
@@ -617,9 +621,15 @@ def main():
             source, rebuilt = round_trip(original, temp, "truthy.default")
             checks["TRUTHY_DEFAULT_BEHAVIOR_SAME"] = trace(source, temp) == expected
             checks["TRUTHY_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
+            # Since 2026-11-07 the decompiler keeps the empty truthiness test (`if x then end`), so the
+            # strict gate needs the old dropping decompile to show what the no-op tolerance covers.
+            drop_env = base_env()
+            drop_env["RENOVICE_NO_EMPTY_TRUTHY_IF"] = "1"
+            _, dropped = round_trip(original, temp, "truthy.dropped", drop_env)
+            checks["TRUTHY_DROPPED_DEFAULT_GATE_PASSES"] = cfg_verdict(original, dropped) == "PASS"
             legacy_gate = base_env()
             legacy_gate["RENOVICE_CFGID_LEGACY_TRUTHY_NOOP"] = "1"
-            checks["TRUTHY_LEGACY_GATE_FAILS"] = cfg_verdict(original, rebuilt, legacy_gate) == "FAIL"
+            checks["TRUTHY_LEGACY_GATE_FAILS"] = cfg_verdict(original, dropped, legacy_gate) == "FAIL"
             if text.count(TRUTHY_ANCHOR) != 1:
                 raise RuntimeError("truthy mutation anchor not unique")
             for label, new in TRUTHY_MUTATIONS.items():
