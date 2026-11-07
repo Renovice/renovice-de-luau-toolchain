@@ -6459,3 +6459,26 @@ higher upvalue for the first time is rendered as one assignment (per-value singl
 evaluation order checked against instruction order, single-result last-argument calls parenthesized).
 All-module first pass vs rt_full10: 94 fixed / 0 broken; CFG-ID 5,083 / 5,481. Fixtures pass.
 Rejected on the way: snapshotting all by-value captures of multiply-written registers (58/65).
+
+## 2026-11-07 — FASTCALL hint refused the short-circuit fold (#96); SETLIST nested-constant class
+
+Hypothesis 1: the `LABEL LOAD -> LOAD` failures include a structuring bug, not only operand order.
+Evidence: NpcSwitchTeleportAbility p5 decompiled `while not IsNull(self) and not IsNull(cam) and t < 0.5 do`
+inside `for` as `while true do` with two tests dropped, one inverted, the after-loop block inside the loop.
+A 15-line repro reproduces it only when the tests use a fast-called builtin; the fold trace shows the test
+setup `FASTCALL1+MOVE+GETIMPORT+CALL` refused (`defs.empty()` on the hint).
+Result: TRUE. Fixed in 93f8636 + 5c7cebc (hint transparent for a single-builtin-call operand). Tier 1:
+45 fixed / 0 broken vs all-1107 (CFG-ID 5,142 first pass before). Broad variant (hint anywhere) fixed the
+same 45 but broke AimGravityFX p1 (call chain `IsNull(string.find(tostring(...)))`): rejected.
+Fixture `fastcall_condition_chain` runs through decompile-mod-u44 (the plain path is strict and never folds
+a call condition); its legacy control changes program output.
+
+Hypothesis 2: the `LABEL SETLIST -> NEWTABLE/SETTABLEN` class (15 modules) is a constructor-parse gap.
+Evidence: CtorParser refuses with F_STORE at a `SETFIELD item.k <- LOADN` into a DUPTABLE item whose template
+slot is nil. DE's compiler leaves folded named constants (`Type = SOME_CONST`) out of templates; our
+luau-compile folds every constant into the template (`color=40`, `color=C`, `(40)`, `40::any`, `-(-40)`,
+`0x28`, `40.0` all fold; a reassigned local hoists the load before NEWTABLE).
+Result: TRUE for the cause, UNRESOLVED for a fix: no source spelling compiles to stock's shape with our
+compiler, so the nested constructor cannot be printed as one expression. The output is the same program
+(only construction order differs). Next: identify DE's Luau version / template rule, or accept as a
+compiler-version gap.
