@@ -241,6 +241,8 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
     stamp("u44_source_header");
     source = header + source;
     std::string chosen_env;   // environment reproducing the selected fold render (inverse stage)
+    // the selection stages run only in the top-level process, never in their child renders
+    const bool top_level = !std::getenv("RENOVICE_SC_EXPR_FOLD_CHILD") && !std::getenv("RENOVICE_INVERSE_CHILD");
     if (!std::getenv("RENOVICE_NO_SC_EXPR_FOLD") && !std::getenv("RENOVICE_SC_EXPR_FOLD_CHILD")
         && !std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")) {
         _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");      // children never select again
@@ -346,13 +348,14 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
     // prototypes an identity gate still reports with the compiler-inverse walker, under the same
     // fold environment, and keep that render only when the compiler confirms it is better on control
     // flow and not worse on any other identity count. Production output stays for every other proto.
-    if (std::getenv("RENOVICE_INVERSE_SELECT") && !std::getenv("RENOVICE_INVERSE_CHILD")
-        && !std::getenv("RENOVICE_INVERSE_EMIT")) {
+    if (std::getenv("RENOVICE_INVERSE_SELECT") && top_level && !std::getenv("RENOVICE_INVERSE_EMIT")) {
         char tmp_dir[MAX_PATH]; GetTempPathA(MAX_PATH, tmp_dir);
         char stem[MAX_PATH]; GetTempFileNameA(tmp_dir, "inv", 0, stem);
         const std::string cur_src = std::string(stem) + ".cur.luau", inv_src = std::string(stem) + ".inv.luau";
         const std::string q = "\"";
-        const ScFoldScore cur = write_file(cur_src, source)
+        // skip very large modules outright (their renders alone approach the gate timeout)
+        const bool small_enough = source.size() < 400000;
+        const ScFoldScore cur = small_enough && write_file(cur_src, source)
             ? sc_fold_score(argv[2], cur_src, std::string(stem) + ".cur.lua_B") : ScFoldScore();
         if (cur.built && !cur.perfect() && !cur.bad.empty()) {
             std::string protos;
@@ -366,22 +369,41 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
             // two candidates: only the reported prototypes, then every prototype (a walker render
             // of a passing prototype can also fix its neighbours' numbering); best compiler score wins
             ScFoldScore best = cur;
-            for (int pass = 0; pass < 2; ++pass) {
+            const auto stage_start = std::chrono::steady_clock::now();
+            // candidates: (fold environment, prototypes). The production fold choice first, then
+            // the other fold levels: the walker sees a different graph under each.
+            std::string wide_env = "RENOVICE_SC_EXPR_FOLD_LEVELS=";
+            for (long proto = 0; proto < cur.protos; ++proto)
+                wide_env += (proto ? "," : "") + std::to_string(proto) + ":2";
+            std::vector<std::pair<std::string, bool>> cands = {
+                {chosen_env, true}, {chosen_env, false}, {wide_env, false},
+                {"RENOVICE_SC_EXPR_FOLD_STRICT=1", false}, {"RENOVICE_NO_SC_EXPR_FOLD=1", false}};
+            std::set<std::pair<std::string, bool>> seen;
+            for (int pass = 0; pass < (int)cands.size(); ++pass) {
+                const std::string env = cands[(size_t)pass].first;
+                if (!seen.insert(cands[(size_t)pass]).second) continue;
+                // time budget: the gates run each module under a fixed timeout; a large module's
+                // extra renders must not turn a correct production decompile into a timeout
+                if (std::chrono::duration<double>(std::chrono::steady_clock::now() - stage_start).count() > 45.0)
+                    break;
                 _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");
                 _putenv("RENOVICE_INVERSE_CHILD=1");
                 _putenv("RENOVICE_INVERSE_EMIT=1");
-                if (pass == 0) _putenv(("RENOVICE_INVERSE_PROTOS=" + protos).c_str());
-                if (!chosen_env.empty()) _putenv(chosen_env.c_str());
+                if (cands[(size_t)pass].second) _putenv(("RENOVICE_INVERSE_PROTOS=" + protos).c_str());
+                if (!env.empty()) _putenv(env.c_str());
                 sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + inv_src + q);
-                if (!chosen_env.empty()) _putenv((chosen_env.substr(0, chosen_env.find('=') + 1)).c_str());
+                if (!env.empty()) _putenv((env.substr(0, env.find('=') + 1)).c_str());
                 _putenv("RENOVICE_INVERSE_PROTOS=");
                 _putenv("RENOVICE_INVERSE_EMIT=");
                 _putenv("RENOVICE_INVERSE_CHILD=");
                 const std::string inv = read_file(inv_src);
                 if (inv.empty() || inv == source) continue;
                 const ScFoldScore s = sc_fold_score(argv[2], inv_src, std::string(stem) + ".inv.lua_B");
-                const bool better = s.built && s.hash >= best.hash && s.str >= best.str && s.key >= best.key
-                    && s.df >= best.df && s.cfg > best.cfg;
+                // no prototype may newly fail any gate (count totals can hide a trade)
+                bool no_new_bad = true;
+                for (int proto : s.bad) if (!cur.bad.count(proto)) no_new_bad = false;
+                const bool better = s.built && no_new_bad && s.hash >= best.hash && s.str >= best.str
+                    && s.key >= best.key && s.df >= best.df && s.cfg > best.cfg;
                 if (better) { source = inv; best = s; }
                 if (std::getenv("RENOVICE_INVERSE_TRACE"))
                     std::fprintf(stderr, "INVERSE_SELECT pass %d cfg %ld -> %ld %s\n", pass, cur.cfg, s.cfg,
