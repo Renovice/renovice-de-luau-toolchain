@@ -142,8 +142,16 @@ struct Analyzer {
     // RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER restores the guard reading.
     bool terminal_jump_arm_is_else(int n, int t) {
         if (std::getenv("RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER")) return false;
-        if (regions[t].kind != RK::Basic) return false;
-        const int tb = regions[t].block;
+        // The arm's ENTRY block: its own block, or (for a reduced region, e.g. a long `else` part:
+        // ResourceConversion p199) the block with its lowest first instruction. A region arm needs
+        // RENOVICE_TERMINAL_JUMP_ARM_REGIONS unset to be considered (opt-out).
+        int tb = -1;
+        if (regions[t].kind == RK::Basic) tb = regions[t].block;
+        else if (!std::getenv("RENOVICE_NO_TERMINAL_JUMP_ARM_REGIONS")) {
+            std::vector<int> tbs; region_blocks(t, tbs);
+            const int tf = region_first(t);
+            for (int b : tbs) if (b >= 0 && b < (int)block_edges.size() && block_edges[b].first == tf) tb = b;
+        }
         if (tb < 0 || tb >= (int)block_edges.size()) return false;
         std::vector<int> nb; region_blocks(n, nb);
         int decision = -1, count = 0;
