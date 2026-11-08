@@ -754,7 +754,17 @@ struct Analyzer {
                     // outside left a loop whose break arm is a second exit target unreduced
                     // (reduce_loop_body_dag admits one exit target) and the emitter dropped the
                     // `if IsNull(t) or 1 < Time() - t then` test (DragonGroundBoss p34 PASS -> FAIL).
-                    if (all_in && header_of_current_loop && proper_header_exit_guard
+                    // DEFAULT for a FOR LATCH header (2026-11-08): `for ... do for ... do if c then
+                    // while w do ... end break end end end; f()` — the inner break (threaded through
+                    // the while's exit) lands on the outer FORGLOOP, whose exit then joined this
+                    // Proper with the inner prep; the outer loop vanished (NewWarPart3Erra p29).
+                    // OPT-IN (RENOVICE_FOR_LATCH_PROPER_EXIT_GUARD=1): fixes the 15-line repro and 2
+                    // modules but costs AvatarDiorama CONST-ID; NewWarPart3Erra still fails elsewhere.
+                    const bool for_latch_header = regions[n].kind == RK::Basic
+                        && n >= 0 && regions[n].block >= 0 && regions[n].block < (int)block_edges.size()
+                        && (block_edges[regions[n].block].term == 0x1e || block_edges[regions[n].block].term == 0x0a)
+                        && std::getenv("RENOVICE_FOR_LATCH_PROPER_EXIT_GUARD") != nullptr;
+                    if (all_in && header_of_current_loop && (proper_header_exit_guard || for_latch_header)
                         && succ[n].count(c) && !reaches(c, n)) all_in = false;
                     if (all_in) { S.insert(c); grew = true; }
                 }

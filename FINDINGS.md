@@ -6547,3 +6547,16 @@ first pass + closed PASS, but RJCorpusCapitalShipEncounter p28 then printed the 
 the loop body (CONST-ID lost; it failed CFG-ID before too). Net 1/1, kept OPT-IN
 (RENOVICE_LATCH_EXIT_ARM_GUARD=1). Next: emitter side — when a NaturalLoop's head region is
 IfThen(for latch, exit), open the `for` at the NaturalLoop and emit the IfThen's arm after the loop.
+
+## 2026-11-08 — Nested for + break arm with a while: outer loop lost (open, pre-existing)
+
+Repro (15 lines, cert/fixtures/open_2026_11_08/nested_for_break_while.luau):
+`for _, e in ipairs(l) do for _, t in ipairs(e) do if t == k then while Busy() do Sleep(1) end break end end end; Done()`.
+The while's exit is threaded straight to the OUTER FORGLOOP (the `break` JUMP is dead code). The
+structurer collapses a Proper headed at the outer latch with the inner prep and the code after the
+loops before either loop reduces; the output is a dispatcher that calls Done() before any loop runs.
+Fails with the Nov 2 binary too. Shape of NewWarPart3Erra p29 (closed CONST-ID loss).
+Measured fixes (switch screen): RENOVICE_PROPER_HEADER_EXIT_GUARD (global: tier 1 2 fixed / 9
+broken) and RENOVICE_NO_LOOP_BODY_PROPER. Narrowed to for-latch headers
+(RENOVICE_FOR_LATCH_PROPER_EXIT_GUARD=1, opt-in): repro PASS, tier 1 2 fixed / 1 broken
+(AvatarDiorama CONST-ID); NewWarPart3Erra still fails elsewhere. Not shipped.
