@@ -6517,3 +6517,20 @@ out away from the decision, one CFG predecessor, and not a loop exit. Was REJECT
 one-terminal IfThenElse, N-way). Hypothesis TRUE for HarrowHeatInBubbles ApplyUpgrade (closure order
 p2/p3 restored, CFG-ID PASS), but the rule cost Discs and WaveDefend (net -1). Fixture kept as
 cert/fixtures/open_2026_11_07/terminal_else_order.luau. Next: find what distinguishes those two.
+
+## 2026-11-08 — Tier 3 (compiler-closed) for the Nov 2-8 batch
+
+Run work/quickgate/closed-1108 vs rt_full10 (the last closed baseline, 2026-11-02):
+decompile 5,481; CONST-ID first 5,471 / closed 5,380; CFG-ID first 5,279 / closed 5,081;
+compiler closed 5,395. Fixed 286, broken 9 — all 9 in closed metrics only (first pass identical).
+Attribution by switch (each module re-run closed with one fix disabled):
+- DragonBreath (closed CONST-ID) <- #103 terminal-else layout (RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER)
+- NewWarPart1VesoBetrayerMission, NewWarPart3Erra (closed CONST-ID) <- #101 generic latch
+  (RENOVICE_NO_GENERIC_LATCH_HEADED or _BODY)
+- MinigameBossII, MinigameBossIII (closed CONST-ID) <- #98 or #96 (either switch recovers both)
+- WeaponSlotButton, DuviriPatrol, EventVendorEntity (closed CFG-ID), VoidAngel (closed CONST-ID):
+  no switch of #96-#106 recovers them; they come from earlier commits of the batch (Nov 2-6).
+Meaning: on these modules the first decompile is CFG-identical, but decompiling the RECOMPILED
+output again does not reproduce it (the output is not yet a fixed point). Next: per module, diff the
+first and second decompile to find which rule fires differently on recompiled bytecode.
+Gotcha: quickgate --no-targets drops --targets modules too; use --class NOMATCH to keep only extras.
