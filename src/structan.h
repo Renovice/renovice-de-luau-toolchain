@@ -111,6 +111,19 @@ struct Analyzer {
         entry = 0;
     }
 
+    // `t` is the normal EXIT of the for latch `n` (FORGLOOP/FORNLOOP block): absorbing it as an IfThen
+    // arm makes the latch's exhaustion path an `if` body, and the emitter then opened the `for` from
+    // that IfThen with the exit as its body (DragonBreath p11: `for ... do return end`, the real body
+    // printed after it). OPT-IN (RENOVICE_LATCH_EXIT_ARM_GUARD=1): it fixes DragonBreath p11 first
+    // pass and closure, but RJCorpusCapitalShipEncounter p28 then prints the exit `return` inside the
+    // loop body (CONST-ID lost; it failed CFG-ID before too). The emitter-side fix is open: a loop
+    // whose latch+exit reduced as IfThen must open its `for` at the loop region, not at that IfThen.
+    bool latch_exit_arm(int n, int t) const {
+        if (!std::getenv("RENOVICE_LATCH_EXIT_ARM_GUARD")) return false;
+        if (regions[n].kind != RK::Basic || regions[t].kind != RK::Basic) return false;
+        const BlockEdges& e = block_edges[regions[n].block];
+        return (e.term == 0x1e || e.term == 0x0a) && e.f == regions[t].block && nsucc(t) == 0;
+    }
     int region_first(int id) const {
         if (id < 0 || id >= (int)regions.size()) return -1;
         const Region& r = regions[id];
@@ -543,6 +556,7 @@ struct Analyzer {
                     if (touts.count(t)) absorbable = false; // self-loop: handled elsewhere
                     if (!absorbable) continue;
                     if (touts.empty() && nsucc(n) == 2 && terminal_jump_arm_is_else(n, t)) continue;
+                    if (latch_exit_arm(n, t)) continue;
                     std::set<int> outs;
                     for (int x : succ[n]) if (x != t) outs.insert(x);
                     for (int x : touts) if (x != t) outs.insert(x);
@@ -640,6 +654,7 @@ struct Analyzer {
                     bool joins     = one_succ(t, ts) && ts == f;
                     bool terminates = (nsucc(t) == 0);
                     if (terminates && !joins && terminal_jump_arm_is_else(n, t)) continue;
+                    if (latch_exit_arm(n, t)) continue;
                     if (npred(t)==1 && (joins || terminates) && t!=n && f!=n) {
                         Region r; r.kind = RK::IfThen; r.head = n; r.parts = {n, t};
                         int id = add(r); collapse({n,t}, id, {f}); return true;

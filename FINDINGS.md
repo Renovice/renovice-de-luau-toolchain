@@ -6534,3 +6534,16 @@ Meaning: on these modules the first decompile is CFG-identical, but decompiling 
 output again does not reproduce it (the output is not yet a fixed point). Next: per module, diff the
 first and second decompile to find which rule fires differently on recompiled bytecode.
 Gotcha: quickgate --no-targets drops --targets modules too; use --class NOMATCH to keep only extras.
+
+## 2026-11-08 — DragonBreath closed loss: root cause is a first-pass loop-exit bug (open)
+
+Hypothesis: DragonBreath's closed CONST-ID loss is a closure-only instability.
+Result: FALSE. DragonBreath already FAILS first-pass CFG-ID: p11 `for _, v in ipairs(list) do ... end`
+reduced its FORGLOOP latch + exit `return` as IfThen(latch, return); the emitter opened the `for`
+from that IfThen with the exit as its body (`for ... do return end`, the real body printed after,
+reading the loop variable as an unset local). The closed pass then lost the body's constants.
+Tried: structan guard "never absorb a for latch's terminating exit as an IfThen arm" -> DragonBreath
+first pass + closed PASS, but RJCorpusCapitalShipEncounter p28 then printed the exit `return` inside
+the loop body (CONST-ID lost; it failed CFG-ID before too). Net 1/1, kept OPT-IN
+(RENOVICE_LATCH_EXIT_ARM_GUARD=1). Next: emitter side — when a NaturalLoop's head region is
+IfThen(for latch, exit), open the `for` at the NaturalLoop and emit the IfThen's arm after the loop.
