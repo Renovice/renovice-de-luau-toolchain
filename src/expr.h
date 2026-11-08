@@ -555,6 +555,74 @@ inline bool merge_setlist_batch(std::vector<Stmt>& stmts, const ir::IProto& ip, 
     };
     for (size_t q = (size_t)ctor + 1; q < stmts.size() && ok; ++q) {
         const Stmt& s = stmts[q];
+        // RECORD FILL (2026-11-09, opt-in RENOVICE_SETLIST_RECORD_FILL; the measured case was an inlining artifact): `t = { name = nil, ... }; t.name = v` is DUPTABLE + SETFIELD, the
+        // exact code of `{ name = v, ... }`. Fold the store into a pending item table's nil slot.
+        if (s.k == SK::Assign && s.lhs && s.rhs && s.lhs->k == EK::Field && s.lhs->a
+            && s.lhs->a->k == EK::Reg && std::getenv("RENOVICE_SETLIST_RECORD_FILL")) {
+            auto it = avail.find(s.lhs->a->reg);
+            if (it == avail.end() || it->second.consumed || !it->second.expr
+                || it->second.expr->k != EK::Table) return refuse(12);
+            // A DUPTABLE template is carried as rendered text `{ k = v, ... }`: explode it into
+            // record items (identifier keys, constant values; strings may hold `,` or `=`).
+            if (it->second.expr->list.empty() && it->second.expr->text.size() > 4) {
+                const std::string& tx = it->second.expr->text;
+                if (tx.compare(0, 2, "{ ") != 0 || tx.compare(tx.size() - 2, 2, " }") != 0) return refuse(15);
+                auto exploded = std::make_shared<Expr>(*it->second.expr);
+                exploded->text.clear();
+                const std::string body = tx.substr(2, tx.size() - 4);
+                size_t at = 0;
+                while (at < body.size()) {
+                    size_t end = at; char quote = 0;
+                    for (; end < body.size(); ++end) {
+                        const char ch = body[end];
+                        if (quote) { if (ch == '\\') ++end; else if (ch == quote) quote = 0; continue; }
+                        if (ch == '"' || ch == '\'') quote = ch;
+                        else if (ch == ',' && end + 1 < body.size() && body[end + 1] == ' ') break;
+                    }
+                    const std::string item = body.substr(at, end - at);
+                    const size_t eq = item.find(" = ");
+                    if (eq == std::string::npos || eq == 0) return refuse(15);
+                    const std::string key = item.substr(0, eq);
+                    for (char ch : key) if (!(std::isalnum((unsigned char)ch) || ch == '_')) return refuse(15);
+                    auto k = mk(EK::Const); k->text = key;
+                    exploded->keykind.push_back(1); exploded->keys.push_back(k);
+                    exploded->list.push_back(mkconst(item.substr(eq + 3)));
+                    at = end + 2;
+                }
+                if (effect_id.count(it->second.expr.get())) effect_id[exploded.get()] = effect_id[it->second.expr.get()];
+                it->second.expr = exploded;
+            }
+            const EP& t = it->second.expr;
+            int slot = -1;
+            for (size_t i = 0; i < t->list.size() && i < t->keykind.size(); ++i)
+                if (t->keykind[i] == 1 && t->keys[i] && t->keys[i]->text == s.lhs->text
+                    && t->list[i] && t->list[i]->k == EK::Const && t->list[i]->text == "nil") slot = (int)i;
+            if (slot < 0 && trace)
+                std::fprintf(stderr, "  RECORD_FILL table text=%s items=%zu keykinds=%zu\n",
+                             t->text.c_str(), t->list.size(), t->keykind.size());
+            if (slot < 0 && trace)
+                for (size_t i = 0; i < t->list.size(); ++i)
+                    std::fprintf(stderr, "  RECORD_FILL want=%s item=%zu kind=%d key=%s val=%d:%s\n",
+                                 s.lhs->text.c_str(), i, i < t->keykind.size() ? t->keykind[i] : -1,
+                                 i < t->keys.size() && t->keys[i] ? t->keys[i]->text.c_str() : "-",
+                                 t->list[i] ? (int)t->list[i]->k : -1,
+                                 t->list[i] ? t->list[i]->text.c_str() : "-");
+            if (slot < 0) return refuse(13);
+            EP value = subst(s.rhs);
+            if (!ok) return refuse(14);
+            auto copy = std::make_shared<Expr>(*t);
+            copy->list[(size_t)slot] = value;
+            if (effect_id.count(t.get())) {
+                // creating a table has no observable effect: in source order it completes after the
+                // field values it now holds (the post-order walk below visits them first)
+                const int id = effect_id[t.get()];
+                effect_id[copy.get()] = id;
+                auto pos = std::find(effectful.begin(), effectful.end(), id);
+                if (pos != effectful.end()) { effectful.erase(pos); effectful.push_back(id); }
+            }
+            it->second.expr = copy;
+            continue;
+        }
         if (s.k != SK::Assign || !s.lhs || s.lhs->k != EK::Reg || !s.rhs) return refuse(4);
         if (s.call_sources.size() > 1 || s.call_targets.size() > 1) return refuse(5);
         const int r = s.lhs->reg;
