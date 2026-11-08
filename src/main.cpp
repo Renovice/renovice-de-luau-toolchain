@@ -2835,6 +2835,7 @@ static int cmd_de_builtins(int argc, char** argv) {
 #include "cfg_identity_cmd.h"
 #include "dataflow_identity_cmd.h"
 #include "loop_exit_scan_cmd.h"
+#include "../inverse/inverse_scan.h"
 
 // The fixed-point rules below were A/B tested, then certified together at 360/360 in raw mode,
 // with five witnesses stable through ten cycles and 19 executable behavior fixtures. Keep that
@@ -2977,6 +2978,7 @@ int main(int argc, char** argv) {
     }
     if (mode == "cfg-identity" && argc >= 4) return cmd_cfg_identity(argc, argv);
     if (mode == "loop-exit-scan" && argc >= 3) return cmd_loop_exit_scan(argc, argv);
+    if (mode == "inverse-scan" && argc >= 3) return cmd_inverse_scan(argc, argv);
     if (mode == "dataflow-identity" && argc >= 4) return cmd_dataflow_identity(argc, argv);
     if (mode == "u44-rawhash-selftest") return cmd_u44_rawhash_selftest();
     if ((mode == "profile-to-u44" || mode == "profile-from-u44") && argc == 5) {
