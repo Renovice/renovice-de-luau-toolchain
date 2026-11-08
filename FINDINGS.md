@@ -6573,3 +6573,9 @@ existing multi-latch path, widened from its 3-latch topology) -> the loop forms 
 loop-body DAG then rejects it (reason 3: exactly one latch required). Next: multi-latch support in
 reduce_loop_body_dag (cut every back edge to a FORGLOOP header; each is a `continue`), then widen the
 union. Experiment reverted (default unchanged).
+Update (same day): structurer half done behind RENOVICE_FORG_MULTI_LATCH=1 — the multi-latch union is
+widened to FORGLOOP headers and reduce_loop_body_dag accepts several latches for a FORGLOOP-headed
+body (no single-latch / for-latch-sink / header-exit rejects). On the repro the body now reduces
+(SA_LOOP_BODY_DAG root ok), but the emitter prints that root scrambled (reversed, tests dropped, no
+`continue`): the NaturalLoop/for emission for a FORGLOOP-headed body whose DAG holds the header and
+continue sinks is the open half. Default output unchanged (tier 1: 0 fixed / 0 broken).

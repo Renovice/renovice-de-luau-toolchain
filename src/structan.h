@@ -309,6 +309,8 @@ struct Analyzer {
     // RENOVICE_NO_FOR_LOOP_BODY_DAG restore each rejection for A/B.
     const bool nested_loop_body_dag = !std::getenv("RENOVICE_NO_NESTED_LOOP_BODY_DAG");
     const bool for_loop_body_dag = !std::getenv("RENOVICE_NO_FOR_LOOP_BODY_DAG");
+    // Multi-latch generic for bodies (2026-11-08, experiment: RENOVICE_FORG_MULTI_LATCH=1).
+    const bool forg_multi_latch = std::getenv("RENOVICE_FORG_MULTI_LATCH") != nullptr;
     // PROPER EXIT IN A CUT BODY (proper campaign 2026-10-09, DeathSquadFlak p0). A loop body that
     // holds a short-circuit test with a statement operand (`if v:A(2) or v:B():C() then X else Y
     // end`) reduces to a Proper region, and the Proper grows over the body's earlier break tests
@@ -393,14 +395,22 @@ struct Analyzer {
         if (succ[n].count(n)) return dag_reject(n, 2);
         std::vector<int> latches;
         for (int x : body) if (x != n && succ[x].count(n)) latches.push_back(x);
-        if (latches.size() != 1) return dag_reject(n, 3);
+        // FORGLOOP-HEADED BODY WITH CONTINUES (2026-11-08): a generic for whose header region is its
+        // FORGLOOP latch has one latch per `continue` (every guard's skip edge targets the header).
+        // With the back edges cut each becomes a sink, reduced like a terminal arm; the emitter
+        // prints those edges as `continue`. TauBattleMission p97 / forg_continue_chain.
+        const bool forg_head_multi = forg_multi_latch && regions[n].kind == RK::Basic
+            && regions[n].block >= 0 && regions[n].block < (int)block_edges.size()
+            && block_edges[regions[n].block].term == 0x1e && latches.size() >= 2;
+        if (latches.size() != 1 && !forg_head_multi) return dag_reject(n, 3);
+        if (forg_head_multi) latches.resize(1);
         // FOR-LATCH SINK (conditions campaign 2026-10-09): a numeric/generic `for` closes its
         // cycle with FORNLOOP/FORGLOOP, whose fall-through is the loop's normal exit. Once the
         // back edge and the exit are cut that latch is the DAG's sink exactly like a `while`
         // latch, and the for header text is printed from the latch by the emitter. Admitted when
         // the latch region's only loop-leaving edge is that FOR latch exit to the single out.
         int for_latch_block = -1;
-        if (nsucc(latches[0]) != 1) {
+        if (nsucc(latches[0]) != 1 && !forg_head_multi) {
             if (!for_loop_body_dag || nsucc(latches[0]) != 2 || main_out < 0
                 || !succ[latches[0]].count(main_out)) return dag_reject(n, 3);
             std::set<int> latch_blocks, head_blocks, out_blocks;
@@ -445,6 +455,7 @@ struct Analyzer {
                 for (int part : region.parts) loop_blocks_of(part, inside || loop, out);
             };
         for (int x : body) {
+            if (forg_head_multi && x == n) continue;   // the FORGLOOP header's own normal exit
             std::set<int> xb; region_block_set(x, xb);
             const bool part_has_loop = region_has_loop(x);
             std::set<int> nested_loop_blocks;
@@ -830,6 +841,11 @@ struct Analyzer {
                 }
                 bool known_multi_latch = regions[n].kind == RK::Basic
                     && multi_latch_for_headers.count(regions[n].block);
+                const bool forg_header = regions[n].kind == RK::Basic && regions[n].block >= 0
+                    && regions[n].block < (int)block_edges.size()
+                    && block_edges[regions[n].block].term == 0x1e;
+                if (!known_multi_latch && forg_multi_latch && forg_header && latches.size() >= 2)
+                    known_multi_latch = true;
                 if (!known_multi_latch || latches.empty()) continue;
                 std::set<int> body; body.insert(n);
                 std::vector<int> stk(latches.begin(), latches.end());
@@ -849,6 +865,10 @@ struct Analyzer {
                 if (!entry_ok) continue;
                 std::vector<int> parts(body.begin(), body.end());
                 Region r; r.kind = RK::NaturalLoop; r.head = n; r.parts = parts;
+                if (forg_multi_latch && forg_header) {
+                    const int body_root = reduce_loop_body_dag(n, body, outs);
+                    if (body_root >= 0) r.parts = {body_root};
+                }
                 int id = add(r); collapse(parts, id, outs); return true;
             }
             // No multi-latch header was ready. Preserve the established single-latch reduction below.
