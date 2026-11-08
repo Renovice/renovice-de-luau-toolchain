@@ -6579,3 +6579,25 @@ body (no single-latch / for-latch-sink / header-exit rejects). On the repro the 
 (SA_LOOP_BODY_DAG root ok), but the emitter prints that root scrambled (reversed, tests dropped, no
 `continue`): the NaturalLoop/for emission for a FORGLOOP-headed body whose DAG holds the header and
 continue sinks is the open half. Default output unchanged (tier 1: 0 fixed / 0 broken).
+
+## 2026-11-09 - Inverse renderer (milestone 2) and remaining-failure census
+
+Hypothesis: a grammar-driven renderer that follows the compiler's own layout fixes a large share of the
+CFG-ID failures the shape-matching structurer cannot.
+Finding: Partially true. On the 196 modules failing with production (all-1108d), the opt-in per-prototype
+selection (`RENOVICE_INVERSE_SELECT=1`, inverse/inverse_emit.h) passes 70 (CFG-ID + CONST-ID, first pass).
+Full corpus (inv9 not yet re-run; inv8 run): CFG-ID 5,350, CONST-ID 5,475, 2 dataflow breaks since fixed
+(fold-selection children inherited the stage) and 3 timeouts since fixed (size limit + 45 s budget).
+Evidence: work/inv_q9, work/inv_all2. Walker rules added: implicit else after return/break, threaded follow
+targets, and/or chains decoded from jump patterns with setup inlined, same-register test threading,
+LOADB-skip comparison values, empty ifs.
+Remaining classes found (not fixed):
+- vector constants: DE folds `Vector3(x,y,z)` to a type-7 constant; upstream luau-compile only folds with
+  --vector-ctor at -O2 (RENOVICE_VECTOR_CTOR opt-in passes the flag; needs a post-compile rewrite) - 2 modules.
+- integer record values via LOADN+SETFIELD under a nil DUPTABLE slot (HorseCustomization): upstream
+  templates every constant; corpus shows DE templates integers too, so this is most likely an -O2 inlining
+  artifact. SETLIST record fill kept opt-in (RENOVICE_SETLIST_RECORD_FILL).
+- "IF TRUTHY -> ORK": the call result lands in a temp + MOVE because the fallback (state dispatcher) declares
+  every local at function top; stock keeps the local at the stack top. Local-declaration placement class.
+Next Step: walker coverage for the dispatcher-fallback protos (they cause the ORK/MOVE class), then the
+STRAY_JUMP inlining class; one full run at the end.
