@@ -79,7 +79,12 @@ static std::string compile_luau(const std::string& src_path, std::string& err) {
                           + std::to_string((long long)GetCurrentProcessId()) + ".tmp";
     const std::string errtmp = "_derecomp_luauerr_"
                              + std::to_string((long long)GetCurrentProcessId()) + ".tmp";
-    std::string inner = std::string("\"") + luau_compile_path() + "\" --binary \""
+    // DE's compiler folds constant vector constructors into vector constants (LOADK of a type-7
+    // constant); the decompiler spells those constants `Vector3(x, y, z)`.
+    std::string vector_opt;
+    if (const char* ctor = std::getenv("RENOVICE_VECTOR_CTOR"))
+        vector_opt = std::string(" --vector-ctor=") + ctor;
+    std::string inner = std::string("\"") + luau_compile_path() + "\" --binary" + vector_opt + " \""
                       + src_path + "\" > \"" + tmp + "\" 2> \"" + errtmp + "\"";
     // cmd.exe strips one leading+trailing quote off the whole /c line; wrap in an extra pair so the inner stays balanced.
     std::string cmd = "\"" + inner + "\"";
