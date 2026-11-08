@@ -240,6 +240,7 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
     }
     stamp("u44_source_header");
     source = header + source;
+    std::string chosen_env;   // environment reproducing the selected fold render (inverse stage)
     if (!std::getenv("RENOVICE_NO_SC_EXPR_FOLD") && !std::getenv("RENOVICE_SC_EXPR_FOLD_CHILD")
         && !std::getenv("RENOVICE_NO_SC_EXPR_FOLD_SELECT")) {
         _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");      // children never select again
@@ -279,7 +280,7 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
             else if (narrow == source)
                 n = f;
             if (n.perfect()) {
-                source = narrow; chosen = "narrow";
+                source = narrow; chosen = "narrow"; chosen_env = "RENOVICE_SC_EXPR_FOLD_STRICT=1";
             } else {
                 const std::string base = render(false, true);
                 if (!base.empty()) write_file(base_src, base);
@@ -292,8 +293,8 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
                 const bool wide_ok = qualifies(f), narrow_ok = qualifies(n);
                 long best_cfg = b.cfg;
                 if (wide_ok && (!narrow_ok || f.cfg >= n.cfg)) { chosen = "fold"; best_cfg = f.cfg; }
-                else if (narrow_ok) { source = narrow; chosen = "narrow"; best_cfg = n.cfg; }
-                else if (!base.empty()) { source = base; chosen = "base"; }
+                else if (narrow_ok) { source = narrow; chosen = "narrow"; chosen_env = "RENOVICE_SC_EXPR_FOLD_STRICT=1"; best_cfg = n.cfg; }
+                else if (!base.empty()) { source = base; chosen = "base"; chosen_env = "RENOVICE_NO_SC_EXPR_FOLD=1"; }
                 // Per-prototype mix: each prototype takes the first fold level (none, narrow, wide)
                 // under which no identity gate reports it. One fold level can fix one function and
                 // disturb another in the same module; the module-wide choice cannot express that.
@@ -318,7 +319,7 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
                         if (!mix.empty()) {
                             const ScFoldScore m = sc_fold_score(argv[2], mix_src,
                                                                 std::string(stem) + ".mix.lua_B");
-                            if (qualifies(m) && m.cfg > best_cfg) { source = mix; chosen = "mix"; best_cfg = m.cfg; }
+                            if (qualifies(m) && m.cfg > best_cfg) { source = mix; chosen = "mix"; chosen_env = "RENOVICE_SC_EXPR_FOLD_LEVELS=" + spec; best_cfg = m.cfg; }
                             if (std::getenv("RENOVICE_SC_EXPR_FOLD_TRACE"))
                                 std::fprintf(stderr, "SC_EXPR_FOLD_SELECT mix cfg %ld\n", m.cfg);
                         }
@@ -338,6 +339,52 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
             std::fprintf(stderr, "SC_EXPR_FOLD_SELECT perfect -> fold\n");
         }
         for (const char* suffix : {".base.luau", ".fold.luau", ".base.lua_B", ".fold.lua_B", ""}) {
+            std::error_code ec; fs::remove(long_path(std::string(stem) + suffix), ec);
+        }
+    }
+    // INVERSE STAGE (inverse/inverse_emit.h, opt-in RENOVICE_INVERSE_SELECT): re-render only the
+    // prototypes an identity gate still reports with the compiler-inverse walker, under the same
+    // fold environment, and keep that render only when the compiler confirms it is better on control
+    // flow and not worse on any other identity count. Production output stays for every other proto.
+    if (std::getenv("RENOVICE_INVERSE_SELECT") && !std::getenv("RENOVICE_INVERSE_CHILD")
+        && !std::getenv("RENOVICE_INVERSE_EMIT")) {
+        char tmp_dir[MAX_PATH]; GetTempPathA(MAX_PATH, tmp_dir);
+        char stem[MAX_PATH]; GetTempFileNameA(tmp_dir, "inv", 0, stem);
+        const std::string cur_src = std::string(stem) + ".cur.luau", inv_src = std::string(stem) + ".inv.luau";
+        const std::string q = "\"";
+        const ScFoldScore cur = write_file(cur_src, source)
+            ? sc_fold_score(argv[2], cur_src, std::string(stem) + ".cur.lua_B") : ScFoldScore();
+        if (cur.built && !cur.perfect() && !cur.bad.empty()) {
+            std::string protos;
+            for (int proto : cur.bad) protos += (protos.empty() ? "" : ",") + std::to_string(proto);
+            if (chosen_env.empty() && g_sc_expr_fold_wide && cur.protos > 0) {
+                // the in-process wide fold has no child switch: spell it as per-prototype levels
+                chosen_env = "RENOVICE_SC_EXPR_FOLD_LEVELS=";
+                for (long proto = 0; proto < cur.protos; ++proto)
+                    chosen_env += (proto ? "," : "") + std::to_string(proto) + ":2";
+            }
+            _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");
+            _putenv("RENOVICE_INVERSE_CHILD=1");
+            _putenv("RENOVICE_INVERSE_EMIT=1");
+            _putenv(("RENOVICE_INVERSE_PROTOS=" + protos).c_str());
+            if (!chosen_env.empty()) _putenv(chosen_env.c_str());
+            sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + inv_src + q);
+            if (!chosen_env.empty()) _putenv((chosen_env.substr(0, chosen_env.find('=') + 1)).c_str());
+            _putenv("RENOVICE_INVERSE_PROTOS=");
+            _putenv("RENOVICE_INVERSE_EMIT=");
+            _putenv("RENOVICE_INVERSE_CHILD=");
+            const std::string inv = read_file(inv_src);
+            if (!inv.empty() && inv != source) {
+                const ScFoldScore s = sc_fold_score(argv[2], inv_src, std::string(stem) + ".inv.lua_B");
+                const bool better = s.built && s.hash >= cur.hash && s.str >= cur.str && s.key >= cur.key
+                    && s.df >= cur.df && s.cfg > cur.cfg;
+                if (better) source = inv;
+                if (std::getenv("RENOVICE_INVERSE_TRACE"))
+                    std::fprintf(stderr, "INVERSE_SELECT cfg %ld -> %ld %s\n", cur.cfg, s.cfg,
+                                 better ? "taken" : "kept");
+            }
+        }
+        for (const char* suffix : {".cur.luau", ".cur.lua_B", ".inv.luau", ".inv.lua_B", ""}) {
             std::error_code ec; fs::remove(long_path(std::string(stem) + suffix), ec);
         }
     }

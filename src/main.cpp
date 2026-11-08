@@ -2836,6 +2836,7 @@ static int cmd_de_builtins(int argc, char** argv) {
 #include "dataflow_identity_cmd.h"
 #include "loop_exit_scan_cmd.h"
 #include "../inverse/inverse_scan.h"
+#include "../inverse/inverse_emit.h"
 
 // The fixed-point rules below were A/B tested, then certified together at 360/360 in raw mode,
 // with five witnesses stable through ten cycles and 19 executable behavior fixtures. Keep that

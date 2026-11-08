@@ -40,6 +40,8 @@ inline std::map<int, std::string> interior_dead_markers;
 // anonymous path (which carries no index). Needed because block ids are PER-PROTO and collide.
 
 struct Emitter {
+    // inverse/inverse_emit.h: grammar-driven renderer (opt-in RENOVICE_INVERSE_EMIT).
+    static inline bool (*inverse_hook)(Emitter&, int) = nullptr;
     const ir::IProto* ip = nullptr;
     const st::Graph*  g  = nullptr;
     const sa::Analyzer* A = nullptr;
@@ -19628,7 +19630,11 @@ inexact_selector_fallback:
             bool private_return_gap = false;
             bool ownership_collision_gap = false;
             bool cfg_rendered = false;
-            if (try_cfg && std::getenv("RENOVICE_CFG_PREFER_STRUCTURED_PLAIN")) {
+            if (!planning && inverse_hook && std::getenv("RENOVICE_INVERSE_EMIT")) {
+                cfg_rendered = inverse_hook(*this, 1);
+                if (!cfg_rendered) *this = saved_emitter;
+            }
+            if (!cfg_rendered && try_cfg && std::getenv("RENOVICE_CFG_PREFER_STRUCTURED_PLAIN")) {
                 // Prefer ordinary source guards only when the complete prototype can be
                 // rendered with exact reachable-block ownership. A partial structured walk
                 // must not force the legacy fallback or contaminate the proven DAG path.
