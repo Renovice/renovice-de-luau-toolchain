@@ -6560,3 +6560,16 @@ Measured fixes (switch screen): RENOVICE_PROPER_HEADER_EXIT_GUARD (global: tier 
 broken) and RENOVICE_NO_LOOP_BODY_PROPER. Narrowed to for-latch headers
 (RENOVICE_FOR_LATCH_PROPER_EXIT_GUARD=1, opt-in): repro PASS, tier 1 2 fixed / 1 broken
 (AvatarDiorama CONST-ID); NewWarPart3Erra still fails elsewhere. Not shipped.
+
+## 2026-11-08 — Generic for with several `continue` guards inside an endless loop (open)
+
+Repro cert/fixtures/open_2026_11_08/forg_continue_chain.luau (shape of TauBattleMission p97, depth-3
+CFG diff `FORGPREP -> NAMECALL`): `while true do for _, p in t do if not IsNull(p) then ... nested
+IsNull guards ... end end end`. Every guard's skip edge targets the FORGLOOP latch, which is the
+loop's dominance header; the NaturalLoop rule reduces one latch at a time into a CHAIN of fake
+nested loops (one per guard) and the output prints the whole body, reversed, before an empty `for`.
+No existing switch fixes it. Tried: union all latches of a FORGLOOP header before one collapse (the
+existing multi-latch path, widened from its 3-latch topology) -> the loop forms whole, but the
+loop-body DAG then rejects it (reason 3: exactly one latch required). Next: multi-latch support in
+reduce_loop_body_dag (cut every back edge to a FORGLOOP header; each is a `continue`), then widen the
+union. Experiment reverted (default unchanged).
