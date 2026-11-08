@@ -363,25 +363,30 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
                 for (long proto = 0; proto < cur.protos; ++proto)
                     chosen_env += (proto ? "," : "") + std::to_string(proto) + ":2";
             }
-            _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");
-            _putenv("RENOVICE_INVERSE_CHILD=1");
-            _putenv("RENOVICE_INVERSE_EMIT=1");
-            _putenv(("RENOVICE_INVERSE_PROTOS=" + protos).c_str());
-            if (!chosen_env.empty()) _putenv(chosen_env.c_str());
-            sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + inv_src + q);
-            if (!chosen_env.empty()) _putenv((chosen_env.substr(0, chosen_env.find('=') + 1)).c_str());
-            _putenv("RENOVICE_INVERSE_PROTOS=");
-            _putenv("RENOVICE_INVERSE_EMIT=");
-            _putenv("RENOVICE_INVERSE_CHILD=");
-            const std::string inv = read_file(inv_src);
-            if (!inv.empty() && inv != source) {
+            // two candidates: only the reported prototypes, then every prototype (a walker render
+            // of a passing prototype can also fix its neighbours' numbering); best compiler score wins
+            ScFoldScore best = cur;
+            for (int pass = 0; pass < 2; ++pass) {
+                _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");
+                _putenv("RENOVICE_INVERSE_CHILD=1");
+                _putenv("RENOVICE_INVERSE_EMIT=1");
+                if (pass == 0) _putenv(("RENOVICE_INVERSE_PROTOS=" + protos).c_str());
+                if (!chosen_env.empty()) _putenv(chosen_env.c_str());
+                sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + inv_src + q);
+                if (!chosen_env.empty()) _putenv((chosen_env.substr(0, chosen_env.find('=') + 1)).c_str());
+                _putenv("RENOVICE_INVERSE_PROTOS=");
+                _putenv("RENOVICE_INVERSE_EMIT=");
+                _putenv("RENOVICE_INVERSE_CHILD=");
+                const std::string inv = read_file(inv_src);
+                if (inv.empty() || inv == source) continue;
                 const ScFoldScore s = sc_fold_score(argv[2], inv_src, std::string(stem) + ".inv.lua_B");
-                const bool better = s.built && s.hash >= cur.hash && s.str >= cur.str && s.key >= cur.key
-                    && s.df >= cur.df && s.cfg > cur.cfg;
-                if (better) source = inv;
+                const bool better = s.built && s.hash >= best.hash && s.str >= best.str && s.key >= best.key
+                    && s.df >= best.df && s.cfg > best.cfg;
+                if (better) { source = inv; best = s; }
                 if (std::getenv("RENOVICE_INVERSE_TRACE"))
-                    std::fprintf(stderr, "INVERSE_SELECT cfg %ld -> %ld %s\n", cur.cfg, s.cfg,
+                    std::fprintf(stderr, "INVERSE_SELECT pass %d cfg %ld -> %ld %s\n", pass, cur.cfg, s.cfg,
                                  better ? "taken" : "kept");
+                if (best.perfect()) break;
             }
         }
         for (const char* suffix : {".cur.luau", ".cur.lua_B", ".inv.luau", ".inv.lua_B", ""}) {

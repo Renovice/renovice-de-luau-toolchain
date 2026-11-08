@@ -7,6 +7,8 @@
 // explain fails the whole prototype closed; emit_function then falls back to the production paths.
 #pragma once
 #include <functional>
+#include <map>
+#include <tuple>
 #include <set>
 #include <string>
 #include <vector>
@@ -188,11 +190,28 @@ private:
         const std::set<int> silent_mark = silent;
         const int r = if_rest(S, T, E.cond_of(b, !then_is_taken), end, ctx, depth, fol);
         if (r >= 0) return r;
+        // SAME-REGISTER THREADING: a JUMPIF/JUMPIFNOT r landing on a later test of r has a known
+        // outcome there, so the compiler sends it straight to that test's destination
+        // (`r = a or b; if r then` -> the first test skips the second). Retry with the skip
+        // ending at that later test.
+        if ((term.name == "JUMPIF" || term.name == "JUMPIFNOT") && !then_is_taken) {
+            const bool truthy = term.name == "JUMPIF";
+            for (int e = S + 1; e < end && e < T; ++e) {
+                const ir::IInsn& x = I(e);
+                if ((x.name != "JUMPIF" && x.name != "JUMPIFNOT") || x.A != term.A || node_at[(size_t)e] < 0) continue;
+                const int dest = (x.name == "JUMPIF") == truthy ? x.target : e + 1;
+                if (dest != T) continue;
+                E.out.resize(mark);
+                silent = silent_mark;
+                const int r3 = if_rest(S, e, E.cond_of(b, !then_is_taken), end, ctx, depth, fol);
+                if (r3 >= 0) return r3;
+            }
+        }
         // CONDITION CHAIN: `a or b`, `a and (b or c)` ... whose later tests carry setup code
         // (calls, loads) and therefore were not merged into one graph node.
         const std::string why0 = why; const int at0 = at;
         std::vector<int> nodes{b};
-        for (int k = 2; k <= 10; ++k) {
+        for (int k = 2; k <= 48; ++k) {
             const int np = g.n[(size_t)nodes.back()].last + 1;
             if (np >= end) break;
             const int nb = node_at[(size_t)np];
@@ -252,8 +271,13 @@ private:
                 injected.push_back({nodes[(size_t)i], c.last});
             }
         }
+        std::map<std::tuple<int, int, int, int>, std::pair<bool, std::string>> memo;
         std::function<bool(int, int, int, int, std::string&)> dec =
             [&](int i, int j, int Lt, int Lf, std::string& outc) -> bool {
+                const auto key = std::make_tuple(i, j, Lt, Lf);
+                const auto hit = memo.find(key);
+                if (hit != memo.end()) { outc = hit->second.second; return hit->second.first; }
+                memo[key] = {false, std::string()};
                 if (j - i == 1) {
                     const int t = norm(tgt[(size_t)i]);
                     const int F = i + 1 < k ? start[(size_t)i + 1] : S;
@@ -264,10 +288,10 @@ private:
                 for (int m = i + 1; m < j; ++m) {
                     std::string a, c2;
                     if (dec(i, m, Lt, start[(size_t)m], a) && dec(m, j, Lt, Lf, c2)) {
-                        outc = "(" + a + " or " + c2 + ")"; return true;
+                        outc = "(" + a + " or " + c2 + ")"; memo[key] = {true, outc}; return true;
                     }
                     if (dec(i, m, start[(size_t)m], Lf, a) && dec(m, j, Lt, Lf, c2)) {
-                        outc = "(" + a + " and " + c2 + ")"; return true;
+                        outc = "(" + a + " and " + c2 + ")"; memo[key] = {true, outc}; return true;
                     }
                 }
                 return false;
