@@ -114,12 +114,11 @@ struct Analyzer {
     // `t` is the normal EXIT of the for latch `n` (FORGLOOP/FORNLOOP block): absorbing it as an IfThen
     // arm makes the latch's exhaustion path an `if` body, and the emitter then opened the `for` from
     // that IfThen with the exit as its body (DragonBreath p11: `for ... do return end`, the real body
-    // printed after it). OPT-IN (RENOVICE_LATCH_EXIT_ARM_GUARD=1): it fixes DragonBreath p11 first
-    // pass and closure, but RJCorpusCapitalShipEncounter p28 then prints the exit `return` inside the
-    // loop body (CONST-ID lost; it failed CFG-ID before too). The emitter-side fix is open: a loop
-    // whose latch+exit reduced as IfThen must open its `for` at the loop region, not at that IfThen.
+    // printed after it). Applied to every IfThen/IfThenElse/N-way rule: covering only the IfThen rules
+    // let the one-terminal IfThenElse absorb the exit instead (RJCorpusCapitalShipEncounter p28: the
+    // exit `return` printed inside the loop body). RENOVICE_NO_LATCH_EXIT_ARM_GUARD restores it.
     bool latch_exit_arm(int n, int t) const {
-        if (!std::getenv("RENOVICE_LATCH_EXIT_ARM_GUARD")) return false;
+        if (std::getenv("RENOVICE_NO_LATCH_EXIT_ARM_GUARD")) return false;
         if (regions[n].kind != RK::Basic || regions[t].kind != RK::Basic) return false;
         const BlockEdges& e = block_edges[regions[n].block];
         return (e.term == 0x1e || e.term == 0x0a) && e.f == regions[t].block && nsucc(t) == 0;
@@ -572,6 +571,7 @@ struct Analyzer {
             if (nsucc(n) >= 2 && !is_loop_header(n)) {
                 std::vector<int> arms(succ[n].begin(), succ[n].end());
                 int j = -1; bool ok = true;
+                for (int t : arms) if (latch_exit_arm(n, t)) ok = false;
                 for (int t : arms) {
                     if (t == n || npred(t) != 1) { ok = false; break; }
                     size_t k = nsucc(t);
@@ -640,7 +640,7 @@ struct Analyzer {
                 // IF-THEN-ELSE: both arms private to n and converging on one block
                 int as_, bs_;
                 if (npred(a)==1 && npred(b)==1 && one_succ(a,as_) && one_succ(b,bs_) && as_==bs_
-                    && a!=n && b!=n && as_!=a && as_!=b) {
+                    && a!=n && b!=n && as_!=a && as_!=b && !latch_exit_arm(n, a) && !latch_exit_arm(n, b)) {
                     Region r; r.kind = RK::IfThenElse; r.head = n; r.parts = {n, a, b};
                     int id = add(r); collapse({n,a,b}, id, {as_}); return true;
                 }
@@ -665,7 +665,8 @@ struct Analyzer {
                     int as2 = -1, bs2 = -1;
                     bool at = (nsucc(a) == 0), bt = (nsucc(b) == 0);
                     bool aj = one_succ(a, as2), bj = one_succ(b, bs2);
-                    if (npred(a)==1 && npred(b)==1 && a!=n && b!=n) {
+                    if (npred(a)==1 && npred(b)==1 && a!=n && b!=n
+                        && !latch_exit_arm(n, a) && !latch_exit_arm(n, b)) {
                         if (at && bt) {                                   // both arms return
                             Region r; r.kind = RK::IfThenElse; r.head = n; r.parts = {n,a,b};
                             int id = add(r); collapse({n,a,b}, id, {}); return true;

@@ -164,7 +164,8 @@ OPT_OUTS = ("RENOVICE_NO_TERMINAL_SELF_LOOP", "RENOVICE_NO_ENTRY_HEADED_LOOP",
             "RENOVICE_NO_TERMINAL_JUMP_ARM_ORDER",
             "RENOVICE_NO_EMPTY_TRUTHY_IF",
             "RENOVICE_NO_CFG_TERMINAL_FOLLOW_GUARD",
-            "RENOVICE_NO_CUT_BODY_ENTRY")
+            "RENOVICE_NO_CUT_BODY_ENTRY",
+            "RENOVICE_NO_LATCH_EXIT_ARM_GUARD")
 DECOMPILER_FIXTURES = {
     # (2026-11-07) a FASTCALL hint first in a short-circuit test's setup refused the condition fold
     "fastcall_condition_chain": "RENOVICE_NO_SC_FOLD_FASTCALL_HINT",
