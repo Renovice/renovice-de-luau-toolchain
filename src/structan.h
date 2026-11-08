@@ -443,8 +443,11 @@ struct Analyzer {
         // OPT-IN (2026-10-09 integration): on the full 44.1.1 corpus this rule turned Platform
         // CFG-ID PASS -> FAIL, cost KahlOrders p35 and the compiler closure of 6 modules (BardMusic,
         // SearchTheDead, EnergyLeech, HealthLeechPatches, AbilityAuraLib, TeshinShadowRemnants);
-        // RENOVICE_CUT_BODY_ENTRY=1 enables it until the Proper-headed inner loop case is resolved.
-        if (std::getenv("RENOVICE_CUT_BODY_ENTRY")
+        // RENOVICE_CUT_BODY_ENTRY=1 enabled it until the Proper-headed inner loop case was resolved.
+        // DEFAULT since 2026-11-08 (client 44.1.3): full first-pass corpus 8 fixed / 0 broken
+        // (HBTrickExplosions p7: an inner for headed at its latch swallowed the outer while's test).
+        // RENOVICE_NO_CUT_BODY_ENTRY restores the opt-in behaviour.
+        if (!std::getenv("RENOVICE_NO_CUT_BODY_ENTRY")
             && (loop_body_dag_depth > 0 || !std::getenv("RENOVICE_CUT_BODY_ENTRY_NESTED_ONLY")))
             entry = n;
         ++loop_body_dag_depth;
