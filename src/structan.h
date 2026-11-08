@@ -360,6 +360,26 @@ struct Analyzer {
                 if (arm) { ++arms; main_out = x; }
             }
             if (arms != 1) return dag_reject(n, 11);
+        } else if (outs.size() > 2 && !std::getenv("RENOVICE_NO_DAG_MULTI_BREAK_ARMS")) {
+            // MULTI BREAK ARMS (2026-11-08, multi-exit campaign). Three or more exit targets: every
+            // target but one must be a private break arm (all predecessors in the body) that
+            // continues only to that one normal exit X or ends the function; each is printed inside
+            // the loop at its exit test like the two-target case. 136 of 200 failing modules hold a
+            // multi-exit loop (loop-exit-scan). RENOVICE_NO_DAG_MULTI_BREAK_ARMS restores the refusal.
+            int chosen = -1;
+            for (int x : outs) {
+                bool all_arms = true;
+                for (int b : outs) {
+                    if (b == x) continue;
+                    bool arm = !body.count(b) && b != entry && !succ[b].count(b);
+                    for (int q : pred[b]) if (!body.count(q)) { arm = false; break; }
+                    for (int t : succ[b]) if (t != x) { arm = false; break; }
+                    if (!arm) { all_arms = false; break; }
+                }
+                if (all_arms) { if (chosen >= 0) { chosen = -2; break; } chosen = x; }
+            }
+            if (chosen < 0) return dag_reject(n, 11);
+            main_out = chosen;
         } else if (outs.size() > 1) return dag_reject(n, 11);
         if (body.size() < 3) return dag_reject(n, 12);
         if (succ[n].count(n)) return dag_reject(n, 2);
