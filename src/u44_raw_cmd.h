@@ -377,24 +377,38 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
                 wide_env += (proto ? "," : "") + std::to_string(proto) + ":2";
             std::vector<std::pair<std::string, bool>> cands = {
                 {chosen_env, true}, {chosen_env, false}, {wide_env, false},
-                {"RENOVICE_SC_EXPR_FOLD_STRICT=1", false}, {"RENOVICE_NO_SC_EXPR_FOLD=1", false},
-                // walker output with its locals rebuilt from Luau's allocator (STACK LOCALS)
-                {"RENOVICE_INVERSE_STACK_LOCALS=1", false}};
+                {"RENOVICE_SC_EXPR_FOLD_STRICT=1", false}, {"RENOVICE_NO_SC_EXPR_FOLD=1", false}};
+            // walker output with its locals rebuilt from Luau's allocator (STACK LOCALS), under each
+            // fold level, with the text look-ahead and with bytecode temporary verdicts
+            // (a candidate's environment is a ';'-separated list)
+            for (const char* extra : {"RENOVICE_INVERSE_STACK_LOCALS=1",
+                                      "RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_STACK_BYTECODE_TEMPS=1"})
+                for (const std::string& fold : {chosen_env, wide_env, std::string("RENOVICE_SC_EXPR_FOLD_STRICT=1"),
+                                                std::string("RENOVICE_NO_SC_EXPR_FOLD=1")})
+                    cands.push_back({fold.empty() ? std::string(extra) : fold + ";" + extra, false});
+            // most productive first (measured 2026-11-09): stack-locals renders, then plain fold levels
+            std::stable_partition(cands.begin(), cands.end(), [](const std::pair<std::string, bool>& c) {
+                return c.first.find("STACK_LOCALS") != std::string::npos; });
             std::set<std::pair<std::string, bool>> seen;
             for (int pass = 0; pass < (int)cands.size(); ++pass) {
                 const std::string env = cands[(size_t)pass].first;
                 if (!seen.insert(cands[(size_t)pass]).second) continue;
                 // time budget: the gates run each module under a fixed timeout; a large module's
                 // extra renders must not turn a correct production decompile into a timeout
-                if (std::chrono::duration<double>(std::chrono::steady_clock::now() - stage_start).count() > 45.0)
+                if (std::chrono::duration<double>(std::chrono::steady_clock::now() - stage_start).count() > 90.0)
                     break;
                 _putenv("RENOVICE_SC_EXPR_FOLD_CHILD=1");
                 _putenv("RENOVICE_INVERSE_CHILD=1");
                 _putenv("RENOVICE_INVERSE_EMIT=1");
                 if (cands[(size_t)pass].second) _putenv(("RENOVICE_INVERSE_PROTOS=" + protos).c_str());
-                if (!env.empty()) _putenv(env.c_str());
+                std::vector<std::string> parts;
+                for (size_t at = 0; at <= env.size() && !env.empty();) {
+                    size_t e = env.find(';', at); if (e == std::string::npos) e = env.size();
+                    parts.push_back(env.substr(at, e - at)); at = e + 1;
+                }
+                for (const std::string& part : parts) _putenv(part.c_str());
                 sc_fold_run("decompile-mod-u44 " + q + argv[2] + q + " " + q + inv_src + q);
-                if (!env.empty()) _putenv((env.substr(0, env.find('=') + 1)).c_str());
+                for (const std::string& part : parts) _putenv((part.substr(0, part.find('=') + 1)).c_str());
                 _putenv("RENOVICE_INVERSE_PROTOS=");
                 _putenv("RENOVICE_INVERSE_EMIT=");
                 _putenv("RENOVICE_INVERSE_CHILD=");
