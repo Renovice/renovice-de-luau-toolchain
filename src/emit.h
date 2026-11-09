@@ -6422,7 +6422,49 @@ inexact_selector_fallback:
     // the whole body closed and the flat declaration list stays. A `for` loop takes its frame at
     // the current depth: the statements materialising that frame into the depth's registers are
     // folded into the header, which is the only source that puts the frame there.
-    static bool stack_locals(std::string& body, int nparams) {
+    // BYTECODE TEMPORARY MAP (2026-11-09). For every write to a register, in instruction order:
+    // is the written value an expression temporary? Yes when exactly one later instruction reads
+    // it before the register is written again, that read is in the same basic block and is not a
+    // plain MOVE (a local is copied into an argument slot; a temporary is consumed in place), and
+    // nothing in between writes a lower register (no local is declared under a live temporary).
+    std::map<int, std::vector<bool>> bytecode_temp_map() const {
+        std::map<int, std::vector<bool>> out;
+        const int n = (int)ip->code.size();
+        std::vector<int> block_of((size_t)n, -1);
+        for (size_t b = 0; b < g->n.size(); ++b) {
+            const st::Node& nd = g->n[b];
+            if (!nd.reach) continue;
+            for (int i = nd.first; i <= nd.last && i >= 0 && i < n; ++i) block_of[(size_t)i] = (int)b;
+        }
+        std::vector<std::set<int>> uses((size_t)n), defs((size_t)n);
+        for (int i = 0; i < n; ++i)
+            if (!lv::register_effects(*ip, ip->code[(size_t)i], uses[(size_t)i], defs[(size_t)i])) return {};
+        for (int i = 0; i < n; ++i) {
+            if (block_of[(size_t)i] < 0) continue;
+            for (int r : defs[(size_t)i]) {
+                int reads = 0, read_at = -1; bool lower_def = false;
+                for (int j = i + 1; j < n; ++j) {
+                    if (block_of[(size_t)j] < 0) continue;
+                    if (uses[(size_t)j].count(r)) {
+                        ++reads; if (read_at < 0) read_at = j;
+                        // a loop prep takes its frame over: that read consumes the value
+                        const std::string& op = ip->code[(size_t)j].name;
+                        if (op == "FORNPREP" || op.rfind("FORGPREP", 0) == 0) break;
+                    }
+                    if (defs[(size_t)j].count(r)) break;
+                    if (read_at < 0) for (int w : defs[(size_t)j]) if (w < r) lower_def = true;
+                    if (reads > 1) break;
+                }
+                const bool temp = reads == 1 && read_at > i && block_of[(size_t)read_at] == block_of[(size_t)i]
+                    && ip->code[(size_t)read_at].name != "MOVE" && !lower_def;
+                out[r].push_back(temp);
+            }
+        }
+        return out;
+    }
+
+    static bool stack_locals(std::string& body, int nparams,
+                             const std::map<int, std::vector<bool>>* bmap = nullptr) {
         static const bool dbg = std::getenv("RENOVICE_STACKDBG") != nullptr;
         size_t cur_line = 0; int cur_d = 0;
         auto bail = [&](int why) {
@@ -6446,6 +6488,20 @@ inexact_selector_fallback:
                 i = j + 2;
             }
         };
+        // bytecode verdicts per textual definition: (line, register) -> temporary?
+        std::map<std::pair<size_t, int>, bool> verdict;
+        if (bmap) {
+            std::map<int, std::vector<size_t>> def_lines;
+            for (size_t li = 0; li < lines.size(); ++li) {
+                size_t rhs = 0;
+                for (int r : targets(trim(lines[li]), rhs)) def_lines[r].push_back(li);
+            }
+            for (const auto& kv : def_lines) {
+                auto it = bmap->find(kv.first);
+                if (it == bmap->end() || it->second.size() != kv.second.size()) continue;
+                for (size_t k = 0; k < kv.second.size(); ++k) verdict[{kv.second[k], kv.first}] = it->second[k];
+            }
+        }
         // pending expression temporaries (register, value text), in definition order
         std::vector<std::pair<int, std::string>> pending;
         auto atomic = [](const std::string& e) {
@@ -6612,6 +6668,11 @@ inexact_selector_fallback:
                 const int R = tg[0];
                 int reads = 0, level = 0;
                 bool nested_rewrite = false;
+                const auto known = verdict.find({li, R});
+                if (known != verdict.end() && known->second && std::getenv("RENOVICE_STACK_BYTECODE_TEMPS")) {
+                    reads = 1;                                // the bytecode proves a temporary
+                    goto decided;
+                }
                 for (size_t q = li + 1; q < lines.size(); ++q) {
                     const std::string u = trim(lines[q]);
                     const bool close = u == "end" || u.rfind("until ", 0) == 0;
@@ -6645,6 +6706,7 @@ inexact_selector_fallback:
                     if (close) { if (level == 0) break; --level; }
                     else if (ends(u, " then") || ends(u, " do") || u == "repeat") ++level;
                 }
+            decided:
                 if (reads == 1) { pending.push_back({R, value}); continue; }
                 // a register below a real local is itself a local: pending values filling exactly
                 // d..R-1 in order were locals (`local a, b, c = x, y, z` style declarations)
@@ -20090,9 +20152,10 @@ inexact_selector_fallback:
         bool stack_rebuilt = false;
         if (stack_mode) {
             std::string trial = body;
+            const std::map<int, std::vector<bool>> tmap = bytecode_temp_map();
             suppress_dead_generic_frame_copies(trial);
             canonicalize_lexical_for_variables(trial, pidx);
-            if (stack_locals(trial, ip->nparams)) { body.swap(trial); stack_rebuilt = true; }
+            if (stack_locals(trial, ip->nparams, &tmap)) { body.swap(trial); stack_rebuilt = true; }
         }
         // Luau inserts an implicit zero-result RETURN when source control can fall off the end of a
         // function. The next decompile necessarily prints that real instruction, causing a one-time
