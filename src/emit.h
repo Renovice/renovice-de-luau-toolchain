@@ -6413,6 +6413,130 @@ inexact_selector_fallback:
 
     struct RegToken { size_t first = 0, last = 0; int reg = -1; };
 
+    // STACK LOCALS (2026-11-09, opt-in RENOVICE_INVERSE_STACK_LOCALS, walker output only). Luau
+    // gives a new local the next free register at its declaration and frees every register a
+    // scope declared at its end; register numbers are already the generated names (vR = register R).
+    // Rebuild the declarations by replaying that allocator over the body: a write `vR = ...` with
+    // R equal to the current depth declares (`local vR = ...`); R below the depth is an ordinary
+    // assignment; anything else (a write above the depth, a read of an undeclared register) fails
+    // the whole body closed and the flat declaration list stays. A `for` loop takes its frame at
+    // the current depth: the statements materialising that frame into the depth's registers are
+    // folded into the header, which is the only source that puts the frame there.
+    static bool stack_locals(std::string& body, int nparams) {
+        static const bool dbg = std::getenv("RENOVICE_STACKDBG") != nullptr;
+        size_t cur_line = 0; int cur_d = 0;
+        auto bail = [&](int why) { if (dbg) std::fprintf(stderr, "STACK_BAIL why=%d line=%zu d=%d\n", why, cur_line, cur_d); return false; };
+        std::vector<std::string> lines;
+        { size_t at = 0; while (at < body.size()) { size_t e = body.find('\n', at); if (e == std::string::npos) e = body.size();
+              lines.push_back(body.substr(at, e - at)); at = e + 1; } }
+        auto trim = [](const std::string& s) { size_t b = s.find_first_not_of(' '); return b == std::string::npos ? std::string() : s.substr(b); };
+        auto indent = [](const std::string& s) { size_t b = s.find_first_not_of(' '); return b == std::string::npos ? s : s.substr(0, b); };
+        auto ends = [](const std::string& s, const char* t) { size_t n = std::strlen(t); return s.size() >= n && s.compare(s.size() - n, n, t) == 0; };
+        // leading `vA, vB, ... = ` targets of a statement (empty when none)
+        auto targets = [&](const std::string& t, size_t& rhs) {
+            std::vector<int> regs; size_t i = 0;
+            while (true) {
+                if (i >= t.size() || t[i] != 'v' || i + 1 >= t.size() || !std::isdigit((unsigned char)t[i + 1])) return std::vector<int>();
+                size_t j = i + 1; int r = 0; while (j < t.size() && std::isdigit((unsigned char)t[j])) r = r * 10 + (t[j++] - '0');
+                regs.push_back(r);
+                if (t.compare(j, 3, " = ") == 0) { rhs = j + 3; return regs; }
+                if (t.compare(j, 2, ", ") != 0) return std::vector<int>();
+                i = j + 2;
+            }
+        };
+        std::vector<int> depth_stack;
+        int d = nparams;
+        std::vector<std::string> out;
+        for (size_t li = 0; li < lines.size(); ++li) {
+            const std::string t = trim(lines[li]);
+            cur_line = li; cur_d = d;
+            if (dbg) std::fprintf(stderr, "STACK_LINE %zu d=%d %s\n", li, d, t.c_str());
+            const std::string in = indent(lines[li]);
+            if (t.empty()) { out.push_back(lines[li]); continue; }
+            const bool is_end = t == "end" || t.rfind("until ", 0) == 0;
+            const bool is_else = t == "else" || t.rfind("elseif ", 0) == 0;
+            if (is_end || is_else) {
+                if (depth_stack.empty()) return bail(2);
+                if (t.rfind("until ", 0) == 0) {               // until reads the repeat body's locals
+                    for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(3);
+                }
+                d = depth_stack.back(); depth_stack.pop_back();
+                if (is_else) {
+                    for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(4);
+                    depth_stack.push_back(d);
+                }
+                out.push_back(lines[li]); continue;
+            }
+            if (t.rfind("for ", 0) == 0 && ends(t, " do")) {
+                // frame registers d.. ; fold the frame-materialising statements just emitted
+                const bool generic = t.find(" in ") != std::string::npos;
+                const size_t hs = generic ? t.find(" in ") + 4 : t.find(" = ") + 3;
+                std::string srcs = t.substr(hs, t.size() - 3 - hs);
+                std::vector<RegToken> st = reg_tokens(srcs);
+                int nvars = 1;
+                if (generic) { const std::string vars = t.substr(4, t.find(" in ") - 4); nvars = 1 + (int)std::count(vars.begin(), vars.end(), ','); }
+                // generic: `vD, vD+1, vD+2 = <call>` then `for .. in vD, vD+1, vD+2 do`
+                // numeric: three single assignments to vD+2, vD, vD+1 then `for i = vD+2, vD, vD+1 do`
+                std::string header = t;
+                bool folded = false;
+                if (generic && srcs == "v" + std::to_string(d) + ", v" + std::to_string(d + 1) + ", v" + std::to_string(d + 2) && !out.empty()) {
+                    size_t rhs = 0; const std::string prev = trim(out.back());
+                    std::vector<int> tg = targets(prev, rhs);
+                    if (tg.size() == 3 && tg[0] == d && tg[1] == d + 1 && tg[2] == d + 2) {
+                        header = t.substr(0, hs) + prev.substr(rhs) + " do"; out.pop_back(); folded = true;
+                    }
+                } else if (!generic && st.size() == 3 && st[0].reg == d + 2 && st[1].reg == d && st[2].reg == d + 1 && out.size() >= 3) {
+                    std::string vals[3]; bool ok = true;
+                    for (int k = 0; k < 3 && ok; ++k) {
+                        size_t rhs = 0; const std::string prev = trim(out[out.size() - 3 + (size_t)k]);
+                        std::vector<int> tg = targets(prev, rhs);
+                        if (tg.size() != 1) { ok = false; break; }
+                        const int want[3] = {d + 2, d, d + 1};
+                        if (tg[0] != want[k]) { ok = false; break; }
+                        vals[k] = prev.substr(rhs);
+                        for (const RegToken& tk : reg_tokens(vals[k])) if (tk.reg >= d) ok = false;
+                    }
+                    if (ok) {
+                        out.resize(out.size() - 3);
+                        header = t.substr(0, hs) + vals[0] + ", " + vals[1] + ", " + vals[2] + " do"; folded = true;
+                    }
+                }
+                if (!folded) return bail(5);
+                for (const RegToken& tk : reg_tokens(header)) if (tk.reg >= d) return bail(6);
+                out.push_back(in + header);
+                depth_stack.push_back(d);
+                d += generic ? 3 + nvars : 3;
+                continue;
+            }
+            if (ends(t, " then") || t == "repeat" || ends(t, " do") ) {
+                for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(7);
+                depth_stack.push_back(d);
+                out.push_back(lines[li]); continue;
+            }
+            size_t rhs = 0;
+            std::vector<int> tg = targets(t, rhs);
+            if (!tg.empty()) {
+                for (const RegToken& tk : reg_tokens(t.substr(rhs))) if (tk.reg >= d) return bail(8);
+                if (tg[0] >= d) {
+                    for (size_t k = 0; k < tg.size(); ++k) if (tg[k] != d + (int)k) return bail(9);
+                    d += (int)tg.size();
+                    out.push_back(in + "local " + t);
+                } else {
+                    for (int r : tg) if (r >= d) return bail(10);
+                    out.push_back(lines[li]);
+                }
+                continue;
+            }
+            for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(11);
+            out.push_back(lines[li]);
+        }
+        if (!depth_stack.empty()) return bail(12);
+        std::string rebuilt;
+        for (const std::string& l : out) { rebuilt += l; rebuilt += '\n'; }
+        body = rebuilt;
+        return true;
+    }
+
     // SCOPED LOCALS (2026-11-09, opt-in RENOVICE_INVERSE_SCOPED_LOCALS, walker output only). Luau
     // allocates a local's register at its declaration and frees it at its scope's end; one flat
     // `local v1, ..., vN` list keeps every register alive for the whole function, so a call result
@@ -20134,7 +20258,11 @@ inexact_selector_fallback:
             }
         }
         std::set<int> scoped_regs;
-        if (inverse_rendered && std::getenv("RENOVICE_INVERSE_SCOPED_LOCALS"))
+        if (inverse_rendered && std::getenv("RENOVICE_INVERSE_STACK_LOCALS")
+            && stack_locals(body, ip->nparams)) {
+            scoped_regs = used;                         // every register is declared in place
+            if (std::getenv("RENOVICE_INVERSE_TRACE")) std::fprintf(stderr, "STACK_LOCALS pidx=%d ok\n", pidx);
+        } else if (inverse_rendered && std::getenv("RENOVICE_INVERSE_SCOPED_LOCALS"))
             scoped_regs = scope_block_locals(body);
         std::vector<int> decl;
         for (int i = ip->nparams; i <= maxreg; ++i)
