@@ -6511,10 +6511,10 @@ inexact_selector_fallback:
         std::vector<std::pair<int, std::string>> pending;
         auto atomic = [](const std::string& e) {
             // a lone string literal is atomic even when it holds spaces or parentheses
-            if (e.size() >= 2 && (e[0] == '"' || e[0] == ''') && e.back() == e[0]) {
+            if (e.size() >= 2 && (e[0] == '"' || e[0] == '\'') && e.back() == e[0]) {
                 bool inner_quote = false;
                 for (size_t k = 1; k + 1 < e.size(); ++k) {
-                    if (e[k] == '\') { ++k; continue; }
+                    if (e[k] == '\\') { ++k; continue; }
                     if (e[k] == e[0]) inner_quote = true;
                 }
                 if (!inner_quote) return true;
