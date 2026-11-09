@@ -84,6 +84,8 @@ static std::string compile_luau(const std::string& src_path, std::string& err) {
     std::string vector_opt;
     if (const char* ctor = std::getenv("RENOVICE_VECTOR_CTOR"))
         vector_opt = std::string(" --vector-ctor=") + ctor;
+    // research switch: compile at -O2 (inlining, constant folding of builtins)
+    if (std::getenv("RENOVICE_LUAU_O2")) vector_opt += " -O2";
     std::string inner = std::string("\"") + luau_compile_path() + "\" --binary" + vector_opt + " \""
                       + src_path + "\" > \"" + tmp + "\" 2> \"" + errtmp + "\"";
     // cmd.exe strips one leading+trailing quote off the whole /c line; wrap in an extra pair so the inner stays balanced.
