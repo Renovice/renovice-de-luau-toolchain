@@ -42,6 +42,7 @@ inline std::map<int, std::string> interior_dead_markers;
 struct Emitter {
     // inverse/inverse_emit.h: grammar-driven renderer (opt-in RENOVICE_INVERSE_EMIT).
     static inline bool (*inverse_hook)(Emitter&, int) = nullptr;
+    bool inverse_rendered = false;   // this body came from the inverse walker
     const ir::IProto* ip = nullptr;
     const st::Graph*  g  = nullptr;
     const sa::Analyzer* A = nullptr;
@@ -6411,6 +6412,76 @@ inexact_selector_fallback:
     }
 
     struct RegToken { size_t first = 0, last = 0; int reg = -1; };
+
+    // SCOPED LOCALS (2026-11-09, opt-in RENOVICE_INVERSE_SCOPED_LOCALS, walker output only). Luau
+    // allocates a local's register at its declaration and frees it at its scope's end; one flat
+    // `local v1, ..., vN` list keeps every register alive for the whole function, so a call result
+    // assigned to an early-declared local lands at the stack top and is MOVEd (stock wrote it in
+    // place). Declare a register instead at its first occurrence when that occurrence is a plain
+    // `vR = ...` directly inside the innermost block holding every occurrence. Returns the registers
+    // declared that way (they leave the flat list).
+    static std::set<int> scope_block_locals(std::string& body) {
+        std::set<int> scoped;
+        // per line: start offset, indentation, enclosing block path
+        std::vector<size_t> line_at; std::vector<std::vector<int>> path;
+        std::vector<int> stack; int next_block = 1;
+        size_t at = 0;
+        auto ends_with = [](const std::string& s, const char* t) {
+            const size_t n = std::strlen(t); return s.size() >= n && s.compare(s.size() - n, n, t) == 0;
+        };
+        while (at < body.size()) {
+            size_t e = body.find('\n', at); if (e == std::string::npos) e = body.size();
+            std::string ln = body.substr(at, e - at);
+            size_t b = ln.find_first_not_of(' ');
+            std::string t = b == std::string::npos ? std::string() : ln.substr(b);
+            while (!t.empty() && t.back() == '\r') t.pop_back();
+            const bool closes = t == "end" || t.rfind("until ", 0) == 0 || t == "else" || t.rfind("elseif ", 0) == 0;
+            const bool opens = ends_with(t, " then") || ends_with(t, " do") || t == "repeat" || t == "else"
+                || (ends_with(t, ")") && t.find("function(") != std::string::npos);
+            if (t.rfind("until ", 0) == 0) path.push_back(stack);          // until sees the repeat body
+            if (closes && !stack.empty()) stack.pop_back();
+            if (t.rfind("until ", 0) != 0) path.push_back(stack);
+            line_at.push_back(at);
+            if (opens || (t.rfind("elseif ", 0) == 0)) stack.push_back(next_block++);
+            at = e + 1;
+        }
+        if (!stack.empty()) return scoped;                                 // unbalanced: leave flat
+        auto line_of = [&](size_t off) {
+            return (int)(std::upper_bound(line_at.begin(), line_at.end(), off) - line_at.begin()) - 1;
+        };
+        std::map<int, std::vector<RegToken>> occ;
+        for (const RegToken& tk : reg_tokens(body)) occ[tk.reg].push_back(tk);
+        std::vector<std::pair<size_t, int>> inserts;   // (offset of first token, reg)
+        for (const auto& kv : occ) {
+            std::vector<int> common;
+            bool first = true;
+            for (const RegToken& tk : kv.second) {
+                const std::vector<int>& p = path[(size_t)line_of(tk.first)];
+                if (first) { common = p; first = false; continue; }
+                size_t k = 0; while (k < common.size() && k < p.size() && common[k] == p[k]) ++k;
+                common.resize(k);
+            }
+            if (common.empty()) continue;                                  // function scope: flat list
+            const RegToken& f = kv.second.front();
+            const int fl = line_of(f.first);
+            if (path[(size_t)fl] != common) continue;                      // first use is deeper
+            const size_t ls = line_at[(size_t)fl];
+            const size_t ind = body.find_first_not_of(' ', ls);
+            if (ind != f.first) continue;                                  // not at statement start
+            if (body.compare(f.last, 3, " = ") != 0) continue;             // not a single assignment
+            // the value must not read the register it defines
+            const size_t le = body.find('\n', f.last);
+            bool self_read = false;
+            for (size_t q = 1; q < kv.second.size(); ++q)
+                if (kv.second[q].first < le) self_read = true;
+            if (self_read) continue;
+            inserts.push_back({f.first, kv.first});
+            scoped.insert(kv.first);
+        }
+        std::sort(inserts.rbegin(), inserts.rend());
+        for (const auto& ins : inserts) body.insert(ins.first, "local ");
+        return scoped;
+    }
 
     // Find generated register identifiers without touching recovered string contents or comments.
     // The old declaration scan was textual and could mistake a literal such as "v123" for a local;
@@ -19633,6 +19704,7 @@ inexact_selector_fallback:
             if (!planning && inverse_hook && std::getenv("RENOVICE_INVERSE_EMIT")) {
                 cfg_rendered = inverse_hook(*this, 1);
                 if (!cfg_rendered) *this = saved_emitter;
+                else inverse_rendered = true;
             }
             if (!cfg_rendered && try_cfg && std::getenv("RENOVICE_CFG_PREFER_STRUCTURED_PLAIN")) {
                 // Prefer ordinary source guards only when the complete prototype can be
@@ -20061,9 +20133,13 @@ inexact_selector_fallback:
                 for (const RegToken& token : reg_tokens(body)) used.insert(token.reg);
             }
         }
+        std::set<int> scoped_regs;
+        if (inverse_rendered && std::getenv("RENOVICE_INVERSE_SCOPED_LOCALS"))
+            scoped_regs = scope_block_locals(body);
         std::vector<int> decl;
         for (int i = ip->nparams; i <= maxreg; ++i)
-            if (used.count(i) && !entry_locals.count(i) && !for_locals.count(i)) decl.push_back(i);
+            if (used.count(i) && !entry_locals.count(i) && !for_locals.count(i) && !scoped_regs.count(i))
+                decl.push_back(i);
         // Luau's 200-local limit is HARD, and a few real protos genuinely name more registers than
         // that. Locals are not the only way to hold them: spill to a REGISTER TABLE, which has no such
         // limit. Parameters must stay real locals (they are the function's signature), so only
