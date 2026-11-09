@@ -385,7 +385,8 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
                                       "RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_STACK_BYTECODE_TEMPS=1"})
                 for (const std::string& fold : {chosen_env, wide_env, std::string("RENOVICE_SC_EXPR_FOLD_STRICT=1"),
                                                 std::string("RENOVICE_NO_SC_EXPR_FOLD=1")})
-                    cands.push_back({fold.empty() ? std::string(extra) : fold + ";" + extra, false});
+                    for (bool only_bad : {true, false})
+                        cands.push_back({fold.empty() ? std::string(extra) : fold + ";" + extra, only_bad});
             // most productive first (measured 2026-11-09): stack-locals renders, then plain fold levels
             std::stable_partition(cands.begin(), cands.end(), [](const std::pair<std::string, bool>& c) {
                 return c.first.find("STACK_LOCALS") != std::string::npos; });
