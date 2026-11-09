@@ -6727,7 +6727,7 @@ inexact_selector_fallback:
                     if (here > 0 && nested_rewrite && level >= rewrite_level) break;   // reads the new value
                     if (here > 0 && (level > 0 || nested_rewrite)) { reads = 2; break; }
                     reads += here;
-                    if (here > 0 && header && level == 0) break;               // consumed by a header
+                    if (here > 0 && header && level == 0 && u.rfind("for ", 0) == 0) break;   // a loop frame
                     if (rewrites && level == 0) break;                         // value consumed or dead
                     if (rewrites && level > 0 && !nested_rewrite) { nested_rewrite = true; rewrite_level = level; }
                     if (close) { if (level == 0) break; --level; }
@@ -6835,6 +6835,45 @@ inexact_selector_fallback:
             out.push_back(in + t);
         }
         if (!depth_stack.empty() || !pending.empty()) return bail(19);
+        // RECORD FILL ON LOCALS: `local vR = { a = nil, b = 1 }` followed directly by `vR.a = x`
+        // is the constructor `{ a = x, b = 1 }` (DUPTABLE, compute, SETFIELD). Writing the nil
+        // out would add a nil constant and renumber every later constant. Fill slots only in
+        // template order and only with values that do not read the table.
+        for (size_t q = 0; q < out.size(); ++q) {
+            const std::string t = trim(out[q]);
+            const std::string in0 = indent(out[q]);
+            size_t eq = t.find(" = { ");
+            if (eq == std::string::npos || !ends(t, " }")) continue;
+            std::string lhs = t.substr(0, eq);
+            if (lhs.rfind("local ", 0) == 0) lhs = lhs.substr(6);
+            if (lhs.empty() || lhs[0] != 'v' || lhs.find_first_not_of("v0123456789") != std::string::npos) continue;
+            std::string lit = t.substr(eq + 3);
+            size_t last_slot = 0;
+            size_t r = q + 1;
+            while (r < out.size()) {
+                const std::string u = trim(out[r]);
+                if (indent(out[r]) != in0 || u.compare(0, lhs.size() + 1, lhs + ".") != 0) break;
+                const size_t e2 = u.find(" = ");
+                if (e2 == std::string::npos) break;
+                const std::string key = u.substr(lhs.size() + 1, e2 - lhs.size() - 1);
+                bool ident = !key.empty() && !std::isdigit((unsigned char)key[0]);
+                for (char ch : key) if (!(std::isalnum((unsigned char)ch) || ch == '_')) ident = false;
+                const std::string val = u.substr(e2 + 3);
+                bool reads_self = false;
+                for (const RegToken& tk : reg_tokens(val)) if ("v" + std::to_string(tk.reg) == lhs) reads_self = true;
+                size_t slot = lit.find(" " + key + " = nil");
+                if (!ident || reads_self || slot == std::string::npos || slot < last_slot) break;
+                const size_t after = slot + 1 + key.size() + 6;
+                if (after < lit.size() && lit[after] != ',' && lit[after] != ' ') break;
+                const bool wrapped = val.size() >= 2 && val.front() == '(' && val.back() == ')';
+                lit.replace(slot + 1 + key.size() + 3, 3, (atomic(val) || wrapped) ? val : "(" + val + ")");
+                last_slot = slot;
+                ++r;
+            }
+            if (r == q + 1) continue;
+            out[q] = in0 + t.substr(0, eq + 3) + lit;
+            out.erase(out.begin() + (long)q + 1, out.begin() + (long)r);
+        }
         std::string rebuilt;
         for (const std::string& l : out) { rebuilt += l; rebuilt += '\n'; }
         body = rebuilt;
