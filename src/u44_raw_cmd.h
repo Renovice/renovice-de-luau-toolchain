@@ -377,7 +377,9 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
                 wide_env += (proto ? "," : "") + std::to_string(proto) + ":2";
             std::vector<std::pair<std::string, bool>> cands = {
                 {chosen_env, true}, {chosen_env, false}, {wide_env, false},
-                {"RENOVICE_SC_EXPR_FOLD_STRICT=1", false}, {"RENOVICE_NO_SC_EXPR_FOLD=1", false}};
+                {"RENOVICE_SC_EXPR_FOLD_STRICT=1", false}, {"RENOVICE_NO_SC_EXPR_FOLD=1", false},
+                // walker output with its locals rebuilt from Luau's allocator (STACK LOCALS)
+                {"RENOVICE_INVERSE_STACK_LOCALS=1", false}};
             std::set<std::pair<std::string, bool>> seen;
             for (int pass = 0; pass < (int)cands.size(); ++pass) {
                 const std::string env = cands[(size_t)pass].first;

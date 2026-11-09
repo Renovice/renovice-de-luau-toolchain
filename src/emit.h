@@ -6425,14 +6425,16 @@ inexact_selector_fallback:
     static bool stack_locals(std::string& body, int nparams) {
         static const bool dbg = std::getenv("RENOVICE_STACKDBG") != nullptr;
         size_t cur_line = 0; int cur_d = 0;
-        auto bail = [&](int why) { if (dbg) std::fprintf(stderr, "STACK_BAIL why=%d line=%zu d=%d\n", why, cur_line, cur_d); return false; };
+        auto bail = [&](int why) {
+            if (dbg) std::fprintf(stderr, "STACK_BAIL why=%d line=%zu d=%d\n", why, cur_line, cur_d);
+            return false;
+        };
         std::vector<std::string> lines;
         { size_t at = 0; while (at < body.size()) { size_t e = body.find('\n', at); if (e == std::string::npos) e = body.size();
               lines.push_back(body.substr(at, e - at)); at = e + 1; } }
         auto trim = [](const std::string& s) { size_t b = s.find_first_not_of(' '); return b == std::string::npos ? std::string() : s.substr(b); };
         auto indent = [](const std::string& s) { size_t b = s.find_first_not_of(' '); return b == std::string::npos ? s : s.substr(0, b); };
         auto ends = [](const std::string& s, const char* t) { size_t n = std::strlen(t); return s.size() >= n && s.compare(s.size() - n, n, t) == 0; };
-        // leading `vA, vB, ... = ` targets of a statement (empty when none)
         auto targets = [&](const std::string& t, size_t& rhs) {
             std::vector<int> regs; size_t i = 0;
             while (true) {
@@ -6444,93 +6446,269 @@ inexact_selector_fallback:
                 i = j + 2;
             }
         };
+        // pending expression temporaries (register, value text), in definition order
+        std::vector<std::pair<int, std::string>> pending;
+        auto atomic = [](const std::string& e) {
+            for (char ch : e) if (ch == ' ' || ch == '(' ) return false;
+            return true;
+        };
+        // substitute pending temporaries read by `text` (from offset `from`); every pending one
+        // read must be read exactly once and in definition order; returns false on a violation
+        auto substitute = [&](std::string& text, size_t from, std::vector<int>& used_regs) {
+            std::vector<RegToken> tks = reg_tokens(text.substr(from));
+            std::map<int, int> count;
+            for (const RegToken& tk : tks) count[tk.reg]++;
+            // registers of the substituted temporaries must rise in text (evaluation) order: Luau
+            // evaluates one expression's operands into increasing registers. A temporary read
+            // after a higher one was a local (`f(x)` with f above x: x was declared); it stays a
+            // token and is materialised as a local by the caller.
+            int max_reg = -1;
+            std::vector<std::pair<RegToken, size_t>> reps;
+            for (const RegToken& tk : tks) {
+                size_t idx = pending.size();
+                for (size_t k = 0; k < pending.size(); ++k) if (pending[k].first == tk.reg) idx = k;
+                if (idx == pending.size()) continue;
+                if (count[tk.reg] != 1) continue;                 // read twice here: a local
+                if (tk.reg < max_reg) continue;                   // out of register order: a local
+                max_reg = tk.reg;
+                reps.push_back({tk, idx});
+            }
+            for (auto it = reps.rbegin(); it != reps.rend(); ++it) {
+                const std::string& v = pending[it->second].second;
+                text.replace(from + it->first.first, it->first.last - it->first.first, atomic(v) ? v : "(" + v + ")");
+                used_regs.push_back(pending[it->second].first);
+            }
+            return true;
+        };
         std::vector<int> depth_stack;
         int d = nparams;
         std::vector<std::string> out;
+        // a statement consumes pending temporaries; the unread ones must be materialised first:
+        // only a leading one sitting exactly at the depth can become a local
+        auto consume = [&](std::string& t, size_t from, const std::string& in) {
+            // `vB < vA` with A evaluated first (A < B, both pending) is the compiled form of
+            // `vA > vB`: Luau swaps the operands of > / >= but evaluates them in source order
+            {
+                std::vector<RegToken> tk = reg_tokens(t.substr(from));
+                for (size_t k = 0; k + 1 < tk.size(); ++k) {
+                    const size_t a0 = from + tk[k].last, b0 = from + tk[k + 1].first;
+                    if (b0 < a0 + 3) continue;
+                    const std::string op = t.substr(a0, b0 - a0);
+                    static const char* ops[][2] = {{" < ", " > "}, {" <= ", " >= "}, {" > ", " < "}, {" >= ", " <= "},
+                                                   {" == ", " == "}, {" ~= ", " ~= "}};
+                    const char* flip = nullptr;
+                    for (auto& o : ops) if (op == o[0]) flip = o[1];
+                    if (!flip || tk[k].reg <= tk[k + 1].reg) continue;
+                    bool pa = false, pb = false;
+                    for (const auto& p : pending) { if (p.first == tk[k].reg) pa = true; if (p.first == tk[k + 1].reg) pb = true; }
+                    if (!pa || !pb) continue;
+                    const std::string left = t.substr(from + tk[k].first, tk[k].last - tk[k].first);
+                    const std::string right = t.substr(b0, tk[k + 1].last - tk[k + 1].first);
+                    t.replace(from + tk[k].first, from + tk[k + 1].last - (from + tk[k].first), right + flip + left);
+                    break;
+                }
+            }
+            std::vector<int> used;
+            if (!substitute(t, from, used)) return false;
+            std::vector<std::pair<int, std::string>> left;
+            for (const auto& p : pending)
+                if (std::find(used.begin(), used.end(), p.first) == used.end()) left.push_back(p);
+            pending.clear();
+            for (const auto& p : left) {
+                if (p.first != d) return false;
+                out.push_back(in + "local v" + std::to_string(p.first) + " = " + p.second);
+                ++d;
+            }
+            return true;
+        };
         for (size_t li = 0; li < lines.size(); ++li) {
-            const std::string t = trim(lines[li]);
+            std::string t = trim(lines[li]);
+            const std::string in = indent(lines[li]);
             cur_line = li; cur_d = d;
             if (dbg) std::fprintf(stderr, "STACK_LINE %zu d=%d %s\n", li, d, t.c_str());
-            const std::string in = indent(lines[li]);
-            if (t.empty()) { out.push_back(lines[li]); continue; }
+            if (t.empty()) continue;
             const bool is_end = t == "end" || t.rfind("until ", 0) == 0;
             const bool is_else = t == "else" || t.rfind("elseif ", 0) == 0;
             if (is_end || is_else) {
-                if (depth_stack.empty()) return bail(2);
-                if (t.rfind("until ", 0) == 0) {               // until reads the repeat body's locals
-                    for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(3);
-                }
+                if (depth_stack.empty()) return bail(1);
+                if (t.rfind("until ", 0) == 0 || t.rfind("elseif ", 0) == 0) {
+                    if (t.rfind("elseif ", 0) == 0 && !pending.empty()) return bail(2);
+                    if (!consume(t, 0, in)) return bail(3);
+                    if (t.rfind("until ", 0) == 0)
+                        for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(4);
+                } else if (!pending.empty()) return bail(5);
                 d = depth_stack.back(); depth_stack.pop_back();
                 if (is_else) {
-                    for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(4);
+                    for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(6);
                     depth_stack.push_back(d);
                 }
-                out.push_back(lines[li]); continue;
+                out.push_back(in + t); continue;
             }
             if (t.rfind("for ", 0) == 0 && ends(t, " do")) {
-                // frame registers d.. ; fold the frame-materialising statements just emitted
                 const bool generic = t.find(" in ") != std::string::npos;
                 const size_t hs = generic ? t.find(" in ") + 4 : t.find(" = ") + 3;
-                std::string srcs = t.substr(hs, t.size() - 3 - hs);
-                std::vector<RegToken> st = reg_tokens(srcs);
                 int nvars = 1;
                 if (generic) { const std::string vars = t.substr(4, t.find(" in ") - 4); nvars = 1 + (int)std::count(vars.begin(), vars.end(), ','); }
-                // generic: `vD, vD+1, vD+2 = <call>` then `for .. in vD, vD+1, vD+2 do`
-                // numeric: three single assignments to vD+2, vD, vD+1 then `for i = vD+2, vD, vD+1 do`
                 std::string header = t;
-                bool folded = false;
-                if (generic && srcs == "v" + std::to_string(d) + ", v" + std::to_string(d + 1) + ", v" + std::to_string(d + 2) && !out.empty()) {
-                    size_t rhs = 0; const std::string prev = trim(out.back());
+                if (generic && t.substr(hs, t.size() - 3 - hs) == "v" + std::to_string(d - 3) + ", v" + std::to_string(d - 2) + ", v" + std::to_string(d - 1)
+                    && pending.empty() && !out.empty()) {
+                    size_t rhs = 0; std::string prev = trim(out.back());
+                    if (prev.rfind("local ", 0) == 0) prev = prev.substr(6);
                     std::vector<int> tg = targets(prev, rhs);
-                    if (tg.size() == 3 && tg[0] == d && tg[1] == d + 1 && tg[2] == d + 2) {
-                        header = t.substr(0, hs) + prev.substr(rhs) + " do"; out.pop_back(); folded = true;
+                    if (tg.size() == 3 && tg[0] + 3 == d && tg[1] + 2 == d && tg[2] + 1 == d) {
+                        // undo the triple's declaration: the loop frame takes those registers
+                        std::string rhs_text = prev.substr(rhs);
+                        if (rhs_text.rfind("local ", 0) == 0) rhs_text = rhs_text.substr(6);
+                        header = t.substr(0, hs) + rhs_text + " do"; out.pop_back(); d -= 3;
+                        for (const RegToken& tk : reg_tokens(header)) if (tk.reg >= d) return bail(24);
                     }
-                } else if (!generic && st.size() == 3 && st[0].reg == d + 2 && st[1].reg == d && st[2].reg == d + 1 && out.size() >= 3) {
-                    std::string vals[3]; bool ok = true;
-                    for (int k = 0; k < 3 && ok; ++k) {
-                        size_t rhs = 0; const std::string prev = trim(out[out.size() - 3 + (size_t)k]);
-                        std::vector<int> tg = targets(prev, rhs);
-                        if (tg.size() != 1) { ok = false; break; }
+                } else {
+                    // numeric for: Luau evaluates start, limit, step into A+2, A, A+1
+                    if (!generic) {
+                        const std::string ops = header.substr(hs, header.size() - 3 - hs);
+                        std::vector<RegToken> ot = reg_tokens(ops);
                         const int want[3] = {d + 2, d, d + 1};
-                        if (tg[0] != want[k]) { ok = false; break; }
-                        vals[k] = prev.substr(rhs);
-                        for (const RegToken& tk : reg_tokens(vals[k])) if (tk.reg >= d) ok = false;
+                        bool frame = ot.size() == 3;
+                        std::string vals[3];
+                        for (int k = 0; k < 3 && frame; ++k) {
+                            if (ot[(size_t)k].reg != want[k]) { frame = false; break; }
+                            bool found = false;
+                            for (const auto& p : pending) if (p.first == want[k]) { vals[k] = p.second; found = true; }
+                            if (!found) frame = false;
+                        }
+                        if (frame && ops == "v" + std::to_string(d + 2) + ", v" + std::to_string(d) + ", v" + std::to_string(d + 1)) {
+                            for (int k = 0; k < 3; ++k)
+                                pending.erase(std::remove_if(pending.begin(), pending.end(),
+                                              [&](const std::pair<int, std::string>& q) { return q.first == want[k]; }), pending.end());
+                            header = header.substr(0, hs) + vals[0] + ", " + vals[1] + ", " + vals[2] + " do";
+                        }
                     }
-                    if (ok) {
-                        out.resize(out.size() - 3);
-                        header = t.substr(0, hs) + vals[0] + ", " + vals[1] + ", " + vals[2] + " do"; folded = true;
-                    }
+                    if (!consume(header, hs, in)) return bail(7);
                 }
-                if (!folded) return bail(5);
-                for (const RegToken& tk : reg_tokens(header)) if (tk.reg >= d) return bail(6);
+                for (const RegToken& tk : reg_tokens(header)) if (tk.reg >= d) return bail(8);
                 out.push_back(in + header);
                 depth_stack.push_back(d);
                 d += generic ? 3 + nvars : 3;
                 continue;
             }
-            if (ends(t, " then") || t == "repeat" || ends(t, " do") ) {
-                for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(7);
+            if (ends(t, " then") || t == "repeat" || ends(t, " do")) {
+                if (!consume(t, 0, in)) return bail(9);
+                for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(10);
                 depth_stack.push_back(d);
-                out.push_back(lines[li]); continue;
+                out.push_back(in + t); continue;
             }
             size_t rhs = 0;
             std::vector<int> tg = targets(t, rhs);
+            if (tg.size() == 1 && tg[0] >= d) {
+                // a temporary (read exactly once before the register is rewritten) or a new local
+                std::vector<int> used;
+                std::string value = t.substr(rhs);
+                if (!substitute(value, 0, used)) return bail(11);
+                for (int r : used)
+                    pending.erase(std::remove_if(pending.begin(), pending.end(),
+                                  [&](const std::pair<int, std::string>& p) { return p.first == r; }), pending.end());
+                for (const RegToken& tk : reg_tokens(value)) if (tk.reg >= d) return bail(12);
+                for (const auto& p : pending) if (p.first == tg[0]) return bail(13);
+                const int R = tg[0];
+                int reads = 0, level = 0;
+                bool nested_rewrite = false;
+                for (size_t q = li + 1; q < lines.size(); ++q) {
+                    const std::string u = trim(lines[q]);
+                    const bool close = u == "end" || u.rfind("until ", 0) == 0;
+                    size_t r2 = 0; std::vector<int> tq = targets(u, r2);
+                    int here = 0;
+                    // a closure capture makes the register a real local
+                    const size_t cap = u.find("function<");
+                    for (const RegToken& tk : reg_tokens(tq.empty() ? u : u.substr(r2)))
+                        if (tk.reg == R) here += (cap != std::string::npos && tk.first + (tq.empty() ? 0 : r2) > cap) ? 2 : 1;
+                    // `vR.name = x` filling a nil slot of a pending table literal is part of its value
+                    const std::string fill_prefix = "v" + std::to_string(R) + ".";
+                    if (tq.empty() && u.compare(0, fill_prefix.size(), fill_prefix) == 0 && value.rfind("{ ", 0) == 0) {
+                        const size_t eq = u.find(" = ");
+                        const std::string key = eq == std::string::npos ? std::string() : u.substr(fill_prefix.size(), eq - fill_prefix.size());
+                        if (!key.empty() && value.find(" " + key + " = nil") != std::string::npos) {
+                            int self = 0;
+                            for (const RegToken& tk : reg_tokens(u.substr(eq))) if (tk.reg == R) ++self;
+                            here = self;
+                        }
+                    }
+                    // a temporary lives inside one expression: a read or rewrite in a nested block
+                    // means the value is a local
+                    bool rewrites = false;
+                    for (int r : tq) if (r == R) rewrites = true;
+                    const bool header = ends(u, " then") || ends(u, " do") || u == "repeat";
+                    if (here > 0 && (level > 0 || nested_rewrite)) { reads = 2; break; }
+                    reads += here;
+                    if (here > 0 && header && level == 0) break;               // consumed by a header
+                    if (rewrites && level == 0) break;                         // value consumed or dead
+                    if (rewrites && level > 0) nested_rewrite = true;          // live after the block?
+                    if (close) { if (level == 0) break; --level; }
+                    else if (ends(u, " then") || ends(u, " do") || u == "repeat") ++level;
+                }
+                if (reads == 1) { pending.push_back({R, value}); continue; }
+                // a register below a real local is itself a local: pending values filling exactly
+                // d..R-1 in order were locals (`local a, b, c = x, y, z` style declarations)
+                if (R != d || !pending.empty()) {
+                    bool fills = (int)pending.size() == R - d;
+                    for (size_t k = 0; k < pending.size() && fills; ++k)
+                        if (pending[k].first != d + (int)k) fills = false;
+                    if (!fills) return bail(20);
+                    for (const auto& p : pending)
+                        out.push_back(in + "local v" + std::to_string(p.first) + " = " + p.second);
+                    d += (int)pending.size();
+                    pending.clear();
+                }
+                out.push_back(in + "local v" + std::to_string(R) + " = " + value);
+                ++d;
+                continue;
+            }
+            {
+                // `vR.key = expr` into a pending table literal's nil slot: fold it into the literal
+                bool filled = false;
+                for (auto& p : pending) {
+                    const std::string pre = "v" + std::to_string(p.first) + ".";
+                    const size_t eq = t.find(" = ");
+                    if (t.compare(0, pre.size(), pre) != 0 || eq == std::string::npos || p.second.rfind("{ ", 0) != 0) continue;
+                    const std::string key = t.substr(pre.size(), eq - pre.size());
+                    bool ident = !key.empty();
+                    for (char ch : key) if (!(std::isalnum((unsigned char)ch) || ch == '_')) ident = false;
+                    const size_t slot = p.second.find(" " + key + " = nil");
+                    if (!ident || slot == std::string::npos) continue;
+                    std::string val = t.substr(eq + 3);
+                    std::vector<int> used;
+                    // only pending values defined after the table may be read (they feed this field)
+                    if (!substitute(val, 0, used)) return bail(21);
+                    for (const RegToken& tk : reg_tokens(val)) if (tk.reg >= d) return bail(22);
+                    for (int r : used)
+                        pending.erase(std::remove_if(pending.begin(), pending.end(),
+                                      [&](const std::pair<int, std::string>& q) { return q.first == r; }), pending.end());
+                    for (auto& q : pending) if (q.first == p.first) {
+                        q.second.replace(slot + 1 + key.size() + 3, 3, atomic(val) ? val : "(" + val + ")");
+                    }
+                    filled = true;
+                    break;
+                }
+                if (filled) continue;
+            }
+            tg = targets(t, rhs);
+            if (!consume(t, tg.empty() ? 0 : rhs, in)) return bail(14);
+            tg = targets(t, rhs);
             if (!tg.empty()) {
-                for (const RegToken& tk : reg_tokens(t.substr(rhs))) if (tk.reg >= d) return bail(8);
+                for (const RegToken& tk : reg_tokens(t.substr(rhs))) if (tk.reg >= d) return bail(15);
                 if (tg[0] >= d) {
-                    for (size_t k = 0; k < tg.size(); ++k) if (tg[k] != d + (int)k) return bail(9);
+                    for (size_t k = 0; k < tg.size(); ++k) if (tg[k] != d + (int)k) return bail(16);
                     d += (int)tg.size();
                     out.push_back(in + "local " + t);
                 } else {
-                    for (int r : tg) if (r >= d) return bail(10);
-                    out.push_back(lines[li]);
+                    for (int r : tg) if (r >= d) return bail(17);
+                    out.push_back(in + t);
                 }
                 continue;
             }
-            for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(11);
-            out.push_back(lines[li]);
+            for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(18);
+            out.push_back(in + t);
         }
-        if (!depth_stack.empty()) return bail(12);
+        if (!depth_stack.empty() || !pending.empty()) return bail(19);
         std::string rebuilt;
         for (const std::string& l : out) { rebuilt += l; rebuilt += '\n'; }
         body = rebuilt;
@@ -19902,10 +20080,20 @@ inexact_selector_fallback:
         }
         // Block-scoped locals captured by reference (scoped_captures.h): consumes every
         // CLOSEUPVALS marker line before any other text pass sees the body.
+        const bool stack_mode = inverse_rendered && std::getenv("RENOVICE_INVERSE_STACK_LOCALS");
         scap::scope_captured_block_locals(body, *ip);
         scap::unshare_snapshot_closures(body, *ip);
         if (std::getenv("RENOVICE_EMIT_RAW_BODY_TRACE"))
             std::fprintf(stderr, "RAW_BODY pidx=%d\n%sEND_RAW_BODY\n", pidx, body.c_str());
+        // STACK LOCALS (walker bodies): rebuild declarations on the raw body; a rebuilt body skips
+        // the dispatcher-oriented canonicalisations below, which would rename its registers.
+        bool stack_rebuilt = false;
+        if (stack_mode) {
+            std::string trial = body;
+            suppress_dead_generic_frame_copies(trial);
+            canonicalize_lexical_for_variables(trial, pidx);
+            if (stack_locals(trial, ip->nparams)) { body.swap(trial); stack_rebuilt = true; }
+        }
         // Luau inserts an implicit zero-result RETURN when source control can fall off the end of a
         // function. The next decompile necessarily prints that real instruction, causing a one-time
         // source-only drift. Spell the implicit tail explicitly on cycle one. A final unconditional
@@ -19938,6 +20126,7 @@ inexact_selector_fallback:
         std::set<int> used;
         std::set<int> entry_locals;
         std::set<int> for_locals;
+        if (!stack_rebuilt) {
         int dead_for_frame_lines = suppress_dead_generic_frame_copies(body);
         if (dead_for_frame_lines && std::getenv("RENOVICE_FORLOCALDBG"))
             std::fprintf(stderr, "DEAD_FOR_FRAME pidx=%d lines=%d\n",
@@ -19980,9 +20169,9 @@ inexact_selector_fallback:
         canonicalize_paired_numeric_binary_temporaries(body);
         if (!std::getenv("RENOVICE_NO_PRESERVE_EMPTY_CONDITIONS"))
             canonicalize_unused_empty_conditions(body);
-        localize_reused_root_state_intervals(body);
+        if (!stack_mode) localize_reused_root_state_intervals(body);
         if (!std::getenv("RENOVICE_NO_ENTRY_LOCAL_INIT")) {
-            if (!std::getenv("RENOVICE_NO_DISJOINT_STATE_INTERVALS"))
+            if (!std::getenv("RENOVICE_NO_DISJOINT_STATE_INTERVALS") && !stack_mode)
                 entry_locals = localize_disjoint_nested_state_intervals(body);
             // Region rendering may already have named outer selectors. Reserve those serials while
             // recovering later raw-register lifetimes so nested lexical locals cannot shadow an
@@ -20248,6 +20437,7 @@ inexact_selector_fallback:
             for (int reg : for_locals) std::fprintf(stderr, " v%d", reg);
             std::fputc('\n', stderr);
         }
+        }
         for (const RegToken& token : reg_tokens(body)) used.insert(token.reg);
         if (std::getenv("RENOVICE_LIVERANGE")) {
             std::map<int, int> names = allocate_registers(body, used);
@@ -20258,8 +20448,7 @@ inexact_selector_fallback:
             }
         }
         std::set<int> scoped_regs;
-        if (inverse_rendered && std::getenv("RENOVICE_INVERSE_STACK_LOCALS")
-            && stack_locals(body, ip->nparams)) {
+        if (stack_rebuilt) {
             scoped_regs = used;                         // every register is declared in place
             if (std::getenv("RENOVICE_INVERSE_TRACE")) std::fprintf(stderr, "STACK_LOCALS pidx=%d ok\n", pidx);
         } else if (inverse_rendered && std::getenv("RENOVICE_INVERSE_SCOPED_LOCALS"))
