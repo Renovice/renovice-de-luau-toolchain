@@ -82,10 +82,14 @@ static std::string compile_luau(const std::string& src_path, std::string& err) {
     // DE's compiler folds constant vector constructors into vector constants (LOADK of a type-7
     // constant); the decompiler spells those constants `Vector3(x, y, z)`.
     std::string vector_opt;
-    if (const char* ctor = std::getenv("RENOVICE_VECTOR_CTOR"))
-        vector_opt = std::string(" --vector-ctor=") + ctor;
-    // research switch: compile at -O2 (inlining, constant folding of builtins)
-    if (std::getenv("RENOVICE_LUAU_O2")) vector_opt += " -O2";
+    // DE's compiler folds constant vector constructors (`Vector3(x, y, z)`) into type-7 constants;
+    // upstream luau-compile does so only at -O2 with --vector-ctor. Measured 2026-11-09: -O2 alone
+    // is neutral on the 196 baseline failures and 939 tripwires (0 BROKEN); with the vector
+    // constructor it fixes the vector-constant class. RENOVICE_LUAU_O1 restores the old compile.
+    if (!std::getenv("RENOVICE_LUAU_O1")) {
+        const char* ctor = std::getenv("RENOVICE_VECTOR_CTOR");
+        vector_opt = std::string(" -O2 --vector-ctor=") + (ctor ? ctor : "Vector3");
+    }
     std::string inner = std::string("\"") + luau_compile_path() + "\" --binary" + vector_opt + " \""
                       + src_path + "\" > \"" + tmp + "\" 2> \"" + errtmp + "\"";
     // cmd.exe strips one leading+trailing quote off the whole /c line; wrap in an extra pair so the inner stays balanced.
