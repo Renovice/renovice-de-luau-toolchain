@@ -188,7 +188,7 @@ private:
             return jump_stmt(T, ctx, depth, last, E.cond_of(b, then_is_taken)) ? S : -1;
         const size_t mark = E.out.size();
         const std::set<int> silent_mark = silent;
-        const int r = if_rest(S, T, E.cond_of(b, !then_is_taken), end, ctx, depth, fol);
+        const int r = if_rest(S, T, E.cond_of(b, !then_is_taken), end, ctx, depth, fol, E.cond_of(b, then_is_taken));
         if (r >= 0) return r;
         // SAME-REGISTER THREADING: a JUMPIF/JUMPIFNOT r landing on a later test of r has a known
         // outcome there, so the compiler sends it straight to that test's destination
@@ -314,7 +314,8 @@ private:
     }
 
     // if-statement with then-block starting at S and skip target T
-    int if_rest(int S, int T, const std::string& cond_S, int end, const EmitCtx& ctx, int depth, int fol) {
+    int if_rest(int S, int T, const std::string& cond_S, int end, const EmitCtx& ctx, int depth, int fol,
+                const std::string& cond_T = std::string()) {
         // where control goes after this sequence: a skip may be threaded straight there
         auto at_end = [&](int t) { return lands(t, end) || (fol >= 0 && lands(t, fol)); };
         if (T > end && at_end(T)) T = end;
@@ -333,6 +334,16 @@ private:
             if (skip && Ee > end && at_end(Ee)) Ee = end;
             if (skip && Ee > T && Ee <= end && T - 1 != ctx.latch
                 && !lands(j.target, ctx.exit) && !lands(j.target, ctx.cont)) {
+                // COMPARISON VALUE (`x = a < b`): both arms are one LOADB into the same register.
+                // Print the boolean assignment; the if/else spelling compiles to another jump shape.
+                if (j.name == "LOADB" && S == T - 1 && Ee == T + 1 && I(T).name == "LOADB" && I(T).A == j.A
+                    && I(T).C == 0 && j.B != I(T).B && !std::getenv("RENOVICE_INVERSE_NO_CMP_VALUE")) {
+                    const std::string& c = I(T).B ? cond_T : cond_S;    // condition reaching the true arm
+                    if (!c.empty()) {
+                        E.out += ind(depth) + "v" + std::to_string(j.A) + " = " + c + "\n";
+                        return Ee;
+                    }
+                }
                 silent.insert(T - 1);
                 E.out += ind(depth) + "if " + cond_S + " then\n";
                 const int f2 = Ee == end ? fol : Ee;
