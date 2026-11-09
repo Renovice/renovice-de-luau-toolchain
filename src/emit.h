@@ -43,6 +43,7 @@ struct Emitter {
     // inverse/inverse_emit.h: grammar-driven renderer (opt-in RENOVICE_INVERSE_EMIT).
     static inline bool (*inverse_hook)(Emitter&, int) = nullptr;
     bool inverse_rendered = false;   // this body came from the inverse walker
+    bool tag_insns = false;          // append ` --@<pc>` to assignment lines (STACK LOCALS)
     const ir::IProto* ip = nullptr;
     const st::Graph*  g  = nullptr;
     const sa::Analyzer* A = nullptr;
@@ -1627,7 +1628,8 @@ struct Emitter {
                         }
                     }
                     if (!restored_live_call_move)
-                    out += ind(depth) + ex::render(s.lhs) + " = " + ex::render(s.rhs) + "\n";
+                    out += ind(depth) + ex::render(s.lhs) + " = " + ex::render(s.rhs)
+                         + (tag_insns && s.insn >= 0 ? " --@" + std::to_string(s.insn) : std::string()) + "\n";
                     break;
                 }
                 case ex::SK::ExprStmt:
@@ -6427,8 +6429,8 @@ inexact_selector_fallback:
     // it before the register is written again, that read is in the same basic block and is not a
     // plain MOVE (a local is copied into an argument slot; a temporary is consumed in place), and
     // nothing in between writes a lower register (no local is declared under a live temporary).
-    std::map<int, std::vector<bool>> bytecode_temp_map() const {
-        std::map<int, std::vector<bool>> out;
+    std::map<int, std::map<int, bool>> bytecode_temp_map() const {
+        std::map<int, std::map<int, bool>> out;
         const int n = (int)ip->code.size();
         std::vector<int> block_of((size_t)n, -1);
         for (size_t b = 0; b < g->n.size(); ++b) {
@@ -6457,14 +6459,14 @@ inexact_selector_fallback:
                 }
                 const bool temp = reads == 1 && read_at > i && block_of[(size_t)read_at] == block_of[(size_t)i]
                     && ip->code[(size_t)read_at].name != "MOVE" && !lower_def;
-                out[r].push_back(temp);
+                out[i][r] = temp;
             }
         }
         return out;
     }
 
     static bool stack_locals(std::string& body, int nparams,
-                             const std::map<int, std::vector<bool>>* bmap = nullptr) {
+                             const std::map<int, std::map<int, bool>>* bmap = nullptr) {
         static const bool dbg = std::getenv("RENOVICE_STACKDBG") != nullptr;
         size_t cur_line = 0; int cur_d = 0;
         auto bail = [&](int why) {
@@ -6490,16 +6492,19 @@ inexact_selector_fallback:
         };
         // bytecode verdicts per textual definition: (line, register) -> temporary?
         std::map<std::pair<size_t, int>, bool> verdict;
-        if (bmap) {
-            std::map<int, std::vector<size_t>> def_lines;
-            for (size_t li = 0; li < lines.size(); ++li) {
-                size_t rhs = 0;
-                for (int r : targets(trim(lines[li]), rhs)) def_lines[r].push_back(li);
-            }
-            for (const auto& kv : def_lines) {
-                auto it = bmap->find(kv.first);
-                if (it == bmap->end() || it->second.size() != kv.second.size()) continue;
-                for (size_t k = 0; k < kv.second.size(); ++k) verdict[{kv.second[k], kv.first}] = it->second[k];
+        // instruction tags ` --@pc` (emitted for this pass) give each assignment its definition
+        for (size_t li = 0; li < lines.size(); ++li) {
+            const size_t tag = lines[li].rfind(" --@");
+            if (tag == std::string::npos) continue;
+            const int pc = std::atoi(lines[li].c_str() + tag + 4);
+            lines[li].resize(tag);
+            if (!bmap) continue;
+            const auto at = bmap->find(pc);
+            if (at == bmap->end()) continue;
+            size_t rhs = 0;
+            for (int r : targets(trim(lines[li]), rhs)) {
+                const auto v = at->second.find(r);
+                if (v != at->second.end()) verdict[{li, r}] = v->second;
             }
         }
         // pending expression temporaries (register, value text), in definition order
@@ -20066,7 +20071,9 @@ inexact_selector_fallback:
             bool ownership_collision_gap = false;
             bool cfg_rendered = false;
             if (!planning && inverse_hook && std::getenv("RENOVICE_INVERSE_EMIT")) {
+                tag_insns = std::getenv("RENOVICE_INVERSE_STACK_LOCALS") != nullptr;
                 cfg_rendered = inverse_hook(*this, 1);
+                tag_insns = false;
                 if (!cfg_rendered) *this = saved_emitter;
                 else inverse_rendered = true;
             }
@@ -20152,10 +20159,17 @@ inexact_selector_fallback:
         bool stack_rebuilt = false;
         if (stack_mode) {
             std::string trial = body;
-            const std::map<int, std::vector<bool>> tmap = bytecode_temp_map();
+            const std::map<int, std::map<int, bool>> tmap = bytecode_temp_map();
             suppress_dead_generic_frame_copies(trial);
             canonicalize_lexical_for_variables(trial, pidx);
             if (stack_locals(trial, ip->nparams, &tmap)) { body.swap(trial); stack_rebuilt = true; }
+            else {                                 // fallback: drop the instruction tags
+                size_t at = 0;
+                while ((at = body.find(" --@", at)) != std::string::npos) {
+                    size_t e = body.find(char(10), at);
+                    body.erase(at, (e == std::string::npos ? body.size() : e) - at);
+                }
+            }
         }
         // Luau inserts an implicit zero-result RETURN when source control can fall off the end of a
         // function. The next decompile necessarily prints that real instruction, causing a one-time
