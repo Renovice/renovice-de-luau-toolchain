@@ -108,6 +108,11 @@ private:
                 auto it = st.reg.find(a.A);
                 int pr = it == st.reg.end() ? (is_param(a.A) ? st.params[(size_t)a.A].reg : -1) : it->second;
                 if (pr < 0) return;
+                // a value in another register is copied into the result register first
+                if (p < (int)P.code.size() && PI(p).name == "MOVE" && PI(p).B == pr
+                    && (st.result < 0 || PI(p).A == st.result) && PI(p).A != pr) {
+                    pr = PI(p).A; ++p;
+                }
                 if (st.result < 0) st.result = pr; else if (st.result != pr) return;
                 if (h + 1 >= (int)H.code.size()) { finish(st, p); return; }
                 const ir::IInsn& j = PI(p);
@@ -128,8 +133,11 @@ private:
                 return;
             }
             if (std::getenv("RENOVICE_INLINE_DBG"))
-                std::fprintf(stderr, "INL h=%d %s [%s|%u|%d,%d] p=%d %s [%s|%u|%d,%d]\n", h, a.name.c_str(), a.note.c_str(), (unsigned)a.aux, a.B, a.C, p, b.name.c_str(), b.note.c_str(), (unsigned)b.aux, b.B, b.C);
+                std::fprintf(stderr, "INL P%d H%d h=%d %s [%s|%u|%d,%d] p=%d %s [%s|%u|%d,%d]\n", P.index, H.index, h, a.name.c_str(), a.note.c_str(), (unsigned)a.aux, a.B, a.C, p, b.name.c_str(), b.note.c_str(), (unsigned)b.aux, b.B, b.C);
             if (!same_static(a, b)) return;
+            // loop variables are written by the loop itself: map the frame (A..A+2) and variables
+            if (a.name.rfind("FORGPREP", 0) == 0 || a.name == "FORNPREP")
+                for (int k = 0; k < 3 + 8; ++k) write(st, a.A + k, b.A + k);
             if (a.name == "GETUPVAL" || a.name == "SETUPVAL") {
                 auto it = st.upv.find(a.B);
                 if (it == st.upv.end()) st.upv[a.B] = b.B; else if (it->second != b.B) return;
@@ -226,16 +234,18 @@ inline void prepare(const de::Module& m, const std::vector<std::string>& pool, i
     if (!std::getenv("RENOVICE_INLINE_CALLS")) return;
     for (size_t i = 0; i < m.protos.size(); ++i) mod_protos().push_back(ir_annotate(m.protos[i], (int)i, pool, g_nb));
     const ir::IProto& r = mod_protos()[(size_t)root];
-    std::map<int, int> writes;
-    for (const ir::IInsn& in : r.code) {
-        std::set<int> u, d; if (lv::register_effects(r, in, u, d)) for (int x : d) ++writes[x];
-    }
-    for (const ir::IInsn& in : r.code) {
+    for (size_t pc = 0; pc < r.code.size(); ++pc) {
+        const ir::IInsn& in = r.code[pc];
         int sub = -1;
         if (in.op == 0x42 && in.Bx < r.consts.size() && r.consts[in.Bx].kind == ir::KKind::Closure) sub = (int)r.consts[in.Bx].sub;
         else if (in.op == 0x16 && in.Bx < r.kids.size()) sub = (int)r.kids[in.Bx];
-        // only a closure stored once in a root register can be an inlinable local function
-        if (sub >= 0 && writes[(int)in.A] == 1 && !root_closure_reg().count(sub)) root_closure_reg()[sub] = in.A;
+        if (sub < 0 || root_closure_reg().count(sub)) continue;
+        // an inlinable local function: its register is never written again after the closure
+        bool rewritten = false;
+        for (size_t q = pc + 1; q < r.code.size() && !rewritten; ++q) {
+            std::set<int> u, d; if (lv::register_effects(r, r.code[q], u, d) && d.count((int)in.A)) rewritten = true;
+        }
+        if (!rewritten) root_closure_reg()[sub] = in.A;
     }
 }
 

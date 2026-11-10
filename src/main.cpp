@@ -97,7 +97,8 @@ static std::string compile_luau(const std::string& src_path, std::string& err) {
     }
     if (const char* th = std::getenv("RENOVICE_LUAU_INLINE_THRESHOLD"))
         vector_opt += std::string(" --fflags=LuauCompileInlineThreshold=") + th
-                    + ",RenoviceInlineMissingArgsConstant=0";   // DE does not fold missing arguments
+                    + ",RenoviceInlineMissingArgsConstant="
+                    + (std::getenv("RENOVICE_LUAU_MISSING_ARGS_CONST") ? std::getenv("RENOVICE_LUAU_MISSING_ARGS_CONST") : "1");
     std::string inner = std::string("\"") + luau_compile_path() + "\" --binary" + vector_opt + " \""
                       + src_path + "\" > \"" + tmp + "\" 2> \"" + errtmp + "\"";
     // cmd.exe strips one leading+trailing quote off the whole /c line; wrap in an extra pair so the inner stays balanced.
