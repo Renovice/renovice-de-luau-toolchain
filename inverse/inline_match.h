@@ -16,7 +16,8 @@
 
 namespace inl {
 
-struct Binding { int reg = -1; int truth = -1; };   // a caller register, or a folded truthiness
+// a caller register, a folded truthiness, or a constant the caller materialised (its load kept)
+struct Binding { int reg = -1; int truth = -1; bool has_k = false; ir::IInsn kload; };
 struct Match {
     int callee = -1, start = -1, end = -1, result = -1;
     std::vector<Binding> params;
@@ -45,6 +46,7 @@ private:
         std::vector<int> pcmap;            // callee pc -> caller pc
         int result = -1, join = -1, last_p = -1;
         std::map<int, int> upv;            // callee upvalue -> caller upvalue
+        std::map<int, ir::IInsn> kreg;     // caller register -> constant load feeding a parameter
     };
     Match best; bool best_ok = false;
 
@@ -53,17 +55,27 @@ private:
     bool is_param(int r) const { return r < H.nparams; }
 
     // map a callee register read; parameters bind on first read
+    static bool same_load(const ir::IInsn& x, const ir::IInsn& y) {
+        return x.op == y.op && x.B == y.B && x.C == y.C && x.Bx == y.Bx && x.aux == y.aux;
+    }
     bool read(State& st, int hr, int pr) {
         if (is_param(hr)) {
             Binding& b = st.params[(size_t)hr];
             if (b.truth >= 0) return false;
+            auto k = st.kreg.find(pr);
+            if (k != st.kreg.end()) {                          // the argument was a constant
+                if (b.reg >= 0) return false;
+                if (!b.has_k) { b.has_k = true; b.kload = k->second; return true; }
+                return same_load(b.kload, k->second);
+            }
+            if (b.has_k) return false;
             if (b.reg < 0) { b.reg = pr; return true; }
             return b.reg == pr;
         }
         auto it = st.reg.find(hr);
         return it != st.reg.end() && it->second == pr;
     }
-    void write(State& st, int hr, int pr) { st.reg[hr] = pr; }
+    void write(State& st, int hr, int pr) { st.reg[hr] = pr; st.kreg.erase(pr); }
 
     // operands other than registers must be identical
     // constant operands compare by meaning: indices into each function's own constant table differ
@@ -134,6 +146,13 @@ private:
             }
             if (std::getenv("RENOVICE_INLINE_DBG"))
                 std::fprintf(stderr, "INL P%d H%d h=%d %s [%s|%u|%d,%d] p=%d %s [%s|%u|%d,%d]\n", P.index, H.index, h, a.name.c_str(), a.note.c_str(), (unsigned)a.aux, a.B, a.C, p, b.name.c_str(), b.note.c_str(), (unsigned)b.aux, b.B, b.C);
+            // the caller materialises a constant argument right before it is used
+            if (a.name != b.name && (b.name == "LOADN" || b.name == "LOADK" || b.name == "LOADNIL"
+                                     || (b.name == "LOADB" && b.C == 0))) {
+                st.kreg[b.A] = b;
+                ++p;
+                continue;
+            }
             if (!same_static(a, b)) return;
             // loop variables are written by the loop itself: map the frame (A..A+2) and variables
             if (a.name.rfind("FORGPREP", 0) == 0 || a.name == "FORNPREP")
@@ -212,6 +231,7 @@ static int cmd_inline_scan(int argc, char** argv) {
                     for (const auto& b2 : r.params) {
                         if (b2.reg >= 0) std::printf("R%d ", b2.reg);
                         else if (b2.truth >= 0) std::printf("%s ", b2.truth ? "truthy" : "falsy");
+                        else if (b2.has_k) std::printf("K:%s ", b2.kload.name.c_str());
                         else std::printf("? ");
                     }
                     std::printf("\n");
@@ -267,25 +287,27 @@ inline bool rewrite(ir::IProto& ip) {
             if (!mt.at(s, r)) continue;
             const int n = (int)r.params.size();
             bool bound = true;
-            for (const auto& b : r.params) if (b.reg < 0 && b.truth < 0) bound = false;
+            for (const auto& b : r.params) if (b.reg < 0 && b.truth < 0 && !b.has_k) bound = false;
             if (!bound || r.end - s < n + 4 || ip.maxstack + n + 1 > 250) continue;
             // the region keeps its exact size in code WORDS (jump offsets outside it are word
             // relative); instruction indices after it shift and are remapped
             int W = 0;
             for (int q = s; q < r.end; ++q) W += (ip.code[(size_t)q].wide || tc::is_de_width8(ip.code[(size_t)q].op)) ? 2 : 1;
-            if (W < n + 6) continue;
+            if (W < n + 8) continue;
             const int F = ip.maxstack;
             std::vector<ir::IInsn> seq;
             ir::IInsn g = synth("GETGLOBAL", 0x17, F, 0, 0); g.wide = true; g.aux = 0;
             g.note = "__renovice_proto_" + std::to_string(callee); seq.push_back(g);
             for (int i = 0; i < n; ++i) {
                 const Binding& b = r.params[(size_t)i];
-                if (b.reg >= 0) seq.push_back(synth("MOVE", 0x14, F + 1 + i, b.reg, 0));
+                if (b.has_k) { ir::IInsn k = b.kload; k.A = (uint8_t)(F + 1 + i); seq.push_back(k); }
+                else if (b.reg >= 0) seq.push_back(synth("MOVE", 0x14, F + 1 + i, b.reg, 0));
                 else seq.push_back(synth("LOADB", 0x04, F + 1 + i, b.truth ? 1 : 0, 0));
             }
             seq.push_back(synth("CALL", 0x54, F, n + 1, 2));
             seq.push_back(synth("MOVE", 0x14, r.result, F, 0));
-            const int used_words = n + 5;                    // GETGLOBAL counts 2
+            int used_words = n + 5;                          // GETGLOBAL counts 2
+            for (const auto& b2 : r.params) if (b2.has_k && (b2.kload.wide || tc::is_de_width8(b2.kload.op))) ++used_words;
             const int filler = W - used_words;               // after the JUMP (used_words counts it)
             ir::IInsn j = synth("JUMP", 0x40, 0, 0, 0); j.branch = true;
             j.Bx = (uint16_t)(int16_t)filler;                // skip the fillers: lands on r.end
