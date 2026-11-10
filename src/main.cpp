@@ -35,7 +35,12 @@ static std::string exe_dir() {
     return (s == std::string::npos) ? std::string(".") : p.substr(0, s);
 }
 // luau-compile.exe ships INSIDE the folder (bin/ next to derecomp.exe).
-static std::string luau_compile_path() { return exe_dir() + "\\luau-compile.exe"; }
+// RENOVICE_LUAU_INLINE_THRESHOLD selects bin/luau-compile-renovice.exe (the same upstream compiler built
+// from source, byte-identical output, plus integer fast-flag support) and DE's inline cost threshold.
+static std::string luau_compile_path() {
+    if (std::getenv("RENOVICE_LUAU_INLINE_THRESHOLD")) return exe_dir() + "\\luau-compile-renovice.exe";
+    return exe_dir() + "\\luau-compile.exe";
+}
 
 // Windows silently refuses paths at/near MAX_PATH unless they carry the \\?\ extended-length prefix
 // (and are absolute, with backslashes). Four corpus scripts have names long enough to trip this; the
@@ -90,6 +95,9 @@ static std::string compile_luau(const std::string& src_path, std::string& err) {
         const char* ctor = std::getenv("RENOVICE_VECTOR_CTOR");
         vector_opt = std::string(" -O2 --vector-ctor=") + (ctor ? ctor : "Vector3");
     }
+    if (const char* th = std::getenv("RENOVICE_LUAU_INLINE_THRESHOLD"))
+        vector_opt += std::string(" --fflags=LuauCompileInlineThreshold=") + th
+                    + ",RenoviceInlineMissingArgsConstant=0";   // DE does not fold missing arguments
     std::string inner = std::string("\"") + luau_compile_path() + "\" --binary" + vector_opt + " \""
                       + src_path + "\" > \"" + tmp + "\" 2> \"" + errtmp + "\"";
     // cmd.exe strips one leading+trailing quote off the whole /c line; wrap in an extra pair so the inner stays balanced.

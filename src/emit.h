@@ -6527,6 +6527,19 @@ inexact_selector_fallback:
         }
         // pending expression temporaries (register, value text), in definition order
         std::vector<std::pair<int, std::string>> pending;
+        // true when the expression has an operator at its top level (needs parentheses as an operand)
+        auto top_level_op = [](const std::string& e) {
+            int depth = 0; char quote = 0;
+            for (size_t k = 0; k < e.size(); ++k) {
+                const char ch = e[k];
+                if (quote) { if (ch == '\\') ++k; else if (ch == quote) quote = 0; continue; }
+                if (ch == '"' || ch == '\'') quote = ch;
+                else if (ch == '(' || ch == '[' || ch == '{') ++depth;
+                else if (ch == ')' || ch == ']' || ch == '}') --depth;
+                else if (depth == 0 && ch == ' ') return true;
+            }
+            return false;
+        };
         auto atomic = [](const std::string& e) {
             // a lone string literal is atomic even when it holds spaces or parentheses
             if (e.size() >= 2 && (e[0] == '"' || e[0] == '\'') && e.back() == e[0]) {
@@ -6568,7 +6581,30 @@ inexact_selector_fallback:
             }
             for (auto it = reps.rbegin(); it != reps.rend(); ++it) {
                 const std::string& v = pending[it->second].second;
-                text.replace(from + it->first.first, it->first.last - it->first.first, atomic(v) ? v : "(" + v + ")");
+                // Parentheses are needed for an operator expression, and for a call only where it
+                // could expand to several values (last argument / table item / return value / end of
+                // a multi-assignment). Elsewhere they are redundant, and around an inlined call
+                // they change the code the inliner emits.
+                const size_t at_tok = from + it->first.first, end_tok = from + it->first.last;
+                bool call_like = !v.empty() && v.back() == ')' && v.front() != '(';
+                if (call_like) {
+                    int depth = 0;
+                    for (char ch : v) {
+                        if (ch == '(' || ch == '[' || ch == '{') ++depth;
+                        else if (ch == ')' || ch == ']' || ch == '}') --depth;
+                        else if (depth == 0 && ch == ' ') { call_like = false; break; }
+                    }
+                }
+                const char next = end_tok < text.size() ? text[end_tok] : '\0';
+                const bool multret_site = next == ')' || next == '}' || next == '\0' || next == ',';
+                // the whole right-hand side of an assignment / return needs no parentheses for an
+                // operator expression (a call keeps them in a return: they limit it to one value)
+                const bool whole_rhs = (at_tok >= 2 && text.compare(at_tok - 2, 2, "= ") == 0
+                                        && (end_tok == text.size()))
+                    || (at_tok >= 7 && text.compare(at_tok - 7, 7, "return ") == 0
+                        && (end_tok == text.size() || text.compare(end_tok, 4, " end") == 0) && !call_like);
+                const bool wrap = !atomic(v) && !(call_like && !multret_site) && !(whole_rhs && !call_like);
+                text.replace(at_tok, end_tok - at_tok, wrap ? "(" + v + ")" : v);
                 used_regs.push_back(pending[it->second].first);
             }
             return true;
@@ -6683,6 +6719,73 @@ inexact_selector_fallback:
                 depth_stack.push_back(d);
                 d += generic ? 3 + nvars : 3;
                 continue;
+            }
+            // COMPOUND ASSIGNMENT: `vT = NAME; vT = vT op Y; NAME = vT` keeps one register throughout,
+            // which is how Luau compiles `NAME op= Y` (plain `NAME = NAME op Y` loads NAME into a
+            // second register). NAME is an upvalue, global or field, never a register.
+            bool compound_done = false;
+            if (li + 2 < lines.size()) {
+                auto strip = [&](std::string u) { const size_t tag = u.rfind(" --@"); if (tag != std::string::npos) u.resize(tag); return trim(u); };
+                const std::string l1 = strip(lines[li + 1]), l2 = strip(lines[li + 2]);
+                size_t r0 = 0; std::vector<int> t0 = targets(t, r0);
+                if (t0.size() == 1 && t0[0] >= d) {
+                    const std::string T = "v" + std::to_string(t0[0]);
+                    const std::string name = t.substr(r0);
+                    static const char* cops[] = {" + ", " - ", " * ", " / ", " // ", " % ", " ^ ", " .. "};
+                    for (const char* op : cops) {
+                        const std::string mid = T + " = " + T + op;
+                        if (l1.compare(0, mid.size(), mid) != 0 || l2 != name + " = " + T) continue;
+                        bool name_ok = !name.empty() && name[0] != 'v' && name.find(' ') == std::string::npos
+                                    && name.find('(') == std::string::npos;
+                        std::string y = l1.substr(mid.size());
+                        for (const RegToken& tk : reg_tokens(y)) if (tk.reg == t0[0]) name_ok = false;
+                        if (!name_ok) break;
+                        std::string opn(op);
+                        std::string stmt_text = name + " " + opn.substr(1, opn.size() - 2) + "= " + y;
+                        if (!consume(stmt_text, name.size() + opn.size(), in)) return bail(25);
+                        for (const RegToken& tk : reg_tokens(stmt_text)) if (tk.reg >= d) return bail(26);
+                        out.push_back(in + stmt_text);
+                        li += 2;
+                        compound_done = true;
+                        break;
+                    }
+                }
+            }
+            if (compound_done) continue;
+            // VALUE OR / AND: `vX = A; if not vX then <temps>; vX = B end` is `vX = A or B`
+            // (`if vX then` is `and`): the block only computes B through registers at or above X.
+            if ((t.rfind("if not v", 0) == 0 || t.rfind("if v", 0) == 0) && ends(t, " then") && !pending.empty()) {
+                const bool neg = t.rfind("if not v", 0) == 0;
+                const std::string reg_text = t.substr(neg ? 7 : 3, t.size() - 5 - (neg ? 7 : 3));
+                const int X = pending.back().first;
+                if (reg_text == "v" + std::to_string(X)) {
+                    std::map<int, std::string> val;
+                    size_t q = li + 1;
+                    bool ok = true;
+                    for (; q < lines.size(); ++q) {
+                        std::string u = trim(lines[q]);
+                        const size_t tag = u.rfind(" --@"); if (tag != std::string::npos) u.resize(tag);
+                        if (u == "end") break;
+                        size_t r2 = 0; std::vector<int> tq = targets(u, r2);
+                        if (tq.size() != 1 || tq[0] < X) { ok = false; break; }
+                        std::string rhs2 = u.substr(r2);
+                        std::vector<RegToken> tk2 = reg_tokens(rhs2);
+                        for (auto it2 = tk2.rbegin(); it2 != tk2.rend(); ++it2) {
+                            auto kv = val.find(it2->reg);
+                            if (kv != val.end()) { rhs2.replace(it2->first, it2->last - it2->first, atomic(kv->second) ? kv->second : "(" + kv->second + ")"); val.erase(kv); }
+                            else if (it2->reg >= X) { ok = false; break; }
+                        }
+                        if (!ok) break;
+                        val[tq[0]] = rhs2;
+                    }
+                    if (ok && q < lines.size() && val.size() == 1 && val.count(X) && q > li + 1) {
+                        const std::string a = pending.back().second, b = val[X];
+                        pending.back().second = (top_level_op(a) ? "(" + a + ")" : a) + (neg ? " or " : " and ")
+                                              + (top_level_op(b) ? "(" + b + ")" : b);
+                        li = q;                                   // skip through the block's `end`
+                        continue;
+                    }
+                }
             }
             if (ends(t, " then") || t == "repeat" || ends(t, " do")) {
                 if (!consume(t, 0, in)) return bail(9);
