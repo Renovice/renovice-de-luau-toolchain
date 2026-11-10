@@ -6465,8 +6465,26 @@ inexact_selector_fallback:
         return out;
     }
 
+    // A register gap (a local needed at R while only d < R registers are live) means the values that
+    // last occupied d..R-1 were locals read once, not temporaries; retry with those definitions
+    // forced to be locals.
     static bool stack_locals(std::string& body, int nparams,
                              const std::map<int, std::map<int, bool>>* bmap = nullptr) {
+        std::set<std::pair<size_t, int>> forced;
+        for (int round = 0; round < 12; ++round) {
+            std::string trial = body;
+            std::set<std::pair<size_t, int>> gaps;
+            if (stack_locals_once(trial, nparams, bmap, forced, gaps)) { body.swap(trial); return true; }
+            bool grew = false;
+            for (const auto& gp : gaps) grew |= forced.insert(gp).second;
+            if (!grew) return false;
+        }
+        return false;
+    }
+    static bool stack_locals_once(std::string& body, int nparams,
+                                  const std::map<int, std::map<int, bool>>* bmap,
+                                  const std::set<std::pair<size_t, int>>& forced,
+                                  std::set<std::pair<size_t, int>>& gaps) {
         static const bool dbg = std::getenv("RENOVICE_STACKDBG") != nullptr;
         size_t cur_line = 0; int cur_d = 0;
         auto bail = [&](int why) {
@@ -6533,13 +6551,18 @@ inexact_selector_fallback:
             // after a higher one was a local (`f(x)` with f above x: x was declared); it stays a
             // token and is materialised as a local by the caller.
             int max_reg = -1;
+            // the inline rewrite's call frame sits at invented registers: no order to respect
+            bool synthetic = false;
+            for (const RegToken& tk : tks)
+                for (const auto& pv : pending)
+                    if (pv.first == tk.reg && pv.second.rfind("__renovice_proto_", 0) == 0) synthetic = true;
             std::vector<std::pair<RegToken, size_t>> reps;
             for (const RegToken& tk : tks) {
                 size_t idx = pending.size();
                 for (size_t k = 0; k < pending.size(); ++k) if (pending[k].first == tk.reg) idx = k;
                 if (idx == pending.size()) continue;
                 if (count[tk.reg] != 1) continue;                 // read twice here: a local
-                if (tk.reg < max_reg) continue;                   // out of register order: a local
+                if (tk.reg < max_reg && !synthetic) continue;     // out of register order: a local
                 max_reg = tk.reg;
                 reps.push_back({tk, idx});
             }
@@ -6694,10 +6717,13 @@ inexact_selector_fallback:
                 int reads = 0, level = 0;
                 bool nested_rewrite = false;
                 int rewrite_level = 0;
-                const auto known = verdict.find({li, R});
-                if (known != verdict.end() && known->second && std::getenv("RENOVICE_STACK_BYTECODE_TEMPS")) {
-                    reads = 1;                                // the bytecode proves a temporary
-                    goto decided;
+                if (forced.count({li, R})) { reads = 2; goto decided; }
+                {
+                    const auto known = verdict.find({li, R});
+                    if (known != verdict.end() && known->second && std::getenv("RENOVICE_STACK_BYTECODE_TEMPS")) {
+                        reads = 1;                            // the bytecode proves a temporary
+                        goto decided;
+                    }
                 }
                 for (size_t q = li + 1; q < lines.size(); ++q) {
                     const std::string u = trim(lines[q]);
@@ -6742,7 +6768,14 @@ inexact_selector_fallback:
                     bool fills = (int)pending.size() == R - d;
                     for (size_t k = 0; k < pending.size() && fills; ++k)
                         if (pending[k].first != d + (int)k) fills = false;
-                    if (!fills) return bail(20);
+                    if (!fills) {
+                        for (int g2 = d; g2 < R; ++g2)
+                            for (size_t q = li; q-- > 0;) {
+                                size_t r2 = 0; std::vector<int> tq = targets(trim(lines[q]), r2);
+                                if (tq.size() == 1 && tq[0] == g2) { gaps.insert({q, g2}); break; }
+                            }
+                        return bail(20);
+                    }
                     for (const auto& p : pending)
                         out.push_back(in + "local v" + std::to_string(p.first) + " = " + p.second);
                     d += (int)pending.size();

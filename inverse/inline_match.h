@@ -214,3 +214,124 @@ static int cmd_inline_scan(int argc, char** argv) {
     }
     return 0;
 }
+
+namespace inl {
+
+// Module context for the rewrite (set per module by decompile_module_source).
+inline std::vector<ir::IProto>& mod_protos() { static std::vector<ir::IProto> v; return v; }
+inline std::map<int, int>& root_closure_reg() { static std::map<int, int> m; return m; }   // proto -> root register
+
+inline void prepare(const de::Module& m, const std::vector<std::string>& pool, int root) {
+    mod_protos().clear(); root_closure_reg().clear();
+    if (!std::getenv("RENOVICE_INLINE_CALLS")) return;
+    for (size_t i = 0; i < m.protos.size(); ++i) mod_protos().push_back(ir_annotate(m.protos[i], (int)i, pool, g_nb));
+    const ir::IProto& r = mod_protos()[(size_t)root];
+    std::map<int, int> writes;
+    for (const ir::IInsn& in : r.code) {
+        std::set<int> u, d; if (lv::register_effects(r, in, u, d)) for (int x : d) ++writes[x];
+    }
+    for (const ir::IInsn& in : r.code) {
+        int sub = -1;
+        if (in.op == 0x42 && in.Bx < r.consts.size() && r.consts[in.Bx].kind == ir::KKind::Closure) sub = (int)r.consts[in.Bx].sub;
+        else if (in.op == 0x16 && in.Bx < r.kids.size()) sub = (int)r.kids[in.Bx];
+        // only a closure stored once in a root register can be an inlinable local function
+        if (sub >= 0 && writes[(int)in.A] == 1 && !root_closure_reg().count(sub)) root_closure_reg()[sub] = in.A;
+    }
+}
+
+inline ir::IInsn synth(const char* name, uint8_t op, int A, int B, int C) {
+    ir::IInsn x; x.name = name; x.op = op; x.A = (uint8_t)A; x.B = (uint8_t)B; x.C = (uint8_t)C; return x;
+}
+
+// Replace every matched inlined region of `ip` by a call to `__renovice_proto_<callee>`.
+inline bool rewrite(ir::IProto& ip) {
+    if (mod_protos().empty() || !ip.ok) return false;
+    bool changed = false;
+    for (const auto& kv : root_closure_reg()) {
+        const int callee = kv.first;
+        if (callee == ip.index || callee >= (int)mod_protos().size() || !mod_protos()[(size_t)callee].ok) continue;
+        const ir::IProto& H = mod_protos()[(size_t)callee];
+        if (H.code.size() < 4 || H.vararg) continue;
+        for (int s = 0; s < (int)ip.code.size(); ++s) {
+            Matcher mt(ip, H); Match r;
+            if (!mt.at(s, r)) continue;
+            const int n = (int)r.params.size();
+            bool bound = true;
+            for (const auto& b : r.params) if (b.reg < 0 && b.truth < 0) bound = false;
+            if (!bound || r.end - s < n + 4 || ip.maxstack + n + 1 > 250) continue;
+            // the region keeps its exact size in code WORDS (jump offsets outside it are word
+            // relative); instruction indices after it shift and are remapped
+            int W = 0;
+            for (int q = s; q < r.end; ++q) W += (ip.code[(size_t)q].wide || tc::is_de_width8(ip.code[(size_t)q].op)) ? 2 : 1;
+            if (W < n + 6) continue;
+            const int F = ip.maxstack;
+            std::vector<ir::IInsn> seq;
+            ir::IInsn g = synth("GETGLOBAL", 0x17, F, 0, 0); g.wide = true; g.aux = 0;
+            g.note = "__renovice_proto_" + std::to_string(callee); seq.push_back(g);
+            for (int i = 0; i < n; ++i) {
+                const Binding& b = r.params[(size_t)i];
+                if (b.reg >= 0) seq.push_back(synth("MOVE", 0x14, F + 1 + i, b.reg, 0));
+                else seq.push_back(synth("LOADB", 0x04, F + 1 + i, b.truth ? 1 : 0, 0));
+            }
+            seq.push_back(synth("CALL", 0x54, F, n + 1, 2));
+            seq.push_back(synth("MOVE", 0x14, r.result, F, 0));
+            const int used_words = n + 5;                    // GETGLOBAL counts 2
+            const int filler = W - used_words;               // after the JUMP (used_words counts it)
+            ir::IInsn j = synth("JUMP", 0x40, 0, 0, 0); j.branch = true;
+            j.Bx = (uint16_t)(int16_t)filler;                // skip the fillers: lands on r.end
+            seq.push_back(j);
+            for (int k = 0; k < filler; ++k) {
+                ir::IInsn f2 = synth("JUMP", 0x40, 0, 0, 0); f2.branch = true; f2.Bx = 0; seq.push_back(f2);
+            }
+            ip.maxstack += n + 1;
+            const int old_len = r.end - s, new_len = (int)seq.size(), delta = new_len - old_len;
+            std::vector<ir::IInsn> code;
+            for (int q = 0; q < s; ++q) code.push_back(ip.code[(size_t)q]);
+            for (auto& x : seq) code.push_back(x);
+            for (int q = r.end; q < (int)ip.code.size(); ++q) code.push_back(ip.code[(size_t)q]);
+            for (size_t q = 0; q < code.size(); ++q) {
+                code[q].idx = (int)q;
+                if (code[q].branch && (int)q < s && code[q].target >= r.end) code[q].target += delta;
+                else if (code[q].branch && (int)q >= s + new_len && code[q].target >= r.end) code[q].target += delta;
+                else if (code[q].branch && (int)q >= s + new_len && code[q].target >= 0 && code[q].target < s) {}
+            }
+            // synthetic jumps: targets by index
+            for (int k = 0; k < new_len; ++k) {
+                ir::IInsn& x = code[(size_t)s + (size_t)k];
+                if (x.name != "JUMP") continue;
+                x.target = (k == new_len - filler - 1) ? s + new_len : s + k + 1;
+            }
+            const int end_new = s + new_len;
+            if (std::getenv("RENOVICE_INLINE_TRACE")) {
+                auto words = [](const std::vector<ir::IInsn>& c, int from, int to) {
+                    int w = 0; for (int q = from; q < to; ++q) w += c[(size_t)q].wide ? 2 : 1; return w; };
+                std::fprintf(stderr, "INLINE_WORDS W=%d old=%d new=%d%c", W, words(ip.code, s, r.end), words(code, s, s + new_len), 10);
+                for (int q = s; q < r.end; ++q)
+                    std::fprintf(stderr, "  old %d %s op=%d wide=%d tbl=%d%c", q, ip.code[(size_t)q].name.c_str(), ip.code[(size_t)q].op,
+                                 ip.code[(size_t)q].wide ? 1 : 0, tc::is_de_width8(ip.code[(size_t)q].op) ? 1 : 0, 10);
+            }
+            ip.code.swap(code);
+            r.end = end_new;
+            if (std::getenv("RENOVICE_INLINE_TRACE"))
+                std::fprintf(stderr, "INLINE_REWRITE proto=%d callee=%d region=[%d,%d)%c", ip.index, callee, s, r.end, 10);
+            changed = true;
+            s = r.end - 1;
+        }
+    }
+    return changed;
+}
+
+// After the module text is assembled: the placeholder becomes the root local holding the closure.
+inline void resolve(std::string& src) {
+    for (const auto& kv : root_closure_reg()) {
+        const std::string ph = "__renovice_proto_" + std::to_string(kv.first);
+        const std::string nm = "v" + std::to_string(kv.second);
+        for (size_t at = src.find(ph); at != std::string::npos; at = src.find(ph, at + nm.size())) {
+            const size_t e = at + ph.size();
+            if (e < src.size() && (std::isalnum((unsigned char)src[e]) || src[e] == '_')) { at = e; continue; }
+            src.replace(at, ph.size(), nm);
+        }
+    }
+}
+
+} // namespace inl

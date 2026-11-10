@@ -1269,8 +1269,13 @@ static std::string decompile_proto_text_once(const ir::IProto& ip, int idx, bool
     return src;
 }
 
-static std::string decompile_proto_anon_once(const ir::IProto& ip, int idx,
+static std::string decompile_proto_anon_once(const ir::IProto& ip_in, int idx,
                                              bool& ok, std::string& why, bool& folds_complete) {
+    // INLINE CALLS (opt-in RENOVICE_INLINE_CALLS): -O2 inlined copies of the module's own local
+    // functions become calls to a placeholder global, resolved after the module is assembled.
+    ir::IProto ip_rw;
+    const bool rewritten = !inl::mod_protos().empty() && (ip_rw = ip_in, inl::rewrite(ip_rw));
+    const ir::IProto& ip = rewritten ? ip_rw : ip_in;
     folds_complete = true;
     ok = false;
     st::Graph g;
@@ -1476,6 +1481,7 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
     int root = (int)m.protos.size() - 1;              // the chunk is the LAST proto
     // closure sharing differs between the main chunk and every other function (scoped_captures.h)
     scap::main_proto_index() = root;
+    inl::prepare(m, pool, root);
     ir::IProto ip = ir_annotate(m.protos[root], root, pool, g_nb);
     if (!ip.ok) { why = std::string("annotate failed: ") + ip.why; return false; }
     bool ok = false;
@@ -1501,6 +1507,7 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
     }
     compute_shared_protos(m);
     src = inline_closures(src, m, pool, 0);
+    inl::resolve(src);
     g_orphans_by_host.clear();          // module-scoped: never leak into another module's inlining
     em::late_scope_locals().clear();
     g_shared_protos.clear();

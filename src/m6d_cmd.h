@@ -56,7 +56,10 @@ static const std::map<int, int>& sc_fold_levels() {
 static bool build_graph(const ir::IProto& ip, st::Graph& g) {
     std::vector<Blk> bl; std::string why;
     std::string code = ir_code_bytes(ip);
-    if (!build_cfg(code, bl, why)) return false;
+    if (!build_cfg(code, bl, why)) {
+        if (std::getenv("RENOVICE_CFGDBG")) std::fprintf(stderr, "BUILD_CFG_FAIL proto=%d why=%s%c", ip.index, why.c_str(), 10);
+        return false;
+    }
     std::map<int,int> start2blk;
     for (size_t i = 0; i < bl.size(); ++i) start2blk[bl[i].first] = (int)i;
     g.n.assign(bl.size(), st::Node{});

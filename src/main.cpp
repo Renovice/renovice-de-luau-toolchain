@@ -856,7 +856,11 @@ static bool recode_proto(const std::string& code, std::string& out, std::string&
         if (!r.branch) { r.target=-1; continue; }
         long long tb = (long long)r.off + 4 + (long long)(int16_t)r.Bx * 4;
         auto it = (tb < 0) ? off2idx.end() : off2idx.find((size_t)tb);
-        if (it == off2idx.end()) { why="branch target off-boundary"; return false; }
+        if (it == off2idx.end()) {
+            why = "branch target off-boundary (insn " + std::to_string(r.idx) + " op " + std::to_string(r.op)
+                + " Bx " + std::to_string((int16_t)r.Bx) + ")";
+            return false;
+        }
         r.target = it->second;
     }
     std::vector<size_t> pos(ins.size()+1); size_t p=0;             // recompute layout
@@ -907,7 +911,11 @@ static bool build_cfg(const std::string& code, std::vector<Blk>& blocks, std::st
         if (!r.branch) { r.target=-1; continue; }
         long long tb = (long long)r.off + 4 + (long long)(int16_t)r.Bx * 4;
         auto it = (tb < 0) ? off2idx.end() : off2idx.find((size_t)tb);
-        if (it == off2idx.end()) { why="branch target off-boundary"; return false; }
+        if (it == off2idx.end()) {
+            why = "branch target off-boundary (insn " + std::to_string(r.idx) + " op " + std::to_string(r.op)
+                + " Bx " + std::to_string((int16_t)r.Bx) + ")";
+            return false;
+        }
         r.target = it->second;
     }
     // leaders
@@ -2837,6 +2845,7 @@ static int cmd_de_builtins(int argc, char** argv) {
 
 #include "m6c_cmd.h"
 #include "m6d_cmd.h"
+#include "../inverse/inline_match.h"
 #include "m6e_cmd.h"
 #include "skel_cmd.h"
 #include "semantic_plan_cmd.h"
@@ -2848,7 +2857,6 @@ static int cmd_de_builtins(int argc, char** argv) {
 #include "loop_exit_scan_cmd.h"
 #include "../inverse/inverse_scan.h"
 #include "../inverse/inverse_emit.h"
-#include "../inverse/inline_match.h"
 
 // The fixed-point rules below were A/B tested, then certified together at 360/360 in raw mode,
 // with five witnesses stable through ten cycles and 19 executable behavior fixtures. Keep that

@@ -173,6 +173,16 @@ private:
         if (nd.is_return || term.name == "RETURN") return last + 1;
         if (uncond(term)) {
             if (last == ctx.latch || silent.count(last)) return last + 1;
+            // a jump over unreachable code only (the inline rewrite's padding) is a fall-through
+            if (term.target > last + 1 && term.target <= end) {
+                bool dead = true;
+                for (int q = last + 1; q < term.target && dead; ++q) {
+                    if (node_at[(size_t)q] >= 0) dead = false;
+                    for (size_t k = 0; k < g.n.size() && dead; ++k)
+                        if (g.n[k].reach && g.n[k].first <= q && g.n[k].last >= q) dead = false;
+                }
+                if (dead) return last + 1;
+            }
             return jump_stmt(term.target, ctx, depth, last, "") ? last + 1 : -1;
         }
         if (!nd.is_branch || nd.succ_true < 0 || nd.succ_false < 0) return last + 1;   // fall-through
