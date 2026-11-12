@@ -6628,3 +6628,12 @@ Rejected: bytecode-only temporary/local verdicts (190-274 vs 290 rebuilt prototy
 inline threshold 42 as default; parenthesised callee to block inlining (upstream inlines `(f)(x)` too).
 Next Step: promote after the full --closed run; remaining groups: walker if/for give-ups, inlining that
 upstream cannot reproduce, statement-order details in main chunks.
+
+## 2026-11-12 - Full closed run full_1113b (canonical builtin-chain refusal + RenoviceNoConstantSwap)
+
+Hypothesis: the fixes for the 10 compile-twice regressions hold corpus-wide with no new losses.
+Finding: True for first pass; the closed column shows 6 pre-existing drifts that were never measured before.
+Evidence: first-pass CFG-ID 5,279 -> 5,386 / 5,481; CONST-ID 5,471 -> 5,478; 98 fixed; closed CFG/CONST losses vs closed-1108: 0.
+The 6 "BROKEN" rows (StatCompare, StatsUtil, TNW_CinAspect, WorldStateWindow, 1999_CalendarLib, NecramechControl) had closedCfgId=None in the baseline (never measured). The old bin/derecomp.exe (2026-11-08) drifts identically on pass 2 (for example, CalendarLib 19/19 -> 16/19, a __renovice_state dispatcher re-rendered with register-loaded compare constants).
+Reason: same failure with the old build, so it's a pre-existing closed-loop instability, not a regression.
+Next Step: fix dispatcher-output re-decompilation (state-var compares rendered against register constants); promoted full_1113b as the baseline.
