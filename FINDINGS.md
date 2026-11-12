@@ -6637,3 +6637,11 @@ Evidence: first-pass CFG-ID 5,279 -> 5,386 / 5,481; CONST-ID 5,471 -> 5,478; 98 
 The 6 "BROKEN" rows (StatCompare, StatsUtil, TNW_CinAspect, WorldStateWindow, 1999_CalendarLib, NecramechControl) had closedCfgId=None in the baseline (never measured). The old bin/derecomp.exe (2026-11-08) drifts identically on pass 2 (for example, CalendarLib 19/19 -> 16/19, a __renovice_state dispatcher re-rendered with register-loaded compare constants).
 Reason: same failure with the old build, so it's a pre-existing closed-loop instability, not a regression.
 Next Step: fix dispatcher-output re-decompilation (state-var compares rendered against register constants); promoted full_1113b as the baseline.
+
+## 2026-11-12 - Closed-loop drift: AND/OR/ANDK/ORK lowered by the transcoder
+
+Hypothesis: the 6 compile-twice drifts come from our transcoder rewriting stock single instructions into JUMPIF sequences, which the next decompile faithfully reads as `if`.
+Finding: Partially true (4 of 6).
+Evidence: `x = x or 1999` recompiled to MOVE/JUMPIF/LOADK instead of ORK. With AND/OR/ANDK/ORK native by default (certified V11_ANDK, V12_ANDOR, V15_ORK), CalendarLib, StatCompare, StatsUtil and TNW_CinAspect hold 3/3 passes. All-module first pass: 0 BROKEN, 1 FIXED (5,387 CFG-ID).
+Remaining: NecramechControl (proto 27) and WorldStateWindow (proto 49) — one large proto each falls back to the dispatcher on the second decompile. JUMPXEQK* stay lowered: the in-game capture-cell finding (transcode.h) means they can't simply go native.
+Next Step: structure those two giant protos on re-decompile; RENOVICE_NATIVE_LEGACY=1 restores the old lowering.

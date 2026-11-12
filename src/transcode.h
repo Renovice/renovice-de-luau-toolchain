@@ -206,7 +206,11 @@ inline bool is_jumpxeqk(const std::string& n) { return n=="JUMPXEQKN"||n=="JUMPX
 // knob-off build has zero — a cert that never reaches the code proves nothing.
 // ---------------------------------------------------------------------------------------------
 inline bool native_on(const char* name) {
+    // AND/OR/ANDK/ORK are certified in game (V11_ANDK, V12_ANDOR, V15_ORK): native by default, so a
+    // recompile keeps stock's single instruction instead of a JUMPIF lowering that decompiles back as
+    // an if (closed-loop drift, 2026-11-12). RENOVICE_NATIVE_LEGACY=1 restores the old lowering.
     const char* e = std::getenv("RENOVICE_NATIVE");
+    if ((!e || !*e) && !std::getenv("RENOVICE_NATIVE_LEGACY")) e = "AND,OR,ANDK,ORK";
     if (!e || !*e) return false;
     std::string hay = e, needle = name;
     for (auto& c : hay) c = (char)std::toupper((unsigned char)c);
