@@ -6615,9 +6615,8 @@ inexact_selector_fallback:
         std::vector<std::string> out;
         // a statement consumes pending temporaries; the unread ones must be materialised first:
         // only a leading one sitting exactly at the depth can become a local
-        auto consume = [&](std::string& t, size_t from, const std::string& in) {
-            // `vB < vA` with A evaluated first (A < B, both pending) is the compiled form of
-            // `vA > vB`: Luau swaps the operands of > / >= but evaluates them in source order
+        // `vB < vA` with A evaluated first (A < B, both pending) is the compiled form of `vA > vB`
+        auto flip_compare = [&](std::string& t, size_t from) {
             {
                 std::vector<RegToken> tk = reg_tokens(t.substr(from));
                 for (size_t k = 0; k + 1 < tk.size(); ++k) {
@@ -6638,6 +6637,9 @@ inexact_selector_fallback:
                     break;
                 }
             }
+        };
+        auto consume = [&](std::string& t, size_t from, const std::string& in) {
+            flip_compare(t, from);
             std::vector<int> used;
             if (!substitute(t, from, used)) return false;
             std::vector<std::pair<int, std::string>> left;
@@ -6870,6 +6872,7 @@ inexact_selector_fallback:
                 // a temporary (read exactly once before the register is rewritten) or a new local
                 std::vector<int> used;
                 std::string value = t.substr(rhs);
+                flip_compare(value, 0);
                 if (!substitute(value, 0, used)) return bail(11);
                 for (int r : used)
                     pending.erase(std::remove_if(pending.begin(), pending.end(),
