@@ -383,7 +383,8 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
             // (a candidate's environment is a ';'-separated list)
             for (const char* extra : {"RENOVICE_INVERSE_STACK_LOCALS=1",
                                       "RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_STACK_BYTECODE_TEMPS=1",
-                                      "RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_INLINE_CALLS=1"})
+                                      "RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_INLINE_CALLS=1",
+                                      "RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_STACK_NO_VALUE_FLIP=1"})
                 for (const std::string& fold : {chosen_env, wide_env, std::string("RENOVICE_SC_EXPR_FOLD_STRICT=1"),
                                                 std::string("RENOVICE_NO_SC_EXPR_FOLD=1")})
                     for (bool only_bad : {true, false})

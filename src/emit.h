@@ -6872,7 +6872,7 @@ inexact_selector_fallback:
                 // a temporary (read exactly once before the register is rewritten) or a new local
                 std::vector<int> used;
                 std::string value = t.substr(rhs);
-                flip_compare(value, 0);
+                if (!std::getenv("RENOVICE_STACK_NO_VALUE_FLIP")) flip_compare(value, 0);
                 if (!substitute(value, 0, used)) return bail(11);
                 for (int r : used)
                     pending.erase(std::remove_if(pending.begin(), pending.end(),
