@@ -6909,7 +6909,14 @@ inexact_selector_fallback:
                         pending.erase(std::remove_if(pending.begin(), pending.end(),
                                       [&](const std::pair<int, std::string>& q) { return q.first == r; }), pending.end());
                     for (auto& q : pending) if (q.first == p.first) {
-                        q.second.replace(slot + 1 + key.size() + 3, 3, atomic(val) ? val : "(" + val + ")");
+                        // a constant DE stored after the template: parenthesised, our compiler build
+                        // keeps it out of the template too (RenoviceGroupNotTemplated)
+                        auto is_literal = [](const std::string& v) {
+                    return !v.empty() && (std::isdigit((unsigned char)v[0]) || v[0] == '"' || v == "true" || v == "false"
+                        || (v[0] == '-' && v.size() > 1 && std::isdigit((unsigned char)v[1])));
+                };
+                        q.second.replace(slot + 1 + key.size() + 3, 3,
+                                         (is_literal(val) || !atomic(val)) ? "(" + val + ")" : val);
                     }
                     filled = true;
                     break;
@@ -7002,7 +7009,12 @@ inexact_selector_fallback:
                 const size_t after = slot + 1 + key.size() + 6;
                 if (after < lit.size() && lit[after] != ',' && lit[after] != ' ') break;
                 const bool wrapped = val.size() >= 2 && val.front() == '(' && val.back() == ')';
-                lit.replace(slot + 1 + key.size() + 3, 3, (atomic(val) || wrapped) ? val : "(" + val + ")");
+                auto is_literal = [](const std::string& v) {
+                    return !v.empty() && (std::isdigit((unsigned char)v[0]) || v[0] == '"' || v == "true" || v == "false"
+                        || (v[0] == '-' && v.size() > 1 && std::isdigit((unsigned char)v[1])));
+                };
+                lit.replace(slot + 1 + key.size() + 3, 3,
+                            is_literal(val) ? "(" + val + ")" : ((atomic(val) || wrapped) ? val : "(" + val + ")"));
                 last_slot = slot;
                 ++r;
             }

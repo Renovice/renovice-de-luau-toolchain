@@ -38,7 +38,7 @@ static std::string exe_dir() {
 // RENOVICE_LUAU_INLINE_THRESHOLD selects bin/luau-compile-renovice.exe (the same upstream compiler built
 // from source, byte-identical output, plus integer fast-flag support) and DE's inline cost threshold.
 static std::string luau_compile_path() {
-    if (std::getenv("RENOVICE_LUAU_INLINE_THRESHOLD")) return exe_dir() + "\\luau-compile-renovice.exe";
+    if (!std::getenv("RENOVICE_LUAU_UPSTREAM")) return exe_dir() + "\\luau-compile-renovice.exe";
     return exe_dir() + "\\luau-compile.exe";
 }
 
@@ -95,8 +95,12 @@ static std::string compile_luau(const std::string& src_path, std::string& err) {
         const char* ctor = std::getenv("RENOVICE_VECTOR_CTOR");
         vector_opt = std::string(" -O2 --vector-ctor=") + (ctor ? ctor : "Vector3");
     }
+    // our compiler build (byte-identical to upstream otherwise): a parenthesised table value stays out
+    // of the template, as DE's compiler does for some constant fields. RENOVICE_LUAU_UPSTREAM opts out.
+    if (!std::getenv("RENOVICE_LUAU_UPSTREAM")) vector_opt += " --fflags=RenoviceGroupNotTemplated=1";
     if (const char* th = std::getenv("RENOVICE_LUAU_INLINE_THRESHOLD"))
-        vector_opt += std::string(" --fflags=LuauCompileInlineThreshold=") + th
+        vector_opt += std::string(std::getenv("RENOVICE_LUAU_UPSTREAM") ? " --fflags=" : ",")
+                    + "LuauCompileInlineThreshold=" + th
                     + ",RenoviceInlineMissingArgsConstant="
                     + (std::getenv("RENOVICE_LUAU_MISSING_ARGS_CONST") ? std::getenv("RENOVICE_LUAU_MISSING_ARGS_CONST") : "1");
     std::string inner = std::string("\"") + luau_compile_path() + "\" --binary" + vector_opt + " \""
