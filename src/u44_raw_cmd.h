@@ -344,11 +344,11 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
             std::error_code ec; fs::remove(long_path(std::string(stem) + suffix), ec);
         }
     }
-    // INVERSE STAGE (inverse/inverse_emit.h, opt-in RENOVICE_INVERSE_SELECT): re-render only the
+    // INVERSE STAGE (inverse/inverse_emit.h, default; RENOVICE_NO_INVERSE_SELECT disables): re-render only the
     // prototypes an identity gate still reports with the compiler-inverse walker, under the same
     // fold environment, and keep that render only when the compiler confirms it is better on control
     // flow and not worse on any other identity count. Production output stays for every other proto.
-    if (std::getenv("RENOVICE_INVERSE_SELECT") && top_level && !std::getenv("RENOVICE_INVERSE_EMIT")) {
+    if (!std::getenv("RENOVICE_NO_INVERSE_SELECT") && top_level && !std::getenv("RENOVICE_INVERSE_EMIT")) {
         char tmp_dir[MAX_PATH]; GetTempPathA(MAX_PATH, tmp_dir);
         char stem[MAX_PATH]; GetTempFileNameA(tmp_dir, "inv", 0, stem);
         const std::string cur_src = std::string(stem) + ".cur.luau", inv_src = std::string(stem) + ".inv.luau";
