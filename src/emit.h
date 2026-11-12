@@ -44,6 +44,7 @@ struct Emitter {
     static inline bool (*inverse_hook)(Emitter&, int) = nullptr;
     bool inverse_rendered = false;   // this body came from the inverse walker
     bool tag_insns = false;          // append ` --@<pc>` to assignment lines (STACK LOCALS)
+    static inline int stack_pidx = -1;   // prototype being rebuilt (diagnostics only)
     const ir::IProto* ip = nullptr;
     const st::Graph*  g  = nullptr;
     const sa::Analyzer* A = nullptr;
@@ -6488,7 +6489,7 @@ inexact_selector_fallback:
         static const bool dbg = std::getenv("RENOVICE_STACKDBG") != nullptr;
         size_t cur_line = 0; int cur_d = 0;
         auto bail = [&](int why) {
-            if (dbg) std::fprintf(stderr, "STACK_BAIL why=%d line=%zu d=%d\n", why, cur_line, cur_d);
+            if (dbg) std::fprintf(stderr, "STACK_BAIL pidx=%d why=%d line=%zu d=%d\n", stack_pidx, why, cur_line, cur_d);
             return false;
         };
         std::vector<std::string> lines;
@@ -6871,6 +6872,21 @@ inexact_selector_fallback:
                     bool fills = (int)pending.size() == R - d;
                     for (size_t k = 0; k < pending.size() && fills; ++k)
                         if (pending[k].first != d + (int)k) fills = false;
+                    // a gap register with no earlier definition anywhere is a bare `local vX`
+                    // (declared nil; `local x` compiles to the LOADNIL the stock code has)
+                    if (!fills && pending.empty()) {
+                        bool never_defined = true;
+                        for (int g2 = d; g2 < R && never_defined; ++g2)
+                            for (size_t q = 0; q < li && never_defined; ++q) {
+                                size_t r2 = 0; std::vector<int> tq = targets(trim(lines[q]), r2);
+                                for (int x : tq) if (x == g2) never_defined = false;
+                            }
+                        if (never_defined) {
+                            for (int g2 = d; g2 < R; ++g2) out.push_back(in + "local v" + std::to_string(g2));
+                            d = R;
+                            fills = true;
+                        }
+                    }
                     if (!fills) {
                         for (int g2 = d; g2 < R; ++g2)
                             for (size_t q = li; q-- > 0;) {
@@ -20408,6 +20424,7 @@ inexact_selector_fallback:
             const std::map<int, std::map<int, bool>> tmap = bytecode_temp_map();
             suppress_dead_generic_frame_copies(trial);
             canonicalize_lexical_for_variables(trial, pidx);
+            stack_pidx = pidx;
             if (stack_locals(trial, ip->nparams, &tmap)) { body.swap(trial); stack_rebuilt = true; }
             else {                                 // fallback: drop the instruction tags
                 size_t at = 0;
