@@ -97,7 +97,7 @@ static std::string compile_luau(const std::string& src_path, std::string& err) {
     }
     // our compiler build (byte-identical to upstream otherwise): a parenthesised table value stays out
     // of the template, as DE's compiler does for some constant fields. RENOVICE_LUAU_UPSTREAM opts out.
-    if (!std::getenv("RENOVICE_LUAU_UPSTREAM")) vector_opt += " --fflags=RenoviceGroupNotTemplated=1";
+    if (!std::getenv("RENOVICE_LUAU_UPSTREAM")) vector_opt += " --fflags=RenoviceGroupNotTemplated=1,RenoviceNoConstantSwap=1";
     if (const char* th = std::getenv("RENOVICE_LUAU_INLINE_THRESHOLD"))
         vector_opt += std::string(std::getenv("RENOVICE_LUAU_UPSTREAM") ? " --fflags=" : ",")
                     + "LuauCompileInlineThreshold=" + th

@@ -282,6 +282,29 @@ static bool build_graph(const ir::IProto& ip, st::Graph& g) {
                 for (int q = F.first; q < F.last; ++q) if (ip.code[q].name == "CALL") ++setup_calls;
                 const bool single_call_operand = setup_calls == 1 && F.last - 1 >= F.first
                                               && ip.code[F.last - 1].name == "CALL";
+                // CANONICAL BUILTIN CHAINS (2026-11-13): a chain of calls containing a builtin is
+                // refused below when the builtin carries its FASTCALL hint; the same source spelled
+                // through registers (our own recompile drops the hint) used to fold, so stock and
+                // recompiled bytecode decompiled differently and the compiler-closed loop alternated
+                // (BrawlerGaze and 7 others: two spellings, both CFG-equal, never a fixed point).
+                // Decide by what is called, not by whether the hint survived.
+                // (the hinted form is admitted only as a single call ending the setup)
+                if (setup_calls >= 1 && !single_call_operand && !std::getenv("RENOVICE_NO_CANONICAL_BUILTIN_CHAIN")) {
+                    for (int q = F.first; q < F.last; ++q) {
+                        const ir::IInsn& in = ip.code[(size_t)q];
+                        if (in.name != "GETIMPORT") continue;
+                        const std::string& nm = in.note;
+                        static const char* builtin_prefix[] = {"math.", "string.", "table.", "bit32.", "buffer.", "vector."};
+                        static const char* builtin_name[] = {"IsNull", "type", "typeof", "tostring", "tonumber",
+                                                             "rawget", "rawset", "rawequal", "rawlen", "select",
+                                                             "assert", "unpack", "getmetatable", "setmetatable"};
+                        bool builtin = false;
+                        for (const char* pfx : builtin_prefix) if (nm.rfind(pfx, 0) == 0) builtin = true;
+                        for (const char* b : builtin_name) if (nm == b) builtin = true;
+                        if (builtin) { setup_calls = -1; break; }
+                    }
+                }
+                if (setup_calls < 0) exact = false;
                 std::map<int, int> def_at, def_count, use_count, first_use;
                 for (int q = F.first; q <= F.last && exact; ++q) {
                     std::set<int> uses, defs;
