@@ -6601,3 +6601,30 @@ Remaining classes found (not fixed):
   every local at function top; stock keeps the local at the stack top. Local-declaration placement class.
 Next Step: walker coverage for the dispatcher-fallback protos (they cause the ORK/MOVE class), then the
 STRAY_JUMP inlining class; one full run at the end.
+
+## 2026-11-12 - Batch: local-structure rebuild, -O2 recompile, inline recognition, table templates
+
+Hypothesis: the remaining CFG-ID failures after the inverse walker are compiler-inversion gaps (register
+allocation, compiler settings, inlining, table templates), not per-script shapes.
+Finding: Partially true (measured on the 196 all-1108d failures; full corpus run in work/full_1112).
+- Stack locals (RENOVICE_INVERSE_STACK_LOCALS, used through the selection stage): replays Luau's local
+  allocator over walker output; folds expression temporaries (register order = evaluation order; numeric
+  for start/limit/step; `a > b` flips; record fills; value or/and; compound assignment `x op= y` where the
+  same register carries load/op/store; register-gap retry for single-read locals; parentheses only where a
+  call could be multret). Comparison values print as `x = a <= b`.
+- Recompile defaults: `-O2 --vector-ctor=Vector3` (DE folds vector constructors; -O2 alone neutral, 0 BROKEN
+  on 939 tripwires) and bin/luau-compile-renovice.exe (upstream built from source, byte-identical, plus
+  integer fast flags and RenoviceGroupNotTemplated: a parenthesised table value stays out of the DUPTABLE
+  template, matching DE's LOADN+SETFIELD after DUPTABLE; no upstream spelling reproduces that).
+- Inline recognition (inverse/inline_match.h, RENOVICE_INLINE_CALLS, selection candidate): matches -O2
+  inlined copies of root local functions (returns -> result write + JUMP join, constant-argument folding,
+  constant loads, loop variables, register-held returns). DE's inliner differs from upstream: threshold
+  between ~25.5 and ~43 (cost 28@1.10x and 45@1.08x inlined; 46@1.06x not); upstream's "missing arguments are
+  nil constants" rule probably absent. Threshold 42 + missing-args-off as a default: +1 / -4 on the 196 -> kept
+  opt-in (RENOVICE_LUAU_INLINE_THRESHOLD, RENOVICE_LUAU_MISSING_ARGS_CONST). Residual differences after inlining
+  (two-jump condition after an inlined call) indicate an older Luau in DE.
+- Failure set: 96/196 pass CFG-ID + CONST-ID with the default build (inverse selection now default).
+Rejected: bytecode-only temporary/local verdicts (190-274 vs 290 rebuilt prototypes for the text look-ahead);
+inline threshold 42 as default; parenthesised callee to block inlining (upstream inlines `(f)(x)` too).
+Next Step: promote after the full --closed run; remaining groups: walker if/for give-ups, inlining that
+upstream cannot reproduce, statement-order details in main chunks.
