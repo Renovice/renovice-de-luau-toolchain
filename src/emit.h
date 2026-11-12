@@ -6666,7 +6666,16 @@ inexact_selector_fallback:
                     if (!consume(t, 0, in)) return bail(3);
                     if (t.rfind("until ", 0) == 0)
                         for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(4);
-                } else if (!pending.empty()) return bail(5);
+                } else if (!pending.empty()) {
+                    // values computed at the end of a block and not consumed there: locals of that
+                    // block when they sit exactly at the next free registers
+                    for (size_t k = 0; k < pending.size(); ++k)
+                        if (pending[k].first != d + (int)k) return bail(5);
+                    for (const auto& pv : pending)
+                        out.push_back(in + "  local v" + std::to_string(pv.first) + " = " + pv.second);
+                    d += (int)pending.size();
+                    pending.clear();
+                }
                 d = depth_stack.back(); depth_stack.pop_back();
                 if (is_else) {
                     for (const RegToken& tk : reg_tokens(t)) if (tk.reg >= d) return bail(6);
