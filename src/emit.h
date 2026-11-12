@@ -6645,7 +6645,16 @@ inexact_selector_fallback:
                 if (std::find(used.begin(), used.end(), p.first) == used.end()) left.push_back(p);
             pending.clear();
             for (const auto& p : left) {
-                if (p.first != d) return false;
+                if (p.first != d) {
+                    // a local above the depth: the registers below it held locals, not temporaries
+                    // (gap retry: force their last definitions to be locals)
+                    for (int g2 = d; g2 < p.first; ++g2)
+                        for (size_t q = cur_line; q-- > 0;) {
+                            size_t r2 = 0; std::vector<int> tq = targets(trim(lines[q]), r2);
+                            if (tq.size() == 1 && tq[0] == g2) { gaps.insert({q, g2}); break; }
+                        }
+                    return false;
+                }
                 out.push_back(in + "local v" + std::to_string(p.first) + " = " + p.second);
                 ++d;
             }
@@ -6733,6 +6742,58 @@ inexact_selector_fallback:
             // COMPOUND ASSIGNMENT: `vT = NAME; vT = vT op Y; NAME = vT` keeps one register throughout,
             // which is how Luau compiles `NAME op= Y` (plain `NAME = NAME op Y` loads NAME into a
             // second register). NAME is an upvalue, global or field, never a register.
+            // LATER SETLIST BATCH: `vT[N] = X` right after `local vT = {item1, ..., itemN-1}` is
+            // item N of the same constructor (items 17.. go through a second SETLIST batch)
+            {
+                const size_t lb = t.find('[');
+                const size_t rb = t.find("] = ");
+                if (lb != std::string::npos && rb != std::string::npos && lb > 1 && t[0] == 'v'
+                    && t.find_first_not_of("0123456789", 1) == lb && !out.empty()) {
+                    const std::string T = t.substr(0, lb);
+                    const std::string idx = t.substr(lb + 1, rb - lb - 1);
+                    bool num = !idx.empty() && idx.find_first_not_of("0123456789") == std::string::npos;
+                    // the constructor line: the last emitted line declaring T
+                    size_t ci = out.size();
+                    for (size_t q = out.size(); q-- > 0;) {
+                        const std::string u = trim(out[q]);
+                        if (u.rfind("local " + T + " = {", 0) == 0 || u.rfind(T + " = {", 0) == 0) { ci = q; break; }
+                        if (u.find(T) != std::string::npos) break;          // T used in between: stop
+                    }
+                    if (num && ci < out.size() && ends(out[ci], "}")) {
+                        std::string& cl = out[ci];
+                        const size_t open = cl.find("= {") + 2;
+                        // count top-level items
+                        int items = 0, depth = 0; char quote = 0; bool any = false, keyed = false;
+                        for (size_t k = open + 1; k + 1 < cl.size(); ++k) {
+                            const char ch = cl[k];
+                            if (quote) { if (ch == '\\') ++k; else if (ch == quote) quote = 0; continue; }
+                            if (ch == '"' || ch == '\'') quote = ch;
+                            else if (ch == '(' || ch == '[' || ch == '{') ++depth;
+                            else if (ch == ')' || ch == ']' || ch == '}') --depth;
+                            else if (ch == ',' && depth == 0) ++items;
+                            else if (ch == '=' && depth == 0) keyed = true;
+                            if (ch != ' ') any = true;
+                        }
+                        if (any) ++items;
+                        const bool positional = !keyed;
+                        if (positional && std::atoi(idx.c_str()) == items + 1) {
+                            std::string val = t.substr(rb + 4);
+                            std::vector<int> used;
+                            if (substitute(val, 0, used)) {
+                                bool clean = true;
+                                for (const RegToken& tk : reg_tokens(val)) if (tk.reg >= d) clean = false;
+                                if (clean) {
+                                    for (int r : used)
+                                        pending.erase(std::remove_if(pending.begin(), pending.end(),
+                                                      [&](const std::pair<int, std::string>& pv) { return pv.first == r; }), pending.end());
+                                    cl.insert(cl.size() - 1, std::string(any ? ", " : "") + val);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             bool compound_done = false;
             if (li + 2 < lines.size()) {
                 auto strip = [&](std::string u) { const size_t tag = u.rfind(" --@"); if (tag != std::string::npos) u.resize(tag); return trim(u); };
