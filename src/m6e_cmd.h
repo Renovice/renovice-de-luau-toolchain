@@ -1513,6 +1513,29 @@ static bool decompile_module_source(const std::string& path, std::string& src, s
     compute_shared_protos(m);
     src = inline_closures(src, m, pool, 0);
     inl::resolve(src);
+    // A statement that begins with `(` (`(a.b).c = 0`, `(f)(x)`) after an expression statement is
+    // ambiguous Luau syntax ("could also be a start of new statement"): give it a leading `;`.
+    // RENOVICE_NO_PAREN_STATEMENT_SEMI disables it.
+    if (!std::getenv("RENOVICE_NO_PAREN_STATEMENT_SEMI")) {
+        std::string fixed; fixed.reserve(src.size() + 64);
+        size_t line = 0;
+        while (line < src.size()) {
+            size_t eol = src.find('\n', line);
+            if (eol == std::string::npos) eol = src.size();
+            size_t first = line;
+            while (first < eol && src[first] == ' ') ++first;
+            if (first < eol && src[first] == '(') {
+                fixed.append(src, line, first - line);
+                fixed += ';';
+                fixed.append(src, first, eol - first);
+            } else {
+                fixed.append(src, line, eol - line);
+            }
+            if (eol < src.size()) fixed += '\n';
+            line = eol + 1;
+        }
+        src.swap(fixed);
+    }
     g_orphans_by_host.clear();          // module-scoped: never leak into another module's inlining
     em::late_scope_locals().clear();
     g_shared_protos.clear();

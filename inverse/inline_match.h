@@ -10,6 +10,7 @@
 //   derecomp inline-scan FILE    lists the matches it finds (diagnostic)
 #pragma once
 #include <map>
+#include <algorithm>
 #include <set>
 #include <string>
 #include <vector>
@@ -371,8 +372,20 @@ inline void resolve(std::string& src) {
     // guarantees that store is the register's last write, so the shadowing local holds every
     // later read. Opt-in RENOVICE_INLINE_LOCAL_DECL (a selection candidate): declaring the local
     // can also let upstream inline calls DE kept (IceShieldSpecter), so it competes, never default.
+    // Luau allows 200 locals per function: each shadowing declaration adds one root local, so
+    // declarations stop where the root's own local list leaves no room (ChatRedux, HudRedux)
+    int room = 0;
+    {
+        const size_t at = src.find("\n  local v");
+        if (at != std::string::npos) {
+            const size_t eol = src.find('\n', at + 1);
+            const std::string decl = src.substr(at, eol == std::string::npos ? std::string::npos : eol - at);
+            room = 190 - (1 + (int)std::count(decl.begin(), decl.end(), ','));
+        }
+    }
     if (std::getenv("RENOVICE_INLINE_LOCAL_DECL"))
         for (int callee : used_callees()) {
+            if (room-- <= 0) break;
             const auto it = root_closure_reg().find(callee);
             if (it == root_closure_reg().end()) continue;
             const std::string pat = "\n  v" + std::to_string(it->second) + " = function(";

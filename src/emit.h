@@ -6604,7 +6604,16 @@ inexact_selector_fallback:
                                         && (end_tok == text.size()))
                     || (at_tok >= 7 && text.compare(at_tok - 7, 7, "return ") == 0
                         && (end_tok == text.size() || text.compare(end_tok, 4, " end") == 0) && !call_like);
-                const bool wrap = !atomic(v) && !(call_like && !multret_site) && !(whole_rhs && !call_like);
+                // a postfix position (`v:m()`, `v.f`, `v[k]`, `v(...)`) takes only a prefix expression:
+                // a literal, constructor, function or unary expression there needs parentheses
+                // (`"%s":format(x)` does not parse)
+                const bool postfix_next = next == ':' || next == '.' || next == '[' || next == '(';
+                bool prefix_expr = !v.empty() && (std::isalpha((unsigned char)v[0]) || v[0] == '_' || v[0] == '(');
+                for (const char* kw : {"nil", "true", "false", "function", "not "})
+                    if (v.rfind(kw, 0) == 0 && (v.size() == std::strlen(kw) || !std::isalnum((unsigned char)v[std::strlen(kw)]) || kw[std::strlen(kw) - 1] == ' '))
+                        prefix_expr = false;
+                const bool wrap = (!atomic(v) && !(call_like && !multret_site) && !(whole_rhs && !call_like))
+                                  || (postfix_next && !prefix_expr);
                 text.replace(at_tok, end_tok - at_tok, wrap ? "(" + v + ")" : v);
                 used_regs.push_back(pending[it->second].first);
             }
