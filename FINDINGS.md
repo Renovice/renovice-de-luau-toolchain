@@ -6710,3 +6710,14 @@ Finding: True. New compiler flag (compiler/Compiler.cpp, passed by default from 
 Evidence: tier 1 neutral with the flag alone (0/0); with the waived threshold, tier 2 (all_1113h): FIXED 3, BROKEN 0, CFG-ID 5,395 / 5,481. Fixtures 206/206, 177/177. NokkoMushroomEffectsLib 9/9.
 The patched compiler sources and build steps are now tracked under compiler/ (before, they lived only in the untracked work/luau_build).
 Next Step: the remaining inline-class misses: rewritten sources that do not compile (ChatRedux, LotusUtilities ...), constant-argument specialisation (ToxinInoculation), regions the matcher does not find.
+
+## 2026-11-13 - Emission validity fixes found by the re-inline renders
+
+Hypothesis: re-inline candidate renders that do not compile (`-1` in the scan) have three separate causes.
+Finding: True.
+1. ChatRedux, HudRedux: the shadowing `local vR = function` declarations push the root past Luau's 200-local limit. resolve() now stops declaring when the root's own list leaves no room.
+2. LotusUtilities: a statement starting with `(` after an expression statement is ambiguous syntax. Lines beginning with `(` now get a leading `;` (m6e_cmd.h; RENOVICE_NO_PAREN_STATEMENT_SEMI disables it).
+3. VoidTear: stack-locals text substitution put a string literal in a postfix position (`"…%*…":format(…)`). A substituted value followed by `:` `.` `[` `(` must be a prefix expression, otherwise it is parenthesised (emit.h).
+2 and 3 are general emitter defects (not inline-specific); they produced uncompilable source in any render that hit them.
+Evidence: all four renders now compile. Tier 2 (all_1113i): FIXED 0, BROKEN 0; fixtures 206/206, 177/177.
+Next Step: the inline-class modules that compile but still miss (constant-argument specialisation; matcher misses).
