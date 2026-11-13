@@ -6691,3 +6691,14 @@ Finding: True. DE's bytecode loads the number and compares registers (LOADN r 2;
 Evidence: tier 2 (all_1113f): FIXED 1, BROKEN 0. CFG-ID 5,391 / 5,481. Fixture suites 206/206 and 177/177 PASS.
 RENOVICE_CTOR_NO_CONST_EQ restores the refusal.
 Next Step: the remaining SETLIST modules are inlined helpers inside constructors (UICommonResources: loops per item); that class waits for the rejected inline route or a new idea.
+
+## 2026-11-13 - Re-inline as a selection candidate
+
+Hypothesis: the rejected re-inline route (m6e_cmd.h:261, measured as a module-wide DEFAULT) can win as a selection candidate. The inline matcher rewrites DE's inlined region into a call; the callee's root store becomes `local vR = function` (upstream inlines only through a local with an init that is never written: Compiler getFunctionExpr); the -O2 recompile then inlines it again.
+Finding: Partially true.
+- CreateShieldOnHeavySlam: the walker prints `if IsNull(e) or (not v8(e, list) or e:HasAbilityResistance(0))`, and with `local v8 = function` CFG/CONST/dataflow all reach 8/8.
+- The declaration must stay a CANDIDATE: on IceShieldSpecter it lets upstream inline calls DE kept, so 14 -> 12. Opt-in RENOVICE_INLINE_LOCAL_DECL; two candidates (JUMP or MOVE fillers, opt-in RENOVICE_INLINE_MOVE_FILLER), each in only-bad and all-protos form, queued LAST so large modules keep their budget.
+- Side finding: the default emitter (NO_INVERSE_SELECT) drops the conditions around this region even WITHOUT the rewrite (CreateShieldOnHeavySlam proto 6: `c7v29 = true; c7v29 = false`). The gates catch it and selection falls back to the dispatcher, but it is a latent emitter defect.
+- LoadOutRedux flips to "lost decompile" in tier 1 with the unchanged promoted build too (107 s standalone, 300 s gate timeout under parallel load): a timing flake, not a regression.
+Evidence: tier 2 (all_1113g): FIXED 1, BROKEN 0, CFG-ID 5,392 / 5,481. Fixture suites 206/206, 177/177.
+Next Step: find why the other inline-class modules still fail with the candidate (constant-argument specialisation, e.g. ToxinInoculation; matcher misses).
