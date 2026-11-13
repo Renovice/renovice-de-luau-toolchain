@@ -6721,3 +6721,13 @@ Finding: True.
 2 and 3 are general emitter defects (not inline-specific); they produced uncompilable source in any render that hit them.
 Evidence: all four renders now compile. Tier 2 (all_1113i): FIXED 0, BROKEN 0; fixtures 206/206, 177/177.
 Next Step: the inline-class modules that compile but still miss (constant-argument specialisation; matcher misses).
+
+## 2026-11-13 - Re-inline selection: targeted, ordered, and a fairer "better" rule
+
+Hypothesis: the re-inline candidate fixes more functions than the pipeline adopts.
+Finding: True, for three reasons:
+1. inl::rewrite rewrote EVERY prototype even in a candidate restricted to the bad ones. 8 fixes each broke 3-140 other prototypes. The rewrite now honours RENOVICE_INVERSE_PROTOS.
+2. Ordering and size: the only-bad re-inline candidates now run FIRST. Modules over 400 KB of source (they skipped selection entirely) get just those two candidates (HudRedux: one 28 s render, 317 -> 318).
+3. The "better" rule needed a STRICTLY higher CFG count. Stalker: pass 0 lifted CFG with strings unchanged and blocked a later render with the same CFG and the strings and keys restored. Now: no count may drop, and any count may rise (RENOVICE_INVERSE_SELECT_CFG_ONLY restores the old rule).
+Evidence: tier 2 (all_1113j): FIXED 3, BROKEN 0 (4 targets now pass CFG). CFG-ID 5,399 / 5,481 (98.5%), CONST-ID 5,479, dataflow 5,403. Fixtures 206/206, 177/177.
+Next Step: 65 still-failing prototypes render cleanly in the walker without any inline region yet still differ: survey their CFG_DIFF classes.
