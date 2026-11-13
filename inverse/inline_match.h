@@ -385,7 +385,11 @@ inline void resolve(std::string& src) {
         for (size_t at = src.find(ph); at != std::string::npos; at = src.find(ph, at + nm.size())) {
             const size_t e = at + ph.size();
             if (e < src.size() && (std::isalnum((unsigned char)src[e]) || src[e] == '_')) { at = e; continue; }
-            src.replace(at, ph.size(), nm);
+            // a direct call is written `(vR)(...)`: the compiler inlines only that form
+            // (RenoviceInlineGroupedOnly), so exactly the calls DE inlined are inlined again
+            const bool direct = e < src.size() && src[e] == '(';
+            src.replace(at, ph.size(), direct ? "(" + nm + ")" : nm);
+            if (direct) at += 2;
         }
     }
 }
