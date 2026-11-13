@@ -990,7 +990,11 @@ private:
         }
         EP a = read(in.A, pc), b = read((int)in.aux, pc);
         if (st.fail) return nullptr;
-        if ((rel == "==" || rel == "~=") && (a->k == EK::Const || b->k == EK::Const)) {
+        // Upstream would use JUMPXEQK* for `x == k`; DE's bytecode loads the constant and compares
+        // registers (LOADN r k; JUMPIFEQ x r), the same shape our transcoder lowers JUMPXEQK* to.
+        // RENOVICE_CTOR_NO_CONST_EQ restores the refusal.
+        static const bool const_eq = !std::getenv("RENOVICE_CTOR_NO_CONST_EQ");
+        if ((rel == "==" || rel == "~=") && (a->k == EK::Const || b->k == EK::Const) && !const_eq) {
             bad(F_CONST_OPERAND, pc); return nullptr;              // the compiler would use JUMPXEQK*
         }
         const int pa = pc_of(a), pb = pc_of(b);

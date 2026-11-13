@@ -6682,4 +6682,12 @@ Fixes (harness only, no decompiler change):
 - OR_BLOCK_LEGACY_GATE_FAILS rebuilds its pair with RENOVICE_NATIVE_LEGACY, the ORK lowering its gate normalization was written for.
 Evidence: CFG_CLASS_FIXTURES 206/206 PASS, DATAFLOW_FIXTURES 177/177 PASS (bin/derecomp.candidate.exe = 94ec25b build).
 Side note: inline_match.h may now grow a short inlined region (RENOVICE_INLINE_NO_GROW disables it; opt-in RENOVICE_INLINE_CALLS only). Re-inlining still fails because root locals are emitted as `local vN` + `vN = function`, which upstream's inliner does not treat as a local function. That is the real blocker for the inline class.
-Next Step: emit never-reassigned root functions as `local function vN` / `local vN = function`, so the -O2 recompile can inline them again (prerequisite for the inline-call failures, e.g. ToxinInoculation).
+Next Step: (CORRECTION, same day) re-inlining by emitting `local function` was already measured and REJECTED (src/m6e_cmd.h:261: Luau's inliner uses an AST cost model and the register-faithful emission costs more; 11 of 31 shared-proto cases rejected). Do not pursue it.
+
+## 2026-11-13 - Constructor parser: `x == <number>` inside a constructor item
+
+Hypothesis: DefenseReward proto 34 (`{ Ternary(r == 2, -20, x + 20) }`) splits into `t = {}` plus `t = {Ternary(...)}` because CtorParser refuses an equality against a constant register (F_CONST_OPERAND: "the compiler would use JUMPXEQK*").
+Finding: True. DE's bytecode loads the number and compares registers (LOADN r 2; JUMPIFEQ x r), and our transcoder lowers JUMPXEQK* to the same shape, so the refusal rejected a valid parse. Allowing it renders the one constructor: DefenseReward 58/58.
+Evidence: tier 2 (all_1113f): FIXED 1, BROKEN 0. CFG-ID 5,391 / 5,481. Fixture suites 206/206 and 177/177 PASS.
+RENOVICE_CTOR_NO_CONST_EQ restores the refusal.
+Next Step: the remaining SETLIST modules are inlined helpers inside constructors (UICommonResources: loops per item); that class waits for the rejected inline route or a new idea.
