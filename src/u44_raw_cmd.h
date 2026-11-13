@@ -355,7 +355,10 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
         const std::string q = "\"";
         // skip very large modules outright (their renders alone approach the gate timeout)
         const bool small_enough = source.size() < 400000;
-        const ScFoldScore cur = small_enough && write_file(cur_src, source)
+        // a large module still gets the two targeted re-inline candidates (one ~30 s render each,
+        // HudRedux 2026-11-13); RENOVICE_NO_BIG_REINLINE keeps the old skip
+        const bool big_reinline = !small_enough && source.size() < 1500000 && !std::getenv("RENOVICE_NO_BIG_REINLINE");
+        const ScFoldScore cur = (small_enough || big_reinline) && write_file(cur_src, source)
             ? sc_fold_score(argv[2], cur_src, std::string(stem) + ".cur.lua_B") : ScFoldScore();
         if (cur.built && !cur.perfect() && !cur.bad.empty()) {
             std::string protos;
@@ -397,8 +400,19 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
             // under the production fold choice
             for (const char* extra : {"RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_INLINE_CALLS=1;RENOVICE_INLINE_LOCAL_DECL=1;RENOVICE_INLINE_MOVE_FILLER=1",
                                       "RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_INLINE_CALLS=1;RENOVICE_INLINE_LOCAL_DECL=1"})
-                for (bool only_bad : {true, false})
-                    cands.push_back({chosen_env.empty() ? std::string(extra) : chosen_env + ";" + extra, only_bad});
+                for (bool only_bad : {true, false}) {
+                    const std::pair<std::string, bool> c{chosen_env.empty() ? std::string(extra) : chosen_env + ";" + extra, only_bad};
+                    // the only-bad form rewrites just the reported prototypes (inl::rewrite honours
+                    // RENOVICE_INVERSE_PROTOS): cheap and targeted, so it runs FIRST; the all-protos
+                    // form stays last
+                    if (only_bad) cands.insert(cands.begin(), c); else cands.push_back(c);
+                }
+            if (!small_enough) {
+                std::vector<std::pair<std::string, bool>> keep;
+                for (const auto& c : cands)
+                    if (c.second && c.first.find("RENOVICE_INLINE_LOCAL_DECL") != std::string::npos) keep.push_back(c);
+                cands.swap(keep);
+            }
             std::set<std::pair<std::string, bool>> seen;
             for (int pass = 0; pass < (int)cands.size(); ++pass) {
                 const std::string env = cands[(size_t)pass].first;
@@ -428,11 +442,18 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
                 // no prototype may newly fail any gate (count totals can hide a trade)
                 bool no_new_bad = true;
                 for (int proto : s.bad) if (!cur.bad.count(proto)) no_new_bad = false;
-                const bool better = s.built && no_new_bad && s.hash >= best.hash && s.str >= best.str
-                    && s.key >= best.key && s.df >= best.df && s.cfg > best.cfg;
+                // no count may get worse and at least one must improve (a render that first lifts CFG
+                // alone must not block a later one with the same CFG and the constants restored:
+                // Stalker, 2026-11-13). RENOVICE_INVERSE_SELECT_CFG_ONLY restores "CFG must rise".
+                static const bool cfg_only = std::getenv("RENOVICE_INVERSE_SELECT_CFG_ONLY") != nullptr;
+                const bool no_worse = s.built && no_new_bad && s.hash >= best.hash && s.str >= best.str
+                    && s.key >= best.key && s.df >= best.df && s.cfg >= best.cfg;
+                const bool better = no_worse && (s.cfg > best.cfg
+                    || (!cfg_only && (s.hash > best.hash || s.str > best.str || s.key > best.key || s.df > best.df)));
                 if (better) { source = inv; best = s; }
                 if (std::getenv("RENOVICE_INVERSE_TRACE"))
-                    std::fprintf(stderr, "INVERSE_SELECT pass %d cfg %ld -> %ld %s\n", pass, cur.cfg, s.cfg,
+                    std::fprintf(stderr, "INVERSE_SELECT pass %d cfg %ld -> %ld str %ld/%ld key %ld/%ld df %ld/%ld %s\n",
+                                 pass, cur.cfg, s.cfg, cur.str, s.str, cur.key, s.key, cur.df, s.df,
                                  better ? "taken" : "kept");
                 if (best.perfect()) break;
             }

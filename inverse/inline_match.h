@@ -278,6 +278,17 @@ inline ir::IInsn synth(const char* name, uint8_t op, int A, int B, int C) {
 // Replace every matched inlined region of `ip` by a call to `__renovice_proto_<callee>`.
 inline bool rewrite(ir::IProto& ip) {
     if (mod_protos().empty() || !ip.ok) return false;
+    // a selection candidate restricted to some prototypes rewrites only those: elsewhere the rewrite
+    // changes prototypes the gates already accept (2026-11-13: 8 fixes each broke 3-140 others)
+    if (const char* only = std::getenv("RENOVICE_INVERSE_PROTOS")) {
+        bool listed = false;
+        for (const char* c = only; *c;) {
+            if (std::atoi(c) == ip.index) { listed = true; break; }
+            while (*c && *c != ',') ++c;
+            if (*c == ',') ++c;
+        }
+        if (!listed) return false;
+    }
     bool changed = false;
     for (const auto& kv : root_closure_reg()) {
         const int callee = kv.first;
