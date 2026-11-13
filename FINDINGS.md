@@ -6660,3 +6660,14 @@ Hypothesis: the walker's FORN_SHAPE refusal (Zariman proto 7) is DE's compiler s
 Finding: True. FORNPREP 383 -> 449, FORNLOOP 404, both 405 and 449 are `RETURN R0 nret=0`. Treating identical void returns as one landing gives CFG 16/16 with 0 dispatch webs. 284 corpus modules have a FORNPREP not landing right after its own FORNLOOP (33 in the failure set); most of them are JUMP threading that `lands` already followed.
 Evidence: tier 1: FIXED 2 (with the condition-value fix), BROKEN 0, 92 failing targets left.
 Next Step: ToxinInoculation needs inline matching with a constant argument (DE's inliner dropped a branch), a bigger feature. RENOVICE_INVERSE_NO_RETURN_MERGE disables the rule.
+
+## 2026-11-13 - Generic condition-value decoder; liveness guard refined; fixture suite state
+
+Hypothesis: the walker's main IF_TARGET refusal family is upstream's compileExprAndOr -> compileConditionValue output (and/or values written straight into R, terms jumping to the merge, last term falling into it).
+Finding: True.
+- `cond_value_stmt` in inverse_emit.h decodes the full grammar: both onlyTruth modes, comparison terms (`LOADB R b; cmp -> M`), value terms (`R = e; JUMPIF[NOT] R -> M`), terms without a target (plain conditions to the else label), and a nested right operand. It parenthesises terms that carry their own and/or.
+- Fixture cert/fixtures_src/cond_value_grammar.lua: F1, F2 and F4 round-trip CFG-equal with 0 dispatch webs. F3/F5 (`a == 1 or b:Get() or 7`) stay open: the short-circuit fold renders `(x or 7)` as one value, so they belong to fold-level selection.
+- Liveness guard: refusing every chain fold whose test register is live at T broke DynamicGhoulExterminate. There, T is a re-test of the same register (same-register threading) and the register is dead after that test. The guard now ignores T in that case.
+Evidence: tier 2 (all_1113e, full first pass): FIXED 3, BROKEN 0. CFG-ID 5,390 / 5,481.
+Fixture suites: run against the candidate build and against the session-start build 83dcbdf, the default-path failures are identical: SETLIST_EXISTING_DEFAULT_CFG_IDENTITY, CTOR_COND_ITEMS_DEFAULT_{CFG,DATAFLOW}_IDENTITY, TRUTHY_DROPPED_DEFAULT_GATE_PASSES, READ_BEFORE_WRITE_MUT_CFG_PASS, REF_CAPTURE_EQUIVALENT_{CFG,DF}_PASS. They pre-date this session, so this is not a regression; they need their own fix. The many *_LEGACY_* negative controls in cfg_class_fixtures now FAIL because the default inverse selection repairs the legacy path; those controls need RENOVICE_NO_INVERSE_SELECT to stay meaningful. The OR/AND lowering controls in dataflow_identity_fixtures now also set RENOVICE_NATIVE_LEGACY.
+Next Step: fix the pre-existing default fixture failures (SETLIST_EXISTING, CTOR_COND_ITEMS, REF_CAPTURE_EQUIVALENT); make the cfg legacy controls set RENOVICE_NO_INVERSE_SELECT.

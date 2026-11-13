@@ -349,6 +349,14 @@ private:
         }
         return (lc ? "local " : "") + L + " = " + r + "\n";
     }
+    // T re-tests r (same-register threading: the chain's jump there has a known outcome) and r is
+    // dead on both of that test's successors
+    bool retest(int T, int r) {
+        if (T < 0 || T >= n) return false;
+        const ir::IInsn& x = I(T);
+        if ((x.name != "JUMPIF" && x.name != "JUMPIFNOT") || x.A != r) return false;
+        return !live_at(T + 1, r) && !live_at(x.target, r);
+    }
     int cvbail(int code, int b) const {
         if (std::getenv("RENOVICE_CV_TRACE"))
             std::fprintf(stderr, "CV_BAIL pidx=%d code=%d at=%d\n", E.pidx, code, g.n[(size_t)b].last);
@@ -646,7 +654,12 @@ private:
             const st::Node& c = g.n[(size_t)nodes[(size_t)i]];
             const ir::IInsn& t = I(c.last);
             if ((t.name == "JUMPIF" || t.name == "JUMPIFNOT") && defines(c.first, c.last, t.A)
-                && (live_at(S, t.A) || live_at(T, t.A))) { undo(); return -1; }
+                && (live_at(S, t.A) || (live_at(T, t.A) && !retest(T, t.A))) && !std::getenv("RENOVICE_INVERSE_NO_LIVE_GUARD")) {
+                if (std::getenv("RENOVICE_CV_TRACE"))
+                    std::fprintf(stderr, "LIVE_GUARD pidx=%d test=%d reg=%d S=%d T=%d liveS=%d liveT=%d\n", E.pidx, c.last, (int)t.A, S, T,
+                                 live_at(S, t.A) ? 1 : 0, live_at(T, t.A) ? 1 : 0);
+                undo(); return -1;
+            }
         }
         if (lands(T, ctx.exit) || lands(T, ctx.cont)) {
             // `if c then break end`: c is the condition for reaching T

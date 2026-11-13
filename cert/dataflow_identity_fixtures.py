@@ -84,8 +84,8 @@ OPEN_DEFECTS = {}
 FIXED_DEFECTS = {
     "copy_fold_live_dest": ("RENOVICE_NO_COALESCE_LIVE_DEST_GUARD", "source", "decompile"),
     "table_move_live_source": ("RENOVICE_NO_TABLEMOVE_LIVE_SOURCE_GUARD", "source", "decompile"),
-    "or_lowering_c_equals_a": ("RENOVICE_LEGACY_ORAND_LOWERING", "rebuilt", "recompile"),
-    "orand_alias_cases": ("RENOVICE_LEGACY_ORAND_LOWERING", "rebuilt", "recompile"),
+    "or_lowering_c_equals_a": ("RENOVICE_LEGACY_ORAND_LOWERING RENOVICE_NATIVE_LEGACY", "rebuilt", "recompile"),
+    "orand_alias_cases": ("RENOVICE_LEGACY_ORAND_LOWERING RENOVICE_NATIVE_LEGACY", "rebuilt", "recompile"),
     "call_move_live_multi": ("RENOVICE_NO_CALLMOVE_LIVE_SOURCE_GUARD", "source", "decompile"),
     # fixed by #64 (2026-10-09 batch 3)
     "loop_exit_test_register": ("RENOVICE_NO_WHILE_TAIL_TEST", "source", "decompile"),
@@ -248,7 +248,8 @@ def main():
                 else:
                     cc.compile_fixture(fixture, name, original)
                 legacy_env = cc.base_env()
-                legacy_env[switch] = "1"
+                for switch_name in switch.split():   # the OR/AND lowering only runs under RENOVICE_NATIVE_LEGACY
+                    legacy_env[switch_name] = "1"
                 for variant, env in (("FIXED", None), ("LEGACY", legacy_env)):
                     source, rebuilt = round_trip_staged(
                         original, temp, "%s.%s" % (name, variant.lower()),
