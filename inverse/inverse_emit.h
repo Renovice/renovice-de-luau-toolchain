@@ -6,6 +6,7 @@
 // (conditions incl. merged short-circuit chains) and for_header. Any construct the grammar cannot
 // explain fails the whole prototype closed; emit_function then falls back to the production paths.
 #pragma once
+#include <cctype>
 #include <functional>
 #include <map>
 #include <tuple>
@@ -198,8 +199,13 @@ private:
             return last + 1;
         }
         if (term.name == "LOADB" && term.C != 0 && !silent.count(last)) return fail("STRAY_LOADB_SKIP", last), -1;
+        const size_t blk_mark = E.out.size();
         E.emit_block(b, depth);
         if (nd.is_return || term.name == "RETURN") return last + 1;
+        if (nd.is_branch && !uncond(term)) {
+            const int r = cond_value_stmt(b, end, depth, blk_mark);
+            if (r >= 0) return r;
+        }
         if (uncond(term)) {
             if (last == ctx.latch || silent.count(last)) return last + 1;
             // a jump over unreachable code only (the inline rewrite's padding) is a fall-through
@@ -273,6 +279,259 @@ private:
         silent = silent_mark;
         why = why0; at = at0;
         return -1;
+    }
+
+    // one emitted line `[local ]lhs = rhs` (instruction tags stripped); false when not exactly that
+    static bool parse_assign(std::string t, std::string& lhs, std::string& rhs, bool& is_local) {
+        while (!t.empty() && (t.back() == '\n' || t.back() == ' ')) t.pop_back();
+        if (t.find('\n') != std::string::npos) return false;
+        size_t a = 0; while (a < t.size() && t[a] == ' ') ++a;
+        t = t.substr(a);
+        for (size_t tag; (tag = t.find(" --@")) != std::string::npos;) {
+            size_t e = tag + 4; while (e < t.size() && std::isdigit((unsigned char)t[e])) ++e;
+            t.erase(tag, e - tag);
+        }
+        is_local = t.rfind("local ", 0) == 0;
+        if (is_local) t = t.substr(6);
+        const size_t eq = t.find(" = ");
+        if (eq == std::string::npos || eq == 0) return false;
+        lhs = t.substr(0, eq); rhs = t.substr(eq + 3);
+        return lhs.find_first_of(",()[]. ") == std::string::npos && !rhs.empty();
+    }
+
+    // CONDITION VALUE (inverse of Luau compileExprAndOr -> compileConditionValue): `x = <and/or
+    // expression>` whose terms jump straight to the merge M with the value already in R, the last
+    // term falling into M. Grammar per the compiler: and/or with onlyTruth = !and; a term with a
+    // target is `R = e; JUMPIF[NOT] R -> M` or `LOADB R b; <compare> -> M`; a term without target is
+    // a plain condition jumping to the enclosing else label.
+    // parenthesise a term that carries its own and/or so precedence cannot regroup it
+    static std::string wrap(const std::string& x) {
+        if (x.find(" and ") == std::string::npos && x.find(" or ") == std::string::npos) return x;
+        if (x.size() > 1 && x.front() == '(' && x.back() == ')') {
+            int d = 0; bool whole = true;
+            for (size_t q = 0; q < x.size(); ++q) {
+                if (x[q] == '(') ++d; else if (x[q] == ')') --d;
+                if (d == 0 && q + 1 < x.size()) { whole = false; break; }
+            }
+            if (whole) return x;
+        }
+        return "(" + x + ")";
+    }
+    // `vX = e` lines feeding the block's last line: substitute each into its single use when vX is a
+    // bytecode temp dead at `after` (the operand order is the register order the compiler used)
+    std::string fold_temps(const std::string& txt, int after) {
+        std::vector<std::string> lines;
+        for (size_t p = 0; p < txt.size();) {
+            size_t e = txt.find('\n', p);
+            if (e == std::string::npos) e = txt.size();
+            std::string l = txt.substr(p, e - p);
+            if (l.find_first_not_of(' ') != std::string::npos) lines.push_back(l);
+            p = e + 1;
+        }
+        if (lines.size() < 2) return txt;
+        std::string L, r; bool lc = false;
+        if (!parse_assign(lines.back(), L, r, lc)) return txt;
+        for (int q = (int)lines.size() - 2; q >= 0; --q) {
+            std::string x, ex; bool xl = false;
+            if (!parse_assign(lines[(size_t)q], x, ex, xl) || xl || x.size() < 2 || x[0] != 'v') return txt;
+            if (x.find_first_not_of("0123456789", 1) != std::string::npos) return txt;
+            if (live_at(after, std::atoi(x.c_str() + 1))) return txt;
+            auto ident = [](char c) { return std::isalnum((unsigned char)c) || c == '_'; };
+            size_t hit = std::string::npos; int count = 0;
+            for (size_t f = r.find(x); f != std::string::npos; f = r.find(x, f + 1)) {
+                const bool lb = f == 0 || !ident(r[f - 1]);
+                const bool rb = f + x.size() >= r.size() || !ident(r[f + x.size()]);
+                if (lb && rb) { ++count; hit = f; }
+            }
+            if (count != 1) return txt;
+            const bool simple = ex.find(' ') == std::string::npos;
+            r.replace(hit, x.size(), simple ? ex : "(" + ex + ")");
+        }
+        return (lc ? "local " : "") + L + " = " + r + "\n";
+    }
+    int cvbail(int code, int b) const {
+        if (std::getenv("RENOVICE_CV_TRACE"))
+            std::fprintf(stderr, "CV_BAIL pidx=%d code=%d at=%d\n", E.pidx, code, g.n[(size_t)b].last);
+        return -1;
+    }
+    int cond_value_stmt(int b, int end, int depth, size_t blk_mark) {
+        if (std::getenv("RENOVICE_INVERSE_NO_CV")) return cvbail(1, b);
+        std::vector<int> nodes{b};
+        int pc = g.n[(size_t)b].last + 1;
+        while ((int)nodes.size() < 24) {
+            if (pc >= end) return cvbail(2, b);
+            const int nb = node_at[(size_t)pc];
+            if (nb < 0) return cvbail(3, b);
+            nodes.push_back(nb);
+            const st::Node& c = g.n[(size_t)nb];
+            if (!c.is_branch) break;
+            const ir::IInsn& t = I(c.last);
+            if (uncond(t) || t.name.rfind("FOR", 0) == 0 || t.name == "LOADB" || t.target <= c.last) return cvbail(4, b);
+            if (c.succ_true < 0 || c.succ_false < 0 || g.n[(size_t)c.succ_false].first != c.last + 1) return cvbail(5, b);
+            pc = c.last + 1;
+        }
+        const int k = (int)nodes.size();
+        const st::Node& fin = g.n[(size_t)nodes.back()];
+        if (k < 2 || fin.is_branch || fin.is_return) return cvbail(6, b);
+        const ir::IInsn& ft = I(fin.last);
+        if (ft.branch || uncond(ft) || ft.name == "RETURN" || ft.name.rfind("FOR", 0) == 0) return cvbail(7, b);
+        const int M = fin.last + 1;
+        if (M > end) return cvbail(8, b);
+        std::set<int> fu, fd;
+        if (!lv::register_effects(ip, ft, fu, fd) || fd.size() != 1) return cvbail(9, b);
+        const int R = *fd.begin();
+        std::vector<int> start(k), tgt(k, -1);
+        for (int i = 0; i < k; ++i) start[(size_t)i] = g.n[(size_t)nodes[(size_t)i]].first;
+        auto start_of = [&](int j) { return j < k ? start[(size_t)j] : M; };
+        for (int i = 0; i + 1 < k; ++i) {
+            const st::Node& c = g.n[(size_t)nodes[(size_t)i]];
+            const int t = g.n[(size_t)c.succ_true].first;
+            bool okt = t == M;
+            for (int m = i + 1; m < k; ++m) if (t == start[(size_t)m]) okt = true;
+            if (!okt) return cvbail(10, b);
+            tgt[(size_t)i] = t;
+        }
+        // the final term: its block must render as exactly `lhs = rhs`
+        std::string lhs, frhs; bool loc_f = false;
+        {
+            const size_t mk = E.out.size();
+            E.emit_block(nodes.back(), depth);
+            const std::string txt = E.out.substr(mk);
+            E.out.resize(mk);
+            if (!parse_assign(fold_temps(txt, M), lhs, frhs, loc_f)) {
+                if (std::getenv("RENOVICE_CV_TRACE")) std::fprintf(stderr, "CV_FINAL[%s]\n", txt.c_str());
+                return cvbail(11, b);
+            }
+        }
+        // node 0 already emitted its statements: if it is a term with a target, its last line is
+        // `lhs = <term>` and comes back out of the statement list
+        const ir::IInsn& t0 = I(g.n[(size_t)b].last);
+        const bool t0_tests_R = (t0.name == "JUMPIF" || t0.name == "JUMPIFNOT") && t0.A == R;
+        std::string leaf0; bool loc0 = false; size_t line0 = std::string::npos;
+        {
+            const std::string blk = E.out.substr(blk_mark);
+            size_t e = blk.size();
+            while (e > 0 && blk[e - 1] == '\n') --e;
+            const size_t ls = e ? blk.rfind('\n', e - 1) : std::string::npos;
+            const size_t s0 = (ls == std::string::npos) ? 0 : ls + 1;
+            std::string l2, r2; bool lc = false;
+            if (e > 0 && parse_assign(blk.substr(s0, e - s0), l2, r2, lc) && l2 == lhs) {
+                leaf0 = r2; loc0 = lc; line0 = blk_mark + s0;
+            }
+        }
+        const bool t0_cmp = !t0_tests_R && t0.name != "JUMPIF" && t0.name != "JUMPIFNOT"
+                            && (leaf0 == "true" || leaf0 == "false");
+        const bool node0_leaf = t0_tests_R || t0_cmp;
+        if (node0_leaf && leaf0.empty()) return cvbail(12, b);
+        // later tests: their setup folds into the term / condition
+        st::Graph& mg = const_cast<st::Graph&>(g);
+        std::vector<std::pair<int, int>> injected;
+        std::vector<int> cmpB(k, -1);
+        for (int i = 1; i + 1 < k; ++i) {
+            st::Node& c = mg.n[(size_t)nodes[(size_t)i]];
+            const ir::IInsn& tt = I(c.last);
+            int f0 = c.first;
+            if (tt.name != "JUMPIF" && tt.name != "JUMPIFNOT" && I(f0).name == "LOADB" && I(f0).A == R && I(f0).C == 0) {
+                cmpB[(size_t)i] = I(f0).B ? 1 : 0;
+                ++f0;
+            }
+            if (c.last > f0 && !c.chain_expr_setup.count(c.last)) {
+                c.chain_expr_setup[c.last] = {f0, c.last - 1};
+                injected.push_back({nodes[(size_t)i], c.last});
+            }
+        }
+        if (t0_cmp) cmpB[0] = leaf0 == "true" ? 1 : 0;
+        auto undo = [&]() { for (const auto& x : injected) mg.n[(size_t)x.first].chain_expr_setup.erase(x.second); };
+        std::map<std::tuple<int, int, int, int, int>, std::pair<bool, std::string>> memo;
+        // plain condition over [i, j): true <=> control reaches Lt
+        std::function<bool(int, int, int, int, std::string&)> dec =
+            [&](int i, int j, int Lt, int Lf, std::string& o) -> bool {
+                const auto key = std::make_tuple(0, i, j, Lt, Lf);
+                const auto h = memo.find(key);
+                if (h != memo.end()) { o = h->second.second; return h->second.first; }
+                memo[key] = {false, std::string()};
+                bool ok2 = false;
+                if (j - i == 1) {
+                    if (i == 0 && node0_leaf) return false;
+                    if (cmpB[(size_t)i] >= 0) return false;
+                    const ir::IInsn& tt = I(g.n[(size_t)nodes[(size_t)i]].last);
+                    if ((tt.name == "JUMPIF" || tt.name == "JUMPIFNOT") && tt.A == R) return false;
+                    const int t = tgt[(size_t)i], F = start_of(i + 1);
+                    if (t == Lt && F == Lf) { o = wrap(E.cond_of(nodes[(size_t)i], false)); ok2 = true; }
+                    else if (t == Lf && F == Lt) { o = wrap(E.cond_of(nodes[(size_t)i], true)); ok2 = true; }
+                } else {
+                    for (int m = i + 1; m < j && !ok2; ++m) {
+                        std::string a, c2;
+                        if (dec(i, m, Lt, start_of(m), a) && dec(m, j, Lt, Lf, c2)) { o = "(" + a + " or " + c2 + ")"; ok2 = true; }
+                        else if (dec(i, m, start_of(m), Lf, a) && dec(m, j, Lt, Lf, c2)) { o = "(" + a + " and " + c2 + ")"; ok2 = true; }
+                    }
+                }
+                memo[key] = {ok2, o};
+                return ok2;
+            };
+        // value with target over [i, j), onlyTruth ot: interesting results jump to M with R set
+        std::function<bool(int, int, int, std::string&)> cvt =
+            [&](int i, int j, int ot, std::string& o) -> bool {
+                const auto key = std::make_tuple(1, i, j, ot, 0);
+                const auto h = memo.find(key);
+                if (h != memo.end()) { o = h->second.second; return h->second.first; }
+                memo[key] = {false, std::string()};
+                bool ok2 = false;
+                if (j - i == 1) {
+                    if (tgt[(size_t)i] != M) return false;
+                    const int nb = nodes[(size_t)i];
+                    const ir::IInsn& tt = I(g.n[(size_t)nb].last);
+                    if (cmpB[(size_t)i] >= 0) {
+                        if (cmpB[(size_t)i] != ot) return false;
+                        o = wrap(E.cond_of(nb, ot ? false : true));
+                        ok2 = o.size() > 2;
+                    } else if (tt.name == (ot ? "JUMPIF" : "JUMPIFNOT") && tt.A == R) {
+                        if (i == 0) o = wrap(leaf0);
+                        else {
+                            const st::Node& c = g.n[(size_t)nb];
+                            if (!defines(c.first, c.last, R)) return false;
+                            o = E.cond_of(nb, ot ? false : true);
+                        }
+                        // a leading `not` is the value itself only when the setup ends in NOT -> R
+                        const int pl = g.n[(size_t)nb].last - 1;
+                        const bool own_not = pl >= 0 && I(pl).name == "NOT" && I(pl).A == R;
+                        ok2 = !o.empty() && (o.rfind("not ", 0) != 0 || own_not);
+                        if (ok2) o = wrap(o);
+                    }
+                } else {
+                    for (int m = i + 1; m < j && !ok2; ++m) {
+                        std::string a, c2;
+                        // a op b where op == (ot ? and : or): a is a plain condition to the else label
+                        const bool lok = ot ? dec(i, m, start_of(m), start_of(j), a) : dec(i, m, start_of(j), start_of(m), a);
+                        if (lok && cvt(m, j, ot, c2)) { o = "(" + a + (ot ? " and " : " or ") + c2 + ")"; ok2 = true; break; }
+                        if (cvt(i, m, ot, a) && cvt(m, j, ot, c2)) { o = "(" + a + (ot ? " or " : " and ") + c2 + ")"; ok2 = true; }
+                    }
+                }
+                memo[key] = {ok2, o};
+                return ok2;
+            };
+        // the right operand: the final term, or a nested value over [i, k)
+        std::function<bool(int, std::string&)> pv = [&](int i, std::string& o) -> bool {
+            if (i == k - 1) { o = wrap(frhs); return true; }
+            for (int m2 = k - 1; m2 > i; --m2)
+                for (int ot2 = 0; ot2 <= 1; ++ot2) {
+                    std::string a2, b2;
+                    if (cvt(i, m2, ot2, a2) && pv(m2, b2)) { o = "(" + a2 + (ot2 ? " or " : " and ") + b2 + ")"; return true; }
+                }
+            return false;
+        };
+        std::string expr;
+        bool ok3 = false;
+        for (int m = k - 1; m >= 1 && !ok3; --m) {
+            for (int ot = 0; ot <= 1 && !ok3; ++ot) {
+                std::string a, rr;
+                if (cvt(0, m, ot, a) && pv(m, rr)) { expr = wrap(a) + (ot ? " or " : " and ") + rr; ok3 = true; }
+            }
+        }
+        if (!ok3) { undo(); return cvbail(13, b); }
+        if (node0_leaf) E.out.resize(line0);
+        E.out += ind(depth) + ((loc0 || loc_f) ? "local " : "") + lhs + " = " + expr + "\n";
+        return M;
     }
 
     // nodes[0] already emitted its statements; nodes[1..] contribute setup+test to the condition
