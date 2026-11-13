@@ -1276,6 +1276,11 @@ static std::string decompile_proto_anon_once(const ir::IProto& ip_in, int idx,
     ir::IProto ip_rw;
     const bool rewritten = !inl::mod_protos().empty() && (ip_rw = ip_in, inl::rewrite(ip_rw));
     const ir::IProto& ip = rewritten ? ip_rw : ip_in;
+    if (const char* d = std::getenv("RENOVICE_INLINE_DUMP"))
+        if (rewritten && std::atoi(d) == idx)
+            for (const ir::IInsn& x : ip.code)
+                std::fprintf(stderr, "RW %4d %-12s A=%d B=%d C=%d tgt=%d br=%d wide=%d\n", x.idx, x.name.c_str(),
+                             x.A, x.B, x.C, x.target, x.branch ? 1 : 0, x.wide ? 1 : 0);
     folds_complete = true;
     ok = false;
     st::Graph g;

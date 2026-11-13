@@ -392,6 +392,13 @@ static int cmd_decompile_mod_u44(int argc, char** argv) {
             // most productive first (measured 2026-11-09): stack-locals renders, then plain fold levels
             std::stable_partition(cands.begin(), cands.end(), [](const std::pair<std::string, bool>& c) {
                 return c.first.find("STACK_LOCALS") != std::string::npos; });
+            // RE-INLINE (2026-11-13): the callee's root store becomes `local vR = function` so the -O2
+            // recompile inlines the call again. Last in the queue: only when budget remains, and only
+            // under the production fold choice
+            for (const char* extra : {"RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_INLINE_CALLS=1;RENOVICE_INLINE_LOCAL_DECL=1;RENOVICE_INLINE_MOVE_FILLER=1",
+                                      "RENOVICE_INVERSE_STACK_LOCALS=1;RENOVICE_INLINE_CALLS=1;RENOVICE_INLINE_LOCAL_DECL=1"})
+                for (bool only_bad : {true, false})
+                    cands.push_back({chosen_env.empty() ? std::string(extra) : chosen_env + ";" + extra, only_bad});
             std::set<std::pair<std::string, bool>> seen;
             for (int pass = 0; pass < (int)cands.size(); ++pass) {
                 const std::string env = cands[(size_t)pass].first;

@@ -248,9 +248,10 @@ namespace inl {
 // Module context for the rewrite (set per module by decompile_module_source).
 inline std::vector<ir::IProto>& mod_protos() { static std::vector<ir::IProto> v; return v; }
 inline std::map<int, int>& root_closure_reg() { static std::map<int, int> m; return m; }   // proto -> root register
+inline std::set<int>& used_callees() { static std::set<int> u; return u; }                // callees a rewrite called
 
 inline void prepare(const de::Module& m, const std::vector<std::string>& pool, int root) {
-    mod_protos().clear(); root_closure_reg().clear();
+    mod_protos().clear(); root_closure_reg().clear(); used_callees().clear();
     if (!std::getenv("RENOVICE_INLINE_CALLS")) return;
     for (size_t i = 0; i < m.protos.size(); ++i) mod_protos().push_back(ir_annotate(m.protos[i], (int)i, pool, g_nb));
     const ir::IProto& r = mod_protos()[(size_t)root];
@@ -309,12 +310,19 @@ inline bool rewrite(ir::IProto& ip) {
             seq.push_back(synth("MOVE", 0x14, r.result, F, 0));
             int used_words = n + 5;                          // GETGLOBAL counts 2
             for (const auto& b2 : r.params) if (b2.has_k && (b2.kload.wide || tc::is_de_width8(b2.kload.op))) ++used_words;
-            const int filler = std::max(0, W - used_words);  // after the JUMP (used_words counts it)
-            ir::IInsn j = synth("JUMP", 0x40, 0, 0, 0); j.branch = true;
-            j.Bx = (uint16_t)(int16_t)filler;                // skip the fillers: lands on r.end
-            seq.push_back(j);
+            // fill the rest of the region's words: dead JUMPs (default; the walker renders them as
+            // nothing) or, opt-in RENOVICE_INLINE_MOVE_FILLER, scratch self-MOVEs (these print as
+            // `vF = vF` statements and lost IceShieldSpecter, 2026-11-13)
+            const bool jump_filler = std::getenv("RENOVICE_INLINE_MOVE_FILLER") == nullptr;
+            const int filler = std::max(0, W - used_words + (jump_filler ? 0 : 1));
+            if (jump_filler) {
+                ir::IInsn j = synth("JUMP", 0x40, 0, 0, 0); j.branch = true;
+                j.Bx = (uint16_t)(int16_t)filler;            // skip the fillers: lands on r.end
+                seq.push_back(j);
+            }
             for (int k = 0; k < filler; ++k) {
-                ir::IInsn f2 = synth("JUMP", 0x40, 0, 0, 0); f2.branch = true; f2.Bx = 0; seq.push_back(f2);
+                if (jump_filler) { ir::IInsn f2 = synth("JUMP", 0x40, 0, 0, 0); f2.branch = true; f2.Bx = 0; seq.push_back(f2); }
+                else seq.push_back(synth("MOVE", 0x14, F, F, 0));
             }
             ip.maxstack += n + 1;
             const int old_len = r.end - s, new_len = (int)seq.size(), delta = new_len - old_len;
@@ -348,6 +356,7 @@ inline bool rewrite(ir::IProto& ip) {
             if (std::getenv("RENOVICE_INLINE_TRACE"))
                 std::fprintf(stderr, "INLINE_REWRITE proto=%d callee=%d region=[%d,%d)%c", ip.index, callee, s, r.end, 10);
             changed = true;
+            used_callees().insert(callee);
             s = r.end - 1;
         }
     }
@@ -356,6 +365,20 @@ inline bool rewrite(ir::IProto& ip) {
 
 // After the module text is assembled: the placeholder becomes the root local holding the closure.
 inline void resolve(std::string& src) {
+    // Luau inlines a call only through a local initialised with the function and never written
+    // again (Compiler getFunctionExpr: !written && init). The root reuses its registers, so the
+    // callee's closure store becomes its own declaration: `local vR = function(`. prepare()
+    // guarantees that store is the register's last write, so the shadowing local holds every
+    // later read. Opt-in RENOVICE_INLINE_LOCAL_DECL (a selection candidate): declaring the local
+    // can also let upstream inline calls DE kept (IceShieldSpecter), so it competes, never default.
+    if (std::getenv("RENOVICE_INLINE_LOCAL_DECL"))
+        for (int callee : used_callees()) {
+            const auto it = root_closure_reg().find(callee);
+            if (it == root_closure_reg().end()) continue;
+            const std::string pat = "\n  v" + std::to_string(it->second) + " = function(";
+            const size_t at = src.rfind(pat);
+            if (at != std::string::npos) src.insert(at + 3, "local ");
+        }
     for (const auto& kv : root_closure_reg()) {
         const std::string ph = "__renovice_proto_" + std::to_string(kv.first);
         const std::string nm = "v" + std::to_string(kv.second);
