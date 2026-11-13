@@ -48,6 +48,26 @@ private:
     std::vector<int> node_at;
     std::set<int> silent;      // else-skipping JUMPs: part of the if, not statements
     bool ok = true;
+    lv::Analysis LA;
+    bool la_ready = false;
+
+    // register `r` is read on entry to the node starting at pc (bytecode liveness)
+    bool live_at(int pc, int r) {
+        if (!la_ready) { LA = lv::analyze(ip, g); la_ready = true; }
+        if (!LA.known || !LA.converged) return true;
+        if (pc < 0 || pc >= n) return false;
+        const int b = node_at[(size_t)pc];
+        if (b < 0 || b >= (int)LA.live_in.size()) return true;
+        return LA.live_in[(size_t)b].count(r) != 0;
+    }
+    bool defines(int first, int last, int r) const {
+        for (int q = first; q < last; ++q) {
+            std::set<int> u, d;
+            if (!lv::register_effects(ip, I(q), u, d)) return true;
+            if (d.count(r)) return true;
+        }
+        return false;
+    }
 
     bool fail(const char* w, int pc) { why = w; at = pc; return false; }
     const ir::IInsn& I(int pc) const { return ip.code[(size_t)pc]; }
@@ -309,6 +329,57 @@ private:
         auto undo = [&]() {
             for (const auto& x : injected) mg.n[(size_t)x.first].chain_expr_setup.erase(x.second);
         };
+        // CONDITION VALUE (`x = a and b and (f() or g()) or false`, Luau compileConditionValue):
+        // the later tests write their value into R and JUMPIF R to the merge T; the fallback is a
+        // single constant load into R right after the last test.
+        if (S + 1 == T && T <= end && !std::getenv("RENOVICE_INVERSE_NO_COND_VALUE")) {
+            const ir::IInsn& lt = I(g.n[(size_t)nodes.back()].last);
+            const ir::IInsn& fb = I(S);
+            const int R = lt.A;
+            std::string fbx;
+            if (fb.A == R) {
+                if (fb.name == "LOADB" && fb.C == 0) fbx = fb.B ? "true" : "false";
+                else if (fb.name == "LOADNIL" && fb.B == 0) fbx = "nil";
+                else if (fb.name == "LOADN") fbx = std::to_string((int16_t)fb.Bx);
+            }
+            std::function<bool(int, int, int, std::string&)> decV =
+                [&](int i, int j, int Lf, std::string& outv) -> bool {
+                    if (j - i == 1) {
+                        const st::Node& c = g.n[(size_t)nodes[(size_t)i]];
+                        const ir::IInsn& t = I(c.last);
+                        const int F = i + 1 < k ? start[(size_t)i + 1] : S;
+                        if (i < 1 || t.name != "JUMPIF" || t.A != R || tgt[(size_t)i] != T || F != Lf
+                            || !c.chain.empty() || c.branch_predicate || !defines(c.first, c.last, R))
+                            return false;
+                        outv = E.cond_of(nodes[(size_t)i], false);
+                        return !outv.empty() && outv.rfind("not ", 0) != 0;
+                    }
+                    for (int m = i + 1; m < j; ++m) {
+                        std::string a, b2;
+                        if (dec(i, m, start[(size_t)m], Lf, a) && decV(m, j, Lf, b2)) {
+                            outv = "(" + a + " and " + b2 + ")"; return true;
+                        }
+                        if (decV(i, m, start[(size_t)m], a) && decV(m, j, Lf, b2)) {
+                            outv = "(" + a + " or " + b2 + ")"; return true;
+                        }
+                    }
+                    return false;
+                };
+            std::string v;
+            if (!fbx.empty() && decV(0, k, S, v)) {
+                E.out += ind(depth) + "v" + std::to_string(R) + " = " + v + " or " + fbx + "\n";
+                silent.insert(S);
+                return T;
+            }
+        }
+        // a later test whose setup writes a register read after the chain is a VALUE, not a
+        // condition: folding its setup into the condition would drop the assignment
+        for (int i = 1; i < k; ++i) {
+            const st::Node& c = g.n[(size_t)nodes[(size_t)i]];
+            const ir::IInsn& t = I(c.last);
+            if ((t.name == "JUMPIF" || t.name == "JUMPIFNOT") && defines(c.first, c.last, t.A)
+                && (live_at(S, t.A) || live_at(T, t.A))) { undo(); return -1; }
+        }
         if (lands(T, ctx.exit) || lands(T, ctx.cont)) {
             // `if c then break end`: c is the condition for reaching T
             std::string c;

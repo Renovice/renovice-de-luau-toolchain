@@ -6645,3 +6645,11 @@ Finding: Partially true (4 of 6).
 Evidence: `x = x or 1999` recompiled to MOVE/JUMPIF/LOADK instead of ORK. With AND/OR/ANDK/ORK native by default (certified V11_ANDK, V12_ANDOR, V15_ORK), CalendarLib, StatCompare, StatsUtil and TNW_CinAspect hold 3/3 passes. All-module first pass: 0 BROKEN, 1 FIXED (5,387 CFG-ID).
 Remaining: NecramechControl (proto 27) and WorldStateWindow (proto 49) — one large proto each falls back to the dispatcher on the second decompile. JUMPXEQK* stay lowered: the in-game capture-cell finding (transcode.h) means they can't simply go native.
 Next Step: structure those two giant protos on re-decompile; RENOVICE_NATIVE_LEGACY=1 restores the old lowering.
+
+## 2026-11-13 - Inverse walker: condition values (`x = a and b and (f() or g()) or false`)
+
+Hypothesis: some state-machine fallbacks are Luau's compileConditionValue shape, a value chain whose later tests write R and JUMPIF R to the merge, with a constant fallback load right after the last test.
+Finding: True. The walker also had a semantic bug: chain_if folded such a value-writing setup into a plain condition, dropping the assignment (fixture: `if (not a or ... ) then x = false end`).
+Evidence: fixture cert/fixtures_src/cond_value_or_false.lua now renders `x = ((a and b.u) and (IsNull(q) or c.Has(q))) or false`, CFG PASS with 0 dispatch webs. Tier 1: FIXED 1, BROKEN 0 (93 failing targets left).
+Fix: inverse_emit.h chain_if has a value-chain decoder (the compileConditionValue grammar) and a liveness guard. A later test that writes a register read at the merge refuses the condition fold.
+Next Step: the remaining classes (LOAD->LOAD 10, SETLIST->NEWTABLE 7, FORGPREP->NAMECALL 7).
