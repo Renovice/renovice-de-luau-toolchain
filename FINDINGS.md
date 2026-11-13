@@ -6671,3 +6671,15 @@ Finding: True.
 Evidence: tier 2 (all_1113e, full first pass): FIXED 3, BROKEN 0. CFG-ID 5,390 / 5,481.
 Fixture suites: run against the candidate build and against the session-start build 83dcbdf, the default-path failures are identical: SETLIST_EXISTING_DEFAULT_CFG_IDENTITY, CTOR_COND_ITEMS_DEFAULT_{CFG,DATAFLOW}_IDENTITY, TRUTHY_DROPPED_DEFAULT_GATE_PASSES, READ_BEFORE_WRITE_MUT_CFG_PASS, REF_CAPTURE_EQUIVALENT_{CFG,DF}_PASS. They pre-date this session, so this is not a regression; they need their own fix. The many *_LEGACY_* negative controls in cfg_class_fixtures now FAIL because the default inverse selection repairs the legacy path; those controls need RENOVICE_NO_INVERSE_SELECT to stay meaningful. The OR/AND lowering controls in dataflow_identity_fixtures now also set RENOVICE_NATIVE_LEGACY.
 Next Step: fix the pre-existing default fixture failures (SETLIST_EXISTING, CTOR_COND_ITEMS, REF_CAPTURE_EQUIVALENT); make the cfg legacy controls set RENOVICE_NO_INVERSE_SELECT.
+
+## 2026-11-13 - Fixture suites green: the "pre-existing default failures" were harness drift
+
+Hypothesis: SETLIST_EXISTING / CTOR_COND_ITEMS / TRUTHY_DROPPED / READ_BEFORE_WRITE_MUT / REF_CAPTURE_EQUIVALENT fail because recompile switched to -O2 (2026-11), which inlines the fixtures' helpers. The fixtures were authored for -O1 (only O2_FIXTURES are -O2).
+Finding: True. Example: setlist_existing's `Make()` is inlined between NEWTABLE and SETLIST, so the constructor cannot come back as `{..., (Make(name))}`. With RENOVICE_LUAU_O1=1 the dataflow suite passes 177/177 and the CFG suite 205/206 (selection off).
+Fixes (harness only, no decompiler change):
+- base_env defaults RENOVICE_LUAU_O1=1.
+- Negative controls (any added RENOVICE_NO_* / *LEGACY* switch) run with RENOVICE_NO_INVERSE_SELECT, otherwise the default inverse selection repairs the old path and the control stops proving anything.
+- OR_BLOCK_LEGACY_GATE_FAILS rebuilds its pair with RENOVICE_NATIVE_LEGACY, the ORK lowering its gate normalization was written for.
+Evidence: CFG_CLASS_FIXTURES 206/206 PASS, DATAFLOW_FIXTURES 177/177 PASS (bin/derecomp.candidate.exe = 94ec25b build).
+Side note: inline_match.h may now grow a short inlined region (RENOVICE_INLINE_NO_GROW disables it; opt-in RENOVICE_INLINE_CALLS only). Re-inlining still fails because root locals are emitted as `local vN` + `vN = function`, which upstream's inliner does not treat as a local function. That is the real blocker for the inline class.
+Next Step: emit never-reassigned root functions as `local function vN` / `local vN = function`, so the -O2 recompile can inline them again (prerequisite for the inline-call failures, e.g. ToxinInoculation).

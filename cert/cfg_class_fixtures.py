@@ -292,11 +292,26 @@ def base_env():
     env = dict(os.environ)
     for name in OPT_OUTS:
         env.pop(name, None)
+    # the fixtures were authored for -O1 (the -O2 ones are listed in O2_FIXTURES and compiled
+    # explicitly); recompile defaults to -O2 since 2026-11, which inlines their helpers
+    env.setdefault("RENOVICE_LUAU_O1", "1")
+    return env
+
+
+def with_legacy_isolation(env):
+    """A negative control sets an opt-out switch to reach the old path; the per-prototype inverse
+    selection would repair that path again, so a control runs with the selection off."""
+    added = [k for k, v in (env or {}).items()
+             if v and os.environ.get(k) != v and (k.startswith("RENOVICE_NO_") or "LEGACY" in k)
+             and k not in ("RENOVICE_NO_INVERSE_SELECT", "RENOVICE_NATIVE_LEGACY")]
+    if added:
+        env = dict(env)
+        env["RENOVICE_NO_INVERSE_SELECT"] = "1"
     return env
 
 
 def run(args, env=None, check=True):
-    proc = subprocess.run(args, cwd=ROOT, env=env or base_env(), capture_output=True, text=True,
+    proc = subprocess.run(args, cwd=ROOT, env=with_legacy_isolation(env) or base_env(), capture_output=True, text=True,
                           encoding="utf-8", errors="replace", timeout=300)
     if check and proc.returncode != 0:
         raise RuntimeError("%s failed (%d): %s" % (os.path.basename(args[0]), proc.returncode,
@@ -607,7 +622,12 @@ def main():
             checks["OR_BLOCK_DEFAULT_CFG_IDENTITY"] = cfg_verdict(original, rebuilt) == "PASS"
             legacy_gate = base_env()
             legacy_gate["RENOVICE_CFGID_LEGACY_OR_BLOCK"] = "1"
-            checks["OR_BLOCK_LEGACY_GATE_FAILS"] = cfg_verdict(original, rebuilt, legacy_gate) == "FAIL"
+            # the gate normalization covers the LOWERED ORK, so the control rebuilds with that lowering
+            lowered_env = base_env()
+            lowered_env["RENOVICE_NATIVE_LEGACY"] = "1"
+            lowered = os.path.join(temp, "or_block.lowered.lua_B")
+            run([DEC, "recompile", source, lowered], env=lowered_env)
+            checks["OR_BLOCK_LEGACY_GATE_FAILS"] = cfg_verdict(original, lowered, legacy_gate) == "FAIL"
             if text.count(OR_BLOCK_ANCHOR) != 1:
                 raise RuntimeError("or_block mutation anchor not unique")
             for label, new in OR_BLOCK_MUTATIONS.items():

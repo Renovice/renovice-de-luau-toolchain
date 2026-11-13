@@ -293,7 +293,8 @@ inline bool rewrite(ir::IProto& ip) {
             // relative); instruction indices after it shift and are remapped
             int W = 0;
             for (int q = s; q < r.end; ++q) W += (ip.code[(size_t)q].wide || tc::is_de_width8(ip.code[(size_t)q].op)) ? 2 : 1;
-            if (W < n + 8) continue;
+            const bool grow = W < n + 8;            // short region: the call sequence is longer (targets are remapped by index)
+            if (grow && std::getenv("RENOVICE_INLINE_NO_GROW")) continue;
             const int F = ip.maxstack;
             std::vector<ir::IInsn> seq;
             ir::IInsn g = synth("GETGLOBAL", 0x17, F, 0, 0); g.wide = true; g.aux = 0;
@@ -308,7 +309,7 @@ inline bool rewrite(ir::IProto& ip) {
             seq.push_back(synth("MOVE", 0x14, r.result, F, 0));
             int used_words = n + 5;                          // GETGLOBAL counts 2
             for (const auto& b2 : r.params) if (b2.has_k && (b2.kload.wide || tc::is_de_width8(b2.kload.op))) ++used_words;
-            const int filler = W - used_words;               // after the JUMP (used_words counts it)
+            const int filler = std::max(0, W - used_words);  // after the JUMP (used_words counts it)
             ir::IInsn j = synth("JUMP", 0x40, 0, 0, 0); j.branch = true;
             j.Bx = (uint16_t)(int16_t)filler;                // skip the fillers: lands on r.end
             seq.push_back(j);
