@@ -6702,3 +6702,11 @@ Finding: Partially true.
 - LoadOutRedux flips to "lost decompile" in tier 1 with the unchanged promoted build too (107 s standalone, 300 s gate timeout under parallel load): a timing flake, not a regression.
 Evidence: tier 2 (all_1113g): FIXED 1, BROKEN 0, CFG-ID 5,392 / 5,481. Fixture suites 206/206, 177/177.
 Next Step: find why the other inline-class modules still fail with the candidate (constant-argument specialisation, e.g. ToxinInoculation; matcher misses).
+
+## 2026-11-13 - Per-call inline control in our compiler: RenoviceInlineGroupedOnly
+
+Hypothesis: the re-inline candidate rarely wins because (a) declaring root functions as locals lets upstream inline calls DE kept, and (b) upstream's cost model rejects calls DE did inline (NokkoMushroomEffectsLib: "too expensive (cost 34, profit 1.08x)").
+Finding: True. New compiler flag (compiler/Compiler.cpp, passed by default from compile_luau): only a call written `(f)(x)` is inlined, and the cost threshold is waived for it. inl::resolve writes exactly the matcher-recovered calls as `(vR)(...)`. Every other call stays a call, as in DE's bytecode. DE's own decision decides, not upstream's cost model.
+Evidence: tier 1 neutral with the flag alone (0/0); with the waived threshold, tier 2 (all_1113h): FIXED 3, BROKEN 0, CFG-ID 5,395 / 5,481. Fixtures 206/206, 177/177. NokkoMushroomEffectsLib 9/9.
+The patched compiler sources and build steps are now tracked under compiler/ (before, they lived only in the untracked work/luau_build).
+Next Step: the remaining inline-class misses: rewritten sources that do not compile (ChatRedux, LotusUtilities ...), constant-argument specialisation (ToxinInoculation), regions the matcher does not find.
