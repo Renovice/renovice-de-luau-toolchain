@@ -159,7 +159,16 @@ private:
             if (term.name == "FORNPREP") {
                 for (int q = last + 1; q < end; ++q)
                     if (I(q).name == "FORNLOOP" && I(q).target == last + 1 && I(q).A == term.A) { latch = q; break; }
-                if (latch < 0 || !lands(term.target, latch + 1)) return fail("FORN_SHAPE", last), -1;
+                // the skip may land on a different but identical `return` (the compiler merges
+                // jumps to equal RETURNs): same landing semantics as falling out of the loop
+                auto same_return = [&](int a, int b2) {
+                    if (a < 0 || b2 < 0 || a >= n || b2 >= n) return false;
+                    const ir::IInsn& x = I(a); const ir::IInsn& y = I(b2);
+                    return x.name == "RETURN" && y.name == "RETURN" && x.A == y.A && x.B == y.B && x.B == 1
+                        && !std::getenv("RENOVICE_INVERSE_NO_RETURN_MERGE");
+                };
+                if (latch < 0 || !(lands(term.target, latch + 1) || same_return(term.target, latch + 1)))
+                    return fail("FORN_SHAPE", last), -1;
             } else {
                 latch = term.target;
                 if (latch <= last || latch >= end || I(latch).name != "FORGLOOP" || I(latch).target == latch + 1)

@@ -6653,3 +6653,10 @@ Finding: True. The walker also had a semantic bug: chain_if folded such a value-
 Evidence: fixture cert/fixtures_src/cond_value_or_false.lua now renders `x = ((a and b.u) and (IsNull(q) or c.Has(q))) or false`, CFG PASS with 0 dispatch webs. Tier 1: FIXED 1, BROKEN 0 (93 failing targets left).
 Fix: inverse_emit.h chain_if has a value-chain decoder (the compileConditionValue grammar) and a liveness guard. A later test that writes a register read at the merge refuses the condition fold.
 Next Step: the remaining classes (LOAD->LOAD 10, SETLIST->NEWTABLE 7, FORGPREP->NAMECALL 7).
+
+## 2026-11-13 - Inverse walker: numeric-for skip landing on an identical return
+
+Hypothesis: the walker's FORN_SHAPE refusal (Zariman proto 7) is DE's compiler sending a FORNPREP's zero-iteration skip to a different but identical `RETURN` instead of the one right after the FORNLOOP.
+Finding: True. FORNPREP 383 -> 449, FORNLOOP 404, both 405 and 449 are `RETURN R0 nret=0`. Treating identical void returns as one landing gives CFG 16/16 with 0 dispatch webs. 284 corpus modules have a FORNPREP not landing right after its own FORNLOOP (33 in the failure set); most of them are JUMP threading that `lands` already followed.
+Evidence: tier 1: FIXED 2 (with the condition-value fix), BROKEN 0, 92 failing targets left.
+Next Step: ToxinInoculation needs inline matching with a constant argument (DE's inliner dropped a branch), a bigger feature. RENOVICE_INVERSE_NO_RETURN_MERGE disables the rule.
